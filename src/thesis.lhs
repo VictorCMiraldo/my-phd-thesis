@@ -10,7 +10,7 @@
 \promotor{Prof.dr. J.T. Jeuring}
 \copromotor{Dr. W. Swierstra}
 
-\NWOproject{nwo project name here}
+\NWOproject{Revision Control of Structured Data}
 \NWOgrantnumber{111.111.111}
 
 \defensedate{hopefuly, in the future!}
