@@ -53,8 +53,8 @@ Some amazing abstract should come here.
   [A
     [B]
     [$\rightarrow$, change
-      [Node2 [0 , metavar] [1 , metavar] ]
-      [Node2 [1 , metavar] [2 , metavar] ]
+     [Node2 [0 , metavar] [1 , metavar] ]
+     [Node2 [1 , metavar] [2 , metavar] ]
     ]
   ]
 \end{forest}
