@@ -8,6 +8,7 @@
 \definecolor{forest-digems-metavar}{RGB}{171,72,46}
 \definecolor{forest-digems-black}{RGB}{97,108,132}
 
+%% This was based on: https://tex.stackexchange.com/questions/342334/drawing-super-nodes-in-a-tree 
 \forestset{%
   default preamble={%
       for tree={text=forest-digems-constr, edge=forest-digems-black},
@@ -27,8 +28,12 @@
           before drawing tree={%
             tikz+={%
               \begin{scope}[on background layer]
-                \node (n) [fill=forest-digems-change-bg, inner sep=\savedinnerysep, rounded corners, fit=(!1) (!L) (!F)] {} ;
-                \path [draw=forest-digems-black, \forestoption{edge}] (!u.parent anchor) -- (n.north -| !1.child anchor)\forestoption{edge label};
+                \node (n) [fill=forest-digems-change-bg, 
+                           inner sep=\savedinnerysep, 
+                           rounded corners, fit=(!1) (!L) (!F)] {} ;
+                \path [draw=forest-digems-black, \forestoption{edge}] 
+                           (!u.parent anchor) -- (n.north -| !1.child anchor)
+                           \forestoption{edge label};
               \end{scope}
             },
           },
