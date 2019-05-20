@@ -17,6 +17,9 @@
 \authorbirthdate{october 16, 1991}
 \authorbirthplace{S\~{a}o Paulo, Brasil}
 
+% Include my definitions
+\input{src/my-tikz-defs}
+
 %include lhs2TeX.fmt
 \begin{document}
 \maketitle
@@ -45,6 +48,16 @@ Some amazing abstract should come here.
 
 \chapter{Introduction}
 %include src/chap01.lhs
+
+\begin{forest}
+  [A
+    [B]
+    [$\rightarrow$, change
+      [Node2 [0 , metavar] [1 , metavar] ]
+      [Node2 [1 , metavar] [2 , metavar] ]
+    ]
+  ]
+\end{forest}
 
 \chapter{Conclusion}
 \input{src/chap02}
