@@ -29,8 +29,9 @@
     },
   change/.style={%
     text=forest-digems-black,
-    for 1={no edge},
-    for 2={no edge},
+    s sep=4mm,
+    for 1={fit=band,no edge},
+    for 2={fit=band,no edge},
     before typesetting nodes={%
       no edge,
       before computing xy={/pgf/inner ysep/.get=\savedinnerysep, 
@@ -57,7 +58,7 @@
     },
     tikz+={ \node (m1) at ($(!1)!0.5!(!2)$) {}; 
             \node (m2) at ($(m1)$)          {};
-            \node [text=forest-digems-black] at ($(m1)!0.5!(m2)$) {$\rightarrow$};
+            \node [text=forest-digems-black] at ($(m1)!0.5!(m2)$) {$\mapsto$};
           },
   },
 }
