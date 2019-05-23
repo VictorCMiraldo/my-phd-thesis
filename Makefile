@@ -65,7 +65,7 @@ clean:
 	cd dist && rm -rf * && cd ..
 
 ## Install target for Nix
-install: default
+nix-install: default
 	cp -r dist/*  ${out}
 
 
@@ -75,3 +75,7 @@ install: default
 fonts:
 	@mkdir -p ~/.fonts
 	cp tex/latex/fonts/* ~/.fonts/
+
+## Runs a font-check on the generated pdf.
+pdf-font-check: dist/$(TGT).pdf
+	pdffonts dist/$(TGT).pdf

@@ -93,6 +93,8 @@ I'll pass it to 'book' just in case.}
     ItalicFont     = STIXTwoText-Italic.otf,
     BoldItalicFont = STIXTwoText-BoldItalic.otf,
 ]{STIXTwoText-Regular.otf}
+
+%% Gives us some more math fonts.
 \usepackage{eulervm}
 
 %%%%%%%%%%%%%%%%%%
