@@ -18,19 +18,34 @@
       text=forest-digems-metavar,
       draw=forest-digems-black,
     },
+  triang/.style={%
+      shape=regular polygon,
+      regular polygon sides=3,
+      text=forest-digems-black,
+      draw=forest-digems-black,
+      font=\itshape,
+      minimum width=1.3em,
+      inner sep=0pt,
+    },
   change/.style={%
     text=forest-digems-black,
+    for 1={no edge},
+    for 2={no edge},
     before typesetting nodes={%
       no edge,
-      before computing xy={/pgf/inner ysep/.get=\savedinnerysep, l'=\savedinnerysep},
+      before computing xy={/pgf/inner ysep/.get=\savedinnerysep, 
+                           l'=\savedinnerysep,
+                           l=-1.8mm,
+                           for 1={l=2mm},
+                           for 2={l=2mm}},
       replace by/.wrap pgfmath arg={%
-        [\phantom{##1}, append, fit=rectangle, no edge,
+        [\phantom{##1} , append, fit=rectangle, no edge,
           before drawing tree={%
             tikz+={%
               \begin{scope}[on background layer]
                 \node (n) [fill=forest-digems-change-bg, 
                            inner sep=\savedinnerysep, 
-                           rounded corners, fit=(!1) (!L) (!F)] {} ;
+                           rounded corners, fit to=tree] {}; 
                 \path [draw=forest-digems-black, \forestoption{edge}] 
                            (!u.parent anchor) -- (n.north -| !1.child anchor)
                            \forestoption{edge label};
@@ -40,5 +55,9 @@
         ]
       }{content()}
     },
+    tikz+={ \node (m1) at ($(!1)!0.5!(!2)$) {}; 
+            \node (m2) at ($(m1)$)          {};
+            \node [text=forest-digems-black] at ($(m1)!0.5!(m2)$) {$\rightarrow$};
+          },
   },
 }

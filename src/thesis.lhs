@@ -51,10 +51,10 @@ Some amazing abstract should come here.
 
 \begin{forest}
   [A
-    [B]
-    [$\rightarrow$, change
-     [Node2 [0 , metavar] [1 , metavar] ]
-     [Node2 [1 , metavar] [2 , metavar] ]
+    [B [C [D] [, change [t , triang] [u , triang] ]] ]
+    [, change
+     [Node2 [0 , metavar] [C [1 , metavar] ] ]
+     [Node2 [Node2 [0 , metavar] [1 , metavar]] [2 , metavar] ]
     ]
   ]
 \end{forest}
