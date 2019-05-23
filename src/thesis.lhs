@@ -1,5 +1,8 @@
-\documentclass[10pt,b5paper]{uustthesis}
+\documentclass[10pt,b5paper,noseaweed]{uustthesis}
+%% Remove the 'noseaweed' option to draw the fractal
+%% at the section headings. This slows compilation down, though.
 
+\usepackage{hs-digems-forest}
 \usepackage{lipsum}
 
 \title{Testing A Large Title YAY}
@@ -18,7 +21,7 @@
 \authorbirthplace{S\~{a}o Paulo, Brasil}
 
 % Include my definitions
-\input{src/my-tikz-defs}
+% \input{src/my-tikz-defs}
 
 %include lhs2TeX.fmt
 \begin{document}
@@ -64,6 +67,8 @@ Some amazing abstract should come here.
 
 \chapter{Test 3}
 
+\chapter{Test 4}
+\chapter{Test 4}
 \chapter{Test 4}
 
 \appendix

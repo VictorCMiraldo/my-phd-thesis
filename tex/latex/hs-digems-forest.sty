@@ -1,4 +1,22 @@
-\usepackage{forest}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                                                            %%
+%% Package ``hs-digems Forest''                                               %%
+%%                                                                            %%
+%% Provides a set of definitions for 'forest' enviromentt that make the       %%
+%% drawing of hs-digems patches easy.                                         %%
+%%                                                                            %%
+%% Version: v0.0.1                                                            %%
+%% Authors: Victor Cacciari Miraldo                                           %%
+%% License: MIT License (c) 2019 Victor Cacciari Miraldo                      %%
+%% GitHub Repo: https://github.com/VictorCMiraldo/my-phd-thesis               %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{hs-digems-forest}[2019/05/23 hs-digems Forest]
+
+\RequirePackage{forest}
+\RequirePackage{tikz}
+
+\ProcessOptions\relax
 
 \usetikzlibrary{fit}
 \usetikzlibrary{backgrounds}
@@ -62,3 +80,5 @@
           },
   },
 }
+
+\endinput

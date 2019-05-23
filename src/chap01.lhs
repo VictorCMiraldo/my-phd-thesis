@@ -2,6 +2,8 @@
 \section{Testing Fonts}
 \label{sec:testing}
 
+\lipsum[2]
+
 \subsection{Code Blocks}
 
   Below is the factorial function written in Haskell~\cite{ghcUsersGuide} and a paragraph of lorem ipsum:
