@@ -76,7 +76,6 @@ I'll pass it to 'book' just in case.}
 \RequirePackage{setspace}
 \RequirePackage{amsmath}
 \RequirePackage{amssymb}
-\RequirePackage{unicode-math}
 
 %%%%%%%%%%%%%%%%
 %% Font setup %%
@@ -84,17 +83,16 @@ I'll pass it to 'book' just in case.}
 
 %% Font Confiruation using unicode-math package
 %% https://tex.stackexchange.com/questions/30049/how-to-select-math-font-in-document#30066
+%% 
+\usepackage{unicode-math}
 \defaultfontfeatures{Scale=MatchLowercase}
-
 \setmainfont[
     Path           = ./tex/latex/fonts/,
     BoldFont       = STIXTwoText-Bold.otf,
     ItalicFont     = STIXTwoText-Italic.otf,
     BoldItalicFont = STIXTwoText-BoldItalic.otf,
 ]{STIXTwoText-Regular.otf}
-
-%% Gives us some more math fonts.
-\usepackage{eulervm}
+\setmathfont{STIX Two Math} 
 
 %%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%

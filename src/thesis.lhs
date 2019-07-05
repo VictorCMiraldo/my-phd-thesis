@@ -25,6 +25,7 @@
 
 %include lhs2TeX.fmt
 %include src/definitions.lhs
+%include src/notation.lhs
 \begin{document}
 \maketitle
 

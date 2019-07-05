@@ -1,8 +1,6 @@
+Test $\varphi$, $\kappa$, $\psi$
 
-\newcommand{\mycaption}[1]{\vspace{-1em}\caption{#1}}
 
-\section{Introduction}
-\label{sec:introduction}
 
 \emph{(Datatype-)generic programming} provides a mechanism to write functions
 by induction on the structure of algebraic datatypes~\cite{Gibbons2006}. 
@@ -103,7 +101,7 @@ the previous work could not enjoy.
   Mutual Recursion      &  \texttt{multirec}     &   \\
 \bottomrule
 \end{tabular}
-\mycaption{Spectrum of static generic programming libraries}
+\caption{Spectrum of static generic programming libraries}
 \label{fig:gplibraries}
 \end{figure}
 
@@ -286,9 +284,9 @@ datatypes and want to automatically generate descriptions.
 The definition of |Rose a| above uses the list type, but not
 simply |[a]| for any element type |a|, but the specific instance |[Rose a]|. This means that the
 procedure to derive the code must take this fact into account.
-Shallow descriptions do not suffer too much from this problem. For deep
-approaches, though, how to solve this problem is key to derive a useful
-description of the datatype.
+Shallow descriptions do not suffer heavily from this problem. Deep
+approaches, on the other hand, need to solve this in order to derive
+the description of the datatype.
 
 \section{Background}
 \label{sec:genericprog}
@@ -304,7 +302,7 @@ pieces of each of the different approaches, and combines them without compromise
 \label{sec:patternfunctors}
 
   Since version $7.2$, GHC supports some off the shelf generic
-programming using \texttt{GHC.Generics}~\cite{Magalhaes2010}, 
+programming using the \texttt{GHC.Generics}~\cite{Magalhaes2010} library,
 which exposes the \emph{pattern functor} of a datatype. This
 allows one to define a function for a datatype by induction
 on the structure of its (shallow) representation using \emph{pattern functors}.
@@ -576,9 +574,9 @@ map f  (x :* xs)  = f x : map f xs
 \end{code}
 \end{myhs}
 
-  Reflecting on the current definition of |size|, especially in
-comparison to the \texttt{GHC.Generics} implementation of |size|, we
-see two improvements: (A) we need one fewer type class, namely |GSize|,
+  Reflecting on the current definition of |size|, 
+comparint it to the \texttt{GHC.Generics} implementation of |size|, we
+see two improvements: (A) we need one fewer type class, |GSize|,
 and, (B) the definition is combinator-based. Considering that the
 generated \emph{pattern functor} representation of a Haskell datatype
 will already be in a \emph{sums-of-products}, we do not lose anything
@@ -598,9 +596,9 @@ gsize  =  sum  .  hcollapse
 \end{myhs}
 
   Where |hcollapse| and |hcmap| are analogous to the |elim| and |map|
-combinators we defined above. The |All2 Size (CodeSOP a)| constraint
+combinators defined above. The |All2 Size (CodeSOP a)| constraint
 tells the compiler that all of the types serving as atoms for |CodeSOP
-a| are an instance of |Size|.  In our case, |All2 Size (CodeSOP (Bin
+a| are an instance of |Size|.  Here, |All2 Size (CodeSOP (Bin
 a))| expands to |(Size a , Size (Bin a))|.  The |Size| constraint also
 has to be passed around with a |Proxy| for the eliminator of the
 $n$-ary sum. This is a direct consequence of a \emph{shallow}
@@ -864,7 +862,7 @@ crush k cat = crushFix . deepFrom
     go (NA_K i) = k i
 \end{code}
 \end{myhs}
-\mycaption{Generic |crush| combinator}
+\caption{Generic |crush| combinator}
 \label{fig:crush}
 \end{figure}
 
@@ -932,8 +930,9 @@ Our solution is to move from codes of datatypes to \emph{codes for families of
 datatypes}. We no longer talk about |CodeFix (Rose Int)| or
 |CodeFix [Rose Int]| in isolation. Codes only make sense
 within a family, that is, a list of types. Hence, we talk about
-|CodeMRec (P [Rose Int,  [Rose Int]])|. That is, the codes of the
-two types in the family. Then we extend the language
+the codes of the two types in the family:
+|CodeMRec (P [Rose Int,  [Rose Int]])|. 
+Then we extend the language
 of |Atom|s by appending to |I| a natural number which specifies 
 the member of the family to recurse into:
 \begin{myhs}
@@ -1253,7 +1252,7 @@ class Family (kappa :: kon -> Star) (fam :: [Star]) (codes :: [[[Atom kon]]]) wh
   toMRec    :: SNat ix  -> RepMRec kappa (El fam) (Lkup codes ix) -> El fam ix
 \end{code}
 \end{myhs}
-\mycaption{|Family| type class with support for different opaque types}
+\caption{|Family| type class with support for different opaque types}
 \label{fig:int}
 \end{figure*}
 
@@ -1413,7 +1412,7 @@ geq eq_K x y = go (deepFrom x) (deepFrom y)
       $  zipRep x y  
 \end{code} %$
 \end{myhs}
-\mycaption{Generic equality}
+\caption{Generic equality}
 \label{fig:genericeq}
 \end{figure}
 
@@ -1513,7 +1512,7 @@ alphaEq x y =  flip runState [[]]
       _  -> step x
 \end{code}
 \end{myhs}
-\mycaption{$\alpha$-equivalence for a $\lambda$-calculus}
+\caption{$\alpha$-equivalence for a $\lambda$-calculus}
 \label{fig:alphalambda}
 \end{figure}
 
@@ -1522,7 +1521,6 @@ aside, we define in \Cref{fig:alphalambda} our alpha equivalence decision proced
 for |Var| and |Abs| constructors. The |App| can be eliminated generically.
 
 \begin{figure*}
-\begin{minipage}[t]{.35\textwidth}
 \begin{myhs}
 \begin{code}
 data Stmt  =  SAssign  String  Exp 
@@ -1542,8 +1540,7 @@ data Exp   =  EVar   String
            |  ELit   Int
 \end{code}
 \end{myhs}
-\end{minipage}%
-\begin{minipage}[t]{.65\textwidth}
+
 \begin{myhs}
 \begin{code}
 go (Pat Stmt)  x = case sop x of
@@ -1561,8 +1558,7 @@ go (Pat Exp)   x = case sop x of
 go _      x = step x
 \end{code}
 \end{myhs}
-\end{minipage}
-\mycaption{$\alpha$-equivalence for a toy imperative language}
+\caption{$\alpha$-equivalence for a toy imperative language}
 \label{fig:alphatoy}
 \end{figure*}
 
