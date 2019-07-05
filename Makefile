@@ -51,6 +51,10 @@ default : $(BUILD_DEPENDS) tex/latex/uustthesis.cls
 	export TEXMFHOME=".:$(TEXMFHOME)" && \
 	$(LATEX) $(MAIN_FILE)
 
+## Builds the index
+index: 
+	makeindex -s tex/latex/index_style.ist dist/thesis.idx
+
 ## forces rebuild for bibliography.
 dist/$(TGT).aux: default
 

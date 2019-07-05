@@ -446,7 +446,7 @@ project \@NWOproject{} (\@NWOgrantnumber).
 \usepackage{multirow}
 
 % hyperref MUST be loaded first. Check section 14.1 of cleveref manual.
-\usepackage{hyperref}
+\usepackage[pdfpagelabels,plainpages=false]{hyperref}
 \usepackage{cleveref}
 
 %% Recommented to give more professionally-looking tables.
