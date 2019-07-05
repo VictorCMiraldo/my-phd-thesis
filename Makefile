@@ -17,7 +17,7 @@ BUILD_DEPENDS_LHS=$(TGT_FULL)
 
 ## Now, this very file might depend on other lhs files too,
 ## which should NOT go through lhs2TeX separatly
-LHS_DEPENDENCIES=chap01.lhs
+LHS_DEPENDENCIES=*.lhs
 
 ## Process the above list into a desired format.
 ## Example: if $(BUILD_DEPENDS_LHS) == "a.lhs b.lhs"

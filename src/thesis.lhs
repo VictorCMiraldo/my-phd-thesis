@@ -24,6 +24,7 @@
 % \input{src/my-tikz-defs}
 
 %include lhs2TeX.fmt
+%include src/definitions.lhs
 \begin{document}
 \maketitle
 
