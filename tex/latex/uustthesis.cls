@@ -68,7 +68,6 @@ I'll pass it to 'book' just in case.}
 %% We'll build on top of the 'book' class.
 \LoadClass{book}
 
-
 %% Necessary Packags
 \RequirePackage{tikz}
 \RequirePackage{xcolor}
@@ -439,6 +438,10 @@ project \@NWOproject{} (\@NWOgrantnumber).
 %% General Packages %%
 %%%%%%%%%%%%%%%%%%%%%%
 
+%% Indexing
+\usepackage{imakeidx}
+\makeindex
+
 \usepackage{booktabs}
 \usepackage{multirow}
 
@@ -448,3 +451,4 @@ project \@NWOproject{} (\@NWOgrantnumber).
 
 %% Recommented to give more professionally-looking tables.
 \renewcommand{\arraystretch}{1.3}
+

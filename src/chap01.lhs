@@ -21,14 +21,14 @@ class SomeClass2 r where
 
 \subsection{Math Fonts}
 
-  Below is some math to display our math font:
+  Below is some \index{math} to display our math font:
 \begin{align}
 CIF: \hspace*{5mm}F_0^j(a) = \frac{1}{2\pi \iota} \oint_{\gamma} \frac{F_0^j(z)}{z - a} dz
 \label{eq:ref}
 \end{align}
 
   And we will even reference \Cref{eq:ref} and \Cref{eq:euler} to see
-how references and figures look like. For the sake of testing \Cref{sec:testing}.
+how references and figures \index{look} like. For the sake of testing \Cref{sec:testing}.
 
 \begin{figure}
 \begin{equation*}

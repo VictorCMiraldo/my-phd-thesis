@@ -60,6 +60,12 @@ bib: references.bib dist/$(TGT).aux
 	export TEXMFHOME=".:$(TEXMFHOME)" && \
 	$(LATEX) $(MAIN_FILE)
 
+## Runs makeindex and builds the target with index; implies bib
+index: bib
+	makeindex -s tex/latex/index_style.ist dist/$(TGT).idx
+	export TEXMFHOME=".:$(TEXMFHOME)" && \
+	$(LATEX) $(MAIN_FILE)
+
 ## Standard cleanup
 clean:
 	cd dist && rm -rf * && cd ..

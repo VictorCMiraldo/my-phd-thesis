@@ -81,6 +81,8 @@ Some amazing abstract should come here.
 \bibliographystyle{alpha}
 \bibliography{references}
 
+\printindex
+
 \end{document}
 
 
