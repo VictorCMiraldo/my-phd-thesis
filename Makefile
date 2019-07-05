@@ -53,7 +53,10 @@ default : $(BUILD_DEPENDS) tex/latex/uustthesis.cls
 
 ## Builds the index
 index: 
-	makeindex -s tex/latex/index_style.ist dist/thesis.idx
+	makeindex -s tex/latex/index_style.ist dist/thesis.idx && \
+	grep "\\hyperpage{[12]}" dist/thesis.ind && \
+	echo "\n\n\n DONT USE INDEXES BEFORE PAGE 3!!!\n\n\n" || \
+	echo "\n\n\n INDEXES SEEM FINE\n\n\n"
 
 ## forces rebuild for bibliography.
 dist/$(TGT).aux: default
