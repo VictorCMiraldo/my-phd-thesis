@@ -109,6 +109,12 @@
 
 %% Logistic Stuff
 
+% Easy to typeset Haskell types using the \HSCon
+% command from stylish.lhs (if it's defined!)
+\newcommand{\HT}[1]{\ifdefined\HSCon\HSCon{#1}\else#1\fi}
+\newcommand{\HS}[1]{\ifdefined\HSSym\HSSym{#1}\else#1\fi}
+\newcommand{\HV}[1]{\ifdefined\HSVar\HSVar{#1}\else#1\fi}
+
 \definecolor{C1}{RGB}{0,153,204}
 \definecolor{C2}{RGB}{89,0,179}
 

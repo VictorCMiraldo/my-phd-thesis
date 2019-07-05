@@ -78,7 +78,7 @@ Some amazing abstract should come here.
 % \listoffigures
 % \listoftables
 
-\bibliographystyle{alpha}
+\bibliographystyle{acm}
 \bibliography{references}
 
 \printindex
