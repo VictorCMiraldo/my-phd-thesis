@@ -440,7 +440,7 @@ project \@NWOproject{} (\@NWOgrantnumber).
 
 %% Indexing
 \usepackage{imakeidx}
-\makeindex
+\makeindex[options=-s tex/latex/index_style.ist]
 
 \usepackage{booktabs}
 \usepackage{multirow}
