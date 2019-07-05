@@ -50,33 +50,32 @@ Some amazing abstract should come here.
 \mainmatter
 
 \chapter{Introduction}
-%include src/chap01.lhs
+\label{chap:introduction}
+%include src/Introduction.lhs
 
-\begin{forest}
-  [A
-    [B [C [D] [, change [t , triang] [u , triang] ]] ]
-    [, change
-     [Node2 [0 , metavar] [C [1 , metavar] ] ]
-     [Node2 [Node2 [0 , metavar] [1 , metavar]] [2 , metavar] ]
-    ]
-  ]
-\end{forest}
+\chapter{Generic Programming}
+\label{chap:generic-programming}
+%include src/GenericProgramming.lhs
 
-\chapter{Conclusion}
-\input{src/chap02}
+\chapter{Structural Patches}
+\label{chap:structural-patches}
+%include src/StructPatches.lhs
 
-\chapter{Test 3}
+\chapter{Pattern-Expression Patches}
+\label{chap:pattern-expression-patches}
+%include src/PEPatches.lhs
 
-\chapter{Test 4}
-\chapter{Test 4}
-\chapter{Test 4}
+\chapter{Discussion}
+\label{chap:discussion}
+%include src/Discussion.lhs
 
-\appendix
-\chapter{Some Formulas}
+% \appendix
+% \chapter{Some Formulas}
 
 \backmatter
-\listoffigures
-\listoftables
+
+% \listoffigures
+% \listoftables
 
 \bibliographystyle{alpha}
 \bibliography{references}
