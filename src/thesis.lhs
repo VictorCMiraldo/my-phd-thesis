@@ -14,7 +14,7 @@
 \copromotor{Dr. W. Swierstra}
 
 \NWOproject{Revision Control of Structured Data}
-\NWOgrantnumber{111.111.111}
+\NWOgrantnumber{612.001.401}
 
 \defensedate{hopefuly, in the future!}
 \authorbirthdate{october 16, 1991}
@@ -54,6 +54,10 @@ Some amazing abstract should come here.
 \chapter{Introduction}
 \label{chap:introduction}
 %include src/Introduction.lhs
+
+\chapter{Background}
+\label{chap:background}
+%include src/Background.lhs
 
 \chapter{Generic Programming}
 \label{chap:generic-programming}

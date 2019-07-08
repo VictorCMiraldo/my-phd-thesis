@@ -1,34 +1,62 @@
-Test $\varphi$, $\kappa$, $\psi$
+\victor{Actually... I'd rather put most of this under backgroun and
+use this chapter solely for mrsop}
 
+  \emph{(Datatype-)generic programming}\index{generic programming}
+provides a mechanism to write functions by induction on the structure
+of algebraic datatypes~\cite{Gibbons2006}.  A well-known example is
+the |deriving| mechanism in Haskell, which frees the programmer from
+writing repetitive functions such as equality~\cite{haskell2010}. A
+vast range of approaches were available as preprocessors, language
+extensions, or libraries for
+Haskell~\cite{Rodriguez2008,Magalhaes2012}.  
 
+  The core idea behind generic programming is the fact that a number
+of datatypes can be described in a uniform fashion.  Hence, if a
+programmer were to write programs that work over this uniform
+representation, these programs would immediately work over a variety
+of datatypes. We are interested in writing differencing algorithms for
+abstract syntax trees, hence our datatypes will be mutually recursive
+families.  Our programs must operate over \emph{any} such
+family. Consequently, we must have a powerful generic programming
+approach that is capable of (A) representing mutually recursive
+datatypes and (B) easily operating over them by the means of
+expressive combinators. In \Cref{fig:gplibraries}
+we outline the main design differences between a few of the existing
+libraries and place \texttt{generics-mrsop} in that space.
 
-\emph{(Datatype-)generic programming} provides a mechanism to write functions
-by induction on the structure of algebraic datatypes~\cite{Gibbons2006}. 
-A well-known example is the |deriving| mechanism
-in Haskell, which frees the programmer from writing repetitive functions such as
-equality~\cite{haskell2010}. A vast range of approaches are available as
-preprocessors, language extensions, or libraries for Haskell~\cite{Rodriguez2008,Magalhaes2012}.
-In \Cref{fig:gplibraries} we outline the main design differences between a few
-of those libraries.
+\begin{figure}\centering
+\begin{tabular}{@@{}lll@@{}}\toprule
+                        & Pattern Functors       & Codes                 \\ \midrule
+  No Explicit Recursion & \texttt{GHC.Generics}  & \texttt{generics-sop} \\
+  Simple Recursion      &  \texttt{regular}      &  \multirow{2}{*}{\textbf{\texttt{generics-mrsop}}} \\
+  Mutual Recursion      &  \texttt{multirec}     &   \\
+\bottomrule
+\end{tabular}
+\caption{Spectrum of static generic programming libraries}
+\label{fig:gplibraries}
+\end{figure}
 
-The core idea underlying generic programming is the fact that a great
-number of datatypes can be described in a uniform fashion.
-Consider the following datatype representing binary trees with data stored in their
-leaves:
+\victor{\Huge I'm here}
+
+Consider the following datatype representing binary trees
+with data stored in their leaves:
+
 \begin{myhs}
 \begin{code}
 data Bin a = Leaf a | Bin (Bin a) (Bin a)
 \end{code}
 \end{myhs}
-A value of type |Bin a| consists of a choice between two constructors.
-For the first choice, it also contains a value of type |a| whereas 
-for the second it contains two subtrees as children. This means that the |Bin a| type
-is isomorphic to |Either a (Bin a , Bin a)|. 
 
-Different libraries differ on how they define their underlying generic descriptions. 
-For example,
-\texttt{GHC.Generics}~\cite{Magalhaes2010} defines the representation of |Bin|
-as the following datatype:
+  A value of type |Bin a| consists of a choice between two
+constructors.  For the first choice, it also contains a value of type
+|a| whereas for the second it contains two subtrees as children. This
+means that the |Bin a| type is isomorphic to |Either a (Bin a , Bin
+a)|.
+
+  Different libraries differ on how they define their underlying generic
+descriptions.  For example, \texttt{GHC.Generics}~\cite{Magalhaes2010}
+\index{GHC.Generics} defines the representation of |Bin| as the following 
+datatype:
 
 \begin{myhs}
 \begin{code}
@@ -38,10 +66,10 @@ Rep (Bin a) = K1 R a :+: (K1 R (Bin a) :*: K1 R (Bin a))
 
 which is a direct translation of |Either a (Bin a , Bin a)|, but using
 the combinators provided by \texttt{GHC.Generics}, namely |:+:| and
-|:*:|. In addition, we need two conversion functions |from :: a -> Rep
-a| and |to :: Rep a -> a| which form an isomorphism between |Bin a|
-and |Rep (Bin a)|.  All this information is tied to the original
-datatype using a type class:
+|:*:|. In addition, we require two conversion functions |from :: a ->
+Rep a| and |to :: Rep a -> a| which form an isomorphism between |Bin
+a| and |Rep (Bin a)|.  Finaly, all is tied to the original datatype
+using a type class:
 
 \begin{myhs}
 \begin{code}
@@ -51,29 +79,32 @@ class Generic a where
   to    :: Rep a  -> a
 \end{code}
 \end{myhs}
+
   Most generic programming libraries follow a similar pattern of
 defining the \emph{description} of a datatype in the provided uniform
 language by some type level information, and two functions witnessing
 an isomorphism. A important feature of such library is how this
 description is encoded and which are the primitive operations for
 constructing such encodings, as we shall explore in
-\Cref{sec:designspace}. Some libraries, mainly deriving from the \texttt{SYB}
-approach~\cite{Lammel2003,Mitchell2007}, use the |Data| and |Typeable| type classes
-instead of static type level information to provide generic functionality. 
-These are a completely different strand of work from ours.
+\Cref{sec:designspace}. Some libraries, mainly deriving from the
+\texttt{SYB} approach~\cite{Lammel2003,Mitchell2007}, use the |Data|
+and |Typeable| type classes instead of static type level information
+to provide generic functionality.  These are a completely different
+strand of work from ours.
 
   \Cref{fig:gplibraries} shows the main libraries relying on type
-level representations. In the \emph{pattern functor} approach we have
-\texttt{GHC.Generics}~\cite{Magalhaes2010}, being the most commonly
-used one, that effectively replaced \texttt{regular}~\cite{Noort2008}.
-The former does not account for recursion explicitly, allowing only
-for a \emph{shallow} representation, whereas the later allows for both
-\emph{deep} and \emph{shallow} representations by maintaining
-information about the recursive occurrences of a type. Maintaining
-this information is central to some generic functions, such as the
-generic |map| and |Zipper|, for instance.  Oftentimes though, one
-actually needs more than just one recursive type, justifying the need
-to \texttt{multirec}~\cite{Yakushev2009}.
+level representations. In the \emph{pattern functor}\index{pattern
+functor} approach we have \texttt{GHC.Generics}~\cite{Magalhaes2010},
+being the most commonly used one, that effectively replaced
+\texttt{regular}~\cite{Noort2008}.  The former does not account for
+recursion explicitly, allowing only for a \emph{shallow}
+representation, whereas the later allows for both \emph{deep} and
+\emph{shallow} representations by maintaining information about the
+recursive occurrences of a type. Maintaining this information is
+central to some generic functions, such as the generic |map| and
+|Zipper|, for instance.  Oftentimes though, one actually needs more
+than just one recursive type, justifying the need to
+\texttt{multirec}~\cite{Yakushev2009}.
 
 These libraries are too permissive though, for instance, |K1 R Int :*: Maybe|
 is a perfectly valid \texttt{GHC.Generics} \emph{pattern functor} but
@@ -92,18 +123,6 @@ of the aforementioned libraries \emph{compete} with out work. We
 extend both in orthogonal directions, resulting in a new design altogether,
 that takes advantage of some modern Haskell extensions that the authors of
 the previous work could not enjoy.
-
-\begin{figure}\centering
-\begin{tabular}{@@{}lll@@{}}\toprule
-                        & Pattern Functors       & Codes                 \\ \midrule
-  No Explicit Recursion & \texttt{GHC.Generics}  & \texttt{generics-sop} \\
-  Simple Recursion      &  \texttt{regular}      &  \multirow{2}{*}{\textbf{\texttt{generics-mrsop}}} \\
-  Mutual Recursion      &  \texttt{multirec}     &   \\
-\bottomrule
-\end{tabular}
-\caption{Spectrum of static generic programming libraries}
-\label{fig:gplibraries}
-\end{figure}
 
 \subsection{Contributions}
 
