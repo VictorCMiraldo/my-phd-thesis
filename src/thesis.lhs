@@ -67,6 +67,10 @@ Some amazing abstract should come here.
 \label{chap:structural-patches}
 %include src/StructPatches.lhs
 
+% Show the code in Haskell, talk about the Agda model.
+% Mention that Arian translated the Agda to Haskell and
+% added mutual recursion to the model.
+
 \chapter{Pattern-Expression Patches}
 \label{chap:pattern-expression-patches}
 %include src/PEPatches.lhs

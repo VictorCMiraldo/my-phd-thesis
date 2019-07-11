@@ -19,6 +19,11 @@ differencing} tools.
 
 \victor{Literature review?}
 
+% Problem 
+%   - small summary shortcommings
+% Contributions
+% Outline and Papers
+
 \section{Contributions}
 
 \begin{itemize}
@@ -43,3 +48,7 @@ patches~\cite{Miraldo2017}. This work was developed in Agda and later translated
 
   Finally, whilst on the quest of searching for an efficient algorithm,
 we forked into a radically different approach, explored in \Cref{chap:pattern-expression-patches}.
+
+
+% chapter X is based on paper Y, which was wrote with Alice and Bob
+% and my contribution is Z to that paper.
