@@ -1,41 +1,6 @@
 \victor{Actually... I'd rather put most of this under backgroun and
 use this chapter solely for mrsop}
 
-  \emph{(Datatype-)generic programming}\index{generic programming}
-provides a mechanism to write functions by induction on the structure
-of algebraic datatypes~\cite{Gibbons2006}.  A well-known example is
-the |deriving| mechanism in Haskell, which frees the programmer from
-writing repetitive functions such as equality~\cite{haskell2010}. A
-vast range of approaches were available as preprocessors, language
-extensions, or libraries for
-Haskell~\cite{Rodriguez2008,Magalhaes2012}.  
-
-  The core idea behind generic programming is the fact that a number
-of datatypes can be described in a uniform fashion.  Hence, if a
-programmer were to write programs that work over this uniform
-representation, these programs would immediately work over a variety
-of datatypes. We are interested in writing differencing algorithms for
-abstract syntax trees, hence our datatypes will be mutually recursive
-families.  Our programs must operate over \emph{any} such
-family. Consequently, we must have a powerful generic programming
-approach that is capable of (A) representing mutually recursive
-datatypes and (B) easily operating over them by the means of
-expressive combinators. In \Cref{fig:gplibraries}
-we outline the main design differences between a few of the existing
-libraries and place \texttt{generics-mrsop} in that space.
-
-\begin{figure}\centering
-\begin{tabular}{@@{}lll@@{}}\toprule
-                        & Pattern Functors       & Codes                 \\ \midrule
-  No Explicit Recursion & \texttt{GHC.Generics}  & \texttt{generics-sop} \\
-  Simple Recursion      &  \texttt{regular}      &  \multirow{2}{*}{\textbf{\texttt{generics-mrsop}}} \\
-  Mutual Recursion      &  \texttt{multirec}     &   \\
-\bottomrule
-\end{tabular}
-\caption{Spectrum of static generic programming libraries}
-\label{fig:gplibraries}
-\end{figure}
-
 \victor{\Huge I'm here}
 
 Consider the following datatype representing binary trees
