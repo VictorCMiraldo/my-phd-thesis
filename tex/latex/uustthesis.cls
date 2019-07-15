@@ -230,6 +230,10 @@ I'll pass it to 'book' just in case.}
 \ifPHD@ismsccover
 \renewcommand{\maketitle}{
 %%%%%%%%%%%%%
+%% Custom page numbering to hack the crap out
+%% of duplicate-destinations
+%% seen in: https://tex.stackexchange.com/questions/18924/pdftex-warning-ext4-destination-with-the-same-identifier-nam-epage-1-has
+\pagenumbering{Alph}
 %% Custom title page geometry
 \newgeometry{left=0.17\paperwidth,right=0.17\paperwidth,bindingoffset=6mm}
 \thispagestyle{empty}
@@ -287,6 +291,11 @@ I'll pass it to 'book' just in case.}
 \else
 \renewcommand{\maketitle}{
 %%%%%%%%%%%%%
+%% Custom page numbering to hack the crap out
+%% of duplicate-destinations
+%% seen in: https://tex.stackexchange.com/questions/18924/pdftex-warning-ext4-destination-with-the-same-identifier-nam-epage-1-has
+\pagenumbering{Alph}
+%% \hypersetup{pageanchor=false}
 %% Custom title page geometry
 \newgeometry{left=0.17\paperwidth,right=0.17\paperwidth,bindingoffset=6mm}
 \thispagestyle{empty}
