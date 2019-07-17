@@ -1,4 +1,4 @@
-\documentclass[10pt,b5paper,noseaweed]{uustthesis}
+\documentclass[draft, 10pt,b5paper,noseaweed]{uustthesis}
 %% Remove the 'noseaweed' option to draw the fractal
 %% at the section headings. This slows compilation down, though.
 
@@ -59,7 +59,7 @@ Some amazing abstract should come here.
 \label{chap:background}
 %include src/Background.lhs
 
-\chapter{Generic Programming}
+\chapter{The \texttt{generics-mrsop} Library}
 \label{chap:generic-programming}
 %include src/GenericProgramming.lhs
 

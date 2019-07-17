@@ -460,3 +460,5 @@ project \@NWOproject{} (\@NWOgrantnumber).
 %% Recommented to give more professionally-looking tables.
 \renewcommand{\arraystretch}{1.3}
 
+%% number up to subsections
+\setcounter{secnumdepth}{2}

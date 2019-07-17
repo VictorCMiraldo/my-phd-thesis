@@ -37,5 +37,5 @@
 
 %% LaTeX stuff
 
-\newenvironment{myhs}{\par\vspace{0.15cm}\begin{minipage}{\textwidth}}{\end{minipage}\vspace{0.15cm}}
+\newenvironment{myhs}{\par\vspace{0.15cm}\begin{minipage}{0.8\textwidth}}{\end{minipage}\vspace{0.15cm}}
 
