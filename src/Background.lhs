@@ -1,11 +1,73 @@
-\section{The \texttt{UNIX diff}}
-
-\section{Edit Scripts and Edit Distance}
-\label{sec:edit-scripts}
-
 \section{Tree Edit Distance}
+\label{sec:background:tree-edit-dist}
+
+  The notion of \emph{tree edit distance} is vague and varies from
+author to author \cite{Bille2005}.  Abstractly, it is a number that
+represents the \emph{cost} of transforming a source tree into a
+destination tree. Whereas this transformation is performed by a select
+number of \emph{edit operations}. Which operations to consider will
+heavily influence the cost of transforming a tree into another and,
+consequently, the algorithms for computing the minimal sequence of
+said operations. The most common choice of operations are insertions,
+deletions and relabelings, whih stems from the edit operations that
+are generally used in the \emph{string edit distance}~\cite{Bergroth2000}
+domain. The \unixdiff{}, however, does not consider relabelings
+as a basic operation, for example.
+
+\victor{more glue???}
+
+  On this section we will review some of the important notions and
+background work on edit distance. We start by looking at the string
+edit distance, \Cref{sec:background:string-edit-distance} and
+then we generalize it to untyped trees, in \Cref{sec:background:tree-edit-distance}, as it is classically portrayed in the literature. Finally,
+we discuss some of the consequences of working with typed trees
+in \Cref{sec:background:typed-tree-edit-distance}.
+
+\victor{
+The diffing problem can be portrayed in a variety of different flavors.
+The untyped approach has been thoroughly studied in both its
+linear~\cite{Bergroth2000} and
+tree~\cite{Akutsu2010,Demaine2007,Klein1998,Bille2005,Autexier2015,Chawathe1997}
+variations. The canonical solution for the untyped linear scenario is
+the well known Unix \texttt{diff}~\cite{McIlroy1976}. For the
+tree-structured variation, though, a variety of
+implementations~\cite{Farinier2015,Hashimoto2008,Falleri2014}
+has arisen in the last few years. In this paper, however, we have explored
+how to exploit the \emph{type structure} of trees to give a more
+precise account of our diff algorithm.
+
+Beyond diffing, there is a great deal of work on version control
+systems.  The canonical example of a \emph{formal} VCS is
+Darcs~\cite{Darcs}. The system itself is built around the \emph{theory
+  of patches} developed by the same team. A formalization of such
+theory using inverse semigroups was done by
+Jacobson~\cite{Jacobson2009}. Another example is the Pijul VCS,
+inspired by Mimram~\cite{Mimram2013}. This uses category theory to
+define and reason about patches.  The base category on which their
+work is built, however, handles files as a list of lines, thus
+providing only a theoretical framework on top of the already existing
+Unix \texttt{diff}. Swierstra and L\"{o}h~\cite{Swierstra2014} apply
+separation logic and Hoare calculus to be able to define a logic for
+reasoning about patches. Separation logic is particularly useful to
+prove the \emph{disjointedness} of patches -- and guarantee that their
+associated apply functions commute.  Finally, Anguiuli et
+al.~\cite{Angiuli2014} have developed a model of patch theory within
+Homotopy Type Theory. Although their model considers various patches
+and repositories, it does not provide a generic account for
+arbitrary data types as done here.
+}
+
+\subsection{String Edit Distance and \unixdiff{}}
+\label{sec:background:string-edit-distance}
+ 
+\subsection{Classic Tree Edit Distance}
+\label{sec:background:tree-edit-distance}
+
+\subsection{Typed Tree Edit Distance}
+\label{sec:background:typed-tree-edit-distance}
 
 \section{Generic Programming}
+\label{sec:background:generic-programming}
 
   \emph{(Datatype-)generic programming}\index{Generic Programming}
 provides a mechanism to write functions by induction on the structure

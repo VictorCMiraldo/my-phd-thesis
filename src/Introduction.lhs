@@ -71,7 +71,7 @@ arbitrary datatypes~\cite{Loh2009,Miraldo2017}, but following the
 same recipe: enumerate all combinations of insertions, deletions and
 copies that transform the source into the destination and choose the
 `best' one. This design has some challenges at its core as we 
-can see in \Cref{sec:edit-scripts}.
+can see in \Cref{sec:background:edit-scripts}.
 
 \victor{Literature review?}
 
