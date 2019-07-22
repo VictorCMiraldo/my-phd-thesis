@@ -2,6 +2,8 @@
 ## sure you can specify the output-directory to be 'dist';
 ## it helps keeping the whole development organized.
 LATEX=xelatex -shell-escape -output-directory=dist
+## LATEX=latexmk -lualatex -auxdir=dist
+
 
 ## The target name and full name (with extension)
 TGT=thesis

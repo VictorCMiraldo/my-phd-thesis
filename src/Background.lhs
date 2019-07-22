@@ -18,10 +18,12 @@ as a basic operation, for example.
 
   On this section we will review some of the important notions and
 background work on edit distance. We start by looking at the string
-edit distance, \Cref{sec:background:string-edit-distance} and
-then we generalize it to untyped trees, in \Cref{sec:background:tree-edit-distance}, as it is classically portrayed in the literature. Finally,
-we discuss some of the consequences of working with typed trees
-in \Cref{sec:background:typed-tree-edit-distance}.
+edit distance, \Cref{sec:background:string-edit-distance} and then we
+generalize it to untyped trees, in
+\Cref{sec:background:tree-edit-distance}, as it is classically
+portrayed in the literature. Finally, we discuss some of the
+consequences of working with typed trees in
+\Cref{sec:background:typed-tree-edit-distance}.
 
 \victor{
 The diffing problem can be portrayed in a variety of different flavors.
@@ -59,12 +61,177 @@ arbitrary data types as done here.
 
 \subsection{String Edit Distance and \unixdiff{}}
 \label{sec:background:string-edit-distance}
+
+  The distance between two strings, |s| and |d|, is defined by the
+cost of transforming |s| into |d| by the means of some edit
+operations.  The \emph{Levenshtein Distance}~\cite{Levenshtein1966} is
+the most widespread metric for edit distance~\cite{Bergroth2000}. It
+considers insertions, deletions and substitutions of characters as its
+edit operations. Each of those operations has an associated cost, as
+shown below.
+
+\begin{myhs}
+\begin{code}
+data EOp = Ins Char | Del Char | Subst Char Char
+
+cost :: EOp -> Int
+cost (Ins _)      = 1
+cost (Del _)      = 1
+cost (Subst c d)  = if c == d then 0 else 1
+\end{code}
+\end{myhs}
+
+  Note how the cost of a \emph{copy} operation is 0, and a non-identity
+|Subst| costs less than deleting then inserting the given characters.
+This ensures that the algorithm looking for the list of edit operations
+with the minimum cost will prefer substitutions over deletions
+and insertions. Said list of edit operations represents, in fact, 
+a partial function that \emph{performs the transformation}.
+
+\begin{myhs}
+\begin{code}
+apply :: [EOp] -> String -> Maybe String
+apply []                  []         = Just []
+apply (Ins c:ops)               ss   = (c :) <$$> apply ops ss
+apply (Del c:ops)         (s :  ss)  = guard (c == s) >> apply ops ss
+apply (Subst c d  : ops)  (s :  ss)  = guard (c == s) >> (d :) <$$> apply ops ss
+\end{code}
+\end{myhs}
+
+
+  We can compute the \emph{edit script}\index{Edit Script}, i.e. a
+list of edit operations, with the minimum cost quite easily with a
+naive, inefficient, recursive implementation.  In fact, the problem of
+computing the \emph{longest common subsequence} of a set of strings,
+usually two, is closely related to computing the \emph{edit
+distance}. It differs from the longest common substring for sequences
+need not be consecutive within the original strings.
+
+\begin{figure}
+\begin{myhs}
+\begin{code}
+lcs :: String -> String -> [EOp]
+lcs []      []      = []
+lcs (x:xs)  []      = Del x : lcs xs []
+lcs []      (y:ys)  = Ins y : lcs [] ys
+lcs (x:xs)  (y:ys)  = 
+  let  i = Ins y      : lcs (x:  xs)      ys
+       d = Del x      : lcs      xs  (y:  ys)
+       s = Subst x y  : lcs      xs       ys
+   in minimumBy cost [i , d , s]
+\end{code}
+\end{myhs}
+\caption{Definition of the function that returns a longest
+common subsequence of two strings}
+\label{fig:string-lcs}        
+\end{figure}
+
+  Running the |lcs x y| function, \Cref{fig:string-lcs}, will yield an
+\emph{edit script} with minimum \emph{Levenshtein Distance} and
+enables us to read out one longest common subsequence of |x| and
+|y|. Note that longest common subsequences are not unique, in
+general. Consider the case of |lcs "ab" "ba"| for instance.
+
+  The \unixdiff{}~\cite{McIlroy1976} performs a slight generalization
+by considring the distance between two \emph{files}, seen as a list of
+\emph{strings}, opposed to a list of \emph{characters}. Moreover, it
+does not consider |Subst| as an operation. Instead, it choses to only
+allow for insertions, deletions and copies.
+
+\begin{myhs}
+\begin{code}
+data EOp = Ins String | Del String | Cpy
+
+cost :: EOp -> Int
+cost (Ins _)  = 1
+cost (Del _)  = 1
+cost Cpy      = 0
+\end{code}
+\end{myhs}
+
+  A practical implementation of the \unixdiff{} will use a number of
+algorithmic tricks that make it performant. For starter, it is
+essential to use a memoized |lcs| function to avoid recomputing
+subproblems. It is also common to hash the data being compared to have
+amortized constant time comparisson. More intricate, however, is the
+usage of a number of heuristics that tend to perform well in certain
+situations.  One example is the \texttt{diff --patience} algorithm,
+that will emphasize the matching of lines that appear only once in the
+source and destintion files.\victor{what to cite here?}
+
+\victor{More detail? Less detail?}
  
 \subsection{Classic Tree Edit Distance}
 \label{sec:background:tree-edit-distance}
 
+
+  The \unixdiff{} conceptually generalizes the notion of string edit
+distance to a notion of edit distance between two arbitrary lists.
+The notion of (untyped) tree edit
+distance~\cite{Akutsu2010,Demaine2007,Klein1998,Bille2005,Autexier2015,Chawathe1997}
+goes one step further, and considers \emph{arbitrary} trees as the
+objects under scrutiny.
+
+  There is a lot of freedom on the edit operations that we can consider
+in the untyped scenario. To name a few we can have flattening
+insertions and deletions, where the children of the deleted node are
+inserted or removed in-place in the parent node. Another operation
+that only exists in the untyped world is node relabeling, among
+others. This degree of variation is responsible for the number of
+different approaches and techniques we see in
+practice~\cite{Farinier2015,Hashimoto2008,Falleri2014}.
+  
+  Basic tree edit distance~\cite{Demaine2007}, however, considers only
+node insertions, deletions and copies. The cost function is borrowed
+entirely from string edit distance and so is the |lcs| function, that
+instead of working with |[a]| will work with |[Tree]|. The
+interpretation of the edit operations, shown in
+\Cref{fig:apply-tree-edit} illustrates these modifications.
+
+\begin{figure}
+\begin{myhs}
+\begin{code}
+data EOp  = Ins Label | Del Label | Cpy
+data Tree = Node Label [Tree]
+
+arity :: Label -> Int
+
+apply :: [EOp] -> [Tree] -> Maybe [Tree]
+apply [] [] = Just []
+apply (Cpy : ops) ts
+  = apply (Ins l : Del l : ops) ts
+apply (Del l : ops) (Node l' xs:ts)
+  = guard (l == l') >> apply ops (xs ++ ts)
+apply (Ins l : ops) ts
+  = (\(args , rest) -> Node l args : rest) . takeDrop (arity l)
+    <$$> apply ops ts
+\end{code}
+\end{myhs}
+\caption{Definition of |apply| for tree edit operations}
+\label{fig:apply-tree-edit}
+\end{figure}
+
+  We call these approachs ``untyped'' because there exists edit
+scripts that yield non-well formed trees. For example, imagine |l| is
+a label with arity 2, that is, it is supposed to receive two
+arguments. Now consider the edit script |Ins l : []|, which will yield
+the tree |Node l []| once applied to the empty forest. This is an
+issue when we want to consider our trees to be abstract syntax
+trees. This would mean that the differencing utilities could produce
+unparseable programs. We can use the Haskell type system to our
+advantage and write |EOp| in a way that it is guaranteed to return
+well typed results. Labels will be simply different constructors,
+and edit scripts will be indexes by two lists of types: the types
+of the trees it consumes and the types of the trees it produces.
+
+\victor{finish and glue}
+
 \subsection{Typed Tree Edit Distance}
 \label{sec:background:typed-tree-edit-distance}
+
+\victor{Show the family class, explain the reification into
+typed monsters.
+\texttt{https://hackage.haskell.org/package/gdiff-1.1/docs/Data-Generic-Diff.html\#t:Family}}
 
 \section{Generic Programming}
 \label{sec:background:generic-programming}
@@ -515,3 +682,4 @@ translated to a generic representation. We can relieve this burden by
 recording, explicitly, which fields of a constructor are recursive or
 not, which is exactly how we start to shape \texttt{generics-mrsop}
 in \Cref{chap:generic-programming}.
+
