@@ -84,15 +84,16 @@ I'll pass it to 'book' just in case.}
 %% Font Confiruation using unicode-math package
 %% https://tex.stackexchange.com/questions/30049/how-to-select-math-font-in-document#30066
 %% 
-\usepackage{unicode-math}
-\defaultfontfeatures{Scale=MatchLowercase}
-\setmainfont[
-    Path           = ./tex/latex/fonts/,
-    BoldFont       = STIXTwoText-Bold.otf,
-    ItalicFont     = STIXTwoText-Italic.otf,
-    BoldItalicFont = STIXTwoText-BoldItalic.otf,
-]{STIXTwoText-Regular.otf}
-\setmathfont{STIX Two Math} 
+%% \usepackage{unicode-math}
+%% \defaultfontfeatures{Scale=MatchLowercase}
+%% \setmainfont[
+%%     Path           = ./tex/latex/fonts/,
+%%     BoldFont       = STIXTwoText-Bold.otf,
+%%     ItalicFont     = STIXTwoText-Italic.otf,
+%%     BoldItalicFont = STIXTwoText-BoldItalic.otf,
+%% ]{STIXTwoText-Regular.otf}
+%% \setmathfont{STIX Two Math} 
+%% \usepackage{stix2-type1}
 
 %%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%

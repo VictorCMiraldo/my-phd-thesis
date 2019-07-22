@@ -1,8 +1,8 @@
 ## The LaTeX command to use; it is a good idea to make
 ## sure you can specify the output-directory to be 'dist';
 ## it helps keeping the whole development organized.
-LATEX=xelatex -shell-escape -output-directory=dist
-## LATEX=latexmk -lualatex -auxdir=dist
+## LATEX=xelatex -shell-escape -output-directory=dist
+LATEX=latexmk -pdf -auxdir=dist
 
 
 ## The target name and full name (with extension)
