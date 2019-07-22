@@ -12,6 +12,7 @@
 % put \mathit around whatver we give to \HV. In case of single
 % greek characters, we don't have the font for it.
 \newcommand{\HVNI}[1]{\ifdefined\HSVarNI\HSVarNI{#1}\else#1\fi}
+\newcommand{\HTNI}[1]{\ifdefined\HSConNI\HSConNI{#1}\else#1\fi}
 
 \definecolor{C1}{RGB}{0,153,204}
 \definecolor{C2}{RGB}{89,0,179}
@@ -37,5 +38,5 @@
 
 %% LaTeX stuff
 
-\newenvironment{myhs}{\par\vspace{0.15cm}\begin{minipage}{0.8\textwidth}}{\end{minipage}\vspace{0.15cm}}
+\newenvironment{myhs}{\par\vspace{0.15cm}\begin{minipage}{0.95\textwidth}\small}{\end{minipage}\vspace{0.15cm}}
 

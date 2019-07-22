@@ -304,7 +304,7 @@ I'll pass it to 'book' just in case.}
 \begin{center}
 %%%%%%%%%%%%%
 %% Headings
-  \vspace*{0.12\paperheight} % 2cm on b5
+  \vspace*{0.11\paperheight} % 2cm on b5
   \begin{LARGE}
   {\bf \@title}
   \end{LARGE}
@@ -317,7 +317,7 @@ I'll pass it to 'book' just in case.}
   (met een samenvatting in het Nederlands)
   \end{Large}
 
-  \vspace{0.2\paperheight} % 4.7cm on b5
+  \vspace{0.19\paperheight} % 4.7cm on b5
   
   Proefschrift
 
@@ -453,6 +453,12 @@ project \@NWOproject{} (\@NWOgrantnumber).
 \usepackage{microtype}
 \usepackage{booktabs}
 \usepackage{multirow}
+
+%% Hacks for preventing orphan lines
+%% https://tex.stackexchange.com/questions/4152/how-do-i-prevent-widow-orphan-lines
+\clubpenalty = 10000
+\widowpenalty = 10000
+\displaywidowpenalty = 10000
 
 % hyperref MUST be loaded first. Check section 14.1 of cleveref manual.
 \usepackage[pdfpagelabels,plainpages=false]{hyperref}

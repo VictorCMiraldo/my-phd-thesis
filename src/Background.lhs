@@ -420,7 +420,7 @@ proportional to the expressivity of the combinators the library can
 provide.
 
 \subsection{GHC Generics}
-\label{sec:patternfunctors}
+\label{sec:background:patternfunctors}
 
   Since version $7.2$, GHC supports the
 \texttt{GHC.Generics}~\cite{Magalhaes2010} library, which exposes the
@@ -515,7 +515,7 @@ representation language.
 
 
 \subsection{Explicit Sums of Products}
-\label{sec:explicitsop}
+\label{sec:background:explicitsop}
 
   The other side of the coin to pattern functors is restricting
 the shape of the generic values to \emph{sums-of-products}.
@@ -540,7 +540,7 @@ required to understand the techniques we use in
 paper~\cite{deVries2014} for a more comprehensive explanation.
 
   Using a \emph{sum-of-products} approach one could write the same |gsize|
-function shown in \Cref{sec:patternfunctors} as easily as:
+function shown in \Cref{sec:background:patternfunctors} as easily as:
 
 \begin{myhs}
 \begin{code}
@@ -609,12 +609,12 @@ and |NP| we inform the type checker of the structure of |CodeSOP|.
 \begin{myhs}
 \begin{code}
 data NS :: (k -> Star) -> [k] -> Star where
-  Here   :: f k      -> NS f (k (P (:)) ks)
-  There  :: NS f ks  -> NS f (k (P (:)) ks)
+  Here   :: f k      -> NS f (k Pcons ks)
+  There  :: NS f ks  -> NS f (k Pcons ks)
 
 data NP :: (k -> Star) -> [k] -> Star where
   NP0   ::                    NP f (P [])
-  (:*)  :: f x -> NP f xs ->  NP f (x (P (:)) xs)
+  (:*)  :: f x -> NP f xs ->  NP f (x Pcons xs)
 \end{code}
 \end{myhs}
 

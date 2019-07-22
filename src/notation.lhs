@@ -1,8 +1,11 @@
+%%% Generics MRSOP Notation
+%format NA_I = "\HT{\mathit{NA}_I}"
+%format NA_K = "\HT{\mathit{NA}_K}"
+%format :*   = "\mathbin{\HT{\times}}"
+%format NP0  = "\HTNI{\epsilon}"
+
+
 %%% Usefull Notation
-%format dots         = "\HS{\dots}"
-%format forall       = "\HS{\forall}"
-%format dot          = "\HS{.}"
-%format ^=           = "\HS{\bumpeq}"
 %format alpha        = "\HVNI{\alpha}"
 %format phi          = "\HVNI{\varphi}"
 %format phi1         = "\HVNI{\varphi_1}"
@@ -10,7 +13,6 @@
 %format kappa        = "\HVNI{\kappa}"
 %format kappa1       = "\HVNI{\kappa_1}"
 %format kappa2       = "\HVNI{\kappa_2}"
-%format fSq          = "\HV{f}"
 %format =~=          = "\HS{\approx}"
 
 %%% Types
@@ -43,17 +45,6 @@
 %format fam          = "\HV{\mathit{fam}}"
 %format fmap         = "\HV{\textit{fmap}}"
 %format fold         = "\HV{\textit{fold}}"
-
-%format :>:          = "\mathrel{\HT{\triangleright}}"
-%format :*           = "\mathrel{\HT{\times}}"
-%format :*:          = "\mathrel{\HT{:\!\!*\!\!:}}"
-%format :+:          = "\mathrel{\HT{:\!\!+\!\!:}}"
-%format :@:          = "\mathrel{\HT{:\!\!@\!\!:}}"
-%format <$$>         = "\mathrel{\HS{<\!\!\$\!\!>}}"
-%format $$           = "\mathrel{\HS{\$}}"
-%format <*>          = "\mathrel{\HS{<\!\!*\!\!>}}"
-
-%format <->          = "\HS{\leftrightarrow}"
 
 %format NilRoseTree  = "\HS{[]_{\mathsf{RoseTree}}}"
 %format ConsRoseTree = "\HS{\mathrel{:_{\mathsf{RoseTree}}}}"

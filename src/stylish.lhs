@@ -36,7 +36,7 @@
 \newcommand{\HSChar}[1]{\mathcolor{hsred2}{#1}}
 \newcommand{\HSString}[1]{\mathcolor{hsred2}{#1}}
 \newcommand{\HSSpecial}[1]{\mathcolor{hsblue4}{#1}}
-\newcommand{\HSSym}[1]{\mathbin{\mathcolor{hsblue4}{\textit{\ensuremath{#1}}}}}
+\newcommand{\HSSym}[1]{\mathcolor{hsblue4}{\textit{\ensuremath{#1}}}}
 \newcommand{\HSCon}[1]{\mathcolor{hsblue3}{\mathit{\ensuremath{#1}}}}
 \newcommand{\HSVar}[1]{\mathcolor{hsblue5}{\mathit{\ensuremath{#1}}}}
 \newcommand{\HSVarNI}[1]{\mathcolor{hsblue5}{\ensuremath{#1}}}
@@ -55,30 +55,46 @@
 %subst special a = "\HSSpecial{" a "}"
 %subst comment a = "\HSComment{ -\! -" a "}"
 
+
+%format family     = "\HSKeyword{family}"
+%format pattern    = "\HSKeyword{pattern}"
+%format forall     = "\HSSym{\forall}"
+
+
+%format (P (a)) = "\HSSym{''}" a
+%format Pcons   = "\mathrel{\HSSym{''\!\!:}}"
+
 %%% lhs2TeX parser does not recognize '*' 
 %%% in kind annotations, it thinks it is a multiplication.
 %format Star       = "\HSCon{*}"
 
-%format ::         = "\mathbin{\HSSym{:\!:}}"
+%format ::         = "\mathrel{\HSSym{:\!:}}"
+%format ->         = "\mathrel{\HSSym{\to}} "
+%format =>         = "\mathrel{\HSSym{\Rightarrow}} "
+%format =          = "\mathrel{\HSSym{=}}"
+%format ~          = "\mathrel{\HSSym{\sim}} "
+%format ==         = "\mathrel{\HSSym{\equiv}} "
+%format /=         = "\mathrel{\HSSym{\not\equiv}} "
+%format <=         = "\mathrel{\HSSym{\leq}} "
+%format >=         = "\mathrel{\HSSym{\geq}} "
+
 %format :          = "\mathbin{\HSCon{:}}"
+%format +          = "\mathbin{\HSSym{+}}"
+%format -          = "\mathbin{\HSSym{-}}"
+%format *          = "\mathbin{\HSSym{*}}"
+%format ,          = "\mathbin{\HSSym{,}}"
 %format nil        = "\HSCon{[]}"
 
-%format family     = "\HSKeyword{family}"
-%format pattern    = "\HSKeyword{pattern}"
 %format _          = "\mathbin{\HSSym{\anonymous}} "
-%format ->         = "\mathbin{\HSSym{\to}} "
 %format <-         = "\mathbin{\HSSym{\leftarrow}} "
-%format =>         = "\mathbin{\HSSym{\Rightarrow}} "
 %format \          = "\HSSym{\lambda} "
 %format |          = "\mathbin{\HSSym{\mid}} "
 %format {          = "\HSSym{\{\mskip1.5mu} "
 %format }          = "\HSSym{\mskip1.5mu\}}"
 %format [          = "\HSSym{[\mskip1.5mu} "
 %format ]          = "\HSSym{\mskip1.5mu]}"
-%format =          = "\mathrel{\HSSym{=}}"
 %format ..         = "\HSSym{\mathinner{\ldotp\ldotp}}"
-%format ~          = "\HSSym{\mathrel{\sim}}"
-%format @          = "\HSSym{\mathord{@}}"
+%format @          = "\mathord{\HSSym{@}}"
 %format .          = "\mathbin{\HSSym{\circ}}"
 %format !!         = "\mathbin{\HSSym{!!}}"
 %format ^          = "\mathbin{\HSSym{\uparrow}}"
@@ -91,24 +107,29 @@
 %format `mod`      = "\mathbin{\HSSym{`mod`}}"
 %format :%         = "\mathbin{\HSSym{:\%}}"
 %format %          = "\mathbin{\HSSym{\%}}"
-%format ++         = "\HSSym{\plus} "
-%format ==         = "\HSSym{\equiv} "
-%format /=         = "\HSSym{\not\equiv} "
-%format <=         = "\HSSym{\leq} "
-%format >=         = "\HSSym{\geq} "
-%format `elem`     = "\HSSym{\in} "
-%format `notElem`  = "\HSSym{\notin} "
-%format &&         = "\HSSym{\mathrel{\wedge}}"
-%format ||         = "\HSSym{\mathrel{\vee}}"
-%format >>         = "\HSSym{\sequ} "
-%format >>=        = "\HSSym{\bind} "
-%format =<<        = "\HSSym{\rbind} "
+%format ++         = "\mathbin{\HSSym{\plus}} "
+%format `elem`     = "\mathbin{\HSSym{\in}} "
+%format `notElem`  = "\mathbin{\HSSym{\notin}} "
+%format &&         = "\mathbin{\HSSym{\mathrel{\wedge}}}"
+%format ||         = "\mathbin{\HSSym{\mathrel{\vee}}}"
+%format >>         = "\mathbin{\HSSym{\sequ}} "
+%format >>=        = "\mathbin{\HSSym{\bind}} "
+%format =<<        = "\mathbin{\HSSym{\rbind}} "
 %format $          = "\mathbin{\HSSym{\$}}"
 %format `seq`      = "\mathbin{\HSSym{`seq`}}"
 %format !          = "\mathbin{\HSSym{!}}"
 %format //         = "\mathbin{\HSSym{//}}"
 %format undefined  = "\HSSym{\bot} "
 %format not	   = "\HSSym{\neg} "
-%format >>>        = "\HSSym{\ggg}"
-%format >=>        = "\HSSym{> \! = \! >}"
+%format >>>        = "\mathbin{\HSSym{\ggg}}"
+%format >=>        = "\mathbin{\HSSym{> \! = \! >}}"
+%format dots       = "\mathbin{\HSSym{\dots}}"
+%format dot        = "\mathrel{\HSSym{.}}"
+%format :>:        = "\mathbin{\HSCon{\triangleright}}"
+%format :*:        = "\mathbin{\HSCon{:\!\!*\!\!:}}"
+%format :+:        = "\mathbin{\HSCon{:\!\!+\!\!:}}"
+%format :@:        = "\mathbin{\HSCon{:\!\!@\!\!:}}"
+%format <$$>       = "\mathbin{\HSSym{<\!\!\$\!\!>}}"
+%format $$         = "\mathbin{\HSSym{\$}}"
+%format <*>        = "\mathbin{\HSSym{<\!\!*\!\!>}}"
 

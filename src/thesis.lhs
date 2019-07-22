@@ -3,10 +3,9 @@
 %% at the section headings. This slows compilation down, though.
 
 \usepackage{hs-digems-forest}
-\usepackage{lipsum}
 
-\title{Testing A Large Title YAY}
-\titleDUTCH{Same title in Dutch}
+\title{Type-Safe Generic Differencing of Mutually Recursive Families}
+\titleDUTCH{same title in dutch}
 
 \author{Victor Cacciari Miraldo}
 
