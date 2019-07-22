@@ -401,6 +401,7 @@ project \@NWOproject{} (\@NWOgrantnumber).
 }
 }
 
+
 %% Our appendix has to stop the seaweed madness
 \renewcommand\appendix{\par
 \setcounter{chapter}{0}%
