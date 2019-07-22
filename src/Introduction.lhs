@@ -52,7 +52,7 @@ apply  :: Patch a -> a -> Maybe a
 \end{code}
 \end{myhs}
 
-  Note that the |apply| function may fail, for example, when attempting
+  Note that the |apply| funcTion may fail, for example, when attempting
 to delete data that is not present. Yet when it succeeds, the |apply|
 function must return a value of type |a|. This may seem like an
 obvious design choice, but this property does not hold for the
@@ -67,11 +67,11 @@ represents patches as a series of insertions, deletions and copies of
 lines and works by enumerating all possible patches that transform the
 source into the destination and chooses the `best' such patch.  There
 have been several attempts at generalizing these results to handle
-arbitrary datatypes~\cite{Loh2009,Miraldo2017}, but following the
+arbitrary datatypes~\cite{Lempsink2009,Miraldo2017}, but following the
 same recipe: enumerate all combinations of insertions, deletions and
 copies that transform the source into the destination and choose the
 `best' one. This design has some challenges at its core as we 
-can see in \Cref{sec:background:edit-scripts}.
+can see in \Cref{sec:background:string-edit-distance}.
 
 \victor{Literature review?}
 

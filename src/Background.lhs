@@ -229,9 +229,76 @@ of the trees it consumes and the types of the trees it produces.
 \subsection{Typed Tree Edit Distance}
 \label{sec:background:typed-tree-edit-distance}
 
-\victor{Show the family class, explain the reification into
-typed monsters.
-\texttt{https://hackage.haskell.org/package/gdiff-1.1/docs/Data-Generic-Diff.html\#t:Family}}
+  In order to make the edit operations type-safe by construction, we
+must have access to some extra type level information. The labels will
+become actual contructors and the edit scripts will be indexes by this
+information. In order to encode said indexes we will need to use
+$n$-ary products.  The $\HS{'}$ sign in the code below marks the list
+as operating at the type level, as opposed to term-level lists which
+exist at run-time. This is an example of Haskell's \emph{datatype}
+promotion~\cite{Yorgey2012}.
+
+\begin{myhs}
+\begin{code}
+data NP :: [Star] -> Star where
+  NP0   ::                NP (P [])
+  (:*)  :: x -> NP xs ->  NP (x Pcons xs)
+\end{code}
+\end{myhs}
+
+  We can now define a |Constr n t args| datatype, that encodes the
+|n|-th constructor of a given type. Its semantics are defined by a function
+that constructs a value of type |t| given a |NP args|.
+
+\begin{myhs}
+\begin{code}
+data Constr n t args = dots
+
+inj   :: Constr n t args -> NP args  -> t
+proj  :: Constr n t args -> t        -> Maybe (NP args)
+\end{code}
+\end{myhs}
+
+  We will ommit the definition of |Constr| for we want to maintain the
+focus on encoding edit scripts.
+\Cref{sec:background:generic-programming} introduces these objects in
+more detail. Nevertheless, the edit scripts are now given by the |ES
+xs ys| type, and are guaranteed that given a |NP xs| to which the edit
+script is applicable, we can produce a |NP ys|.
+
+\begin{myhs}
+\begin{code}
+data ES :: [Star] -> [Star] -> Star where
+  Ins  :: Constr t ts -> ES           xs   (ts :++:  ys)  -> ES           xs   (t Pcons  ys)
+  Del  :: Constr t ts -> ES (ts :++:  xs)            ys   -> ES (t Pcons  xs)            ys
+  Cpy  :: Constr t ts -> ES (ts :++:  xs)  (ts :++:  ys)  -> ES (t Pcons  xs)  (t Pcons  ys)
+\end{code}
+\end{myhs}
+
+  Which is exaclty how \texttt{gdiff}~\cite{Lempsink2009} library
+defines its edit operations. Computing and applying the longest common
+subsequence is done exaclty like before, but the new functions comes
+annotated with more type level information. Yet, the \texttt{gdiff} library
+uses a more involved reification of datatypes and their constructor.
+
+\begin{myhs}
+\begin{code}
+diff   :: NP xs -> NP ys -> ES xs ys
+
+apply  :: ES xs ys -> NP xs -> Maybe (NP ys)
+\end{code}
+\end{myhs}
+
+\subsection{Shortcommings of Edit Scripts}
+
+\victor{
+\begin{enumerate}
+  \item Non-cannonicity
+  \item Can't express commonly seen changes (are they really commonly seen?)
+  \item Many longest-common-subsequences
+  \item algorithms are heavily heuristic
+  \item typed approach is very hard to merge
+\end{enumerate}}
 
 \section{Generic Programming}
 \label{sec:background:generic-programming}
@@ -308,7 +375,7 @@ defining the \emph{description} of a datatype in the provided uniform
 language by some type level information, and two functions witnessing
 an isomorphism. The most important feature of such library is how this
 description is encoded and which are the primitive operations for
-constructing such encodings, \Cref{sec:designspace}. Some libraries,
+constructing such encodings. Some libraries,
 mainly deriving from the \texttt{SYB}
 approach~\cite{Lammel2003,Mitchell2007}, use the |Data| and |Typeable|
 type classes instead of static type level information to provide
@@ -366,10 +433,9 @@ The fact that we mark explicitly when recursion takes place in a
 datatype gives some additional insight into the description.
 Some functions really need the information
 about which fields of a constructor are recursive and which are not,
-like the generic |map| and the generic |Zipper| -- we describe
-the latter in \Cref{sec:mrecexamples}.
+like the generic |map| and the generic |Zipper|. 
 This additional power has also been used to define regular
-expressions over Haskell datatypes~\cite{Serrano2016}. 
+expressions over Haskell datatypes~\cite{Serrano2016}, for example.
 
 \paragraph{Pattern Functors versus Codes.}
 
@@ -392,10 +458,7 @@ datatype -- a sum to express the choice of constructor, and within
 each constructor a product to declare which fields you have. The
 \texttt{generic-sop} library~\cite{deVries2014} explicitly uses a list
 of lists of types, the outer one representing the sum and each inner
-one thought of as products. The $\HS{'}$ sign in the code below marks
-the list as operating at the type level, as opposed to term-level
-lists which exist at run-time. This is an example of Haskell's
-\emph{datatype} promotion~ \cite{Yorgey2012}.
+one thought of as products. 
 
 \begin{myhs}
 \begin{code}
@@ -599,7 +662,7 @@ pass |NP| to |NS| here.
 }
 \vspace{-0.4cm}
 
-  It makes no sense to go through all the trouble of adding the
+  It makes no sense to go through the trouble of adding the
 explicit \emph{sums-of-products} structure to forget this information
 in the representation. Instead of piggybacking on \emph{pattern
 functors}, we define |NS| and |NP| from scratch using

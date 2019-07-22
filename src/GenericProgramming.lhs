@@ -428,11 +428,11 @@ data El :: [Star] -> Nat -> Star where
 \end{code}
 \end{myhs}
 
-The representation of the family |fam| at index |ix| is thus given by
-|RepMRec (El fam) (Lkup codes ix)|. We only need to use |El| in the
-first argument, because that is the position in which we require
-partial application.  The second position has |Lkup| already
-fully-applied, and can stay as is.
+The representation of the family |fam| at index |ix| is thus given in
+terms of |El|, which can be partially applied, |RepMRec (El fam) (Lkup
+codes ix)|. We only need to use |El| in the first argument, because
+that is the position in which we require partial application.  The
+second position has |Lkup| already fully-applied, and can stay as is.
 
   We still have to relate a family of types to their respective codes.
 As in other generic programming approaches, we want to make their
@@ -566,8 +566,8 @@ glance, it may seem like the |Atom| datatype gives too much freedom:
 its |I| constructor receives a natural number, but there is no
 apparent static check that this number refers to an actual member of
 the recursive family we are describing. For example, the list of codes
-|(P [ (P [ (P [ KInt, I (S (S Z))])])])| is accepted by the compiler
-although it does not represent any family of datatypes.
+given by |(P [ (P [ (P [ KInt, I (S (S Z))])])])| is accepted by the
+compiler although it does not represent any family of datatypes.
 
 A direct solution to this problem is to introduce yet another index,
 this time in the |Atom| datatype, which specifies which indices are
@@ -699,7 +699,7 @@ data Value :: Star -> Star where
 \end{code}
 \end{myhs}
 
-In order to use |(Star)| as an argument to a type, we are required to enable
+In order to use |(Star)| as an argument to a type, we must enable
 the \texttt{TypeInType} language extension~\cite{Weirich2013,Weirich2017}.
 
 %  All the generic operations implemented use
@@ -943,14 +943,19 @@ level.  The definitions are given in \Cref{fig:sopmeta}.
 \begin{myhs}
 \begin{code}
 data DatatypeInfo :: [[Star]] -> Star where
-  ADT  :: ModuleName -> DatatypeName -> NP  ConstructorInfo cs       -> DatatypeInfo cs
-  New  :: ModuleName -> DatatypeName ->     ConstructorInfo (P [c])  -> DatatypeInfo (P [ P [ c ]])
-data ConstructorInfo :: [Star] -> Star where
-  Constructor  :: ConstructorName                             -> ConstructorInfo xs
-  Infix        :: ConstructorName -> Associativity -> Fixity  -> ConstructorInfo (P [ x, y ])
-  Record       :: ConstructorName -> NP FieldInfo xs          -> ConstructorInfo xs
+  ADT  :: ModuleName -> DatatypeName -> NP  ConstrInfo cs       
+       -> DatatypeInfo cs
+  New  :: ModuleName -> DatatypeName ->     ConstrInfo (P [c])  
+       -> DatatypeInfo (P [ P [ c ]])
+
+data ConstrInfo :: [Star] -> Star where
+  Constructor  :: ConstrName                             -> ConstrInfo xs
+  Infix        :: ConstrName -> Associativity -> Fixity  -> ConstrInfo (P [ x, y ])
+  Record       :: ConstrName -> NP FieldInfo xs          -> ConstrInfo xs
+
 data FieldInfo :: Star -> Star where
   FieldInfo :: FieldName -> FieldInfo a
+
 class HasDatatypeInfo a where
   datatypeInfo :: proxy a -> DatatypeInfo (Code a)
 \end{code}
@@ -969,9 +974,9 @@ scenario:
 
 \begin{myhs}
 \begin{code}
-data DatatypeInfo     :: [  [  Atom kon ]]  -> Star where dots
-data ConstructorInfo  ::    [  Atom kon ]   -> Star where dots
-data FieldInfo        ::       Atom kon     -> Star where dots
+data DatatypeInfo  :: [  [  Atom kon ]]  -> Star where dots
+data ConstrInfo    ::    [  Atom kon ]   -> Star where dots
+data FieldInfo     ::       Atom kon     -> Star where dots
 \end{code}
 \end{myhs}
 
@@ -989,9 +994,9 @@ which can describe applications, as required.
 data TypeName  =  ConT ModuleName DatatypeName
                |  TypeName :@: TypeName
 data DatatypeInfo :: [[Atom kon]] -> Star where
-  ADT  ::  TypeName  -> NP  ConstructorInfo cs
+  ADT  ::  TypeName  -> NP  ConstrInfo cs
        ->  DatatypeInfo cs
-  New  ::  TypeName  ->     ConstructorInfo (P [c])
+  New  ::  TypeName  ->     ConstrInfo (P [c])
        ->  DatatypeInfo (P [ P [ c ]])
 \end{code}
 \end{myhs}
