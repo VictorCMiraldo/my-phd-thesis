@@ -140,7 +140,8 @@ user to pattern match on generic representations just like they would
 on values of the original type, contrasting with
 \texttt{GHC.Generics}. One can precisely state that a value of a
 representation is composed by a choice of constructor and its
-respective product of fields by the |View| type. 
+respective product of fields by the |View| type. This \emph{view}
+pattern~\cite{Wadler1987,McBride2004} is common in dependently typed programming. 
 
 \begin{myhs}
 \begin{code}
