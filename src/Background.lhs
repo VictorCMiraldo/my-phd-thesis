@@ -25,40 +25,6 @@ portrayed in the literature. Finally, we discuss some of the
 consequences of working with typed trees in
 \Cref{sec:background:typed-tree-edit-distance}.
 
-\victor{
-The diffing problem can be portrayed in a variety of different flavors.
-The untyped approach has been thoroughly studied in both its
-linear~\cite{Bergroth2000} and
-tree~\cite{Akutsu2010,Demaine2007,Klein1998,Bille2005,Autexier2015,Chawathe1997}
-variations. The canonical solution for the untyped linear scenario is
-the well known Unix \texttt{diff}~\cite{McIlroy1976}. For the
-tree-structured variation, though, a variety of
-implementations~\cite{Farinier2015,Hashimoto2008,Falleri2014}
-has arisen in the last few years. In this paper, however, we have explored
-how to exploit the \emph{type structure} of trees to give a more
-precise account of our diff algorithm.
-
-Beyond diffing, there is a great deal of work on version control
-systems.  The canonical example of a \emph{formal} VCS is
-Darcs~\cite{Darcs}. The system itself is built around the \emph{theory
-  of patches} developed by the same team. A formalization of such
-theory using inverse semigroups was done by
-Jacobson~\cite{Jacobson2009}. Another example is the Pijul VCS,
-inspired by Mimram~\cite{Mimram2013}. This uses category theory to
-define and reason about patches.  The base category on which their
-work is built, however, handles files as a list of lines, thus
-providing only a theoretical framework on top of the already existing
-Unix \texttt{diff}. Swierstra and L\"{o}h~\cite{Swierstra2014} apply
-separation logic and Hoare calculus to be able to define a logic for
-reasoning about patches. Separation logic is particularly useful to
-prove the \emph{disjointedness} of patches -- and guarantee that their
-associated apply functions commute.  Finally, Anguiuli et
-al.~\cite{Angiuli2014} have developed a model of patch theory within
-Homotopy Type Theory. Although their model considers various patches
-and repositories, it does not provide a generic account for
-arbitrary data types as done here.
-}
-
 \subsection{String Edit Distance and \unixdiff{}}
 \label{sec:background:string-edit-distance}
 

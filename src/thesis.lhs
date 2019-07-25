@@ -1,6 +1,9 @@
-\documentclass[10pt,b5paper,noseaweed]{uustthesis}
+\documentclass[10pt,b5paper,noseaweed,draft]{uustthesis}
 %% Remove the 'noseaweed' option to draw the fractal
 %% at the section headings. This slows compilation down, though.
+
+%% The draft option disables microtype and displays overful hboxes
+%% in the text, plus its faster to compile
 
 \usepackage{hs-digems-forest}
 
