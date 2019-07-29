@@ -134,15 +134,16 @@ can see in \Cref{sec:background:string-edit-distance}.
 % Contributions
 % Outline and Papers
 
-\section{Contributions and Outline} 
+\section{Chronology of Contributions} 
 \label{sec:intro:contributions}
 
-  This thesis arises from a number of papers and two Master's thesis.
-In this section we summarize their contributions and direct the reader
-to the relevant chapter for more information. \Cref{chap:generic-programming,chap:structural-patches,chap:pattern-expression-patches} contain our scientific
-contributions whereas the rest of the thesis contains general discussions.
-Here we outline the thesis in its chronological order, instead of
-chapter order.
+  This thesis arises from a number of contributions.  In this section
+we summarize their contributions and direct the reader to the relevant
+chapter for more information. \Cref{chap:generic-programming,
+chap:structural-patches, chap:pattern-expression-patches} contain our
+scientific contributions whereas the rest of the thesis contains
+general discussions.  Here we outline the thesis in its chronological
+order, instead of chapter order.
 
   In \Cref{chap:background} one can find some preliminary important
 notions underlying the topic of generic structural differencing. We
@@ -153,30 +154,47 @@ generalization. We also provide some background on generic
 programming, mainly explaining the existing approaches that led to our
 developments.
 
-  Our first serious attempt at structural differencing happens 
-in \Cref{chap:structural-patches}, and comes from our first
-publication~\cite{Miraldo2017}. At the time we were working with the
-Agda programming language on the modeling side of things. 
-\victor{bla... bla... bla...}
+  \Cref{chap:structural-patches} portrays my first research visti.
+Back in October of 2016 I made my first visit to Pierre-\'{E}variste
+Dagand, where we worked on our first attempt on datatype-generic,
+type-safe differencing~\cite{Miraldo2017}. This work consisted mainly
+in crafting a representation for patches that could distance itself
+from edit-scripts and better exploit the structure of the datatype in
+question. Up to this point, all of our work was done in the Agda
+programming language. Much later, in 2018, Arian van
+Puten~\cite{Arian2019} adapted our Agda code into Haskell as part of
+his Master thesis, implementing a few of our ideas on how to tackle
+the computation of patches. We base the presentation in
+\Cref{chap:structural-patches} on Arian's code, keeping the
+programming language consistent throughtout this thesis. Nevertheless,
+\Cref{chap:structural-patches} explores a definition of patches for
+arbitrary mutually recursive types that support a simple merging
+algorithm.  This algorithm has been proven to correctly merge disjoint
+patches, but the computation of patches was still a challange.
 
-  \Cref{chap:generic-programming} explains
-\texttt{generics-mrsop}~\cite{Miraldo2018} -- a library that enables
-streamlined generic programming for mutually recursive families. This
-library arose from the wish to explore and address the performance
-issues we were facing with our first serious attempt at structural
-differencing, moreover, it would allow us to switch from Agda to
-Haskell. We did need something that could handle arbitrary abstract
-syntax trees in Haskell, and as seen in
-\Cref{sec:background:generic-programming}, the existing approachs
-would not be enough.
+  After my first visit to Paris, it was clear that we needed some
+better way of computing patches if we ever wanted a practical approach
+to structural differencing. Any algorithm slower than amortized linear
+time would be too much for a tool supposed to be called many times
+during the process of developing software. This would require a
+significant re-engineering of our algorithms and a change of
+programming language. It was time to rely to Haskell as our main
+language. For that, however, we would need to create our own generic
+programming tools. Together with Alejandro Serrano, we wrote and
+published the \texttt{generics-mrsop}~\cite{Miraldo2018} library.
+\Cref{chap:generic-programming} explains how the
+\texttt{generics-mrsop} and shows its streamlined generic programming 
+capabilities for mutually recursive families.
 
-\begin{itemize}
-  \item Generic Programming libraries
-  \item \texttt{stdiff} approach
-  \item \texttt{hashdiff} approach
-\end{itemize}
+  With \texttt{generics-mrsop} at hand, the cost of creating prototypes
+suddenly decreased significantly. In middle 2018 we decided to try
+a radically different approach. Instead of modelling the patches first
+then attempting to write an efficient algorithm that could compute
+said patches, we started with writing a fast algorithm and explore what
+are the patch definitions that would arise from it. 
+\victor{bla... bla... bla..}
 
-\subsection*{Summary of Papers and Thesis}
+\subsection*{Summary of Papers}
 \label{sec:intro:paper-summary}
 
   \Cref{chap:generic-programming} introduces the generic programming library we

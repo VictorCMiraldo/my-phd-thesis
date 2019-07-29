@@ -1,3 +1,12 @@
+\victor{
+Planned Skeleton
+\begin{itemize}
+  \item explain edit-scripts
+  \item make point: least-cost ES is arbitrary! 
+  \item make point: ES are easy to compute but hard to merge!
+  \item explain some generic programming
+\end{itemize}}
+
 \section{Tree Edit Distance}
 \label{sec:background:tree-edit-dist}
 
