@@ -50,6 +50,16 @@ Some amazing abstract should come here.
 Some amazing abstract should come here.
 Some amazing abstract should come here.
 
+\chapter{Sammenvatting}
+Sommige goed samenvatting in het Nederlands.
+Sommige goed samenvatting in het Nederlands.
+Sommige goed samenvatting in het Nederlands.
+Sommige goed samenvatting in het Nederlands.
+Sommige goed samenvatting in het Nederlands.
+Sommige goed samenvatting in het Nederlands.
+Sommige goed samenvatting in het Nederlands.
+Sommige goed samenvatting in het Nederlands.
+
 %% Starts the mainmatter
 \mainmatter
 
