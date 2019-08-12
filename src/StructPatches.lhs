@@ -96,7 +96,6 @@ throughout the exposition. We first consider a single layer of datatype,
 In \Cref{sec:stdiff-fixpoints} we extend this treatment to recursive datatypes,
 essentially by taking the fixpoint of the constructions in \Cref{sec:stdiff-functors}.
 
-
   A datatype, when seen through its initial algebra~\cite{initial-algebra} semantics, can be seen as an infinite sucession of applications of its pattern functor,
 call it $F$, to itself: $\mu F = F (\mu F)$. The \stdiff{} approach to structural
 differencing describes differences between values of $\mu F$ by successively
@@ -104,16 +103,13 @@ applying the description of differences between values of type $F$, closely
 following the initial algebra semantics of datatypes. 
 
 \subsection{Functorial Patches}
-\label{sec:stdiff-functors}
+\label{sec:stdiff:diff:functor}
 
-\victor{Did I define |SOP| anywhere?}
-  Exploiting the sums of products approach 
+  Handling \emph{one layer} or recursion is done by addressing the possible
+changes at the sum level, followed by some reconciliation at the product
+level when needed. 
 
-
-  When representing the possible differences between two values |a| and |b|
-of a given type |SOP I sum|.
-
-The first part of our algorithm handles the \emph{sums} of the
+  The first part of our algorithm handles the \emph{sums} of the
 universe. Given two values, |x| and |y|, it computes the
 \emph{spine}, capturing the largest common coproduct structure. We distinguish 
 three possible cases:
@@ -155,16 +151,57 @@ data Spine  (ki :: kon -> Star) (codes :: [[[Atom kon]]])
 \end{code}
 \end{myhs}
 
+  The semantics of |Spine| are straightforward. Its application function
+is given by pattern matching on the provided value and checking it is
+made up with the required construtor. In the |SCns| case we simply map over
+the fields with the |applyAt| function, for applying changes to atoms.
+Otherwise, we reconcile the fields with the |applyAl| function.
+
+\victor{Should we show compiling code or simplify the proxies away?}
 \begin{myhs}
 \begin{code}
-data TrivialK (ki :: kon -> Star) :: kon -> Star where
-  Trivial :: ki kon -> ki kon -> TrivialK ki kon 
+applySpine  :: (EqHO ki)
+            -> SNat ix -> SNat iy
+            -> Spine ki codes (Lkup ix codes) (Lkup iy codes)
+            -> Rep ki (Fix ki codes) (Lkup ix codes)
+            -> Maybe (Rep ki (Fix ki codes) (Lkup iy codes))
+applySpine _ _ Scp x = return x
+applySpine ix iy (SCns c1 dxs) (sop -> Tag c2 xs) =  do
+  Refl <- testEquality ix iy
+  Refl <- testEquality c1 c2
+  inj c2 <$$> (mapNPM applyAt (zipNP dxs xs))
+applySpine _ _ (SChg c1 c2 al) (sop -> Tag c3 xs) = do
+  Refl <- testEquality' c1 c3
+  inj c2 <$$> applyAl al xs
 \end{code}
 \end{myhs}
 
+  Note that we must pass two |SNat| arguments to disambiguate
+the |ix| and |iy| type variables. Without those arguments, these
+variables would only appear as an argument to a type family, which
+may not be injective.
 
-As soon as said structure disagrees, we use the LCS to
-align the disgreements.
+  Whereas the previous section showed how to match the
+\emph{constructors} of two trees, we still need to determine how to
+continue diffing the products of data stored therein. At this stage in
+our construction, we are given two heterogeneous lists, corresponding
+to the fields associated with two distinct constructors. As a result,
+these lists need not have the same length nor store values of the same
+type. To do so, we need to decide how to line up the constructor
+fields of the source and destination. We shall refer to the process of
+reconciling the lists of constructor fields as solving an
+\emph{alignment} problem. 
+
+  Finding a suitable alignment between two lists of constructor fields
+amounts to finding a suitable \emph{edit script}, that relates source
+fields to destination fields. The |Al| data type below describes such
+edit scripts for a heterogeneously typed list of atoms. These scripts
+may insert fields in the destination (|Ains|), delete fields from the
+source (|Adel|), or associate two fields from both lists (|AX|).
+Depending on whether the alignment associates the heads, deletes from
+the source list or inserts into the destination, the smaller recursive
+alignment has shorter lists of constructor fields at its disposal.
+
 \begin{myhs}
 \begin{code}
 data Al  (ki :: kon -> Star) (codes :: [[[Atom kon]]]) 
@@ -179,8 +216,45 @@ data Al  (ki :: kon -> Star) (codes :: [[[Atom kon]]])
 \end{code}
 \end{myhs}
 
-Finally, when synchronizing atoms we must know whether we
-are in a recursive position or not.
+  We require alignments to preserve the order of the arguments of each
+constructors, thus forbidding permutations of arguments. In effect,
+the datatype of alignments can be viewed as an intensional
+representation of (partial) \emph{order and type preserving maps},
+along the lines of McBride's order preserving
+embeddings~\cite{McBride2005}, mapping source fields to destination
+fields.
+
+  Provided a partial embedding for atoms, we can therefore interpret
+alignments into a function transporting the source fields over to the
+corresponding destination fields, failure potentially occurring when
+trying to associate incompatible atoms:
+
+\begin{myhs}
+\begin{code}
+applyAl  :: (EqHO ki)
+         => Al ki codes xs ys
+         -> PoA ki (Fix ki codes) xs
+         -> Maybe (PoA ki (Fix ki codes) ys)
+applyAl A0                NP0         = return NP0
+applyAl (AX    dx  dxs)   (x :*  xs)  = (:*)    <$$> applyAt (dx :*: x) <*> applyAl dxs xs
+applyAl (AIns  x   dxs)          xs   = (x :*)  <$$> applyAl dxs xs 
+applyAl (ADel  x   dxs)   (y :*  xs)  = guard (eq1 x y) *> applyAl dxs xs
+\end{code}
+\end{myhs}
+
+  Finally, when synchronizing atoms we must distinguish between a recursive position
+or opaque data. In case of opaque data, we simply record the old value and the new value.
+
+\begin{myhs}
+\begin{code}
+data TrivialK (ki :: kon -> Star) :: kon -> Star where
+  Trivial :: ki kon -> ki kon -> TrivialK ki kon 
+\end{code}
+\end{myhs}
+
+  In case we are at a recursive position, we record a potential change in
+the recursive position with |Almu|, which we will get to shortly.
+
 \begin{myhs}
 \begin{code}
 data At  (ki :: kon -> Star) (codes :: [[[Atom kon]]]) 
@@ -191,10 +265,29 @@ data At  (ki :: kon -> Star) (codes :: [[[Atom kon]]])
 \end{code}
 \end{myhs}
 
-Talking about recusive positions:
 
+  The application function for atoms follows the same structure. In case
+we are applying a patch to an opaque type, we must understand whether said patch
+represents a copy, \ie, the source and destination values are the same. If that is the
+case, we simply copy the provided value. Otherwise, we must ensure the provided value matches
+the source value. The recursive position case is directly handled by the |applyAlmu| function.
+
+\begin{myhs}
+\begin{code}
+applyAt  :: EqHO ki
+         => At ki codes at
+         -> NA ki (Fix ki codes)) at
+         -> Maybe (NA ki (Fix ki codes) at)
+applyAt (AtSet (Trivial x y)) (NA_K a)  
+  | eqHO x y   = Just (NA_K a)
+  | eqHO x a   = Just (NA_K b)
+  | otherwise  = Nothing
+applyAt (AtFix px) (NA_I x) = NA_I <$$> applyAlmu px x
+\end{code}
+\end{myhs}
 
 \subsection{Recursive Changes}
+\label{sec:stdiff:diff:fixpoint}
 
 A recursive alignment lets us know which constructors
 must be inserted or deleted. Note how the insertion
