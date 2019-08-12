@@ -1,7 +1,4 @@
 
-%format SQ = "\HSVar{\square}"
-%format PatchGDiff = "\HSCon{\mathit{Patch}_\textsc{gd}}"
-%format PatchST    = "\HSCon{\mathit{Patch}_\textsc{st}}"
 \newcommand{\ie}{i.e.}
 \newcommand{\stdiff}{\texttt{st-diff}}
 
@@ -176,6 +173,10 @@ applySpine _ _ (SChg c1 c2 al) (sop -> Tag c3 xs) = do
 \end{code}
 \end{myhs}
 
+  Where |testEquality|\index{testEquality}, here, is used to compare
+the type indices for porpositional equality. It comes from |Data.Type.Equality|
+and has type |f a -> f b -> Maybe (a :~: b)|.
+
   Note that we must pass two |SNat| arguments to disambiguate
 the |ix| and |iy| type variables. Without those arguments, these
 variables would only appear as an argument to a type family, which
@@ -259,9 +260,9 @@ the recursive position with |Almu|, which we will get to shortly.
 \begin{code}
 data At  (ki :: kon -> Star) (codes :: [[[Atom kon]]]) 
          :: Atom kon -> Star where
-  AtSet  :: TrivialK ki kon -> At ki codes (P K kon)
+  AtSet  :: TrivialK ki kon -> At ki codes ((P K kon))
   AtFix  :: (IsNat ix) 
-         => Almu ki codes ix ix -> At ki codes (P I ix)
+         => Almu ki codes ix ix -> At ki codes ((P I ix))
 \end{code}
 \end{myhs}
 
@@ -285,6 +286,7 @@ applyAt (AtSet (Trivial x y)) (NA_K a)
 applyAt (AtFix px) (NA_I x) = NA_I <$$> applyAlmu px x
 \end{code}
 \end{myhs}
+
 
 \subsection{Recursive Changes}
 \label{sec:stdiff:diff:fixpoint}

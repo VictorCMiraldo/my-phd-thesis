@@ -60,6 +60,9 @@
 %format pattern    = "\HSKeyword{pattern}"
 %format forall     = "\HSSym{\forall}"
 
+%%% A Handy placeholder symbol to have
+%format SQ         = "\HSVar{\square}"
+
 
 %format (P (a)) = "\HSSym{''}" a
 %format Pcons   = "\mathrel{\HSSym{''\!\!:}}"
@@ -127,11 +130,14 @@
 %format dot        = "\mathrel{\HSSym{.}}"
 %format :>:        = "\mathbin{\HSCon{\triangleright}}"
 %format :*:        = "\mathbin{\HSCon{:\!\!*\!\!:}}"
+%format :~:        = "\mathbin{\HSCon{:\!\sim\!:}}"
 %format :+:        = "\mathbin{\HSCon{:\!\!+\!\!:}}"
 %format :@:        = "\mathbin{\HSCon{:\!\!@\!\!:}}"
 %format <$$>       = "\mathbin{\HSSym{<\!\!\$\!\!>}}"
 %format $$         = "\mathbin{\HSSym{\$}}"
 %format <*>        = "\mathbin{\HSSym{<\!\!*\!\!>}}"
+%format  *>        = "\mathbin{\HSSym{*\!\!>}}"
+%format <*         = "\mathbin{\HSSym{<\!\!*}}"
 
 %% Formatting single letters and subscripts by
 %% default.

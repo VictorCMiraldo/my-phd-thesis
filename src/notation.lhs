@@ -28,7 +28,7 @@
 %format CodeMRec     = "\HT{\mathit{Code}_{\mathsf{mrec}}}"
 %format NPHole       = "\HT{NP_{\square}}"
 %format NPHoleE      = "\HT{\exists NP_{\square}}"
-%format Tag          = "\HT{\textit{Tag}}"
+%format Tag          = "\HT{\mathit{Tag}}"
 
 %%% Functions
 %format from         = "\HV{\mathit{from}}"
@@ -45,6 +45,15 @@
 %format fam          = "\HV{\mathit{fam}}"
 %format fmap         = "\HV{\textit{fmap}}"
 %format fold         = "\HV{\textit{fold}}"
+
+%%% STDiff Notation
+
+%format Almu       = "\HTNI{\mathit{Al}\mu}"
+%format PatchGDiff = "\HSCon{\mathit{Patch}_\textsc{gd}}"
+%format PatchST    = "\HSCon{\mathit{Patch}_\textsc{st}}"
+
+
+%%% TMP?
 
 %format NilRoseTree  = "\HS{[]_{\mathsf{RoseTree}}}"
 %format ConsRoseTree = "\HS{\mathrel{:_{\mathsf{RoseTree}}}}"
