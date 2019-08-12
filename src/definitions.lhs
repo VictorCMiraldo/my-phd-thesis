@@ -35,6 +35,9 @@
 
 \newcommand{\victor}[2][nolabel]{%
 {\color{C2} \refstepcounter{commentctr}\label{#1} \textbf{$[$ (\thecommentctr) Victor: } #2 \textbf{$]$}}}
+\newcommand{\todo}[2][nolabel]{%
+{\color{C1} \refstepcounter{commentctr}\label{#1} \textbf{$[$ (\thecommentctr) TODO: } #2 \textbf{$]$}}}
+
 
 %% LaTeX stuff
 

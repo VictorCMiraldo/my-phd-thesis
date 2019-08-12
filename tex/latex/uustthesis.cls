@@ -455,6 +455,15 @@ project \@NWOproject{} (\@NWOgrantnumber).
 \usepackage{microtype}
 \usepackage{booktabs}
 \usepackage{multirow}
+\usepackage{subfig}
+
+%% Refine reference format to include parenthesis
+%% Taken from: https://tex.stackexchange.com/questions/75014/is-it-possible-to-make-a-reference-to-a-subfigure-to-appear-figure-2a-with-cle
+\captionsetup[subfigure]{ subrefformat=simple %
+                        , labelformat=simple %
+                        , listofformat=subsimple}
+\renewcommand\thesubfigure{(\textsc{\alph{subfigure}})}
+
 
 %% Hacks for preventing orphan lines
 %% https://tex.stackexchange.com/questions/4152/how-do-i-prevent-widow-orphan-lines
