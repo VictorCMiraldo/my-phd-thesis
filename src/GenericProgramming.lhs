@@ -1031,5 +1031,6 @@ instance HasDatatypeInfo Singl FamRose CodesRose Z where
 \end{code} %$
 \end{myhs}
 
-\victor{\Huge I'm here}
+\subsection{Revisiting \texttt{GDiff}}
 
+\victor{How about we show gdiff in \texttt{generics-mrsop}?}

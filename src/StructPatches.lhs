@@ -1,6 +1,5 @@
 
 \newcommand{\ie}{i.e.}
-\newcommand{\stdiff}{\texttt{st-diff}}
 
   When working with \texttt{gdiff}-style patches, where a patch that
 transforms a list of trees |xs| into a list of trees |ys| is given by
@@ -70,7 +69,7 @@ respective components. Firstly, we familirizie ourslelves with |PatchST|
 and is application function, \Cref{sec:stdiff:patches}. Next we look into
 merging and its cummutativity proof in \Cref{sec:stdiff:merging}. Lastly,
 we discuss the |diff| function in \Cref{sec:stdiff:diff}, which comprises
-a significant drawback of the \texttt{stdiff} approach because of
+a significant drawback of the \texttt{stdiff} approach for
 its computational complexity. 
 
 \victor{|PatchST| also suffers from the ambiguity problem; Arian used
@@ -93,11 +92,14 @@ throughout the exposition. We first consider a single layer of datatype,
 In \Cref{sec:stdiff-fixpoints} we extend this treatment to recursive datatypes,
 essentially by taking the fixpoint of the constructions in \Cref{sec:stdiff-functors}.
 
-  A datatype, when seen through its initial algebra~\cite{initial-algebra} semantics, can be seen as an infinite sucession of applications of its pattern functor,
-call it $F$, to itself: $\mu F = F (\mu F)$. The \stdiff{} approach to structural
-differencing describes differences between values of $\mu F$ by successively
-applying the description of differences between values of type $F$, closely
-following the initial algebra semantics of datatypes. 
+  A datatype, when seen through its initial
+algebra~\cite{initial-algebra} semantics, can be seen as an infinite
+sucession of applications of its pattern functor, call it $F$, to
+itself: $\mu F = F (\mu F)$. The \texttt{stdiff} approach to
+structural differencing describes differences between values of $\mu
+F$ by successively applying the description of differences between
+values of type $F$, closely following the initial algebra semantics of
+datatypes.
 
 \subsection{Functorial Patches}
 \label{sec:stdiff:diff:functor}
@@ -108,8 +110,8 @@ level when needed.
 
   The first part of our algorithm handles the \emph{sums} of the
 universe. Given two values, |x| and |y|, it computes the
-\emph{spine}, capturing the largest common coproduct structure. We distinguish 
-three possible cases:
+\emph{spine}\index{Structural Patches!Spine}, capturing the largest
+common coproduct structure. We distinguish three possible cases:
 %
 \begin{itemize}
 \item |x| and |y| are fully equal, in which case we copy the full
@@ -125,7 +127,7 @@ three possible cases:
   source and destination's constructor fields.
 \end{itemize}
 
-The datatype |Spine|, defined below, formalizes this 
+  The datatype |Spine|, defined below, formalizes this 
 description. The three cases we describe above correspond to the three
 constructors of |Spine|. When the two values are not equal, we need to
 represent the differences somehow. If the values have the same 
@@ -181,6 +183,7 @@ and has type |f a -> f b -> Maybe (a :~: b)|.
 the |ix| and |iy| type variables. Without those arguments, these
 variables would only appear as an argument to a type family, which
 may not be injective.
+\victor{Explain singletons somewhere}
 
   Whereas the previous section showed how to match the
 \emph{constructors} of two trees, we still need to determine how to
@@ -193,15 +196,16 @@ fields of the source and destination. We shall refer to the process of
 reconciling the lists of constructor fields as solving an
 \emph{alignment} problem. 
 
-  Finding a suitable alignment between two lists of constructor fields
-amounts to finding a suitable \emph{edit script}, that relates source
-fields to destination fields. The |Al| data type below describes such
-edit scripts for a heterogeneously typed list of atoms. These scripts
-may insert fields in the destination (|Ains|), delete fields from the
-source (|Adel|), or associate two fields from both lists (|AX|).
-Depending on whether the alignment associates the heads, deletes from
-the source list or inserts into the destination, the smaller recursive
-alignment has shorter lists of constructor fields at its disposal.
+  Finding a suitable alignment\index{Structural Patches!Alignment}
+between two lists of constructor fields amounts to finding a suitable
+\emph{edit script}, that relates source fields to destination
+fields. The |Al| data type below describes such edit scripts for a
+heterogeneously typed list of atoms. These scripts may insert fields
+in the destination (|Ains|), delete fields from the source (|Adel|),
+or associate two fields from both lists (|AX|).  Depending on whether
+the alignment associates the heads, deletes from the source list or
+inserts into the destination, the smaller recursive alignment has
+shorter lists of constructor fields at its disposal.
 
 \begin{myhs}
 \begin{code}
@@ -266,12 +270,13 @@ data At  (ki :: kon -> Star) (codes :: [[[Atom kon]]])
 \end{code}
 \end{myhs}
 
-
-  The application function for atoms follows the same structure. In case
-we are applying a patch to an opaque type, we must understand whether said patch
-represents a copy, \ie, the source and destination values are the same. If that is the
-case, we simply copy the provided value. Otherwise, we must ensure the provided value matches
-the source value. The recursive position case is directly handled by the |applyAlmu| function.
+  The application function for atoms follows the same structure. In
+case we are applying a patch to an opaque type, we must understand
+whether said patch represents a copy, \ie, the source and destination
+values are the same. If that is the case, we simply copy the provided
+value. Otherwise, we must ensure the provided value matches the source
+value. The recursive position case is directly handled by the
+|applyAlmu| function.
 
 \begin{myhs}
 \begin{code}
@@ -287,14 +292,48 @@ applyAt (AtFix px) (NA_I x) = NA_I <$$> applyAlmu px x
 \end{code}
 \end{myhs}
 
+  The last step is to address how to makde changes over the
+recursive structure of our value, defining |Almu| and |applyAlmu|,
+which will be our next concern.
 
 \subsection{Recursive Changes}
 \label{sec:stdiff:diff:fixpoint}
 
-A recursive alignment lets us know which constructors
-must be inserted or deleted. Note how the insertion
-and deletion operation are different from the XML based
-patches.
+  In the previous section, we presented patches describing changes to
+the coproducts, products, and atoms of our \emph{SoP} universe. This
+treatment handled just a single layer of the fixpoint construction. In
+this section, we tie the knot and define patches describing changes to
+arbitrary \emph{recursive} datatypes.
+
+  To represent generic patches on values of |Fix codes ix|, we will define
+two mutually recursive data types |Almu|\index{Structural Patches!Al\mu} and |Ctx|
+\index{Structural Patches!Context}. The semantics of
+both these datatypes will be given by defining how to \emph{apply}
+them to arbitrary values:
+
+\begin{itemize}
+\item Much like alignments for products, a similar phenomenom appears
+  at fixpoints. When comparing two recursive structures, we can
+  insert, remove or modify constructors. Since we are working over mutually
+  recursive families, removing or inserting constructors can change the
+  overall type. We will use |Almu ix iy| to
+  specify these edit scripts at the constructor-level, describing a transformation
+  from |Fix codes ix| to |Fix codes iy|.
+
+\item Whenever we choose to insert or delete a recursive subtree, we
+  must specify \emph{where} this modification takes place.  To do so,
+  we will define a new type |Ctx dots :: P [Atom kon] -> Star|, inspired by
+  zippers~\cite{zipper}, to navigate through our data-structures. A
+  value of type |Ctx dots p| selects a single atom |I| from the product of type
+  |p|. 
+\end{itemize}
+
+Modeling changes over fixpoints closely follows our definition of
+alignments of products.  Instead of inserting and deleting elements of
+the product we insert, delete or modify \emph{constructors}. Our
+previous definition of spines merely matched the constructors of the
+source and destination values -- but never introduced or removed
+them. It is precisely these operations that we must account for here.
 
 \begin{myhs}
 \begin{code}
@@ -311,14 +350,43 @@ data Almu  (ki :: kon -> Star) (codes :: [[[Atom kon]]])
 \end{code}
 \end{myhs}
 
-  Contexts, here, are just one-hole contexts. We parametrize
-it by the action on atoms for insertion and deletion contexts
-will be slightly different.
+The first constructor, |Spn|, does not perform any new insertions and
+deletions, but instead records a spine and an alignment of the
+underlying product structure. This closely follows the patches we have
+seen in the previous section. To insert a new constructor, |Ins|,
+requires two pieces of information: a choice of the new constructor to
+be introduced, called |c|, and the fields associated with that
+constructor. Note that we only need to record \emph{all but one} of
+the constructor's fields, as represented by a value of type |InsCtx
+ki codes ix (Lkup c (Lkup iy codes))|. Deleting a constructor
+is analogous to insertions, with |InsCtx| and |DelCtx| being
+slight variations over |Ctx|, where one actually flips the arguments
+to ensure the transformation is on the right direction.
 
 \begin{myhs}
 \begin{code}
-data Ctx  (ki :: kon -> Star) (codes :: [[[Atom kon]]]) (p :: Nat -> Nat -> Star) (ix :: Nat) 
-          :: [Atom kon] -> Star where
+type InsCtx ki codes = Ctx ki codes        (Almu ki codes)
+type DelCtx ki codes = Ctx ki codes (Flip  (Almu ki codes)) 
+
+newtype Flip f ix iy = Flip { unFlip :: f iy ix }
+\end{code}
+\end{myhs}
+
+Our definition of insertion and deletions relies on identifying
+\emph{one} recursive argument among the product of possibilities. To
+model this accurately, we define an indexed zipper to identify a
+recursive atom (indicated by a value of type |I|) amongst a product of
+atoms.  Conversely, upon deleting a constructor from the source
+structure, we exploit |Ctx| to indicate find the subtree that should
+be used for the remainder of the patch application, discarding all
+other constructor fields. We parametrize the |Ctx| type
+with a |Nat -> Nat -> Star| argument to distinguish between these
+two cases, as seen above.
+
+\begin{myhs}
+\begin{code}
+data Ctx (ki :: kon -> Star) (codes :: [[[Atom kon]]]) (p :: Nat -> Nat -> Star)
+         (ix :: Nat) :: [Atom kon] -> Star where
   H  :: IsNat iy
      => p ix iy
      -> PoA ki (Fix ki codes) xs
@@ -329,30 +397,81 @@ data Ctx  (ki :: kon -> Star) (codes :: [[[Atom kon]]]) (p :: Nat -> Nat -> Star
 \end{code}
 \end{myhs}
 
-  Deletion contexts reverse the indexes
+  Consequently, we will have two application functions for contexts,
+one that inserts and one that removes contexts. This makes
+clear the need to flip the type indexes of |Almu| when defining
+|DelCtx|. Inserting a context is done by receiving a tree and 
+returning the product stored in the context with the distinguished
+field applied to the received tree:
 
 \begin{myhs}
 \begin{code}
-data InsOrDel  (ki :: kon -> Star) (codes :: [[[Atom kon]]]) 
-               :: (Nat -> Nat -> Star) -> Star where
-  CtxIns  :: InsOrDel ki codes (Almu     ki codes)
-  CtxDel  :: InsOrDel ki codes (AlmuMin  ki codes)
+insCtx  :: (IsNat ix, EqHO ki)
+        => InsCtx ki codes ix xs
+        -> Fix ki codes ix
+        -> Maybe (PoA ki (Fix ki codes) xs)
+insCtx (H x rest) v  = (:* rest) . NA_I  <$$> applyAlmu x v
+insCtx (T a ctx)  v  = (a :*)            <$$> insCtx ctx v
 \end{code}
 \end{myhs}
+
+  The deletion function discards any information we have about all the
+constructor fields, except for the subtree used to continue the patch
+application process. This greatly increases the domain of
+the application function. \victor{this deserves more info...}
 
 \begin{myhs}
 \begin{code}
-newtype AlmuMin ki codes ix iy 
-  = AlmuMin  { unAlmuMin :: Almu ki codes iy ix }
-
-type InsCtx ki codes ix xs  = Ctx ki codes (Almu ki codes) ix xs
-type DelCtx ki codes ix xs  = Ctx ki codes (AlmuMin ki codes) ix xs
+delCtx  :: (IsNat ix, EqHO ki)
+        => DelCtx ki codes ix xs
+        -> PoA ki (Fix ki codes) xs
+        -> Maybe (Fix ki codes ix)
+delCtx (H x rest)  (NA_I v  :* p) = applyAlmu (unFlip x) v
+delCtx (T a ctx)   (at      :* p) = delCtx ctx p
 \end{code}
 \end{myhs}
 
-\subsection{Application Semantics}
+  Finally, the application function for |Almu| is
+nothing but selecting whether we should use the spine
+functionality or insertion and deletion of a context.
 
-a.k.a: Denotational
+\victor{Did we even explain |EqHO|?}
+\begin{myhs}
+\begin{code}
+applyAlmu  :: (IsNat ix, IsNat iy, EqHO ki)
+           => Almu ki codes ix iy
+           -> Fix ki codes ix
+           -> Maybe (Fix ki codes iy)
+applyAlmu (Spn sp)      (Fix rep)  = Fix <$$> applySpine _ _ spine rep
+applyAlmu (Ins  c ctx)  (Fix rep)  = Fix . inj c <$$> insCtx ctx f
+applyAlmu (Del  c ctx)  (Fix rep)  = delCtx ctx <$$> match c rep
+\end{code}
+\end{myhs}
+ 
+  The two underscores at the |Spn| case are just an extraction of
+the necessary singletons to make the |applySpine| typecheck. These
+can be easily replaced by |getSNat| with the correct proxies.
+
+  In fact, defining |PatchST ix| as |Almu ix ix| will fit the 
+our abstract formulation of differencing\victor{Where is this?}.
+
+\begin{myhs}
+\begin{code}
+type PatchST ki codes ix = Almu ki codes ix ix
+
+applyST  :: (IsNat ix , EqHO ki)
+         => PatchST ki codes ix
+         -> Fix codes ix
+         -> Maybe (Fix codes ix)
+applyST  = applyAlmu
+\end{code}
+\end{myhs}
+
+ An easily overlooked property of our patch definition is that the
+destination values it computes are guaranteed to be type-correct \emph{by
+  construction}. This is unlike the line-based or untyped approaches
+(which may generate ill-formed values) and similar to earlier
+results on type-safe differences~\cite{Loh2009}.
 
 \section{Merging Patches}
 \label{sec:stdiff:merging}
@@ -365,6 +484,38 @@ a.k.a: Denotational
 
 \section{Computing |PatchST|}
 \label{sec:stdiff:diff}
+
+  In the previous section, we have devised a typed representation for
+differences. We have seen that this representation is interesting in
+and by itself: being richly-structured and typed, it can be thought of
+as a non-trivial programming language whose denotation is given by the
+application function. However, as programmers, we are mainly 
+interested in \emph{computing} patches from a source and a
+destination. 
+
+\victor{In the work that originated this section, we describe
+how to enumerate all possible patches. Yet this would never work.
+Together with Pierre we had the idea of using the \unixdiff{} as
+an oracle (mention Giovanni's work), later on, we decided that
+we could use \texttt{gdiff} as an oracle (mention Arian's work)}.
+
+\victor{\huge I'm here}
+
+In the following section, we provide a nondeterministic specification
+of such an algorithm. This approach allows us to
+remain oblivious to various grammar-specific
+heuristics we may want to consider in practice, thus focusing our
+attention on the overall structure of the search space. In particular,
+we shall strive to identify \emph{don't care} nondeterminism -- for
+which all choices lead to a successful outcome -- from \emph{don't
+  know} nondeterminism -- for which a choice may
+turn out to be incorrect or sub-optimal.
+
+Since we describe our algorithm in Agda, we model \emph{don't know}
+nondeterminism by programming in the |List| monad. Nondeterministic
+choice is modelled by list concatenation, which we denote by |_ MID _|,
+whereas the absence of valid choice is modelled by the empty list,
+which we denote by |emptyset|.
 
 Here is where we have a problem!
 

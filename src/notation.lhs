@@ -1,6 +1,6 @@
 %%% Generics MRSOP Notation
-%format NA_I = "\HT{\mathit{NA}_I}"
-%format NA_K = "\HT{\mathit{NA}_K}"
+%format NA_I = "\HTNI{\mathit{NA}_I}"
+%format NA_K = "\HTNI{\mathit{NA}_K}"
 %format :*   = "\mathbin{\HT{\times}}"
 %format NP0  = "\HTNI{\epsilon}"
 
@@ -49,8 +49,9 @@
 %%% STDiff Notation
 
 %format Almu       = "\HTNI{\mathit{Al}\mu}"
-%format PatchGDiff = "\HSCon{\mathit{Patch}_\textsc{gd}}"
-%format PatchST    = "\HSCon{\mathit{Patch}_\textsc{st}}"
+%format applyAlmu  = "\HVNI{\mathit{applyAl}\mu}"
+%format PatchGDiff = "\HTNI{\mathit{Patch}_\textsc{gd}}"
+%format PatchST    = "\HTNI{\mathit{Patch}_\textsc{st}}"
 
 
 %%% TMP?
