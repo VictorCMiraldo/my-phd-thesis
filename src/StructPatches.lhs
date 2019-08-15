@@ -72,6 +72,14 @@ we discuss the |diff| function in \Cref{sec:stdiff:diff}, which comprises
 a significant drawback of the \texttt{stdiff} approach for
 its computational complexity. 
 
+  The contributions in this chapter arises from joint
+published work with Pierre-Evariste Dagand~\cite{Miraldo2017} which later
+evolved into an \href{https://github.com/VictorCMiraldo/stdiff}{Agda repository}%
+\footnote{https://github.com/VictorCMiraldo/stdiff}. The code presented here however
+is based on Arian's translation of our Agda repository to Haskell as part of
+his Master thesis work. 
+\victor{We chose to use a single programming language bla bla bla}
+
 \victor{|PatchST| also suffers from the ambiguity problem; Arian used
 heuristics; the code presented here is his; even with \texttt{gdiff-as-a-service}
 the performance was bad for real life}.
@@ -89,8 +97,8 @@ patches over mutually recursive families. We will be using the
 \texttt{generics-mrsop} library (\Cref{chap:generic-programming})
 throughout the exposition. We first consider a single layer of datatype,
 \ie, a single application of the datatypes pattern functor. 
-In \Cref{sec:stdiff-fixpoints} we extend this treatment to recursive datatypes,
-essentially by taking the fixpoint of the constructions in \Cref{sec:stdiff-functors}.
+In \Cref{sec:stdiff:diff:fixpoints} we extend this treatment to recursive datatypes,
+essentially by taking the fixpoint of the constructions in \Cref{sec:stdiff:diff:functors}.
 
   A datatype, when seen through its initial
 algebra~\cite{initial-algebra} semantics, can be seen as an infinite
@@ -306,7 +314,7 @@ this section, we tie the knot and define patches describing changes to
 arbitrary \emph{recursive} datatypes.
 
   To represent generic patches on values of |Fix codes ix|, we will define
-two mutually recursive data types |Almu|\index{Structural Patches!Al\mu} and |Ctx|
+two mutually recursive data types |Almu|\index{Structural Patches!Recursive Alignment} and |Ctx|
 \index{Structural Patches!Context}. The semantics of
 both these datatypes will be given by defining how to \emph{apply}
 them to arbitrary values:
@@ -475,6 +483,16 @@ results on type-safe differences~\cite{Loh2009}.
 
 \section{Merging Patches}
 \label{sec:stdiff:merging}
+
+\victor{I need examples on the previous section to which I
+can refer here}
+
+  Intuitively, if two patches work over different parts of the abstract
+syntax tree, we should be able to merge them quite easily. This is
+what we call disjoint patches.
+
+  The main advantage of the \texttt{stdiff} approach is the simple
+merging algorithm that comes with it. 
 
 \victor{%
 \begin{itemize}
