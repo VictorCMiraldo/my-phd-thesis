@@ -6,6 +6,7 @@
 %% in the text, plus its faster to compile
 
 \usepackage{hs-digems-forest}
+\usepackage[all]{xy}
 
 \title{Type-Safe Generic Differencing of Mutually Recursive Families}
 \titleDUTCH{same title in dutch}

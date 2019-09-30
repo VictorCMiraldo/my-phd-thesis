@@ -7,9 +7,19 @@ Planned Skeleton
   \item explain some generic programming
 \end{itemize}}
 
+  The problem of tree edit distance~\cite{Bergroth2000} has been showing
+up in many different areas. 
+
+  ted in bioinformatics: \cite{Akutsu2010b,Henikoff1992,McKenna2010}
+
+  ted in tutorin systems: \cite{Paassen2017,Rohan2016}
+
+  For more, check surveys \cite{Bille2005,Paassen2018}
+
 \section{Tree Edit Distance}
 \label{sec:background:tree-edit-dist}
 
+\victor{this is bad; I need a better intro to it}
   The notion of \emph{tree edit distance} is vague and varies from
 author to author \cite{Bille2005}.  Abstractly, it is a number that
 represents the \emph{cost} of transforming a source tree into a
@@ -125,14 +135,14 @@ cost Cpy      = 0
 \end{myhs}
 
   A practical implementation of the \unixdiff{} will use a number of
-algorithmic tricks that make it performant. For starter, it is
+algorithmic techniques that make it performant. For starter, it is
 essential to use a memoized |lcs| function to avoid recomputing
 subproblems. It is also common to hash the data being compared to have
 amortized constant time comparisson. More intricate, however, is the
 usage of a number of heuristics that tend to perform well in certain
-situations.  One example is the \texttt{diff --patience} algorithm,
+situations.  One example is the \texttt{diff --patience} algorithm~\cite{patienceDiff},
 that will emphasize the matching of lines that appear only once in the
-source and destintion files.\victor{what to cite here?}
+source and destintion files.
 
 \victor{More detail? Less detail?}
  
@@ -145,22 +155,20 @@ distance to a notion of edit distance between two arbitrary lists.
 The notion of (untyped) tree edit
 distance~\cite{Akutsu2010,Demaine2007,Klein1998,Bille2005,Autexier2015,Chawathe1997}
 goes one step further, and considers \emph{arbitrary} trees as the
-objects under scrutiny.
-
-  There is a lot of freedom on the edit operations that we can consider
-in the untyped scenario. To name a few we can have flattening
-insertions and deletions, where the children of the deleted node are
-inserted or removed in-place in the parent node. Another operation
-that only exists in the untyped world is node relabeling, among
-others. This degree of variation is responsible for the number of
-different approaches and techniques we see in
-practice~\cite{Farinier2015,Hashimoto2008,Falleri2014}.
+objects under scrutiny. Because of that, there is a lot of freedom on
+the edit operations that we can consider in this untyped scenario. To
+name a few we can have flattening insertions and deletions, where the
+children of the deleted node are inserted or removed in-place in the
+parent node. Another operation that only exists in the untyped world
+is node relabeling, among others. This degree of variation is
+responsible for the high number of different approaches and techniques we
+see in practice~\cite{Farinier2015,Hashimoto2008,Falleri2014,Paassen2018}.
   
   Basic tree edit distance~\cite{Demaine2007}, however, considers only
 node insertions, deletions and copies. The cost function is borrowed
-entirely from string edit distance and so is the |lcs| function, that
-instead of working with |[a]| will work with |[Tree]|. The
-interpretation of the edit operations, shown in
+entirely from string edit distance and so is the longest common
+subsequence function, that instead of working with |[a]| will work
+with |[Tree]|. The interpretation of the edit operations, shown in
 \Cref{fig:apply-tree-edit} illustrates these modifications.
 
 \begin{figure}
@@ -186,84 +194,53 @@ apply (Ins l : ops) ts
 \label{fig:apply-tree-edit}
 \end{figure}
 
-  We call these approachs ``untyped'' because there exists edit
+  We label these approaches as ``untyped'' because there exists edit
 scripts that yield non-well formed trees. For example, imagine |l| is
 a label with arity 2, that is, it is supposed to receive two
 arguments. Now consider the edit script |Ins l : []|, which will yield
-the tree |Node l []| once applied to the empty forest. This is an
-issue when we want to consider our trees to be abstract syntax
-trees. This would mean that the differencing utilities could produce
-unparseable programs. We can use the Haskell type system to our
-advantage and write |EOp| in a way that it is guaranteed to return
-well typed results. Labels will be simply different constructors,
-and edit scripts will be indexes by two lists of types: the types
-of the trees it consumes and the types of the trees it produces.
+the tree |Node l []| once applied to the empty forest. If the objects
+under differencing are required to abide by a certain schema, think of
+abstract syntax trees, for example, this becomes an issue.  This is
+particularly important when one wants the ability to manipulate
+patches independently of the objects they have been created from.
+Imagine a merge function that needs to construct a patch
+based on two other patches. A wrong implementation of said merge function
+can yield programs that are unparseable.
 
-\victor{finish and glue}
+  It is possible to use the Haskell type system to our advantage and
+write |EOp| in a way that it is guaranteed to return well typed
+results. Labels will be the different constructors of the family of
+types in question and their arity comes from how many fields each
+constructor expects. Edit scripts will then be indexes by two lists of
+types: the types of the trees it consumes and the types of the trees
+it produces. We will come back to this in more detail in  
+\Cref{sec:gp:well-typed-tree-diff}, where we review the approach of
+Lempsink and L\"{o}h~\cite{Lempsink2009} at adapting this untyped framework
+to be type-safe by construction.
 
-\subsection{Typed Tree Edit Distance}
-\label{sec:background:typed-tree-edit-distance}
+  Although edit scripts provide a very intuitive notion of local
+transformations over a tree, they are very redundant. Making it hard to 
+develop algorithms based solely on edit scripts. It is often the case
+that the community adopts the notion of \emph{tree mapping} as
+a \emph{normal form} version of edit scripts. 
 
-  In order to make the edit operations type-safe by construction, we
-must have access to some extra type level information. The labels will
-become actual contructors and the edit scripts will be indexes by this
-information. In order to encode said indexes we will need to use
-$n$-ary products.  The $\HS{'}$ sign in the code below marks the list
-as operating at the type level, as opposed to term-level lists which
-exist at run-time. This is an example of Haskell's \emph{datatype}
-promotion~\cite{Yorgey2012}.
+\begin{definition}[Tree Mapping]
+Let |t| and |u| be two trees, a tree mapping 
+between |t| and |u| is a partial injective order preserving mapping between the
+nodes of a flattened representation of |t| and |u| according
+to their preorder traversal.
+\end{definition}
 
-\begin{myhs}
-\begin{code}
-data NP :: [Star] -> Star where
-  NP0   ::                NP (P [])
-  (:*)  :: x -> NP xs ->  NP (x Pcons xs)
-\end{code}
-\end{myhs}
-
-  We can now define a |Constr n t args| datatype, that encodes the
-|n|-th constructor of a given type. Its semantics are defined by a function
-that constructs a value of type |t| given a |NP args|.
-
-\begin{myhs}
-\begin{code}
-data Constr n t args = dots
-
-inj   :: Constr n t args -> NP args  -> t
-proj  :: Constr n t args -> t        -> Maybe (NP args)
-\end{code}
-\end{myhs}
-
-  We will ommit the definition of |Constr| for we want to maintain the
-focus on encoding edit scripts.
-\Cref{sec:background:generic-programming} introduces these objects in
-more detail. Nevertheless, the edit scripts are now given by the |ES
-xs ys| type, and are guaranteed that given a |NP xs| to which the edit
-script is applicable, we can produce a |NP ys|.
-
-\begin{myhs}
-\begin{code}
-data ES :: [Star] -> [Star] -> Star where
-  Ins  :: Constr t ts -> ES           xs   (ts :++:  ys)  -> ES           xs   (t Pcons  ys)
-  Del  :: Constr t ts -> ES (ts :++:  xs)            ys   -> ES (t Pcons  xs)            ys
-  Cpy  :: Constr t ts -> ES (ts :++:  xs)  (ts :++:  ys)  -> ES (t Pcons  xs)  (t Pcons  ys)
-\end{code}
-\end{myhs}
-
-  Which is exaclty how \texttt{gdiff}~\cite{Lempsink2009} library
-defines its edit operations. Computing and applying the longest common
-subsequence is done exaclty like before, but the new functions comes
-annotated with more type level information. Yet, the \texttt{gdiff} library
-uses a more involved reification of datatypes and their constructor.
-
-\begin{myhs}
-\begin{code}
-diff   :: NP xs -> NP ys -> ES xs ys
-
-apply  :: ES xs ys -> NP xs -> Maybe (NP ys)
-\end{code}
-\end{myhs}
-
+   The tree mapping determines the nodes where either a copy or substitution
+must be performed. Everything else must be deleted or inserted and the
+order of deletions and insertions is irrelevant, which removes the redundancy
+of edit scripts. Nevertheless, the definition of tree mapping is still very restrictive:
+(i) the ``injective mapping'' does not enable trees to be shared or contracted;
+(ii) the ``order preserving'' does not enbale trees to be permuted or moved
+accross ancestor boundaries. In turn, this imposes a burden of choice on any
+algorithm that has its underlying base in edit-scripts, regardless of whether
+it uses tree mappings internally or not. 
+  
 \subsection{Shortcommings of Edit Scripts}
 
 \victor{
@@ -433,7 +410,11 @@ datatype -- a sum to express the choice of constructor, and within
 each constructor a product to declare which fields you have. The
 \texttt{generic-sop} library~\cite{deVries2014} explicitly uses a list
 of lists of types, the outer one representing the sum and each inner
-one thought of as products. 
+one thought of as products. The $\HS{'}$ sign in the code below marks the list
+as operating at the type level, as opposed to term-level lists which
+exist at run-time. This is an example of Haskell's \emph{datatype}
+promotion~\cite{Yorgey2012}.
+
 
 \begin{myhs}
 \begin{code}

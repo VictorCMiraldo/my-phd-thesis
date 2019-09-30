@@ -41,5 +41,5 @@
 
 %% LaTeX stuff
 
-\newenvironment{myhs}{\par\vspace{0.15cm}\begin{minipage}{0.95\textwidth}\small}{\end{minipage}\vspace{0.15cm}}
+\newenvironment{myhs}{\vspace{0.15em}\par\noindent\begin{minipage}{0.95\textwidth}\small}{\end{minipage}\vspace{0.15cm}}
 

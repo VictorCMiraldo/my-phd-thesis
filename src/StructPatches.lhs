@@ -13,7 +13,7 @@ even exist~\cite{Vassena2016}.
 
   \emph{Structural Patches} was our first attempt at detaching from
 edit-scripts, looking for a homogeneous representation for patches,
-\ie, a patch transforms two values of the same type. In turn, we do
+\ie, a patch transforms two values of the same type. Consequently, we do
 not have a problem to determine the indexes when merging patches, all
 the patches involved will be of type |PatchST x|, where |x| is the
 type of the object being merged. The \texttt{stdiff} algorithm support
@@ -483,6 +483,53 @@ results on type-safe differences~\cite{Loh2009}.
 
 \section{Merging Patches}
 \label{sec:stdiff:merging}
+
+\victor{\Huge temporary}
+
+  A merging algorithm reconciles changes from two different
+patches whenever these are non interfering. There are two
+ways of looking into merging 
+
+receives a span of patches,
+that is, patches |p| and |q| with a common element in their
+domains, and computes a patch that apply the changes
+of |p| adapted to work over the codomain of |q|, as shown
+in \Cref{fig:stdiff:mergesquare}.
+
+\begin{figure}
+\centering
+\subfloat[Residual based merge operation]{%
+\qquad $$
+\xymatrix{ & o \ar[dl]_{p} \ar[dr]^{q} & \\
+          a \ar[dr]_{|merge q p|} & & b \ar[dl]^{|merge p q|} \\
+            & c &}
+$$ \qquad
+\label{fig:stdiff:mergesquare-resid}}%
+\qquad%
+\subfloat[Three-way based merge operation]{%
+\qquad $$
+\xymatrix{ & o \ar[dl]_{p} \ar[dr]^{q} \ar[dd]^(0.8){|merge p q|} & \\
+          a & & b \\
+            & c &}
+$$ \qquad
+\label{fig:stdiff:mergesquare-threeway}}
+\caption{Two different ways to look at the merge problem}.
+\label{fig:stdfiff:mergesquare}
+\end{figure}
+
+  A positive aspect of the |PatchST| approach in comparison with
+a purely edit-scripts based approach is the significantly
+simpler merge function. Since |PatchST| is homogeneous, 
+the type of the merge function is immediate:
+
+\begin{myhs}
+\begin{code}
+mergeST :: PatchST ki codes ix -> PatchST ki codes ix -> Maybe (PatchST ki codes ix)
+\end{code}
+\end{myhs}
+
+  Our merge function is very simple and returns |Nothing| if the patches have
+non-disjoint changes, that is, if the 
 
 \victor{I need examples on the previous section to which I
 can refer here}

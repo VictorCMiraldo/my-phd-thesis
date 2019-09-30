@@ -937,7 +937,7 @@ generic functionality.  This information is tied to a datatype by
 means of an additional type class |HasDatatypeInfo|.  Generic
 functions may now query the metadata by means of functions like
 |datatypeName|, which reflect the type information into the term
-level.  The definitions are given in \Cref{fig:sopmeta}.
+level.  The definitions are given in \Cref{fig:gp:sopmeta}.
 
 \begin{figure}
 \begin{myhs}
@@ -961,7 +961,7 @@ class HasDatatypeInfo a where
 \end{code}
 \end{myhs}
 \caption{Definitions related to metadata from \texttt{generics-sop}}
-\label{fig:sopmeta}
+\label{fig:gp:sopmeta}
 \end{figure}
 
   Our library uses the same approach to handle metadata. In fact, the
@@ -1008,6 +1008,7 @@ for a type \emph{within} a family. This is reflected in the new signature of
 The type equalities in that signature reflect the fact that the given type
 |ty| is included with index |ix| within the family |fam|. This step is needed
 to look up the code for the type in the right position of |codes|.
+
 \begin{myhs}
 \begin{code}
 class (Family kappa fam codes)
@@ -1031,6 +1032,123 @@ instance HasDatatypeInfo Singl FamRose CodesRose Z where
 \end{code} %$
 \end{myhs}
 
-\subsection{Revisiting \texttt{GDiff}}
+\subsection{Well-Typed Tree Differencing} 
+\label{sec:gp:well-typed-tree-diff}
 
-\victor{How about we show gdiff in \texttt{generics-mrsop}?}
+  The approach discussed in this section was originally conceived by
+Lempsink and L\"{o}h~\cite{Lempsink2009}, and has seen one
+implementation for regular types in the \texttt{gdiff} library.
+Vassena~\cite{Vassena2016} have expanded the work with a merging
+algorithm for the type of edit scrips in question. The presentation
+provided here is adapted from van Putten's~\cite{Arian2019} master
+thesis and is available as the \texttt{generics-mrsop-gdiff} library
+on Hackage.
+
+  In \Cref{sec:background:tree-edit-distance} we presented the untyped
+variant of tree edit distance. Making tree edit distance type-safe
+by construction requires edit operations that are individually
+type-safe. Moreover, instead of differencing a list of trees, we will difference 
+an $n$-ary product, |NP|, indexed by the type of each tree. 
+
+\victor{This typed vs. untyped shenanigan is confusing; I need 
+a better story in the background of ES}
+
+\victor{I also don't like this intro}
+
+the cannonical tree edit distance: flatten the trees into
+a list of nodes and use the linear edit distance algorithms
+already at our disposal. Although the algorithm is often presented
+in an untyped fashion, most of these can be represented 
+in a typed setting. This will depend on the choice of edit
+operations. Operations like \emph{insert}, \emph{delete}
+and \emph{copy} can be represented in a typed manner, they do differ
+slightly from some of their untyped counterparts.
+\victor{more!}
+
+  A flattened \texttt{generics-mrsop} value consists in a list
+of opaque values or constructors of the mutually recursive family in question.
+We will use a type, |Cof| to express that notion. A value of type |Cof ki codes at tys|
+represents a constructor of atom |at|, which expepcs arguments whose type is
+in |tys|, for the family |codes| with opaque types interpreted by |ki|.
+It's definition, exactly as in the \texttt{generics-mrsop-gdiff} library, is
+given below.
+
+\begin{myhs}
+\begin{code}
+data Cof (ki :: kon -> Star) (codes :: [[[Atom kon]]]) 
+    :: Atom kon -> [Atom kon] -> Star where
+  ConstrI  :: (IsNat c, IsNat n) 
+           => Constr (Lkup n codes) c 
+           -> ListPrf (Lkup c (Lkup n codes)) 
+           -> Cof ki codes ((P I) n) (Lkup c (Lkup n codes))
+  ConstrK  :: ki k -> Cof ki codes ((P K) k) Pnil
+\end{code}
+\end{myhs}
+ 
+  We need the |ListPrf| argument to |ConstrI| to be able to manipulate
+the type-level lists when defining the application function,
+|applyES|.  We need to define our edit scripts first, though. A value
+of type |ES ki codes xs ys| represents a transformation of a value
+of |NP (NA ki (Fix ki codes)) xs| into a value of |NP (NA ki (Fix ki codes)) ys|.
+The |NP| serves as a list of trees, as is usual for the tree differencing
+algorithms but it enables us to keep track of the type of each individual tree
+through the index to |NP|.
+
+\begin{myhs}
+\begin{code}
+data ES (ki :: kon -> Star) (codes :: [[[Atom kon]]]) 
+    :: [Atom kon] -> [Atom kon] -> Star where
+  ES0  :: ES ki codes Pnil Pnil
+  Ins  :: Cof ki codes a t  -> ES ki codes i            (t :++: j)  
+                            -> ES ki codes i            (a Pcons j)
+  Del  :: Cof ki codes a t  -> ES ki codes (t :++: i)   j           
+                            -> ES ki codes (a Pcons i)  j
+  Cpy  :: Cof ki codes a t  -> ES ki codes (t :++: i)   (t :++: j)  
+                            -> ES ki codes (a Pcons i)  (a Pcons j)
+\end{code}
+\end{myhs}
+
+  Lets take |Ins|, for example. Inserting a constructor |c :: t1 -> dots -> tn -> (P I ix)| in a forest
+|x1 :* x2 :* dots :* Nil| will take the first |n| elements of that forest and use as the arguments
+to |c|. This is realized by the |insCof| function, shown below.
+
+\begin{myhs}
+\begin{code}
+insCof  :: Cof ki codes a t
+        -> NP (NA ki (Fix ki codes)) (t :++: xs)
+        -> NP (NA ki (Fix ki codes)) (a Pcons xs)
+insCof (ConstrK k)        xs =  NA_K k :* xs
+insCof (ConstrI c ispoa)  xs =  let (poa, xs') = split ispoa xs
+                                in NA_I (Fix $$ inj c poa) :* xs'
+\end{code}
+\end{myhs}
+
+  This also showcases the use of the |ListPrf| present in |ConstrI|, which is
+necessary to enable us to split the list |t :++: xs| into |t| and |xs|. The
+typechecker needs some more information about |t|, since type families are
+not injective. The |split| function has type:
+
+\begin{myhs}
+\begin{code}
+split :: ListPrf xs -> NP p (xs :++: ys) -> (NP p xs, NP p ys) 
+\end{code} %
+\end{myhs} 
+
+  The |delCof| function is dual to |insCof|, but since we construct
+a |NP| indexes over |t :++: xs|, we neet not use the |ListPrf| argument.
+Finally, we can assemple the application function that witnesses
+the semantics of |ES|:
+
+\begin{myhs}
+\begin{code}
+applyES  :: (forall k . Eq (ki k))
+         => ES ki codes xs ys
+         -> PoA ki (Fix ki codes) xs
+         -> Maybe (PoA ki (Fix ki codes) ys)
+applyES ES0 _ = Just Nil
+applyES (Ins _ c es) xs = insCof c <$$> applyES es xs
+applyES (Del _ c es) xs = delCof c xs >>= applyES es
+applyES (Cpy _ c es) xs = insCof c <$$> (delCof c xs >>= applyES es)
+\end{code}
+\end{myhs}
+

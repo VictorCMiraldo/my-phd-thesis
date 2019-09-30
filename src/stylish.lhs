@@ -17,6 +17,10 @@
 \definecolor{hsred2}{RGB}{191,121,103}
 \definecolor{hsred3}{RGB}{171,72,46}
 
+% TODO: make all color names upercase so it
+%       all wors in headings too!
+\colorlet{HSBLUE3}{hsblue3}
+
 %% LaTeX Kerning nastiness. By using curly braces to delimit color group,
 %% it breaks spacing. The following seems to work:
 %%
@@ -132,6 +136,7 @@
 %format :*:        = "\mathbin{\HSCon{:\!\!*\!\!:}}"
 %format :~:        = "\mathbin{\HSCon{:\!\sim\!:}}"
 %format :+:        = "\mathbin{\HSCon{:\!\!+\!\!:}}"
+%format :++:       = "\mathbin{\HSCon{:\!\!\plus\!\!:}}"
 %format :@:        = "\mathbin{\HSCon{:\!\!@\!\!:}}"
 %format <$$>       = "\mathbin{\HSSym{<\!\!\$\!\!>}}"
 %format $$         = "\mathbin{\HSSym{\$}}"

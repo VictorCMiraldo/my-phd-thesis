@@ -480,3 +480,16 @@ project \@NWOproject{} (\@NWOgrantnumber).
 
 %% number up to subsections
 \setcounter{secnumdepth}{2}
+
+%% Theorems and Definitions
+\usepackage{amsthm}
+ 
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+
+%% Paragraph formatting
+
+\setlength{\parskip}{0.5em}
+%% These values work; but we get VERY weird erros with other combinations
+%% \linespread{1.05}
+%% \setlength{\parskip}{1em}

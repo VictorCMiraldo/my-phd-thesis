@@ -1,7 +1,7 @@
 %%% Generics MRSOP Notation
 %format NA_I = "\HTNI{\mathit{NA}_I}"
 %format NA_K = "\HTNI{\mathit{NA}_K}"
-%format :*   = "\mathbin{\HT{\times}}"
+%format :*   = "\mathbin{\HTNI{\times}}"
 %format NP0  = "\HTNI{\epsilon}"
 
 
