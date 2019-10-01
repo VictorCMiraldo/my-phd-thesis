@@ -149,7 +149,6 @@ source and destintion files.
 \subsection{Classic Tree Edit Distance}
 \label{sec:background:tree-edit-distance}
 
-
   The \unixdiff{} conceptually generalizes the notion of string edit
 distance to a notion of edit distance between two arbitrary lists.
 The notion of (untyped) tree edit
@@ -162,14 +161,29 @@ children of the deleted node are inserted or removed in-place in the
 parent node. Another operation that only exists in the untyped world
 is node relabeling, among others. This degree of variation is
 responsible for the high number of different approaches and techniques we
-see in practice~\cite{Farinier2015,Hashimoto2008,Falleri2014,Paassen2018}.
+see in practice~\cite{Farinier2015,Hashimoto2008,Falleri2014,Paassen2018,Finis2013}.
+
+\begin{figure}
+\centering
+\subfloat[Insertion of a node on a forest]{%
+Picture of insertion
+}\qquad%
+\subfloat[Deletion of a node from a forest]{%
+Picture of deletion
+}%
+\caption{Insetion, Deletion and Copying of a node with arity $n$
+on a forest}
+\label{fig:background:tree-es-operations}
+\end{figure}
   
   Basic tree edit distance~\cite{Demaine2007}, however, considers only
 node insertions, deletions and copies. The cost function is borrowed
 entirely from string edit distance and so is the longest common
 subsequence function, that instead of working with |[a]| will work
-with |[Tree]|. The interpretation of the edit operations, shown in
-\Cref{fig:apply-tree-edit} illustrates these modifications.
+with |[Tree]|. \Cref{fig:background:tree-es-operation} illsutrates
+insertions and deletions of (untyped) labels on a forest. 
+The interpretation of these edit operations is shown in
+\Cref{fig:apply-tree-edit}. 
 
 \begin{figure}
 \begin{myhs}
@@ -231,17 +245,25 @@ nodes of a flattened representation of |t| and |u| according
 to their preorder traversal.
 \end{definition}
 
+\begin{figure}
+Picture of a few tree mappings; show invalid ones.
+\caption{Example Tree Mappings}
+\label{fig:background:tree-mapping}
+\end{figure}
+
    The tree mapping determines the nodes where either a copy or substitution
 must be performed. Everything else must be deleted or inserted and the
 order of deletions and insertions is irrelevant, which removes the redundancy
 of edit scripts. Nevertheless, the definition of tree mapping is still very restrictive:
 (i) the ``injective mapping'' does not enable trees to be shared or contracted;
 (ii) the ``order preserving'' does not enbale trees to be permuted or moved
-accross ancestor boundaries. In turn, this imposes a burden of choice on any
-algorithm that has its underlying base in edit-scripts, regardless of whether
-it uses tree mappings internally or not. 
-  
-\subsection{Shortcommings of Edit Scripts}
+accross ancestor boundaries. These restrictions are there to ensure that
+one can always compute an edit script from a tree mapping.
+
+ 
+\subsection{Shortcommings of Edit Script Based Approaches}
+
+
 
 \victor{
 \begin{enumerate}

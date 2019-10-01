@@ -1050,12 +1050,9 @@ by construction requires edit operations that are individually
 type-safe. Moreover, instead of differencing a list of trees, we will difference 
 an $n$-ary product, |NP|, indexed by the type of each tree. 
 
-\victor{This typed vs. untyped shenanigan is confusing; I need 
-a better story in the background of ES}
-
 \victor{I also don't like this intro}
 
-the cannonical tree edit distance: flatten the trees into
+  The cannonical tree edit distance: flatten the trees into
 a list of nodes and use the linear edit distance algorithms
 already at our disposal. Although the algorithm is often presented
 in an untyped fashion, most of these can be represented 
@@ -1152,3 +1149,4 @@ applyES (Cpy _ c es) xs = insCof c <$$> (delCof c xs >>= applyES es)
 \end{code}
 \end{myhs}
 
+  \victor{Shall we talk about merging here?}

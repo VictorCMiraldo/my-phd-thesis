@@ -127,13 +127,33 @@ copies that transform the source into the destination and choose the
 `best' one. This design has some challenges at its core as we 
 can see in \Cref{sec:background:string-edit-distance}.
 
-\victor{Literature review?}
+\subsection{Literature Review}
 
-% Problem 
-%   - small summary shortcommings
-% Contributions
-% Outline and Papers
+  Tree-differencing shows up in many different areas, from Computational Biology,
+where it is used to align phylogentic trees and compare RNA secondary structures
+\cite{Akutsu2010b,Henikoff1992,McKenna2010}, all the way to inteligent tutoring systems
+where we must provide good hints to student's solutions to exercises by
+understanding how far they are from the correct solutions \cite{Paassen2017,Rohan2016}.
+Our particular focus lies in the application of structural differencing to software
+components.
 
+  There has been a large body of work on providing better tooling for
+software engineers by the means of structure-aware differencing
+tools. A number of algorithms have been created with the intent of
+being better suited towards operations over source code. Notable
+examples include \emph{GumTree}~\cite{Falleri2014} which is a full
+suite for source code differencing and
+\emph{RWS-Diff}~\cite{Finis2013} which is a tree differencing
+algorithms with a number of different edit operations.
+
+
+  Coccinelle~\cite{Andersen2008,Palix2011}
+
+  GumTree~\cite{Falleri2014}
+
+  Refactoring Tools~\cite{Tonder2019} and a plethora of domain specific tools,
+such as \texttt{latexdiff}~\cite{LatexDiff}
+ 
 \section{Chronology of Contributions} 
 \label{sec:intro:contributions}
 
