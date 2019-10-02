@@ -479,7 +479,7 @@ applyST  = applyAlmu
 destination values it computes are guaranteed to be type-correct \emph{by
   construction}. This is unlike the line-based or untyped approaches
 (which may generate ill-formed values) and similar to earlier
-results on type-safe differences~\cite{Loh2009}.
+results on type-safe differences~\cite{Lempsink2009}.
 
 \section{Merging Patches}
 \label{sec:stdiff:merging}

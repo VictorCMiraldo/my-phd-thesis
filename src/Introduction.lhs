@@ -182,7 +182,7 @@ in crafting a representation for patches that could distance itself
 from edit-scripts and better exploit the structure of the datatype in
 question. Up to this point, all of our work was done in the Agda
 programming language. Much later, in 2018, Arian van
-Puten~\cite{Arian2019} adapted our Agda code into Haskell as part of
+Puten~\cite{Putten2019} adapted our Agda code into Haskell as part of
 his Master thesis, implementing a few of our ideas on how to tackle
 the computation of patches. We base the presentation in
 \Cref{chap:structural-patches} on Arian's code, keeping the

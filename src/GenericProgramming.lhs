@@ -1035,40 +1035,39 @@ instance HasDatatypeInfo Singl FamRose CodesRose Z where
 \subsection{Well-Typed Tree Differencing} 
 \label{sec:gp:well-typed-tree-diff}
 
-  The approach discussed in this section was originally conceived by
-Lempsink and L\"{o}h~\cite{Lempsink2009}, and has seen one
-implementation for regular types in the \texttt{gdiff} library.
-Vassena~\cite{Vassena2016} have expanded the work with a merging
-algorithm for the type of edit scrips in question. The presentation
-provided here is adapted from van Putten's~\cite{Arian2019} master
-thesis and is available as the \texttt{generics-mrsop-gdiff} library
-on Hackage.
+  A good example for \texttt{generics-mrsop} is to implement
+the approach of \citet{Lempsink2009}. Besides some advanced
+generic programming techniques, their approach is the closest
+to ours in the sense that it is the only \emph{typed} approach
+to differencing. The original implementation, due to \citet{Lempsink2009}, 
+can be found on the \texttt{gdiff} library. The presentation
+provided here is adapted from van Putten's~\cite{Putten2019} master
+thesis and is available as the \texttt{generics-mrsop-gdiff} library,
+also on Hackage.
 
-  In \Cref{sec:background:tree-edit-distance} we presented the untyped
-variant of tree edit distance. Making tree edit distance type-safe
-by construction requires edit operations that are individually
-type-safe. Moreover, instead of differencing a list of trees, we will difference 
-an $n$-ary product, |NP|, indexed by the type of each tree. 
+  The construction of type safe tree edit scripts is similar to the
+original tree edit distance, shown in
+\Cref{sec:background:tree-edit-distance}.  The only difference is that
+we have to lift operations into equivalent versions that carry enough
+type level information to ensure the individual edit operations are
+type safe.  Moreover, instead of differencing a list of trees, we will
+difference an $n$-ary product, |NP|, indexed by the type of each tree.
 
-\victor{I also don't like this intro}
+\begin{myhs}
+\begin{code}
+diff  :: (TestEquality ki, EqHO ki)
+      => NP (NA ki (Fix ki codes)) xs
+      -> NP (NA ki (Fix ki codes)) ys
+      -> ES ki codes xs ys
+\end{code}
+\end{myhs}
 
-  The cannonical tree edit distance: flatten the trees into
-a list of nodes and use the linear edit distance algorithms
-already at our disposal. Although the algorithm is often presented
-in an untyped fashion, most of these can be represented 
-in a typed setting. This will depend on the choice of edit
-operations. Operations like \emph{insert}, \emph{delete}
-and \emph{copy} can be represented in a typed manner, they do differ
-slightly from some of their untyped counterparts.
-\victor{more!}
-
-  A flattened \texttt{generics-mrsop} value consists in a list
-of opaque values or constructors of the mutually recursive family in question.
-We will use a type, |Cof| to express that notion. A value of type |Cof ki codes at tys|
-represents a constructor of atom |at|, which expepcs arguments whose type is
-in |tys|, for the family |codes| with opaque types interpreted by |ki|.
-It's definition, exactly as in the \texttt{generics-mrsop-gdiff} library, is
-given below.
+  The edit operations will work over constructors of the mutually
+recursive family |codes| or opaque values from |ki|. To make our operations
+more uniform, we create a type |Cof| to represent the \emph{unit of modification} of each edit operation. A value of type |Cof ki codes at tys|
+represents a constructor of atom |at|, which expects arguments whose type is
+|NP I tys|, for the family |codes| with opaque types interpreted by |ki|.
+Its definition is given below.
 
 \begin{myhs}
 \begin{code}
@@ -1085,11 +1084,11 @@ data Cof (ki :: kon -> Star) (codes :: [[[Atom kon]]])
   We need the |ListPrf| argument to |ConstrI| to be able to manipulate
 the type-level lists when defining the application function,
 |applyES|.  We need to define our edit scripts first, though. A value
-of type |ES ki codes xs ys| represents a transformation of a value
-of |NP (NA ki (Fix ki codes)) xs| into a value of |NP (NA ki (Fix ki codes)) ys|.
-The |NP| serves as a list of trees, as is usual for the tree differencing
-algorithms but it enables us to keep track of the type of each individual tree
-through the index to |NP|.
+of type |ES ki codes xs ys| represents a transformation of a value of
+|NP (NA ki (Fix ki codes)) xs| into a value of |NP (NA ki (Fix ki
+codes)) ys|.  The |NP| serves as a list of trees, as is usual for the
+tree differencing algorithms but it enables us to keep track of the
+type of each individual tree through the index to |NP|.
 
 \begin{myhs}
 \begin{code}
@@ -1105,9 +1104,10 @@ data ES (ki :: kon -> Star) (codes :: [[[Atom kon]]])
 \end{code}
 \end{myhs}
 
-  Lets take |Ins|, for example. Inserting a constructor |c :: t1 -> dots -> tn -> (P I ix)| in a forest
-|x1 :* x2 :* dots :* Nil| will take the first |n| elements of that forest and use as the arguments
-to |c|. This is realized by the |insCof| function, shown below.
+  Lets take |Ins|, for example. Inserting a constructor |c :: t1 ->
+dots -> tn -> (P I ix)| in a forest |x1 :* x2 :* dots :* Nil| will
+take the first |n| elements of that forest and use as the arguments to
+|c|. This is realized by the |insCof| function, shown below.
 
 \begin{myhs}
 \begin{code}
@@ -1149,4 +1149,20 @@ applyES (Cpy _ c es) xs = insCof c <$$> (delCof c xs >>= applyES es)
 \end{code}
 \end{myhs}
 
-  \victor{Shall we talk about merging here?}
+\subsubsection{Discussion}
+
+  Although type safe by construction, which is a major plus
+point, computing edit scripts has a lower temporal complexity
+bound of $\mathcal{O}(n \times m)$, where $n$ and $m$ are the
+number of construcotrs in the source and destination trees,
+respectively. 
+
+  Another downside is clear when we want to look into merging
+these edit scripts. \citet{Vassena2016} developed a merging
+algorithm but notes some difficult setbacks. For example, 
+the heterogenity of |ES|. Suppose we want to merge |p : ES xs ys|
+and |q : ES xs zs|. This means producing an edit script |r : ES xs ks|.
+But how we determine |ks| here? It is not always the case that
+there is a solution. In fact, the merge algorithm~\cite{Vassena2016}
+for |ES| might fail due to conflicting changes \emph{or} 
+inability to find a suitable |ks|.

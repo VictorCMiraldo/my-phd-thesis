@@ -100,7 +100,7 @@ Sommige goed samenvatting in het Nederlands.
 % \listoffigures
 % \listoftables
 
-\bibliographystyle{acm}
+\bibliographystyle{abbrvnat}
 \bibliography{references}
 
 \printindex

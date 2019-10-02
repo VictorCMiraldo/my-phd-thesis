@@ -493,3 +493,5 @@ project \@NWOproject{} (\@NWOgrantnumber).
 %% These values work; but we get VERY weird erros with other combinations
 %% \linespread{1.05}
 %% \setlength{\parskip}{1em}
+
+\usepackage[numbers,square]{natbib}
