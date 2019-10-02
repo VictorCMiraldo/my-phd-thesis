@@ -1,0 +1,33 @@
+#! /bin/bash
+
+ok=true
+
+while IFS= read -r line
+do
+  IFS=","
+  for pat in ${line[*]}; do
+    if [[ "${pat:0:1}" == "!" ]]; then
+      echo "[Enforcing: $pat]"
+    else
+      grep -n --colour "$pat" src/*.lhs
+      if [[ "$?" == "0" ]]; then
+        ok=false
+      fi
+    fi
+  done
+done <<EOF
+!datatype,data type,data-type
+!fixpoint,fixed point,fixed-point,fix point,fixed-point
+!pattern functor,pattern-functor
+!subtree,sub tree,sub-tree
+!type level,type-level,typeleve                     
+!type safe,type-safe,typesafe
+EOF
+
+if $ok; then
+  echo "You're ok! :)"
+  exit 0
+else
+  echo "Be congruent!"
+  exit 1
+fi
