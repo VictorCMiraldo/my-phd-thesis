@@ -1166,3 +1166,6 @@ But how we determine |ks| here? It is not always the case that
 there is a solution. In fact, the merge algorithm~\cite{Vassena2016}
 for |ES| might fail due to conflicting changes \emph{or} 
 inability to find a suitable |ks|.
+
+  Moreover, this suffers from all problems that edit scripts also suffer
+\victor{make it look nice}

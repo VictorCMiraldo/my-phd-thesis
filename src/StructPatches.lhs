@@ -331,7 +331,7 @@ them to arbitrary values:
 \item Whenever we choose to insert or delete a recursive subtree, we
   must specify \emph{where} this modification takes place.  To do so,
   we will define a new type |Ctx dots :: P [Atom kon] -> Star|, inspired by
-  zippers~\cite{zipper}, to navigate through our data-structures. A
+  zippers~\cite{McBride2001}, to navigate through our data-structures. A
   value of type |Ctx dots p| selects a single atom |I| from the product of type
   |p|. 
 \end{itemize}
@@ -519,8 +519,8 @@ $$ \qquad
 
   A positive aspect of the |PatchST| approach in comparison with
 a purely edit-scripts based approach is the significantly
-simpler merge function. Since |PatchST| is homogeneous, 
-the type of the merge function is immediate:
+simpler merge function. This is due to |PatchST| being homogeneous.
+Consequently, the type of the merge function is what one would expect.
 
 \begin{myhs}
 \begin{code}
