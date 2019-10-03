@@ -1,7 +1,7 @@
 SOURCES=$(wildcard *.svg)
 TARGETS=$(SOURCES:.svg=.pdf)
 
-all: $(TARGETS)
+all: cover.pdf frontcover.pdf 
 
 cover.pdf: cover.svg
 	inkscape -A cover.pdf cover.svg

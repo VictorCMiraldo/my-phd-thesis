@@ -60,6 +60,11 @@ index:
 ## forces rebuild for bibliography.
 dist/$(TGT).aux: default
 
+cover: cover/cover.svg default
+	$(MAKE) -C cover/
+	pdftk cover/frontcover.pdf dist/thesis.pdf cat output dist/with-cover.pdf
+
+
 ## Runs bibtex and builds the target with bibliography.
 bib: references.bib dist/$(TGT).aux
 	bibtex dist/$(TGT).aux
