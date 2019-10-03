@@ -108,10 +108,10 @@ lcs (x:xs)  (y:ys)  =
 \end{myhs}
 \caption{Definition of the function that returns a longest
 common subsequence of two strings}
-\label{fig:string-lcs}        
+\label{fig:background:string-lcs}        
 \end{figure}
 
-  Running the |lcs x y| function, \Cref{fig:string-lcs}, will yield an
+  Running the |lcs x y| function, \Cref{fig:background:string-lcs}, will yield an
 \emph{edit script} with minimum \emph{Levenshtein Distance} and
 enables us to read out one longest common subsequence of |x| and
 |y|. Note that longest common subsequences are not unique, in
@@ -183,7 +183,7 @@ subsequence function, that instead of working with |[a]| will work
 with |[Tree]|. \Cref{fig:background:tree-es-operation} illsutrates
 insertions and deletions of (untyped) labels on a forest. 
 The interpretation of these edit operations is shown in
-\Cref{fig:apply-tree-edit}. 
+\Cref{fig:background:apply-tree-edit}. 
 
 \begin{figure}
 \begin{myhs}
@@ -205,7 +205,7 @@ apply (Ins l : ops) ts
 \end{code}
 \end{myhs}
 \caption{Definition of |apply| for tree edit operations}
-\label{fig:apply-tree-edit}
+\label{fig:background:apply-tree-edit}
 \end{figure}
 
   We label these approaches as ``untyped'' because there exists edit
@@ -355,7 +355,7 @@ approach~\cite{Lammel2003,Mitchell2007}, use the |Data| and |Typeable|
 type classes instead of static type level information to provide
 generic functionality.  These are a completely different strand of
 work from what we seek. The other approach relies on type level
-representations of datatypes. \Cref{fig:gplibraries} shows the main
+representations of datatypes. \Cref{fig:background:gplibraries} shows the main
 libraries relying on the typed approach. These can be compared in their
 treatment of recursion and on their choice of type level combinators
 used to represent generic values.
@@ -369,7 +369,7 @@ used to represent generic values.
 \bottomrule
 \end{tabular}
 \caption{Spectrum of static generic programming libraries}
-\label{fig:gplibraries}
+\label{fig:background:gplibraries}
 \end{figure}
 
 \paragraph{Recursion Style.}
@@ -535,7 +535,7 @@ $\begin{array}{l}
   \;  = |size (1 :: Int) + size (2 :: Int)|   
 \end{array}$}
 \caption{Reduction of |size (Bin (Leaf 1) (Leaf 2))|}
-\label{fig:sizederiv}
+\label{fig:background:sizederiv}
 \end{figure}
 
   To finish the description of the generic |size|,
@@ -546,7 +546,7 @@ rather uninteresting, so we omit them for the sake of conciseness.
 
   This technique of \emph{mutually recursive classes} is quite
 specific to the \texttt{GHC.Generics} flavor of generic programming.
-\Cref{fig:sizederiv} illustrates how the compiler goes about choosing
+\Cref{fig:background:sizederiv} illustrates how the compiler goes about choosing
 instances for computing |size (Bin (Leaf 1) (Leaf 2))|.  In the end,
 we just need an instance for |Size Int| to compute the final
 result. Literals of type |Int| illustrate what we call \emph{opaque
@@ -724,3 +724,8 @@ recording, explicitly, which fields of a constructor are recursive or
 not, which is exactly how we start to shape \texttt{generics-mrsop}
 in \Cref{chap:generic-programming}.
 
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "thesis.lhs"
+%%% End:

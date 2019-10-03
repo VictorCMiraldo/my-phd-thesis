@@ -1,4 +1,3 @@
-
 \newcommand{\ie}{i.e.}
 
   When working with \texttt{gdiff}-style patches, where a patch that
@@ -514,7 +513,7 @@ $$ \qquad
 $$ \qquad
 \label{fig:stdiff:mergesquare-threeway}}
 \caption{Two different ways to look at the merge problem}.
-\label{fig:stdfiff:mergesquare}
+\label{fig:stdiff:mergesquare}
 \end{figure}
 
   A positive aspect of the |PatchST| approach in comparison with
@@ -603,3 +602,8 @@ the enumeration.
 
 \section{Discussion}
 
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "thesis.lhs"
+%%% End:

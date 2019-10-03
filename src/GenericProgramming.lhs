@@ -273,14 +273,14 @@ crush k cat = crushFix . deepFrom
 \end{code}
 \end{myhs}
 \caption{Generic |crush| combinator}
-\label{fig:crush}
+\label{fig:gp:crush}
 \end{figure}
 
   Sometimes we actually want to consume a value and produce
 a single value, but do not need the full expressivity of |fold|. 
 Instead, if we know how to consume the opaque types and combine
 those results, we can consume any |GenericFix| type using |crush|,
-which is defined in \cref{fig:crush}. The behavior of |crush|
+which is defined in \Cref{fig:gp:crush}. The behavior of |crush|
 is defined by (1) how to turn atoms into the output
 type |b| -- in this case we only have integer atoms, and thus
 we require an |Int -> b| function -- and (2) how to combine
@@ -667,7 +667,7 @@ data NumericI :: NumericK -> Star where
 
 The last piece of our framework which has to be updated to support
 different sets of opaque types is the |Family| type class, as given in
-\Cref{fig:int}. This type class provides an interesting use case for
+\Cref{fig:gp:int}. This type class provides an interesting use case for
 the new dependent features in Haskell; both |kappa| and |codes| are
 parametrized by an implicit argument |kon| which represents the set of
 opaque types.
@@ -682,7 +682,7 @@ class Family (kappa :: kon -> Star) (fam :: [Star]) (codes :: [[[Atom kon]]]) wh
 \end{code}
 \end{myhs}
 \caption{|Family| type class with support for different opaque types}
-\label{fig:int}
+\label{fig:gp:int}
 \end{figure}
 
 We stress that the parametrization over opaque types does \emph{not}
@@ -756,7 +756,7 @@ zipRep r s = case (sop r , sop s) of
   \victor{explain |testEquality|}
 
   Finally, we can start assembling these basic building blocks into
-more practical functionality. For example, \Cref{fig:genericeq} shows
+more practical functionality. For example, \Cref{fig:gp:genericeq} shows
 the definition generic propositional equality using \texttt{generics-mrsop}.
   
 \begin{figure}
@@ -772,7 +772,7 @@ geq eq_K x y = go (deepFrom x) (deepFrom y)
 \end{code} %$
 \end{myhs}
 \caption{Generic equality}
-\label{fig:genericeq}
+\label{fig:gp:genericeq}
 \end{figure}
 
 \section{Template Haskell}
@@ -810,7 +810,7 @@ whether a type should be considered opaque. By default, it uses a
 selection of Haskell built-in types as opaque types.
 
 \subsection{Unfolding the Family}
-\label{sec:underthehood}
+\label{sec:gp:unfolding-the-family}
 
   The process of deriving a whole mutually recursive family from a
 single member is conceptually divided into two disjoint
@@ -1169,3 +1169,8 @@ inability to find a suitable |ks|.
 
   Moreover, this suffers from all problems that edit scripts also suffer
 \victor{make it look nice}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "thesis.lhs"
+%%% End:

@@ -29,6 +29,9 @@
 %include lhs2TeX.fmt
 %include src/definitions.lhs
 %include src/notation.lhs
+
+\newcommand{\lhsinclude}[1]{}
+
 \begin{document}
 \maketitle
 
@@ -63,21 +66,24 @@ Sommige goed samenvatting in het Nederlands.
 
 %% Starts the mainmatter
 \mainmatter
-
 \chapter{Introduction}
 \label{chap:introduction}
+\lhsinclude{Introduction.lhs}
 %include src/Introduction.lhs
 
 \chapter{Background}
 \label{chap:background}
+\lhsinclude{Background.lhs}
 %include src/Background.lhs
 
 \chapter{The \texttt{generics-mrsop} Library}
 \label{chap:generic-programming}
+\lhsinclude{GenericProgramming.lhs}
 %include src/GenericProgramming.lhs
 
 \chapter{Structural Patches}
 \label{chap:structural-patches}
+\lhsinclude{StructPatches.lhs}
 %include src/StructPatches.lhs
 
 % Show the code in Haskell, talk about the Agda model.
@@ -86,10 +92,12 @@ Sommige goed samenvatting in het Nederlands.
 
 \chapter{Pattern-Expression Patches}
 \label{chap:pattern-expression-patches}
+\lhsinclude{PEPatches.lhs}
 %include src/PEPatches.lhs
 
 \chapter{Discussion}
 \label{chap:discussion}
+\lhsinclude{Discussion.lhs}
 %include src/Discussion.lhs
 
 % \appendix
@@ -107,4 +115,7 @@ Sommige goed samenvatting in het Nederlands.
 
 \end{document}
 
-
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

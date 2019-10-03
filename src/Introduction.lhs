@@ -1,4 +1,3 @@
-
 \newcommand{\unixdiff}{\texttt{UNIX diff}}
 
 \victor{This is some loose paragraphs that need gluing}
@@ -235,3 +234,8 @@ we forked into a radically different approach, explored in \Cref{chap:pattern-ex
 
 % chapter X is based on paper Y, which was wrote with Alice and Bob
 % and my contribution is Z to that paper.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "thesis.lhs"
+%%% End:
