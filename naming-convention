@@ -1,28 +1,40 @@
 #! /bin/bash
+set -u
+
+## Returns a grep regexp to look for
+## forbidden spellings.
+function getForbiddenPat() {
+  pat=$1
+  if [[ "${pat:0:1}" == "!" ]]; then
+    aux=${pat:1}
+    echo "${aux//\|/[ -]\?}"
+  elif [[ "$pat" =~ .*\|.* ]]; then
+    echo "${pat//\|/[ -]}"
+  elif [[ "$pat" =~ .*\ .* ]]; then
+    echo "${pat// /[-]\?}"
+  elif [[ "$pat" =~ .*-.* ]]; then
+    echo "${pat//-/[ ]\\?}"
+  fi
+}
+
+enforce=("data|type"    # enforce spelling of 'datatype', forbids 'data-type' and 'data type'
+         "fix|point"
+         "!fixed|point" # forbids all combinations of fixedpoint
+         "pattern functor"
+         "sub|tree"
+         "type level"
+         "type safe")
 
 ok=true
-
-while IFS= read -r line
-do
-  IFS=","
-  for pat in ${line[*]}; do
-    if [[ "${pat:0:1}" == "!" ]]; then
-      echo "[Enforcing: $pat]"
-    else
-      grep -n --colour "$pat" src/*.lhs
-      if [[ "$?" == "0" ]]; then
-        ok=false
-      fi
-    fi
-  done
-done <<EOF
-!datatype,data type,data-type
-!fixpoint,fixed point,fixed-point,fix point,fixed-point
-!pattern functor,pattern-functor
-!subtree,sub tree,sub-tree
-!type level,type-level,typeleve                     
-!type safe,type-safe,typesafe
-EOF
+IFS=,
+for enf in ${enforce[*]}; do
+  pat=$(getForbiddenPat "$enf")
+  echo "{Enforcing: $pat}"
+  grep -n --colour "$pat" src/*.lhs
+  if [[ "$?" == "0" ]]; then
+    ok=false
+  fi
+done
 
 if $ok; then
   echo "You're ok! :)"
