@@ -619,8 +619,116 @@ less than a couple minutes.
 the search space was not sufficient. The reasons were manifold, really. 
 Besides the complexity introduced by arbitrary heuristics, using the \unixdiff{}
 to flag elements of the AST was still too coarse. Many elements of the AST
-fall under the same line.
+fall under the same line. The next idea was then to use \texttt{gdiff}~\Cref{sec:gp:well-typed-tree-diff},
+as the oracle, enabling us to annotate every node of the source and destination
+trees with a information about whether that node was copied or not.
 
+\begin{myhs}
+\begin{code}
+data Ann = Modify | Copy
+\end{code}
+\end{myhs}
+
+  A |Modify| annotation corresponds to a deletion or insertion
+dependending on whether it is the source or destination tree
+respectively.  Recall that an edit script produced by \texttt{gdiff}
+has type |ES ki codes xs ys|, where |xs| is the list of types of the
+source trees and |ys| is the list of types of the destination trees.
+The definition of |ES| -- introduced in
+\Cref{sec:gp:well-typed-tree-diff} -- is repeated below.
+
+\begin{myhs}
+\begin{code}
+data ES (ki :: kon -> Star) (codes :: [[[Atom kon]]]) 
+    :: [Atom kon] -> [Atom kon] -> Star where
+  ES0  :: ES ki codes Pnil Pnil
+  Ins  :: Cof ki codes a t  -> ES ki codes i            (t :++: j)  
+                            -> ES ki codes i            (a Pcons j)
+  Del  :: Cof ki codes a t  -> ES ki codes (t :++: i)   j           
+                            -> ES ki codes (a Pcons i)  j
+  Cpy  :: Cof ki codes a t  -> ES ki codes (t :++: i)   (t :++: j)  
+                            -> ES ki codes (a Pcons i)  (a Pcons j)
+\end{code}
+\end{myhs}
+
+  Given a value of type |ES ki codes xs ys|, we have information about which constructors
+of the trees in |NP (NA ki (Fix ki codes)) xs| should be copied. Our objective
+then is to annotated the trees with this very information. This is done by the
+|annSrc| and |annDst| functions. We will only look at |annSrc|, the definition
+of |annDst| is symmetric.
+
+\begin{myhs}
+\begin{code}
+annSrc :: NP (NA ki (Fix ki codes)) xs
+       -> ES ki codes xs ys
+       -> NP (NA ki (AnnFix ki codes (Const Ann))) xs
+annSrc xs         ES0         = Nil
+annSrc Nil        _           = Nil
+annSrc xs         (Ins c es)  = annSrc' xs es
+annSrc (x :* xs)  (Del c es)  =
+  let poa = fromJust $ matchCof c x
+   in insCofAnn c (Const Modify) (annSrc' (appendNP poa xs) es)
+annSrc' (x :* xs) (Cpy _ c es) =
+  let poa = fromJust $ matchCof c x
+   in insCofAnn c (Const Copy) (annSrc' (appendNP poa xs) es)
+\end{code}
+\end{myhs}
+
+  The deterministic diff function for |Almu| then starts by checking
+the annotations present at the root of its argument trees. In case both
+are copies, we start with a spine. If at least one of them is not
+a copy we insert or delete the constructor not flagged as a copy.
+We must guard for the case that there exists a copy in the inserted
+or deleted subtree. In case that does not hold, we would not
+be able to choose an argument of the inserted or deleted constructor
+to continue diffing against, in |diffCtx|. When there are no more copies to be performed,
+we just return a \emph{stiff} patch, which deletes all from the source
+and inserts all from the destination.
+
+\begin{myhs}
+\begin{code}
+diffAlmu  :: AnnFix ki codes (Const Ann) ix
+          -> AnnFix ki codes (Const Ann) iy
+          -> Almu ki codes ix iy
+diffAlmu x@(AnnFix ann1 rep1) y@(AnnFix ann2 rep2) =
+  case (getAnn ann1, getAnn ann2) of
+    (Copy, Copy)      -> Spn (diffSpine  (getSNat $ Proxy @ix) 
+                                         (getSNat $ Proxy @iy) 
+                                         rep1 rep2)
+    (Copy, Modify)    ->  if hasCopies y 
+                          then diffIns x rep2 
+                          else stiffAlmu (forgetAnn x) (forgetAnn y)
+    (Modify, Copy)    ->  if hasCopies x 
+                          then diffDel rep1 y 
+                          else stiffAlmu (forgetAnn x) (forgetAnn y)
+    (Modify, Modify)  ->  if hasCopies x 
+                          then diffDel rep1 y 
+                          else stiffAlmu (forgetAnn x) (forgetAnn y)
+    where
+      diffIns x rep  = case sop rep of Tag c ys -> Ins c (diffCtx CtxIns x ys)
+      diffDel rep y  = case sop rep of Tag c xs -> Del c (diffCtx CtxDel y xs)
+\end{code}
+\end{myhs}
+
+  The |diffCtx| function, which selects an element of the
+a product to continue diffing against. We naturally select the
+element that has the most constructors marked for copy as the element
+we continue diffing against. The other fields of the product
+are placed on the rigid part of the context.
+
+\begin{myhs}
+\begin{code}
+diffCtx  :: InsOrDel ki codes p
+         -> AnnFix ki codes (Const Ann) ix
+         -> NP (NA ki (AnnFix ki codes (Const Ann))) xs
+         -> Ctx ki codes p ix xs
+\end{code}
+\end{myhs}
+
+  The other functions for translating two |AnnFix ki codes (Const Ann) ix|
+into a |PatchST| are straightforward and follow a similar reasoning process:
+extract the anotations and defer copies until both source and destination
+annotation flag a copy.
 
 \section{Discussion}
 

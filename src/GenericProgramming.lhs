@@ -707,7 +707,7 @@ the \texttt{TypeInType} language extension~\cite{Weirich2013,Weirich2017}.
 %For convenience we also provide a basic set of opaque types which includes the
 %most common primitive datatypes.
 
-\subsection{Some Useful Combinators}
+\subsection{Selection of Useful Combinators}
 \label{sec:gp:combinators}
 
   The advantages or a \emph{code based} approach to generic progrmming
@@ -775,7 +775,71 @@ geq eq_K x y = go (deepFrom x) (deepFrom y)
 \label{fig:gp:genericeq}
 \end{figure}
 
-\section{Template Haskell}
+\section{Advanced Features}
+\label{sec:gp:advancedfeatures}
+
+  The development of the \texttt{generics-mrsop} library started
+primarily in order to make the development of
+\texttt{hdiff}~\Cref{chap:pattern-expression-patches} possible.  This
+was a great expressivity test for our generic programming library and
+led us to develop overall useful features that, although not novel,
+make the adoption of a generic programming library much more likely.
+This section is a small tutorial into some of these features and document
+the engineering effort that was put in \texttt{generics-mrsop}.
+
+\subsection{Annotated Fixpoints}
+\label{sec:gp:annfix}
+
+  Catamorphisms are used in a big number of computations over recursive
+structures. They receive an algebra that is used to consume one layer of
+a datatype at a time and consumes the whole value of the dataype using this
+\emph{recipe}. The definition of the catamorphism is trivial in a setting
+where we have explicit recursion:
+
+\begin{myhs}
+\begin{code}
+cata  :: (forall iy. Rep ki phi (Lkup iy codes) -> phi iy)
+      -> Fix ki codes ix
+      -> phi ix
+cata f (Fix x) = f (mapRep (cata f) x)
+\end{code}
+\end{myhs}
+
+  One example of catamorphisms is computing the \emph{height} of
+a recursive structure. It can be defined with |cata|
+in a simple manner.
+
+\begin{myhs}
+\begin{code}
+heightAlgebra :: Rep ki (Const Int) xs -> Const Int iy
+heightAlgebra = Const . (1+) . elimRep (const 0) getConst (maximum . (0:))
+
+height :: Fix ki codes ix -> Int
+height = getConst . cata heightAlgebra
+\end{code} 
+\end{myhs}
+
+  Now imagine our particular application makes a number of decisions
+based on the height of the (generic) trees it handles. Calling
+|height| at each of those decision points will be time consuming.
+It is much better to compute the height of a tree only once and keep
+the intermatiary heights annotated in their respective subtrees.
+We can easily do so with a \emph{cofree comonad}\victor{cite that!}
+similar to |Fix|:
+
+\begin{myhs}
+\begin{code}
+data AnnFix (kappa :: k -> Star) (codes :: P [ P [ P [Atom k]]]) (phi :: Nat -> Star) (ix :: Nat)
+  = AnnFix (phi n) (Rep kappa (AnnFix kappa codes phi) (Lkup n codes))
+\end{code}
+\end{myhs}
+  
+
+  A very common programming technique to speed up computations is to
+keep auxiliary values around, as annotations in a larger structure.
+In this way, 
+
+\subsection{Template Haskell}
 \label{sec:gp:templatehaskell}
 
   Having a convenient and robust way to get the |Family| instance for
@@ -809,7 +873,7 @@ instance. Optionally, one can also pass along a custom function to decide
 whether a type should be considered opaque. By default, it uses a
 selection of Haskell built-in types as opaque types.
 
-\subsection{Unfolding the Family}
+\subsubsection{Unfolding the Family}
 \label{sec:gp:unfolding-the-family}
 
   The process of deriving a whole mutually recursive family from a
@@ -907,7 +971,7 @@ instance Family Singl FamRoseInt CodesRoseInt where dots
 \end{myhs}
 
 
-\section{Metadata}
+\subsection{Metadata}
 \label{sec:gp:metadata}
 
   There is one final ingredient missing to make
@@ -1032,7 +1096,12 @@ instance HasDatatypeInfo Singl FamRose CodesRose Z where
 \end{code} %$
 \end{myhs}
 
-\subsection{Well-Typed Tree Differencing} 
+\subsection{Values with Holes}
+\label{sec:gp:holes}
+
+  \victor{Should we talk about the |Holes| type?}
+
+\section{Well-Typed Tree Differencing} 
 \label{sec:gp:well-typed-tree-diff}
 
   A good example for \texttt{generics-mrsop} is to implement
