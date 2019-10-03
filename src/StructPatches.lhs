@@ -474,19 +474,38 @@ applyST  = applyAlmu
 \end{code}
 \end{myhs}
 
- An easily overlooked property of our patch definition is that the
+  An easily overlooked property of our patch definition is that the
 destination values it computes are guaranteed to be type-correct \emph{by
-  construction}. This is unlike the line-based or untyped approaches
+construction}. This is unlike the line-based or untyped approaches
 (which may generate ill-formed values) and similar to earlier
 results on type-safe differences~\cite{Lempsink2009}.
 
 \section{Merging Patches}
 \label{sec:stdiff:merging}
 
+
+  One advantage of the |PatchST| approach is the natural merging
+algorithm it yields. A merging algorithm reconciles changes from two
+different patches whenever these are non interfering, for example, as
+in \Cref{fig:stdiff:merging0}. We call non interfering patches
+\emph{disjoint}, as they operate on separate parts of a tree.
+
+\begin{figure}
+\centering
+Draw a simple example of mergeable patches here
+\caption{A simple example of mergeable patches.}
+\label{fig:stdiff:merging0}
+\end{figure}
+
+\victor{%
+\begin{itemize}
+  \item We have done this in Agda; show the types!
+  \item Talk about disjointness and conflict placement.
+  \end{itemize}}
+
 \victor{\Huge temporary}
 
-  A merging algorithm reconciles changes from two different
-patches whenever these are non interfering. There are two
+There are two
 ways of looking into merging 
 
 receives a span of patches,
@@ -512,7 +531,7 @@ $$ \qquad
             & c &}
 $$ \qquad
 \label{fig:stdiff:mergesquare-threeway}}
-\caption{Two different ways to look at the merge problem}.
+\caption{Two different ways to look at the merge problem.}
 \label{fig:stdiff:mergesquare}
 \end{figure}
 
@@ -549,56 +568,59 @@ merging algorithm that comes with it.
 \section{Computing |PatchST|}
 \label{sec:stdiff:diff}
 
-  In the previous section, we have devised a typed representation for
+  In the previous sections, we have devised a typed representation for
 differences. We have seen that this representation is interesting in
 and by itself: being richly-structured and typed, it can be thought of
 as a non-trivial programming language whose denotation is given by the
-application function. However, as programmers, we are mainly 
+application function. Moreover, we have seen how to
+merge two disjoin differences. However, as programmers, we are mainly 
 interested in \emph{computing} patches from a source and a
-destination. 
+destination. Unfortunately, this is one of the main downsides
+from the |PatchST| approach.
 
-\victor{In the work that originated this section, we describe
-how to enumerate all possible patches. Yet this would never work.
-Together with Pierre we had the idea of using the \unixdiff{} as
-an oracle (mention Giovanni's work), later on, we decided that
-we could use \texttt{gdiff} as an oracle (mention Arian's work)}.
-
-\victor{\huge I'm here}
-
-In the following section, we provide a nondeterministic specification
-of such an algorithm. This approach allows us to
-remain oblivious to various grammar-specific
-heuristics we may want to consider in practice, thus focusing our
-attention on the overall structure of the search space. In particular,
-we shall strive to identify \emph{don't care} nondeterminism -- for
-which all choices lead to a successful outcome -- from \emph{don't
-  know} nondeterminism -- for which a choice may
-turn out to be incorrect or sub-optimal.
-
-Since we describe our algorithm in Agda, we model \emph{don't know}
-nondeterminism by programming in the |List| monad. Nondeterministic
-choice is modelled by list concatenation, which we denote by |_ MID _|,
-whereas the absence of valid choice is modelled by the empty list,
-which we denote by |emptyset|.
-
-Here is where we have a problem!
+  In this section we start by describing a nondeterministic specification
+of an algorithm for computing a |PatchST|, in \Cref{sec:stdiff:naiveenum}.
+We then provide example algorithms that implemented said specification
+in \Cref{sec:stdiff:oraclesenum}. No matter the length of our efforts,
+however, we will always be bound by the necessity of making choices
+that is inherent to edit scripts. Consequently, computing a |PatchST|
+will always be an inefficient process.
 
 \subsection{Naive enumeration}
+\label{sec:stdiff:naiveenum}
 
 Very slow; suffers from the same heuristic
 problems as the edit-script approaches. Plus,
 definition of cost is more complicated here.
 
-\subsection{Using Oracles}
+\subsection{Translating from \texttt{gdiff}}
+\label{sec:stdiff:oraclesenum}
 
-Instead, we attempted using existing solutions to guide
-the enumeration.
+  Enumerating all possible patches and then filtering the one
+with the least cost is a very time consuming. That is due to
+the exponential number of patches that transforms a tree into another tree.
+Most of these patches are far from optimal and, therefore, we should not be
+spending time with them. We have attempted two approaches to
+filter the unintersting patches out.
 
-\subsubsection{\unixdiff{} as an Oracle}
- Giovanni's work; very slow
+  A first attempt was done by \citet{Garuffi2018}, where
+the notion of oracles where used to restrict the paths of the enumeration engine.
+This enables one to easily instruct the enumeration engine to traverse
+the search space in specific ways, for example, to never attempt
+a deletion after an insertion. Moreover, the oracle approach
+can receive external information. Ultimately, \citet{Garuffi2018}
+used the \unixdiff{} as an oracle, instructing the enumeration engine
+to only pursue insertions or deletions on the lines that were
+marked as such by the \unixdiff{}. The performance was still very
+low and could not compute the |PatchST| of two real Clojure files in
+less than a couple minutes.
 
-\subsubsection{\texttt{gdiff} as an Oracle}
- Arian's work; much better, still slow.
+  From the experiments of \citet{Garuffi2018} we learnt that restricting
+the search space was not sufficient. The reasons were manifold, really. 
+Besides the complexity introduced by arbitrary heuristics, using the \unixdiff{}
+to flag elements of the AST was still too coarse. Many elements of the AST
+fall under the same line.
+
 
 \section{Discussion}
 

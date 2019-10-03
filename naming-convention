@@ -23,7 +23,9 @@ enforce=("data|type"    # enforce spelling of 'datatype', forbids 'data-type' an
          "pattern functor"
          "sub|tree"
          "type level"
-         "type safe")
+         "type safe"
+         "non interfering"
+         )
 
 ok=true
 IFS=,
