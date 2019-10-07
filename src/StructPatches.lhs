@@ -142,9 +142,10 @@ constructor we need to reconcile the fields of
 that constructor whereas if the values have different constructors 
 we need to reconcile the products that make the fields of the constructors.
 We index the data type |Spine| by the sum codes it operates over.
-\victor{why?}
+That is because we need to lookup the fields of the constructors
+that have changed, and \emph{align} them in the case of |SChg|.
+Intuitively, Spines act on sums and capture the ``largest shared coproduct structure'':
 
-Spines act on sums and capture the ``largest shared coproduct structure''
 \begin{myhs}
 \begin{code}
 data Spine  (ki :: kon -> Star) (codes :: [[[Atom kon]]]) 
@@ -234,7 +235,11 @@ the datatype of alignments can be viewed as an intensional
 representation of (partial) \emph{order and type preserving maps},
 along the lines of McBride's order preserving
 embeddings~\cite{McBride2005}, mapping source fields to destination
-fields.
+fields. This makes sure that our patches also give rise to tree 
+mappings~\Cref{sec:background:tree-edit-distance} in the classical
+tree-edit distance sense. Enabling us to see our patches as
+some sort of homogeneous type-safe edit scripts. The advantages will
+become clear when we look into the merge function.
 
   Provided a partial embedding for atoms, we can therefore interpret
 alignments into a function transporting the source fields over to the
@@ -538,13 +543,186 @@ $$ \qquad
   A positive aspect of the |PatchST| approach in comparison with
 a purely edit-scripts based approach is the significantly
 simpler merge function. This is due to |PatchST| being homogeneous.
-Consequently, the type of the merge function is what one would expect.
+Consequently, the type of the merge function very simple
+and corresponds to what one would expect.
 
 \begin{myhs}
 \begin{code}
 mergeST :: PatchST ki codes ix -> PatchST ki codes ix -> Maybe (PatchST ki codes ix)
 \end{code}
 \end{myhs}
+
+  A call to |mergeST| returns |Nothing| if the patches have non-disjoint changes,
+that is, if both patches want to change the \emph{same part} of the source tree.
+In our agda model, we have divided the merge function and the notion of disjointness,
+which yields a total merge function:
+
+%{
+%option agda
+
+\begin{myhs}
+\begin{code}
+merge : (p q : Patch ki codes ix) -> Disjoint p q -> Patch ki codes ix
+\end{code}
+\end{myhs}
+
+  Where a value of type |Disjoint p q| is essentially a proof that |p|
+and |q| change different parts of the source tree. This makes reasoning about
+the merge function much easier. In fact, we have proven that the merge function
+commutes as one would expect. A simplified statement of our theorem
+given below, with |sym| witnessing the fact the disjointness is a symmetric relation.
+
+\begin{myhs}
+\begin{code}
+mergecommutes  :   (p q : Patch ki codes ix) 
+               ->  (hyp : Disjoint p q)
+               ->  apply (merge p q hyp) . q == apply (merge q p (sym hyp)) . p
+\end{code}
+\end{myhs}
+
+%}
+
+  Comming back to Haskell, it is simpler to rely on the |Maybe| monad for disjointness.
+In fact, we could define disjointness as whether or not merge returns
+a |Just|:
+
+\begin{myhs}
+\begin{code}
+disjoint :: Patch ki codes ix -> Patch ki codes ix -> Bool
+disjoint p q = maybe (const True) False (merge p q)
+\end{code}
+\end{myhs}
+
+  The definition of the |mergeST| function can be seen in \Cref{fig:stdiff:mergest},
+where we outline the classes of situations, some of which deserve some attention.
+For example, when the numerator deletes a constructor but the denominator performs
+a change within said constructor we must check that they operator over \emph{the same}
+constructor. When that is the case, we must go ahead and ensure the deletion
+context, |ctx|, and the changes in the product of atoms, |at|, are compatible.
+
+\begin{myhs}
+\begin{code}
+mergeST (Del c1 ctx) (Spn (SCns c2 at)) = do  Refl <- testEquality c1 c2 
+                                              mergeCtxAt ctx at
+\end{code}
+\end{myhs}
+
+  A (deletion) context is disjoint from a list of atoms if the patch in
+the hole of the context returns the same type of element than the patch
+on the product of patches and they are both disjoint. Moreover, the rest
+of the product of patches must consist in identity patches. Otherwise, we risk
+deleting newly introduced information.
+
+\victor{IMPORTANT: Arian forgot to ensure the |identityAt x| on the cases below;
+I need to rerun his experiments}
+\begin{myhs}
+\begin{code}
+mergeCtxAt  :: DelCtx ki codes iy xs
+            -> NP (At ki codes) xs
+            -> Maybe (Almu ki codes ix iy)
+mergeCtxAt (H (AlmuMin almu') rest) (AtFix almu :* xs) = do
+  Refl <- testEquality (almuDest almu) (almuDest almu')
+  x <- mergeAlmu almu' almu
+  guard (and $ elimNP identityAt xs)
+  pure x
+mergeCtxAt (T at ctx) (x :* xs) 
+  = guard (identityAt x) >> mergeCtxAt ctx xs
+\end{code} %$
+\end{myhs}
+
+  Note the |textEquality| ensuring the patches to be merged are producing
+the same element of the mutually recursive family. This is one of the two
+places where we need these checks when adapting our Agda model to work
+over mutually recursive types.
+
+  The |mergeAtCtx| function, which is dual to |mergeCtxAt|, merges a
+|NP (At ki codes) xs| and a |DelCtx ki codes iy xs| into a |Maybe
+(DelCtx ki codes iy xs)|, essentially preserving the |T at| it find on
+the recursive calls.  Another interesting case happens on one of the
+|mergeSpine| cases, whose full implementation can be seen in
+\Cref{fig:stdiff:mergespine}.  The |SChg| over |SCns| case must ensure
+we are working over the same element of the mutually recursive family,
+with a |testEquality ix iy|.  This is the second place where we need
+to adapt the code in the Agda repository to work over mutually
+recursive types.
+
+\begin{myhs}
+\begin{code}
+mergeSpine  :: SNat ix -> SNat iy
+            -> Spine ki codes (Lkup ix codes) (Lkup iy codes)
+            -> Spine ki codes (Lkup ix codes) (Lkup iy codes)
+            -> Maybe (Spine ki codes (Lkup ix codes) (Lkup iy codes))
+...
+mergeSpine ix iy (SChg cx cy al) (SCns cz zs)  = do  Refl <- testEquality ix iy
+                                                     Refl <- testEquality cx cz
+                                                     SCns cy <$$> mergeAlAt al zs
+...
+
+\end{code}
+\end{myhs}
+
+
+\begin{figure}
+\begin{myhs}
+\begin{code}
+-- Non-disjoint recursive spines:
+mergeST (Ins _ _)            (Ins _ _)           = Nothing
+mergeST (Spn (SChg _ _ _))   (Del _ _)           = Nothing
+mergeST (Del _ _)            (Spn (Schg _ _ _))  = Nothing
+mergeST (Del _ _)            (Del _ _)           = Nothing
+
+-- Obviously disjoint recursive spines:
+mergeST (Spn Scp)            (Del c2 s2) = Just (Del c2 s2)
+mergeST (Del c1 s2)          (Spn Scp)   = Just (Spn Scp)
+
+-- Spines might be disjoint from spines and deletions:
+mergeST (Spn s1)             (Spn s2) 
+  = Spn <$$> mergeSpine (getSNat (Proxy @ix)) (getSNat (Proxy @iy)) s1 s2
+mergeST (Spn (SCns c1 at1))  (Del c2 s2) 
+  = Del c1 <$$> mergeAtCtx at1 s2
+mergeST (Del c1 s1)          (Spn (SCns c2 at2)) 
+  = do  Refl <- testEquality c1 c2 -- disjoint if same constructor
+        mergeCtxAt s1 at2
+
+-- Insertions are disjoint from anything except insertions.
+-- Overall disjointness does depend on the recursive parts, though.
+mergeST (Ins c1 s1)  (Spn s2)     = Spn . SCns c1  <$$> mergeCtxAlmu s1 (Spn s2)
+mergeST (Ins c1 s1)  (Del c2 s2)  = Spn . SCns c1  <$$> mergeCtxAlmu s1 (Del c2 s2)
+mergeST (Spn s1)     (Ins c2 s2)  = Ins c2         <$$> (mergeAlmuCtx (Spn s1) s2)
+mergeST (Del c1 s1)  (Ins c2 s2)  = Ins c2         <$$> (mergeAlmuCtx (Del c1 s1) s2)
+\end{code} 
+\end{myhs}
+\caption{Definition of |mergeST|}
+\label{fig:stdiff:mergest}
+\end{figure}
+
+
+\begin{figure}
+\begin{myhs}
+\begin{code}
+-- Non-disjoint spines:
+mergeSpine _ _ (SChg _ _ _)       (SChg _ _ _)  = Nothing
+
+-- Obviously disjoint spines:
+mergeSpine _ _ Scp                s             = Just s
+mergeSpine _ _ s                  Scp           = Just Scp
+
+-- Disjointness depends on recursive parts:
+mergeSpine _ _ (SCns cx xs) (SCns cy ys)       = do  Refl <- testEquality cx cy
+                                                     SCns cx <$$> mergeAts xs ys
+mergeSpine _ _ (SCns cx xs)  (SChg cy cz al)   = do  Refl <- testEquality cx cy
+                                                     SChg cy cz <$$> mergeAtAl xs al
+mergeSpine ix iy (SChg cx cy al) (SCns cz zs)  = do  Refl <- testEquality ix iy
+                                                     Refl <- testEquality cx cz
+                                                     SCns cy <$$> mergeAlAt al zs
+\end{code} %$
+\end{myhs}
+\caption{Definition of |mergeSpine|}
+\label{fig:stdiff:mergespine}
+\end{figure}
+
+\victor{I'm here}
+
 
   Our merge function is very simple and returns |Nothing| if the patches have
 non-disjoint changes, that is, if the 
@@ -589,9 +767,11 @@ will always be an inefficient process.
 \subsection{Naive enumeration}
 \label{sec:stdiff:naiveenum}
 
+\victor{
 Very slow; suffers from the same heuristic
 problems as the edit-script approaches. Plus,
 definition of cost is more complicated here.
+}
 
 \subsection{Translating from \texttt{gdiff}}
 \label{sec:stdiff:oraclesenum}
@@ -682,8 +862,8 @@ We must guard for the case that there exists a copy in the inserted
 or deleted subtree. In case that does not hold, we would not
 be able to choose an argument of the inserted or deleted constructor
 to continue diffing against, in |diffCtx|. When there are no more copies to be performed,
-we just return a \emph{stiff} patch, which deletes all from the source
-and inserts all from the destination.
+we just return a \emph{stiff} patch, which deletes the entire source
+and inserts the entire destination tree.
 
 \begin{myhs}
 \begin{code}
