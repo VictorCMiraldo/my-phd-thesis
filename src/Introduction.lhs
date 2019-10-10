@@ -1,4 +1,3 @@
-\newcommand{\unixdiff}{\texttt{UNIX diff}}
 
 \victor{This is some loose paragraphs that need gluing}
 

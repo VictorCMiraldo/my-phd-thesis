@@ -60,10 +60,15 @@ index:
 ## forces rebuild for bibliography.
 dist/$(TGT).aux: default
 
+mock: $(BUILD_DEPENDS) tex/latex/uustthesis.cls
+	./mock-chapter
+	lhs2TeX -o dist/mock-chapter.tex dist/mock-chapter.lhs
+	export TEXMFHOME=".:$(TEXMFHOME)" && \
+	$(LATEX) dist/mock-chapter.tex
+
 cover: cover/cover.svg default
 	$(MAKE) -C cover/
 	pdftk cover/frontcover.pdf dist/thesis.pdf cat output dist/with-cover.pdf
-
 
 ## Runs bibtex and builds the target with bibliography.
 bib: references.bib dist/$(TGT).aux

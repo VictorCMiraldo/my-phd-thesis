@@ -43,3 +43,7 @@
 
 \newenvironment{myhs}{\vspace{0.15em}\par\noindent\begin{minipage}{0.95\textwidth}\small}{\end{minipage}\vspace{0.15cm}}
 
+%% Denotations
+
+\newcommand{\unixdiff}{\texttt{UNIX diff}}
+
