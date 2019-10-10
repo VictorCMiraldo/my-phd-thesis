@@ -48,84 +48,123 @@ consequences of working with typed trees in
 \label{sec:background:string-edit-distance}
 
   The distance between two strings, |s| and |d|, is defined by the
-cost of transforming |s| into |d| by the means of some edit
-operations.  The \emph{Levenshtein Distance}~\cite{Levenshtein1966} is
-the most widespread metric for edit distance~\cite{Bergroth2000}. It
+(minimal) cost of transforming |s| into |d| by the means of some edit
+operations with associated \emph{cost} metric. Many different such
+combinations can be achieved by tweaking these parameters.
+In this section we look at two widespread notions for edit distance.
+The \emph{Levenshtein Distance}~\cite{Levenshtein1966,Bergroth2000},
+for example, works well for detecting spelling mistakes\victor{find citation}. It
 considers insertions, deletions and substitutions of characters as its
-edit operations. Each of those operations has an associated cost, as
-shown below.
+edit operations. The \emph{Longest Common Subsequence (LCS)}~\cite{Bergroth2000}, on the other hand
+considers insertions, deletions and copies as edit operations and is better
+suited for identifying long identical sequences, as sugested by its name.
+
+\subsubsection*{Levenshtein Distance}
+
+  The Levenshtein distance considers insertions, deletions and
+substitutions of characters as edit operations.
 
 \begin{myhs}
 \begin{code}
-data EOp = Ins Char | Del Char | Subst Char Char
+data EditOp = Ins Char | Del Char | Subst Char Char
+\end{code}
+\end{myhs}
 
-cost :: EOp -> Int
+  The semantics of these edit operations are straightforward. The |apply|
+function, shown below, witnesses the denotational semantics of |[EditOp]|
+into the set of partial functions over |String|s. 
+
+\begin{myhs}
+\begin{code}
+apply :: [EditOp] -> String -> Maybe String
+apply []                  []         = Just []
+apply (Ins c      : ops)        ss   = (c :) <$$> apply ops ss
+apply (Del c      : ops)  (s :  ss)  = guard (c == s) >> apply ops ss
+apply (Subst c d  : ops)  (s :  ss)  = guard (c == s) >> (d :) <$$> apply ops ss
+\end{code}
+\end{myhs}
+
+  The cost metric associated with these edit operations is defined
+in a way to ensure that substitutions cost less than insertions and deletions.
+This ensures that the algorithm looking for the list of edit operations
+with the minimum cost will prefer substitutions over deletions
+and insertions. 
+
+\begin{myhs}
+\begin{code}
+cost :: EditOp -> Int
 cost (Ins _)      = 1
 cost (Del _)      = 1
 cost (Subst c d)  = if c == d then 0 else 1
 \end{code}
 \end{myhs}
 
-  Note how the cost of a \emph{copy} operation is 0, and a non-identity
-|Subst| costs less than deleting then inserting the given characters.
-This ensures that the algorithm looking for the list of edit operations
-with the minimum cost will prefer substitutions over deletions
-and insertions. Said list of edit operations represents, in fact, 
-a partial function that \emph{performs the transformation}.
-
-\begin{myhs}
-\begin{code}
-apply :: [EOp] -> String -> Maybe String
-apply []                  []         = Just []
-apply (Ins c:ops)               ss   = (c :) <$$> apply ops ss
-apply (Del c:ops)         (s :  ss)  = guard (c == s) >> apply ops ss
-apply (Subst c d  : ops)  (s :  ss)  = guard (c == s) >> (d :) <$$> apply ops ss
-\end{code}
-\end{myhs}
-
-
   We can compute the \emph{edit script}\index{Edit Script}, i.e. a
 list of edit operations, with the minimum cost quite easily with a
-naive, inefficient, recursive implementation.  In fact, the problem of
-computing the \emph{longest common subsequence} of a set of strings,
-usually two, is closely related to computing the \emph{edit
-distance}. It differs from the longest common substring for sequences
-need not be consecutive within the original strings.
+naive, inefficient, recursive implementation. \Cref{fig:background:string-leveshtein}
+shows the implementation of the edit script with the minimum Levenshtein distance.
 
 \begin{figure}
 \begin{myhs}
 \begin{code}
-lcs :: String -> String -> [EOp]
-lcs []      []      = []
-lcs (x:xs)  []      = Del x : lcs xs []
-lcs []      (y:ys)  = Ins y : lcs [] ys
-lcs (x:xs)  (y:ys)  = 
-  let  i = Ins y      : lcs (x:  xs)      ys
-       d = Del x      : lcs      xs  (y:  ys)
-       s = Subst x y  : lcs      xs       ys
-   in minimumBy cost [i , d , s]
-\end{code}
+lev :: String -> String -> [EOp]
+lev []      []      = []
+lev (x:xs)  []      = Del x : lev xs []
+lev []      (y:ys)  = Ins y : lev [] ys
+lev (x:xs)  (y:ys)  = 
+  let  i = Ins y      : lev (x:  xs)      ys
+       d = Del x      : lev      xs  (y:  ys)
+       s = Subst x y  : lev      xs       ys
+   in minimumBy cost [i , d , s] 
+\end{code} 
 \end{myhs}
-\caption{Definition of the function that returns a longest
-common subsequence of two strings}
-\label{fig:background:string-lcs}        
+\caption{Definition of the function that returns the
+edit script with the minimum Levenshtein Distance between two strings.}
+\label{fig:background:string-levshtein}
 \end{figure}
-
-  Running the |lcs x y| function, \Cref{fig:background:string-lcs}, will yield an
-\emph{edit script} with minimum \emph{Levenshtein Distance} and
-enables us to read out one longest common subsequence of |x| and
-|y|. Note that longest common subsequences are not unique, in
-general. Consider the case of |lcs "ab" "ba"| for instance.
-
-  The \unixdiff{}~\cite{McIlroy1976} performs a slight generalization
-by considring the distance between two \emph{files}, seen as a list of
-\emph{strings}, opposed to a list of \emph{characters}. Moreover, it
-does not consider |Subst| as an operation. Instead, it choses to only
-allow for insertions, deletions and copies.
 
 \begin{myhs}
 \begin{code}
-data EOp = Ins String | Del String | Cpy
+levenshteinDist :: String -> String -> Int
+levenshteinDist s d = cost (head (lev s d))
+\end{code}
+\end{myhs}
+
+  Note that although the Levenshtein distance is unique, the edit
+scripts witnessing this are not. Consider the case of |lev "ab" "ba"|
+for instance. All of the edit scripts below have cost 2, which is the
+minimum possible cost.
+
+\begin{myhs}
+\begin{code}
+lev "ab" "ba" =?  [ Del 'a' , Subst 'b' 'b' , Ins 'a']
+                  [ Ins 'b' , Subst 'a' 'a' , Del 'b']
+                  [ Subst 'a' 'b' , Subst 'b' 'a' ]
+\end{code}
+\end{myhs}
+
+  From a edit distance point of view, there is not an issue. The Levenshtein
+distance between |"ab"| and |"ba"| is 2. But from an operational point of view,
+in which we are interested in transforming one string into another, this ambiguity
+poses a problem. There is no criteria to prefer one edit script over another.
+\victor{more...}
+
+\subsubsection*{Longest Common Subsequence}
+
+  The LCS can be seen as a restriction of the Levenshtein distance, in
+which it only considers identity substitutons, that is, |Subst x y|
+with |x == y|. It is different from the longest common substring
+problem for subsequences need not be contiguous. The LCS metric
+is the base for the \unixdiff{}~\cite{McIlroy1976} utility and therefore,
+particularly interesting for us.
+
+  The \unixdiff{}~\cite{McIlroy1976} performs a slight generalization
+of the LCS problem by considering the distance between two \emph{files}, seen as a list of
+\emph{strings}, opposed to a list of \emph{characters}.
+
+\begin{myhs}
+\begin{code}
+data EditOp = Ins String | Del String | Cpy
 
 cost :: EOp -> Int
 cost (Ins _)  = 1
@@ -133,6 +172,38 @@ cost (Del _)  = 1
 cost Cpy      = 0
 \end{code}
 \end{myhs}
+
+  The application function is analogous to the |apply| for the Levenshtein
+distance. The computation of the minimum cost edit script, however,
+is not. We must ensure to issue a |Cpy| only when both elements
+are the same, as illustrated in \Cref{fig:background-string-lcs}.
+
+\begin{figure}
+\begin{myhs}
+\begin{code}
+lcs :: [String] -> [String] -> [EditOp]
+lcs []      []      = []
+lcs (x:xs)  []      = Del x : lcs xs []
+lcs []      (y:ys)  = Ins y : lcs [] ys
+lcs (x:xs)  (y:ys)  = 
+  let  i = Ins y      : lcs (x:  xs)      ys
+       d = Del x      : lcs      xs  (y:  ys)
+       s = if x == y
+           then [Cpy  : lcs      xs       ys]
+           else []
+   in minimumBy cost (s ++ [i , d])
+\end{code}
+\end{myhs}
+\caption{Speficiation of the \unixdiff{}.}
+\label{fig:background:string-lcs}
+\end{figure}
+
+Running the |lcs x y| function, \Cref{fig:background:string-lcs}, will yield an
+\emph{edit script} that enables us to read out one longest common subsequence of |x| and
+|y|. Note that the ambituity problem is still present. We do have
+slightly less ambituigy than with the Levenshtein distance, though.
+In this case, there are only two edit scripts with minimum cost
+on |lcs ["a", "b"] ["b" , "a"]|.
 
   A practical implementation of the \unixdiff{} will use a number of
 algorithmic techniques that make it performant. For starter, it is
@@ -332,6 +403,11 @@ one can always compute an edit script from a tree mapping.
   \item algorithms are heavily heuristic
   \item typed approach is very hard to merge
 \end{enumerate}}
+
+\section{Three-Way Merging}
+\label{sec:background:three-way-merging}
+
+\victor{I should write a page or twoabour \texttt{diff3}?}
 
 \section{Generic Programming}
 \label{sec:background:generic-programming}

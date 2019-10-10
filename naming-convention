@@ -25,6 +25,7 @@ enforce=("data|type"    # enforce spelling of 'datatype', forbids 'data-type' an
          "type level"
          "type safe"
          "non interfering"
+         "well-typed"
          )
 
 ok=true

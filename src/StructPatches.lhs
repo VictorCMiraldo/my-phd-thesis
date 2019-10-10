@@ -85,7 +85,7 @@ the performance was bad for real life}.
 
 \victor{Code is here: \url{https://github.com/arianvp/generics-mrsop-diff/blob/master/src/Generics/MRSOP/Diff.hs}}
 
-\victor{Shall we present things with or without |ki|? I'm leaning
+\victor{Shall we present things with or without |kappa|? I'm leaning
 towards without}
 
 \section{The Type of Patches}
@@ -148,13 +148,13 @@ Intuitively, Spines act on sums and capture the ``largest shared coproduct struc
 
 \begin{myhs}
 \begin{code}
-data Spine  (ki :: kon -> Star) (codes :: [[[Atom kon]]]) 
+data Spine  (kappa :: kon -> Star) (codes :: [[[Atom kon]]]) 
             :: [[Atom kon]] -> [[Atom kon]] -> Star where
-  Scp   :: Spine ki codes s1 s1
-  SCns  :: Constr s1 c1 -> NP (At ki codes) (Lkup c1 s1) 
-        -> Spine ki codes s1 s1
-  SChg  :: Constr s1 c1 -> Constr s2 c2 -> Al ki codes (Lkup c1 s1) (Lkup c2 s2)
-        -> Spine ki codes s1 s2
+  Scp   :: Spine kappa codes s1 s1
+  SCns  :: Constr s1 c1 -> NP (At kappa codes) (Lkup c1 s1) 
+        -> Spine kappa codes s1 s1
+  SChg  :: Constr s1 c1 -> Constr s2 c2 -> Al kappa codes (Lkup c1 s1) (Lkup c2 s2)
+        -> Spine kappa codes s1 s2
 \end{code}
 \end{myhs}
 
@@ -165,13 +165,15 @@ the fields with the |applyAt| function, for applying changes to atoms.
 Otherwise, we reconcile the fields with the |applyAl| function.
 
 \victor{Should we show compiling code or simplify the proxies away?}
+\victor{Maybe find a syntax-coloring that shades out the unintersting part?
+we are dvidied in this opinion}
 \begin{myhs}
 \begin{code}
-applySpine  :: (EqHO ki)
+applySpine  :: (EqHO kappa)
             -> SNat ix -> SNat iy
-            -> Spine ki codes (Lkup ix codes) (Lkup iy codes)
-            -> Rep ki (Fix ki codes) (Lkup ix codes)
-            -> Maybe (Rep ki (Fix ki codes) (Lkup iy codes))
+            -> Spine kappa codes (Lkup ix codes) (Lkup iy codes)
+            -> Rep kappa (Fix kappa codes) (Lkup ix codes)
+            -> Maybe (Rep kappa (Fix kappa codes) (Lkup iy codes))
 applySpine _ _ Scp x = return x
 applySpine ix iy (SCns c1 dxs) (sop -> Tag c2 xs) =  do
   Refl <- testEquality ix iy
@@ -217,15 +219,15 @@ shorter lists of constructor fields at its disposal.
 
 \begin{myhs}
 \begin{code}
-data Al  (ki :: kon -> Star) (codes :: [[[Atom kon]]]) 
+data Al  (kappa :: kon -> Star) (codes :: [[[Atom kon]]]) 
          :: [Atom kon] -> [Atom kon] -> Star where
-  A0    :: Al ki codes (P []) (P [])
-  AX    :: At ki codes x -> Al ki codes xs ys 
-        -> Al ki codes (x Pcons xs)  (x Pcons ys)
-  ADel  :: NA ki (Fix ki codes) x -> Al ki codes xs ys 
-        -> Al ki codes (x Pcons xs) ys
-  AIns  :: NA ki (Fix ki codes) x -> Al ki codes xs ys 
-        -> Al ki codes xs (x Pcons ys)
+  A0    :: Al kappa codes (P []) (P [])
+  AX    :: At kappa codes x -> Al kappa codes xs ys 
+        -> Al kappa codes (x Pcons xs)  (x Pcons ys)
+  ADel  :: NA kappa (Fix kappa codes) x -> Al kappa codes xs ys 
+        -> Al kappa codes (x Pcons xs) ys
+  AIns  :: NA kappa (Fix kappa codes) x -> Al kappa codes xs ys 
+        -> Al kappa codes xs (x Pcons ys)
 \end{code}
 \end{myhs}
 
@@ -248,10 +250,10 @@ trying to associate incompatible atoms:
 
 \begin{myhs}
 \begin{code}
-applyAl  :: (EqHO ki)
-         => Al ki codes xs ys
-         -> PoA ki (Fix ki codes) xs
-         -> Maybe (PoA ki (Fix ki codes) ys)
+applyAl  :: (EqHO kappa)
+         => Al kappa codes xs ys
+         -> PoA kappa (Fix kappa codes) xs
+         -> Maybe (PoA kappa (Fix kappa codes) ys)
 applyAl A0                NP0         = return NP0
 applyAl (AX    dx  dxs)   (x :*  xs)  = (:*)    <$$> applyAt (dx :*: x) <*> applyAl dxs xs
 applyAl (AIns  x   dxs)          xs   = (x :*)  <$$> applyAl dxs xs 
@@ -264,8 +266,8 @@ or opaque data. In case of opaque data, we simply record the old value and the n
 
 \begin{myhs}
 \begin{code}
-data TrivialK (ki :: kon -> Star) :: kon -> Star where
-  Trivial :: ki kon -> ki kon -> TrivialK ki kon 
+data TrivialK (kappa :: kon -> Star) :: kon -> Star where
+  Trivial :: kappa kon -> kappa kon -> TrivialK kappa kon 
 \end{code}
 \end{myhs}
 
@@ -274,11 +276,11 @@ the recursive position with |Almu|, which we will get to shortly.
 
 \begin{myhs}
 \begin{code}
-data At  (ki :: kon -> Star) (codes :: [[[Atom kon]]]) 
+data At  (kappa :: kon -> Star) (codes :: [[[Atom kon]]]) 
          :: Atom kon -> Star where
-  AtSet  :: TrivialK ki kon -> At ki codes ((P K kon))
+  AtSet  :: TrivialK kappa kon -> At kappa codes ((P K kon))
   AtFix  :: (IsNat ix) 
-         => Almu ki codes ix ix -> At ki codes ((P I ix))
+         => Almu kappa codes ix ix -> At kappa codes ((P I ix))
 \end{code}
 \end{myhs}
 
@@ -293,9 +295,9 @@ value. The recursive position case is directly handled by the
 \begin{myhs}
 \begin{code}
 applyAt  :: EqHO ki
-         => At ki codes at
-         -> NA ki (Fix ki codes)) at
-         -> Maybe (NA ki (Fix ki codes) at)
+         => At kappa codes at
+         -> NA kappa (Fix kappa codes)) at
+         -> Maybe (NA kappa (Fix kappa codes) at)
 applyAt (AtSet (Trivial x y)) (NA_K a)  
   | eqHO x y   = Just (NA_K a)
   | eqHO x a   = Just (NA_K b)
@@ -349,16 +351,16 @@ them. It is precisely these operations that we must account for here.
 
 \begin{myhs}
 \begin{code}
-data Almu  (ki :: kon -> Star) (codes :: [[[Atom kon]]]) 
+data Almu  (kappa :: kon -> Star) (codes :: [[[Atom kon]]]) 
            :: Nat -> Nat -> Star where
-  Spn  :: Spine ki codes (Lkup ix codes) (Lkup iy codes) 
-       -> Almu ki codes ix iy
+  Spn  :: Spine kappa codes (Lkup ix codes) (Lkup iy codes) 
+       -> Almu kappa codes ix iy
   Ins  :: Constr (Lkup iy codes) c
-       -> InsCtx ki codes ix (Lkup c (Lkup iy codes))
-       -> Almu ki codes ix iy
+       -> InsCtx kappa codes ix (Lkup c (Lkup iy codes))
+       -> Almu kappa codes ix iy
   Del  :: Constr (Lkup ix codes) c
-       -> DelCtx ki codes iy (Lkup c (Lkup ix codes))
-       -> Almu ki codes ix iy
+       -> DelCtx kappa codes iy (Lkup c (Lkup ix codes))
+       -> Almu kappa codes ix iy
 \end{code}
 \end{myhs}
 
@@ -377,8 +379,8 @@ to ensure the transformation is on the right direction.
 
 \begin{myhs}
 \begin{code}
-type InsCtx ki codes = Ctx ki codes        (Almu ki codes)
-type DelCtx ki codes = Ctx ki codes (Flip  (Almu ki codes)) 
+type InsCtx kappa codes = Ctx kappa codes        (Almu kappa codes)
+type DelCtx kappa codes = Ctx kappa codes (Flip  (Almu kappa codes)) 
 
 newtype Flip f ix iy = Flip { unFlip :: f iy ix }
 \end{code}
@@ -397,15 +399,15 @@ two cases, as seen above.
 
 \begin{myhs}
 \begin{code}
-data Ctx (ki :: kon -> Star) (codes :: [[[Atom kon]]]) (p :: Nat -> Nat -> Star)
+data Ctx (kappa :: kon -> Star) (codes :: [[[Atom kon]]]) (p :: Nat -> Nat -> Star)
          (ix :: Nat) :: [Atom kon] -> Star where
   H  :: IsNat iy
      => p ix iy
-     -> PoA ki (Fix ki codes) xs
-     -> Ctx ki codes p ix ((P I iy) Pcons xs)
-  T  :: NA ki (Fix ki codes) a
-     -> Ctx ki codes p ix xs
-     -> Ctx ki codes p ix (a Pcons xs)
+     -> PoA kappa (Fix kappa codes) xs
+     -> Ctx kappa codes p ix ((P I iy) Pcons xs)
+  T  :: NA kappa (Fix kappa codes) a
+     -> Ctx kappa codes p ix xs
+     -> Ctx kappa codes p ix (a Pcons xs)
 \end{code}
 \end{myhs}
 
@@ -418,10 +420,10 @@ field applied to the received tree:
 
 \begin{myhs}
 \begin{code}
-insCtx  :: (IsNat ix, EqHO ki)
-        => InsCtx ki codes ix xs
-        -> Fix ki codes ix
-        -> Maybe (PoA ki (Fix ki codes) xs)
+insCtx  :: (IsNat ix, EqHO kappa)
+        => InsCtx kappa codes ix xs
+        -> Fix kappa codes ix
+        -> Maybe (PoA kappa (Fix kappa codes) xs)
 insCtx (H x rest) v  = (:* rest) . NA_I  <$$> applyAlmu x v
 insCtx (T a ctx)  v  = (a :*)            <$$> insCtx ctx v
 \end{code}
@@ -434,10 +436,10 @@ the application function. \victor{this deserves more info...}
 
 \begin{myhs}
 \begin{code}
-delCtx  :: (IsNat ix, EqHO ki)
-        => DelCtx ki codes ix xs
-        -> PoA ki (Fix ki codes) xs
-        -> Maybe (Fix ki codes ix)
+delCtx  :: (IsNat ix, EqHO kappa)
+        => DelCtx kappa codes ix xs
+        -> PoA kappa (Fix kappa codes) xs
+        -> Maybe (Fix kappa codes ix)
 delCtx (H x rest)  (NA_I v  :* p) = applyAlmu (unFlip x) v
 delCtx (T a ctx)   (at      :* p) = delCtx ctx p
 \end{code}
@@ -450,10 +452,10 @@ functionality or insertion and deletion of a context.
 \victor{Did we even explain |EqHO|?}
 \begin{myhs}
 \begin{code}
-applyAlmu  :: (IsNat ix, IsNat iy, EqHO ki)
-           => Almu ki codes ix iy
-           -> Fix ki codes ix
-           -> Maybe (Fix ki codes iy)
+applyAlmu  :: (IsNat ix, IsNat iy, EqHO kappa)
+           => Almu kappa codes ix iy
+           -> Fix kappa codes ix
+           -> Maybe (Fix kappa codes iy)
 applyAlmu (Spn sp)      (Fix rep)  = Fix <$$> applySpine _ _ spine rep
 applyAlmu (Ins  c ctx)  (Fix rep)  = Fix . inj c <$$> insCtx ctx f
 applyAlmu (Del  c ctx)  (Fix rep)  = delCtx ctx <$$> match c rep
@@ -469,10 +471,10 @@ our abstract formulation of differencing\victor{Where is this?}.
 
 \begin{myhs}
 \begin{code}
-type PatchST ki codes ix = Almu ki codes ix ix
+type PatchST kappa codes ix = Almu kappa codes ix ix
 
-applyST  :: (IsNat ix , EqHO ki)
-         => PatchST ki codes ix
+applyST  :: (IsNat ix , EqHO kappa)
+         => PatchST kappa codes ix
          -> Fix codes ix
          -> Maybe (Fix codes ix)
 applyST  = applyAlmu
@@ -548,7 +550,7 @@ and corresponds to what one would expect.
 
 \begin{myhs}
 \begin{code}
-mergeST :: PatchST ki codes ix -> PatchST ki codes ix -> Maybe (PatchST ki codes ix)
+mergeST :: PatchST kappa codes ix -> PatchST kappa codes ix -> Maybe (PatchST kappa codes ix)
 \end{code}
 \end{myhs}
 
@@ -562,7 +564,7 @@ which yields a total merge function:
 
 \begin{myhs}
 \begin{code}
-merge : (p q : Patch ki codes ix) -> Disjoint p q -> Patch ki codes ix
+merge : (p q : Patch kappa codes ix) -> Disjoint p q -> Patch kappa codes ix
 \end{code}
 \end{myhs}
 
@@ -574,7 +576,7 @@ given below, with |sym| witnessing the fact the disjointness is a symmetric rela
 
 \begin{myhs}
 \begin{code}
-mergecommutes  :   (p q : Patch ki codes ix) 
+mergecommutes  :   (p q : Patch kappa codes ix) 
                ->  (hyp : Disjoint p q)
                ->  apply (merge p q hyp) . q == apply (merge q p (sym hyp)) . p
 \end{code}
@@ -588,7 +590,7 @@ a |Just|:
 
 \begin{myhs}
 \begin{code}
-disjoint :: Patch ki codes ix -> Patch ki codes ix -> Bool
+disjoint :: Patch kappa codes ix -> Patch kappa codes ix -> Bool
 disjoint p q = maybe (const True) False (merge p q)
 \end{code}
 \end{myhs}
@@ -617,9 +619,9 @@ deleting newly introduced information.
 I need to rerun his experiments}
 \begin{myhs}
 \begin{code}
-mergeCtxAt  :: DelCtx ki codes iy xs
-            -> NP (At ki codes) xs
-            -> Maybe (Almu ki codes ix iy)
+mergeCtxAt  :: DelCtx kappa codes iy xs
+            -> NP (At kappa codes) xs
+            -> Maybe (Almu kappa codes ix iy)
 mergeCtxAt (H (AlmuMin almu') rest) (AtFix almu :* xs) = do
   Refl <- testEquality (almuDest almu) (almuDest almu')
   x <- mergeAlmu almu' almu
@@ -636,8 +638,8 @@ places where we need these checks when adapting our Agda model to work
 over mutually recursive types.
 
   The |mergeAtCtx| function, which is dual to |mergeCtxAt|, merges a
-|NP (At ki codes) xs| and a |DelCtx ki codes iy xs| into a |Maybe
-(DelCtx ki codes iy xs)|, essentially preserving the |T at| it find on
+|NP (At kappa codes) xs| and a |DelCtx kappa codes iy xs| into a |Maybe
+(DelCtx kappa codes iy xs)|, essentially preserving the |T at| it find on
 the recursive calls.  Another interesting case happens on one of the
 |mergeSpine| cases, whose full implementation can be seen in
 \Cref{fig:stdiff:mergespine}.  The |SChg| over |SCns| case must ensure
@@ -649,9 +651,9 @@ recursive types.
 \begin{myhs}
 \begin{code}
 mergeSpine  :: SNat ix -> SNat iy
-            -> Spine ki codes (Lkup ix codes) (Lkup iy codes)
-            -> Spine ki codes (Lkup ix codes) (Lkup iy codes)
-            -> Maybe (Spine ki codes (Lkup ix codes) (Lkup iy codes))
+            -> Spine kappa codes (Lkup ix codes) (Lkup iy codes)
+            -> Spine kappa codes (Lkup ix codes) (Lkup iy codes)
+            -> Maybe (Spine kappa codes (Lkup ix codes) (Lkup iy codes))
 ...
 mergeSpine ix iy (SChg cx cy al) (SCns cz zs)  = do  Refl <- testEquality ix iy
                                                      Refl <- testEquality cx cz
@@ -756,16 +758,31 @@ interested in \emph{computing} patches from a source and a
 destination. Unfortunately, this is one of the main downsides
 from the |PatchST| approach.
 
-  In this section we start by describing a nondeterministic specification
+  In this section we start by outlining a nondeterministic specification
 of an algorithm for computing a |PatchST|, in \Cref{sec:stdiff:naiveenum}.
 We then provide example algorithms that implemented said specification
 in \Cref{sec:stdiff:oraclesenum}. No matter the length of our efforts,
 however, we will always be bound by the necessity of making choices
-that is inherent to edit scripts. Consequently, computing a |PatchST|
-will always be an inefficient process.
+which is inherent to edit scripts. Consequently, computing a |PatchST|
+will always be a computationally inefficient process.
 
 \subsection{Naive enumeration}
 \label{sec:stdiff:naiveenum}
+
+\victor{I'm unsure whether we should spell out the details of the
+enumeration; it's pretty straightforward...}
+
+\victor{Answer is yes; talk about it and use it to show the tensions
+around copy definitions: counting copies; depth of copies; size of copied subtrees etc;
+each definition will have corner cases}
+
+  The simplest option for computing a patch that transforms
+a tree |x| into |y| is enumerating all possible patches and filtering
+our those with the smallest \emph{cost}, for \emph{cost} an
+arbitrary metric.
+
+  It is straightforward to enumerate all possible patches,
+as we have done for our Agda model~\cite{Miraldo2017}. 
 
 \victor{
 Very slow; suffers from the same heuristic
@@ -802,6 +819,7 @@ to flag elements of the AST was still too coarse. Many elements of the AST
 fall under the same line. The next idea was then to use \texttt{gdiff}~\Cref{sec:gp:well-typed-tree-diff},
 as the oracle, enabling us to annotate every node of the source and destination
 trees with a information about whether that node was copied or not.
+\victor{Mention that Arian implemented our original Agda model}
 
 \begin{myhs}
 \begin{code}
@@ -812,36 +830,36 @@ data Ann = Modify | Copy
   A |Modify| annotation corresponds to a deletion or insertion
 dependending on whether it is the source or destination tree
 respectively.  Recall that an edit script produced by \texttt{gdiff}
-has type |ES ki codes xs ys|, where |xs| is the list of types of the
+has type |ES kappa codes xs ys|, where |xs| is the list of types of the
 source trees and |ys| is the list of types of the destination trees.
 The definition of |ES| -- introduced in
 \Cref{sec:gp:well-typed-tree-diff} -- is repeated below.
 
 \begin{myhs}
 \begin{code}
-data ES (ki :: kon -> Star) (codes :: [[[Atom kon]]]) 
+data ES (kappa :: kon -> Star) (codes :: [[[Atom kon]]]) 
     :: [Atom kon] -> [Atom kon] -> Star where
-  ES0  :: ES ki codes Pnil Pnil
-  Ins  :: Cof ki codes a t  -> ES ki codes i            (t :++: j)  
-                            -> ES ki codes i            (a Pcons j)
-  Del  :: Cof ki codes a t  -> ES ki codes (t :++: i)   j           
-                            -> ES ki codes (a Pcons i)  j
-  Cpy  :: Cof ki codes a t  -> ES ki codes (t :++: i)   (t :++: j)  
-                            -> ES ki codes (a Pcons i)  (a Pcons j)
+  ES0  :: ES kappa codes Pnil Pnil
+  Ins  :: Cof kappa codes a t  -> ES kappa codes i            (t :++: j)  
+                            -> ES kappa codes i            (a Pcons j)
+  Del  :: Cof kappa codes a t  -> ES kappa codes (t :++: i)   j           
+                            -> ES kappa codes (a Pcons i)  j
+  Cpy  :: Cof kappa codes a t  -> ES kappa codes (t :++: i)   (t :++: j)  
+                            -> ES kappa codes (a Pcons i)  (a Pcons j)
 \end{code}
 \end{myhs}
 
-  Given a value of type |ES ki codes xs ys|, we have information about which constructors
-of the trees in |NP (NA ki (Fix ki codes)) xs| should be copied. Our objective
+  Given a value of type |ES kappa codes xs ys|, we have information about which constructors
+of the trees in |NP (NA kappa (Fix kappa codes)) xs| should be copied. Our objective
 then is to annotated the trees with this very information. This is done by the
 |annSrc| and |annDst| functions. We will only look at |annSrc|, the definition
 of |annDst| is symmetric.
 
 \begin{myhs}
 \begin{code}
-annSrc :: NP (NA ki (Fix ki codes)) xs
-       -> ES ki codes xs ys
-       -> NP (NA ki (AnnFix ki codes (Const Ann))) xs
+annSrc :: NP (NA kappa (Fix kappa codes)) xs
+       -> ES kappa codes xs ys
+       -> NP (NA kappa (AnnFix kappa codes (Const Ann))) xs
 annSrc xs         ES0         = Nil
 annSrc Nil        _           = Nil
 annSrc xs         (Ins c es)  = annSrc' xs es
@@ -867,9 +885,9 @@ and inserts the entire destination tree.
 
 \begin{myhs}
 \begin{code}
-diffAlmu  :: AnnFix ki codes (Const Ann) ix
-          -> AnnFix ki codes (Const Ann) iy
-          -> Almu ki codes ix iy
+diffAlmu  :: AnnFix kappa codes (Const Ann) ix
+          -> AnnFix kappa codes (Const Ann) iy
+          -> Almu kappa codes ix iy
 diffAlmu x@(AnnFix ann1 rep1) y@(AnnFix ann2 rep2) =
   case (getAnn ann1, getAnn ann2) of
     (Copy, Copy)      -> Spn (diffSpine  (getSNat $ Proxy @ix) 
@@ -898,14 +916,14 @@ are placed on the rigid part of the context.
 
 \begin{myhs}
 \begin{code}
-diffCtx  :: InsOrDel ki codes p
-         -> AnnFix ki codes (Const Ann) ix
-         -> NP (NA ki (AnnFix ki codes (Const Ann))) xs
-         -> Ctx ki codes p ix xs
+diffCtx  :: InsOrDel kappa codes p
+         -> AnnFix kappa codes (Const Ann) ix
+         -> NP (NA kappa (AnnFix kappa codes (Const Ann))) xs
+         -> Ctx kappa codes p ix xs
 \end{code}
 \end{myhs}
 
-  The other functions for translating two |AnnFix ki codes (Const Ann) ix|
+  The other functions for translating two |AnnFix kappa codes (Const Ann) ix|
 into a |PatchST| are straightforward and follow a similar reasoning process:
 extract the anotations and defer copies until both source and destination
 annotation flag a copy.

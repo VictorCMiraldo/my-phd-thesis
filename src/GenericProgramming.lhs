@@ -798,8 +798,8 @@ where we have explicit recursion:
 
 \begin{myhs}
 \begin{code}
-cata  :: (forall iy. Rep ki phi (Lkup iy codes) -> phi iy)
-      -> Fix ki codes ix
+cata  :: (forall iy. Rep kappa phi (Lkup iy codes) -> phi iy)
+      -> Fix kappa codes ix
       -> phi ix
 cata f (Fix x) = f (mapRep (cata f) x)
 \end{code}
@@ -811,10 +811,10 @@ in a simple manner.
 
 \begin{myhs}
 \begin{code}
-heightAlgebra :: Rep ki (Const Int) xs -> Const Int iy
+heightAlgebra :: Rep kappa (Const Int) xs -> Const Int iy
 heightAlgebra = Const . (1+) . elimRep (const 0) getConst (maximum . (0:))
 
-height :: Fix ki codes ix -> Int
+height :: Fix kappa codes ix -> Int
 height = getConst . cata heightAlgebra
 \end{code} 
 \end{myhs}
@@ -1104,72 +1104,73 @@ instance HasDatatypeInfo Singl FamRose CodesRose Z where
 \section{Well-Typed Tree Differencing} 
 \label{sec:gp:well-typed-tree-diff}
 
-  A good example for \texttt{generics-mrsop} is to implement
-the approach of \citet{Lempsink2009}. Besides some advanced
-generic programming techniques, their approach is the closest
-to ours in the sense that it is the only \emph{typed} approach
-to differencing. The original implementation, due to \citet{Lempsink2009}, 
-can be found on the \texttt{gdiff} library. The presentation
-provided here is adapted from van Putten's~\cite{Putten2019} master
-thesis and is available as the \texttt{generics-mrsop-gdiff} library,
-also on Hackage.
-
-  The construction of type safe tree edit scripts is similar to the
-original tree edit distance, shown in
-\Cref{sec:background:tree-edit-distance}.  The only difference is that
-we have to lift operations into equivalent versions that carry enough
-type level information to ensure the individual edit operations are
-type safe.  Moreover, instead of differencing a list of trees, we will
+  Next we look into a detailed implementation of a type-safe
+adaptation of tree edit distance due to \citet{Lempsink2009}.
+In order to make the constructions from \Cref{sec:background:tree-edit-distance}
+type-safe by construction we must lift edit scripts from kind |Star|
+to kind |[Star] -> [Star] -> Star|, enabling us to index the types of the
+source trees and the destination trees of particular edit scripts.
+Consequently, instead of differencing a list of trees, we will
 difference an $n$-ary product, |NP|, indexed by the type of each tree.
+
+  This piece of related work is the closest to ours in the sense that
+it is the only \emph{typed} approach to differencing. The original
+implementation, due to \citet{Lempsink2009}, can be found on the
+\texttt{gdiff} library. The presentation provided here is adapted from
+van Putten's~\cite{Putten2019} master thesis and is available as the
+\texttt{generics-mrsop-gdiff} library, also on Hackage.
 
 \begin{myhs}
 \begin{code}
-diff  :: (TestEquality ki, EqHO ki)
-      => NP (NA ki (Fix ki codes)) xs
-      -> NP (NA ki (Fix ki codes)) ys
-      -> ES ki codes xs ys
+type PatchGDiff kappa codes xs ys = ES kappa codes xs ys
+
+diff  :: (TestEquality kappa, EqHO kappa)
+      => NP (NA kappa (Fix kappa codes)) xs
+      -> NP (NA kappa (Fix kappa codes)) ys
+      -> PatchGDiff kappa codes xs ys
 \end{code}
 \end{myhs}
 
   The edit operations will work over constructors of the mutually
-recursive family |codes| or opaque values from |ki|. To make our operations
-more uniform, we create a type |Cof| to represent the \emph{unit of modification} of each edit operation. A value of type |Cof ki codes at tys|
-represents a constructor of atom |at|, which expects arguments whose type is
-|NP I tys|, for the family |codes| with opaque types interpreted by |ki|.
-Its definition is given below.
+recursive family |codes| or opaque values from |kappa|. To make our
+operations more uniform, we create a type |Cof| to represent the
+\emph{unit of modification} of each edit operation. A value of type
+|Cof kappa codes at tys| represents a constructor of atom |at|, which
+expects arguments whose type is |NP I tys|, for the family |codes|
+with opaque types interpreted by |kappa|.  Its definition is given below.
 
 \begin{myhs}
 \begin{code}
-data Cof (ki :: kon -> Star) (codes :: [[[Atom kon]]]) 
+data Cof (kappa :: kon -> Star) (codes :: [[[Atom kon]]]) 
     :: Atom kon -> [Atom kon] -> Star where
   ConstrI  :: (IsNat c, IsNat n) 
            => Constr (Lkup n codes) c 
            -> ListPrf (Lkup c (Lkup n codes)) 
-           -> Cof ki codes ((P I) n) (Lkup c (Lkup n codes))
-  ConstrK  :: ki k -> Cof ki codes ((P K) k) Pnil
+           -> Cof kappa codes ((P I) n) (Lkup c (Lkup n codes))
+  ConstrK  :: kappa k -> Cof kappa codes ((P K) k) Pnil
 \end{code}
 \end{myhs}
  
   We need the |ListPrf| argument to |ConstrI| to be able to manipulate
 the type-level lists when defining the application function,
 |applyES|.  We need to define our edit scripts first, though. A value
-of type |ES ki codes xs ys| represents a transformation of a value of
-|NP (NA ki (Fix ki codes)) xs| into a value of |NP (NA ki (Fix ki
+of type |ES kappa codes xs ys| represents a transformation of a value of
+|NP (NA kappa (Fix kappa codes)) xs| into a value of |NP (NA kappa (Fix ki
 codes)) ys|.  The |NP| serves as a list of trees, as is usual for the
 tree differencing algorithms but it enables us to keep track of the
 type of each individual tree through the index to |NP|.
 
 \begin{myhs}
 \begin{code}
-data ES (ki :: kon -> Star) (codes :: [[[Atom kon]]]) 
+data ES (kappa :: kon -> Star) (codes :: [[[Atom kon]]]) 
     :: [Atom kon] -> [Atom kon] -> Star where
-  ES0  :: ES ki codes Pnil Pnil
-  Ins  :: Cof ki codes a t  -> ES ki codes i            (t :++: j)  
-                            -> ES ki codes i            (a Pcons j)
-  Del  :: Cof ki codes a t  -> ES ki codes (t :++: i)   j           
-                            -> ES ki codes (a Pcons i)  j
-  Cpy  :: Cof ki codes a t  -> ES ki codes (t :++: i)   (t :++: j)  
-                            -> ES ki codes (a Pcons i)  (a Pcons j)
+  ES0  :: ES kappa codes Pnil Pnil
+  Ins  :: Cof kappa codes a t  -> ES kappa codes i            (t :++: j)  
+                               -> ES kappa codes i            (a Pcons j)
+  Del  :: Cof kappa codes a t  -> ES kappa codes (t :++: i)   j           
+                               -> ES kappa codes (a Pcons i)  j
+  Cpy  :: Cof kappa codes a t  -> ES kappa codes (t :++: i)   (t :++: j)  
+                               -> ES kappa codes (a Pcons i)  (a Pcons j)
 \end{code}
 \end{myhs}
 
@@ -1180,9 +1181,9 @@ take the first |n| elements of that forest and use as the arguments to
 
 \begin{myhs}
 \begin{code}
-insCof  :: Cof ki codes a t
-        -> NP (NA ki (Fix ki codes)) (t :++: xs)
-        -> NP (NA ki (Fix ki codes)) (a Pcons xs)
+insCof  :: Cof kappa codes a t
+        -> NP (NA kappa (Fix kappa codes)) (t :++: xs)
+        -> NP (NA kappa (Fix kappa codes)) (a Pcons xs)
 insCof (ConstrK k)        xs =  NA_K k :* xs
 insCof (ConstrI c ispoa)  xs =  let (poa, xs') = split ispoa xs
                                 in NA_I (Fix $$ inj c poa) :* xs'
@@ -1207,10 +1208,10 @@ the semantics of |ES|:
 
 \begin{myhs}
 \begin{code}
-applyES  :: (forall k . Eq (ki k))
-         => ES ki codes xs ys
-         -> PoA ki (Fix ki codes) xs
-         -> Maybe (PoA ki (Fix ki codes) ys)
+applyES  :: (forall k . Eq (kappa k))
+         => ES kappa codes xs ys
+         -> PoA kappa (Fix kappa codes) xs
+         -> Maybe (PoA kappa (Fix kappa codes) ys)
 applyES ES0 _ = Just Nil
 applyES (Ins _ c es) xs = insCof c <$$> applyES es xs
 applyES (Del _ c es) xs = delCof c xs >>= applyES es
