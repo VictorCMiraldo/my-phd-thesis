@@ -1,0 +1,43 @@
+#! /bin/bash
+set -ueo pipefail
+
+if [[ "$#" -gt 1 ]]; then
+  echo "usage: mock-chapter [chapter-num]"
+  echo "  provide no argument to see a list of chapters"
+  exit 1
+fi
+
+if [[ "$#" -eq 0 ]]; then
+  count=0
+  grep "^\\\\chapter" src/thesis.lhs | \
+  while read -r chap; do
+    echo "$count :  $chap"
+    count=$(( $count + 1 ))
+  done
+  read -p "Which chapter should I mock? " chap
+else
+  chap=$1
+fi
+
+chap=$(( $chap + 1 ))
+
+process=true
+if [[ -e dist/mock-chapter.lhs ]]; then
+  num=$(grep "mock-chapter-num" dist/mock-chapter.lhs | cut -d':' -f2)
+  if [[ "$?" -eq "0" ]] && [[ "$chap" -eq "$num" ]]; then
+    process=false
+  fi
+fi
+  
+if $process; then
+  echo "Processing"
+
+  chapname=$(grep "^\\\\chapter" src/thesis.lhs | sed "${chap}q;d")
+
+  marker=$(grep -n "mock-chapter-marker" src/thesis.lhs | cut -d':' -f1)
+
+  cat src/thesis.lhs | head -n "$marker" > dist/mock-chapter.lhs
+  grep -A 3 "$chapname" src/thesis.lhs >> dist/mock-chapter.lhs
+  echo "\\end{document}" >> dist/mock-chapter.lhs
+  echo "%% mock-chapter-num:${chap}" >> dist/mock-chapter.lhs
+fi

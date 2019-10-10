@@ -66,6 +66,22 @@ Sommige goed samenvatting in het Nederlands.
 
 %% Starts the mainmatter
 \mainmatter
+
+%% The marker below is used by our mock-chapter
+%% script to know where to crop the file.
+%% when we want to build just a single chapter
+%%
+%% mock-chapter-marker
+%%
+%% It is also important that all chapter declarations
+%% have the structure:
+%%
+%% > \chapter{lalala}
+%% > \label{...}
+%% > \lhsinclude{lalala.lhs} 
+%% > %include src/lalala.lhs
+%%
+
 \chapter{Introduction}
 \label{chap:introduction}
 \lhsinclude{Introduction.lhs}
