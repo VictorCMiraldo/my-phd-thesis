@@ -158,6 +158,11 @@ data Spine  (kappa :: kon -> Star) (codes :: [[[Atom kon]]])
 \end{code}
 \end{myhs}
 
+  \victor{Investigate the real reason why spines became heterogeneous; this could be wrong too!}
+  \victor{One reason is that SChg provides more options for synchronization; essentially being
+  a better option than inserting and deleting constructors. This is a pretty good point to keep
+  spine heterogeneous}
+
   The semantics of |Spine| are straightforward. Its application function
 is given by pattern matching on the provided value and checking it is
 made up with the required construtor. In the |SCns| case we simply map over
@@ -841,11 +846,11 @@ data ES (kappa :: kon -> Star) (codes :: [[[Atom kon]]])
     :: [Atom kon] -> [Atom kon] -> Star where
   ES0  :: ES kappa codes Pnil Pnil
   Ins  :: Cof kappa codes a t  -> ES kappa codes i            (t :++: j)  
-                            -> ES kappa codes i            (a Pcons j)
+                               -> ES kappa codes i            (a Pcons j)
   Del  :: Cof kappa codes a t  -> ES kappa codes (t :++: i)   j           
-                            -> ES kappa codes (a Pcons i)  j
+                               -> ES kappa codes (a Pcons i)  j
   Cpy  :: Cof kappa codes a t  -> ES kappa codes (t :++: i)   (t :++: j)  
-                            -> ES kappa codes (a Pcons i)  (a Pcons j)
+                               -> ES kappa codes (a Pcons i)  (a Pcons j)
 \end{code}
 \end{myhs}
 
