@@ -26,9 +26,11 @@
 \definecolor{forest-digems-change-bg}{RGB}{220,224,238}
 \definecolor{forest-digems-metavar}{RGB}{171,72,46}
 \definecolor{forest-digems-black}{RGB}{97,108,132}
+\definecolor{forest-digems-change-border}{RGB}{0,112,33}
 
 %% This was based on: https://tex.stackexchange.com/questions/342334/drawing-super-nodes-in-a-tree 
 \forestset{%
+  debug=nodewalks,
   default preamble={%
       for tree={text=forest-digems-constr, edge=forest-digems-black},
     },
@@ -63,8 +65,9 @@
           before drawing tree={%
             tikz+={%
               \begin{scope}[on background layer]
-                \node (n) [fill=forest-digems-change-bg, 
+                \node (n) [ %fill=forest-digems-change-bg, 
                            inner sep=\savedinnerysep, 
+                           dashed, draw=forest-digems-change-border,
                            rounded corners, fit to=tree] {}; 
                 \path [draw=forest-digems-black, \forestoption{edge}] 
                            (!u.parent anchor) -- (n.north -| !1.child anchor)
@@ -75,10 +78,56 @@
         ]
       }{content()}
     },
+    tikz+={ \node (m1) at ($ (!1)!0.5!(!2) $) {}; 
+            \node (m2) at ($ (m1) $)          {};
+            \node [text=forest-digems-black] at ($ (m1)!0.5!(m2) $) {$\mapsto$};
+          },
+  },
+  rootchange/.style={%
+    text=forest-digems-black,
+    s sep=4mm,
+    for 1={fit=band,no edge},
+    for 2={fit=band,no edge},
+    before typesetting nodes={%
+      no edge,
+      before computing xy={/pgf/inner ysep/.get=\savedinnerysep, 
+                           l'=\savedinnerysep,
+                           l=-1.8mm,
+                           for 1={l=2mm},
+                           for 2={l=2mm}},
+      replace by/.wrap pgfmath arg={%
+        [\phantom{##1} , append, fit=rectangle, no edge,
+          before drawing tree={%
+            tikz+={%
+              \begin{scope}[on background layer]
+                \node (n) [ %fill=forest-digems-change-bg, 
+                           inner sep=\savedinnerysep, 
+                           dashed, draw=forest-digems-change-border,
+                           rounded corners, fit to=tree] {}; 
+              \end{scope}
+            },
+          },
+        ]
+      }{content()}
+    },
     tikz+={ \node (m1) at ($(!1)!0.5!(!2)$) {}; 
             \node (m2) at ($(m1)$)          {};
             \node [text=forest-digems-black] at ($(m1)!0.5!(m2)$) {$\mapsto$};
           },
+  },
+  rootchange clean/.style n args={1}{%
+    text=forest-digems-black,
+    s sep=#1mm,
+    for 1={fit=band,no edge},
+    for 2={fit=band,no edge},
+    before typesetting nodes={%
+      no edge,
+      before computing xy={/pgf/inner ysep/.get=\savedinnerysep, 
+                           l'=\savedinnerysep,
+                           l=-1.8mm,
+                           for 1={l=2mm},
+                           for 2={l=2mm}},
+    },
   },
 }
 

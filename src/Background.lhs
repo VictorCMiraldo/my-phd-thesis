@@ -235,19 +235,78 @@ to be type-safe by construction.
   Although edit scripts provide a very intuitive notion of local
 transformations over a tree, they are very redundant. Making it hard to 
 develop algorithms based solely on edit scripts. It is often the case
-that the community adopts the notion of \emph{tree mapping} as
+that the notion of \emph{tree mapping} comes in handy. It works as
 a \emph{normal form} version of edit scripts. 
 
+\victor{Make sure I got this right!}
 \begin{definition}[Tree Mapping]
 Let |t| and |u| be two trees, a tree mapping 
-between |t| and |u| is a partial injective order preserving mapping between the
+between |t| and |u| is a bijective order preserving partial mapping between the
 nodes of a flattened representation of |t| and |u| according
-to their preorder traversal.
+to their preorder traversal. Moreover, it must preserve the 
+ancenstral order of nodes. That is, take two subtrees in the domain
+of the mapping, one is an ancestor of the other iff their corresponding images
+are preserve the ancestry.
 \end{definition}
 
 \begin{figure}
-Picture of a few tree mappings; show invalid ones.
-\caption{Example Tree Mappings}
+\centering
+\subfloat[non order preserving]{%
+\begin{forest}
+[, rootchange clean={8}
+  [b,name=sb [c [d] [e, name=se]] [f , name=sf]]
+  [g,name=df [b , name=db] [e, name=de]]]
+\draw [->,dashed,thick,black!20!white] (sb) -- (db);
+\draw [->,dashed,thick,black!20!white] (sf) -- (df);
+% this edge makes it non-acestry preserving too!
+% \draw [->,dashed,thick,black!20!white] (se) -- (de);
+\end{forest}%
+\label{fig:background:tree-mapping-a}}%
+\qquad\qquad%
+\subfloat[non injective]{%
+\raisebox{9mm}{
+\begin{forest}
+[, rootchange clean={9}
+  [b,name=sb [c] [d]]
+  [b,name=db [b , name=dbb] [e]]]
+\draw [->,dashed,thick,black!20!white] (sb) -- (db);
+\draw [->,dashed,thick,black!20!white] (sb) -- (dbb);
+\end{forest}%
+\label{fig:background:tree-mapping-b}}}%
+\qquad\qquad%
+\subfloat[non surjective]{%
+\begin{forest}
+[, rootchange clean={8}
+  [b,name=sb [c] [d,name=sd]]
+  [a [f,name=df [g] [h]] [e]]]
+\draw [->,dashed,thick,black!20!white] (sb) -- (df);
+\draw [->,dashed,thick,black!20!white] (sd) -- (df);
+\end{forest}%
+\label{fig:background:tree-mapping-c}}%
+\qquad\qquad%
+\subfloat[non ancestral preserving]{%
+\raisebox{9mm}{%
+\begin{forest}
+[, rootchange clean={8}
+  [a,name=sb [b [c] [d,name=sd]] [e,name=se]]
+  [f,name=df [g, name=dg]]]
+\draw [->,dashed,thick,black!20!white] (sd) -- (df);
+\draw [->,dashed,thick,black!20!white] (se) -- (dg);
+\end{forest}%
+\label{fig:background:tree-mapping-d}}}%
+\qquad\qquad\qquad\qquad\qquad%
+\subfloat[valid tree mapping]{%
+\begin{forest}
+[, rootchange clean={8}
+  [a,name=sa [b,name=sb [c] [d]] [e,name=se]]
+  [f [a, name=da [g [b,name=db]] [e,name=de]] [h]]]
+\draw [->,dashed,thick,black!20!white] (sa) -- (da);
+\draw [->,dashed,thick,black!20!white] (sb) -- (db);
+\draw [->,dashed,thick,black!20!white] (se) to[out=290] (de);
+\end{forest}%
+\label{fig:background:tree-mapping-e}}%
+\caption{A number of invalid invalid tree mappings with one valid
+example.}
 \label{fig:background:tree-mapping}
 \end{figure}
 
@@ -255,7 +314,7 @@ Picture of a few tree mappings; show invalid ones.
 must be performed. Everything else must be deleted or inserted and the
 order of deletions and insertions is irrelevant, which removes the redundancy
 of edit scripts. Nevertheless, the definition of tree mapping is still very restrictive:
-(i) the ``injective mapping'' does not enable trees to be shared or contracted;
+(i) the ``bijective mapping'' does not enable trees to be shared or contracted;
 (ii) the ``order preserving'' does not enbale trees to be permuted or moved
 accross ancestor boundaries. These restrictions are there to ensure that
 one can always compute an edit script from a tree mapping.
