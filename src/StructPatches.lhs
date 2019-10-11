@@ -122,16 +122,17 @@ common coproduct structure. We distinguish three possible cases:
 %
 \begin{itemize}
 \item |x| and |y| are fully equal, in which case we copy the full
-  values regardless of their contents.
+  values regardless of their contents. They must also be of the same type.
 %
 \item |x| and |y| have the same constructor -- i.e., |x =
-  (inject C) px| and |y = (inject C) py| -- but some subtrees of |x|
+  inj c px| and |y = inj c py| -- but some subtrees of |x|
   and |y| are distinct, in which case we copy the head constructor and
-  handle all arguments pairwise.
+  handle all arguments pairwise. 
 %
 \item |x| and |y| have distinct constructors, in which case we record
   a change in constructor and a choice of the alignment of the
-  source and destination's constructor fields.
+  source and destination's constructor fields. Here, |x| and |y|
+  might be of a different type in the family.
 \end{itemize}
 
   The datatype |Spine|, defined below, formalizes this 
@@ -158,10 +159,29 @@ data Spine  (kappa :: kon -> Star) (codes :: [[[Atom kon]]])
 \end{code}
 \end{myhs}
 
-  \victor{Investigate the real reason why spines became heterogeneous; this could be wrong too!}
-  \victor{One reason is that SChg provides more options for synchronization; essentially being
-  a better option than inserting and deleting constructors. This is a pretty good point to keep
-  spine heterogeneous}
+  It is worth noting that our Agda model~\cite{Miraldo2017} handles
+only regular types, that is, mutually recursive families consisting of
+a single datatype.  Hence, the |Spine| type shows up as a homogeneous
+type. While extending the Agda model to a full fledged Haskell
+implementation, together with van Putten~\cite{Putten2019}, we noted
+how this would severely limit the number of potential copy
+opportunities throghout patches. For example, imagine we want to
+patch the following values:
+
+\begin{myhs}
+\begin{code}
+data TA = TA X Y Z
+data TB = TB X Y Z
+
+diff (TA x y z) (TB x y z) =? SChg TA TB ...
+\end{code}
+\end{myhs}
+
+  Had we chosen a fully homogeneous |Spine| type, our only option would
+be the delete |TA|, then insert |TB|. This would be unsatisfactory as it
+would only allow copying of one of the fields --- as we shall see
+shortly, in \ref{sec:stdiff:diff:fixpoint} --- even though the natural
+patch is to copy the three fields. 
 
   The semantics of |Spine| are straightforward. Its application function
 is given by pattern matching on the provided value and checking it is
@@ -774,6 +794,121 @@ will always be a computationally inefficient process.
 \subsection{Naive enumeration}
 \label{sec:stdiff:naiveenum}
 
+  The simplest option for computing a patch that transforms
+a tree |x| into |y| is enumerating all possible patches and filtering
+our those with the smallest \emph{cost}, for some \emph{cost} metric.
+In this section, we will write a naive enumeration engine for 
+|PatchST| and look at how the definition of the notion of
+\emph{cost} brings a lot of tensions to the design, given
+we can always find counterexamples to intuitively reasonable
+\emph{cost} functions. 
+
+  The enumeration follows the Agda model~\cite{Miraldo2017}
+closely and is not very surprising. Just like on the linear case,
+the changes that can transform two values |x| and |y| of a given mutually
+recursive family into one another are the deletion of a constructor from |x|,
+the insertion of a constructor from |y| or changing the constructor
+of |x| into the one from |y|, by the means of a |Spine|. This
+is witnessed by the |enumAlmu| function below.
+  
+\begin{myhs}
+\begin{code}
+enumAlmu  :: Fix ki codes ix
+          -> Fix ki codes iy
+          -> [Almu ki codes ix iy]
+enumAlmu x y
+  =     enumDel (sop $ unFix x)  y
+   <|>  enumIns x                (sop $ unFix y)
+   <|>  Spn <$> enumSpn (snatFixIdx x) (snatFixIdx y) (unFix x) (unFix y)
+  where
+    enumDel (Tag c p) y0  = Del c <$> enumDelCtx p y0
+    enumIns x0 (Tag c p)  = Ins c <$> enumInsCtx x0 p
+\end{code} %$
+\end{myhs}
+
+  Enumerating a deletion context of a given product |p|
+against some fixpoint |y| consists in enuerating all the patches
+that transform one of the fields of |p| into |y|. Enumerating insertions
+contexts is analogous, therefore we only show |enumDelCtx| here.
+
+\begin{myhs}
+\begin{code}
+enumDelCtx  :: PoA ki (Fix ki codes) prod
+            -> Fix ki codes iy
+            -> [DelCtx ki codes iy prod]
+enumDelCtx Nil              _ = []
+enumDelCtx (NA_K x  :* xs)  f = T (NA_K x) <$> enumDelCtx xs f
+enumDelCtx (NA_I x  :* xs)  f
+  =  (flip H xs . AlmuMin)  <$> enumAlmu x f
+     <|> T (NA_I x)         <$> enumDelCtx xs f
+\end{code} %$
+\end{myhs}
+
+  The |AlmuMin| here is used to flag the resulting context as
+a deletion context.
+
+  Enumerating spines require some auxiliar parameters to determine
+which member of the family are we working over.
+
+\begin{myhs}
+\begin{code}
+enumSpn :: SNat ix -> SNat iy
+        -> Rep ki (Fix ki codes) (Lkup ix codes)
+        -> Rep ki (Fix ki codes) (Lkup iy codes)
+        -> [Spine ki codes (Lkup ix codes) (Lkup iy codes)]
+enumSpn six siy (sop -> Tag cx px) (sop -> Tag cy py)
+  = case testEquality six siy of
+      Nothing -> SChg cx cy <$> enumAl px py
+      Just Refl -> 
+        case testEquality cx cy of
+           Nothing   -> SChg cx cy <$> enumAl px py
+           Just Refl -> if eqHO px py
+                        then return Scp
+                        else SCns cx <$> mapNPM (uncurry' enumAt) (zipNP px py)
+\end{code} %$
+\end{myhs}
+
+  Alignment enumeration is analogous to the longest
+common subsequence enumeration, we must even care that
+the atoms are of the same type before choosing to synchronize
+them with |AX|.
+
+\begin{myhs}
+\begin{code}
+enumAl  :: PoA ki (Fix ki codes) p1
+        -> PoA ki (Fix ki codes) p2
+        -> [Al ki codes p1 p2]
+enumAl Nil Nil = return A0
+enumAl (x :* xs) Nil  = ADel x  <$> enumAl xs Nil
+enumAl Nil (y :* ys)  = AIns y  <$> enumAl Nil ys
+enumAl (x :* xs) (y :* ys)
+  =      (ADel x <$> enumAl xs (y :* ys))
+    <|>  (AIns y <$> enumAl (x :* xs) ys)
+    <|>  case testEquality x y of
+           Just Refl  -> AX <$> (enumAt x y) <*> enumAl xs ys
+           Nothing    -> mzero
+\end{code} %$
+\end{myhs}
+
+\subsubsection{The Cost Dynamics}
+
+  With a systematic way to produce a list of patches,
+|[Almu kappa codes ix iy]|, all that is left to the specification
+is to decide how to sort these patches. This is where
+we come to a problem. The notion of \emph{cost} is not
+as simple as in the linear or in the \emph{gdiff} case.
+
+  With the hability to copy entire trees, we must decide
+whether to prioritize the number of copies, essentially pushing them
+down to the leaves of the patch; or to copy large portions of 
+data by prefering copies that show up. Counting copies is not enough.
+
+
+
+
+
+
+
 \victor{I'm unsure whether we should spell out the details of the
 enumeration; it's pretty straightforward...}
 
@@ -781,13 +916,6 @@ enumeration; it's pretty straightforward...}
 around copy definitions: counting copies; depth of copies; size of copied subtrees etc;
 each definition will have corner cases}
 
-  The simplest option for computing a patch that transforms
-a tree |x| into |y| is enumerating all possible patches and filtering
-our those with the smallest \emph{cost}, for \emph{cost} an
-arbitrary metric.
-
-  It is straightforward to enumerate all possible patches,
-as we have done for our Agda model~\cite{Miraldo2017}. 
 
 \victor{
 Very slow; suffers from the same heuristic
