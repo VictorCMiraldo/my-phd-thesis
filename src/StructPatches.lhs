@@ -799,17 +799,16 @@ a tree |x| into |y| is enumerating all possible patches and filtering
 our those with the smallest \emph{cost}, for some \emph{cost} metric.
 In this section, we will write a naive enumeration engine for 
 |PatchST| and look at how the definition of the notion of
-\emph{cost} brings a lot of tensions to the design, given
-we can always find counterexamples to intuitively reasonable
-\emph{cost} functions. 
+\emph{cost} brings a lot of tensions to the design.
 
   The enumeration follows the Agda model~\cite{Miraldo2017}
-closely and is not very surprising. Just like on the linear case,
+closely and is not very surprising. Nevertheless, it does
+act as a good specification for a better implementation, later.
+Just like on the linear case,
 the changes that can transform two values |x| and |y| of a given mutually
 recursive family into one another are the deletion of a constructor from |x|,
 the insertion of a constructor from |y| or changing the constructor
-of |x| into the one from |y|, by the means of a |Spine|. This
-is witnessed by the |enumAlmu| function below.
+of |x| into the one from |y|, as witnessed by the |enumAlmu| function below.
   
 \begin{myhs}
 \begin{code}
@@ -826,29 +825,33 @@ enumAlmu x y
 \end{code} %$
 \end{myhs}
 
-  Enumerating a deletion context of a given product |p|
-against some fixpoint |y| consists in enuerating all the patches
-that transform one of the fields of |p| into |y|. Enumerating insertions
-contexts is analogous, therefore we only show |enumDelCtx| here.
+  Enumerating all the patches from a deletion context of a given product |p|
+against some fixpoint |y| consists in enumerating the patches 
+that transform all of the fields of |p| into |y|. The handling of insertion
+contexts is analogous, hence it is ommited here.
 
 \begin{myhs}
 \begin{code}
 enumDelCtx  :: PoA ki (Fix ki codes) prod
             -> Fix ki codes iy
             -> [DelCtx ki codes iy prod]
-enumDelCtx Nil              _ = []
-enumDelCtx (NA_K x  :* xs)  f = T (NA_K x) <$> enumDelCtx xs f
+enumDelCtx Nil              _  = []
+enumDelCtx (NA_K x  :* xs)  f  = T (NA_K x) <$> enumDelCtx xs f
 enumDelCtx (NA_I x  :* xs)  f
   =  (flip H xs . AlmuMin)  <$> enumAlmu x f
      <|> T (NA_I x)         <$> enumDelCtx xs f
 \end{code} %$
 \end{myhs}
 
-  The |AlmuMin| here is used to flag the resulting context as
-a deletion context.
+  Recall that the |AlmuMin| here is used to flag the resulting context as
+a deletion context. 
 
-  Enumerating spines require some auxiliar parameters to determine
-which member of the family are we working over.
+  Next we look into enumerating the spines between |x| and |y|, that is,
+changes to the coproduct structure from |x| to |y|. Differently
+from our Agda model, we need to know which elements of the mutually
+recursive family are being operated over. This will dictate which
+constructors from |Spine| we are allowed to use. We gather this
+information through two auxiliary |SNat| parameters.
 
 \begin{myhs}
 \begin{code}
@@ -868,10 +871,14 @@ enumSpn six siy (sop -> Tag cx px) (sop -> Tag cy py)
 \end{code} %$
 \end{myhs}
 
-  Alignment enumeration is analogous to the longest
-common subsequence enumeration, we must even care that
-the atoms are of the same type before choosing to synchronize
-them with |AX|.
+  Note how the choice of the spine operation is deterministic. Each
+situation is uniquely determined by a |Spine| constructor. Enumerating
+atoms, |enumAt|, is trivial. Atoms are either opaque types or recursive
+positions. Opaque types are handled by |TrivialK| and recursive positions
+are handled recursively by |enumAlmu|. Finally, alignments of products is analogous
+to the longest common subsequence. We must make sure that we only
+synchronize atoms with |AX| if they have the same type, though. 
+The |enumAl| is displayed below.
 
 \begin{myhs}
 \begin{code}
@@ -894,7 +901,21 @@ enumAl (x :* xs) (y :* ys)
 
   With a systematic way to produce a list of patches,
 |[Almu kappa codes ix iy]|, all that is left to the specification
-is to decide how to sort these patches. This is where
+is to decide which of these candidates patch is the best one and
+should be selected as the patch between two values.
+
+  Recall that on the longest common subsequence scenario,
+\Cref{sec:background:string-edit-distance}, the cost function was
+essentially counting insertions and deletions and the heuristics were
+to minizesaid count. Another way to look at it was to count possible
+copies and maxime it. This duality is not present on the tree world.
+Counting copies can be misleading: 
+\victor{is it really misleading though? We should just be counting
+isertions and deletions and minimizing them; our spine function does
+not even attempt to not porsue a copy}.
+
+
+ how to sort these patches. This is where
 we come to a problem. The notion of \emph{cost} is not
 as simple as in the linear or in the \emph{gdiff} case.
 
