@@ -912,6 +912,46 @@ enumAl (x :* xs) (y :* ys)
 is to decide which of these candidates patch is the best one and
 should be selected as the patch between two values.
 
+  In this case, we have two operations that can perform a similar
+task. They are insertions and deletions at the |Almu| level
+or |Spn (SChg c1 c2 al)|. The second clearly offers many more
+copy opportunities, and hence, should be preferred. \Cref{fig:stdiff:patch1}
+illustrated two trees |t1| and |t2|.
+Assuming the existence of a |diff| function that returns the
+best |PatchST| according to whatever cost metric in question. 
+We can write the two possible patches that transform |t1| into |t2|
+and we want to distinguish as:
+
+\begin{myhs}
+\begin{code}
+good  = Spn (SChg Bin Tri (AX (diff a a') (AIns c (AX (diff b b') A0))))
+
+bad   = Del Bin (There a  (Here
+            (Ins Tri (There a' (There c (Here (diff b b') [] End)))) End))
+\end{myhs}
+\end{code}
+
+
+\begin{figure}
+\centering
+\subfloat[Source tree, |t1|]{%
+\begin{forest}
+[ |Bin| [a] [b] ]
+\end{forest}\qquad
+\label{fig:stdiff:patch1-a}
+}%
+\qquad 
+\subfloat[Destination tree, |t2|]{%
+\begin{forest}
+[ |Tri| [a'] [c] [b'] ]
+\end{forest}\qquad
+\label{fig:stdiff:patch1-b}}
+\caption{Source when destination where we clearly prefer an |Spn (SChg _ _ _)| over 
+|Ins Tri (dots (Del Bin dots) dots)|}
+\label{fig:stdiff:patch1}
+\end{figure}
+
+
   Recall that on the longest common subsequence scenario,
 \Cref{sec:background:string-edit-distance}, the cost function was
 essentially counting insertions and deletions and the heuristics were
