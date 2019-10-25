@@ -753,7 +753,15 @@ zipRep r s = case (sop r , sop s) of
 \end{code}
 \end{myhs}
 
-  \victor{explain |testEquality|}
+ We use |testEquality| from |Data.Type.Equality| to check for type index equality 
+and inform the compiler of that fact by matching on |Refl|.
+%% 
+%%   The |testEquality| function, from |Data.Type.Equality|, tests type indices
+%% for propositional equality. It has type |f x -> f y -> Maybe (x :~: y)|,
+%% where |(:~:)| is a datatype with a single constructor, |Refl :: x :~: x|.
+%% This is analogous to how the majority of dependently typed languages
+%% handle propositional equality. In Haskell, we declare the functors that
+%% support decidable equality on their indexes through the |TestEquality| typeclass. 
 
   Finally, we can start assembling these basic building blocks into
 more practical functionality. For example, \Cref{fig:gp:genericeq} shows
@@ -762,7 +770,7 @@ the definition generic propositional equality using \texttt{generics-mrsop}.
 \begin{figure}
 \begin{myhs}
 \begin{code}
-geq  ::  (Family kappa fam codes) 
+geq  ::  (EqHO kappa , Family kappa fam codes) 
      =>  (forall k dot kappa k -> kappa k -> Bool) 
      ->  El fam ix -> El fam ix -> Bool
 geq eq_K x y = go (deepFrom x) (deepFrom y)
@@ -774,6 +782,31 @@ geq eq_K x y = go (deepFrom x) (deepFrom y)
 \caption{Generic equality}
 \label{fig:gp:genericeq}
 \end{figure}
+
+  Here the |EqHO| typeclass is a lifted version of |Eq|, for types
+of kind |k -> Star|, defined below. The library also provide 
+|ShowHO|, the |Show| counterpart.
+
+\begin{myhs}
+\begin{code}
+class EqHO (f :: a -> Star) where
+  eqHO :: forall x . f x -> f x -> Bool
+\end{myhs}
+\end{code}
+
+  We decided to provide and keep this custom equality in
+\texttt{generics-mrsop} for two main reasons. Firstly, when we started
+developing the library the
+\texttt{-XQuantifiedConstraints}~\cite{Bottu2017} extension was not
+completed.  Yet, once quantified constraints was available in Haskell
+we wrote \texttt{generics-mrsop-2.2.0} using the extension and
+defining |EqHO f| as a synonym to |forall x . Eq (f x)|.  Developing
+applications on top of \texttt{generics-mrsop} became more difficult.
+The user now would have to reason about and pass around complicated
+constraints down datatypes and auxiliary functions. Moreover, our use
+case was very simple, not extracting any of the advantages of
+quantified constraints. Eventually decided to rollback to the lifted
+|EqHO| presented above in \texttt{generics-mrsop-2.3.0}.
 
 \section{Advanced Features}
 \label{sec:gp:advancedfeatures}
@@ -824,7 +857,7 @@ based on the height of the (generic) trees it handles. Calling
 |height| at each of those decision points will be time consuming.
 It is much better to compute the height of a tree only once and keep
 the intermatiary heights annotated in their respective subtrees.
-We can easily do so with a \emph{cofree comonad}\victor{cite that!}
+We can easily do so with a \emph{cofree comonad}~\cite{Ghani2001}
 similar to |Fix|:
 
 \begin{myhs}
@@ -838,6 +871,63 @@ data AnnFix (kappa :: k -> Star) (codes :: P [ P [ P [Atom k]]]) (phi :: Nat -> 
   A very common programming technique to speed up computations is to
 keep auxiliary values around, as annotations in a larger structure.
 In this way, 
+
+\subsection{Values with Holes}
+\label{sec:gp:holes}
+
+  Dually to annotated fixpoints, we can borrow the \emph{free monad}
+arising from term algebras to represent values with \emph{holes}
+inside of them. Oftentimes one needs to represent and work over these
+values of a given mutually recursive family annotated with
+(meta)variables, which we call \emph{holes}.  Think of unification,
+for example. When performing generic unification-like tasks. We must
+be able to replace entire subtrees by holes and vice-versa. Adding
+support for this type of functionality is another instance of the
+engineering effort that was put into \texttt{generics-mrsop} to make
+it expressive enough to write our differencing algorithms on.
+
+  Recall a value of mutually recursive family can be represented by
+our least fixpoint construction, |Fix|. In order to represent holes inside
+our value all we have to do is to make our fixpoint a coproduct, which
+indicates that recursive positions are either a hole or one layer with
+a constructor, its fields and recursive positions which are, again, either
+a hole or another layer. This is dual to annotated fixpoints in the sense
+that now we are interested in a free monad, compared to the cofree comonad
+from annotated fixpoints. Nevertheless, 
+
+\begin{myhs}
+\begin{code}
+newtype Fix' phi kappa codes ix = Fix' (Sum phi (Rep ki (Fix' phi kappa codes)) ((P I) ix))
+\end{code}
+\end{myhs}
+
+  Here, |phi| is the type of holes. The |Fix'| type has a subtle shortcomming, however.
+It does not allow for holes to be placed in the place of opaque types. To do so, 
+we must actually replace the |NA ki (Fix' phi kappa codes)| inside the |Rep|resentation
+with a coproduct. This is more easily done writing a custom datatype from scratch
+instead of reusing |Rep| and its friends.
+
+  The |Holes| datatype unfolds the sum layer into an explicit constructor
+and a product of fields, where we can use |Holes| again to interpret the codes.
+
+\begin{myhs}
+\begin{code}
+ data Holes :: (kon -> Star) -> [[[Atom kon]]] -> (Atom kon -> Star) -> Atom kon -> Star
+    where
+  Hole   :: phi at  -> HolesAnn ann kappa codes phi at
+  HOpq   :: kappa k -> HolesAnn ann kappa codes phi ((P K) k)
+  HPeel  :: (IsNat n , IsNat i)
+         => Constr (Lkup i codes) n
+         -> NP (Holes kappa codes phi) (Lkup n (Lkup i codes))
+         -> HolesAnn kappa codes phi ((P I) i) 
+\end{code}
+\end{myhs}
+
+  Note that the |Hole| constructor allows for a hole to be placed on a recursive position
+or on an opaque type, by not restricting its type index. We can disallow holes on opaque
+values, for example, by passing a custom datatype to |phi| that does so.
+
+  \victor{More info here; show conversion functions; talk about $LCP$ and anti-unification}
 
 \subsection{Template Haskell}
 \label{sec:gp:templatehaskell}
@@ -1095,11 +1185,6 @@ instance HasDatatypeInfo Singl FamRose CodesRose Z where
     $  (Constructor "Fork") :* NP0
 \end{code} %$
 \end{myhs}
-
-\subsection{Values with Holes}
-\label{sec:gp:holes}
-
-  \victor{Should we talk about the |Holes| type?}
 
 \section{Well-Typed Tree Differencing} 
 \label{sec:gp:well-typed-tree-diff}

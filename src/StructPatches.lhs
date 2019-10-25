@@ -71,19 +71,16 @@ we discuss the |diff| function in \Cref{sec:stdiff:diff}, which comprises
 a significant drawback of the \texttt{stdiff} approach for
 its computational complexity. 
 
-  The contributions in this chapter arises from joint
-published work with Pierre-Evariste Dagand~\cite{Miraldo2017} which later
-evolved into an \href{https://github.com/VictorCMiraldo/stdiff}{Agda repository}%
-\footnote{https://github.com/VictorCMiraldo/stdiff}. The code presented here however
-is based on Arian's translation of our Agda repository to Haskell as part of
-his Master thesis work. 
-\victor{We chose to use a single programming language bla bla bla}
-
-\victor{|PatchST| also suffers from the ambiguity problem; Arian used
-heuristics; the code presented here is his; even with \texttt{gdiff-as-a-service}
-the performance was bad for real life}.
-
-\victor{Code is here: \url{https://github.com/arianvp/generics-mrsop-diff/blob/master/src/Generics/MRSOP/Diff.hs}}
+  The contributions in this chapter arises from joint published work
+with Pierre-Evariste Dagand~\cite{Miraldo2017} which later evolved
+into an \href{https://github.com/VictorCMiraldo/stdiff}{Agda
+repository}% 
+\footnote{https://github.com/VictorCMiraldo/stdiff}. The
+code presented here however is based on Arian's translation of our
+Agda repository to Haskell as part of his Master thesis work. We chose
+to present all of our work in a single programming language in an
+effort to lower the burden on the reader on having to learn different
+notations for the same concepts.
 
 \victor{Shall we present things with or without |kappa|? I'm leaning
 towards without}
@@ -92,14 +89,15 @@ towards without}
 \label{sec:stdiff:patches}
 
   The |PatchST| type is but an intensional model for
-patches over mutually recursive families. We will be using the
-\texttt{generics-mrsop} library (\Cref{chap:generic-programming})
-throughout the exposition. We first consider a single layer of datatype,
+patches over mutually recursive families. 
+We start by considering a single layer of datatype,
 \ie, a single application of the datatypes pattern functor. 
 In \Cref{sec:stdiff:diff:fixpoints} we extend this treatment to recursive datatypes,
 essentially by taking the fixpoint of the constructions in \Cref{sec:stdiff:diff:functors}.
+The \texttt{generics-mrsop} library (\Cref{chap:generic-programming})
+will be used throughout the exposition. 
 
-  A datatype, when seen through its initial
+  Recall that a datatype, when seen through its initial
 algebra~\cite{initial-algebra} semantics, can be seen as an infinite
 sucession of applications of its pattern functor, call it $F$, to
 itself: $\mu F = F (\mu F)$. The \texttt{stdiff} approach to
@@ -217,8 +215,15 @@ and has type |f a -> f b -> Maybe (a :~: b)|.
   Note that we must pass two |SNat| arguments to disambiguate
 the |ix| and |iy| type variables. Without those arguments, these
 variables would only appear as an argument to a type family, which
-may not be injective.
-\victor{Explain singletons somewhere}
+may not be injective. The solution is to use the |SNat| singleton~\cite{Eisenberg2012}.
+
+\begin{myhs}
+\begin{code}
+data SNat :: Nat -> Star where
+  SZ  ::            SNat  (P Z)
+  SS  :: SNat n ->  SNat  ((P S) n)
+\end{code}
+\end{myhs}
 
   Whereas the previous section showed how to match the
 \emph{constructors} of two trees, we still need to determine how to
@@ -456,8 +461,12 @@ insCtx (T a ctx)  v  = (a :*)            <$$> insCtx ctx v
 
   The deletion function discards any information we have about all the
 constructor fields, except for the subtree used to continue the patch
-application process. This greatly increases the domain of
-the application function. \victor{this deserves more info...}
+application process. This is a consequence of our design decision, at the time,
+of having application functions with the largest possible domain. 
+Intuitively, the deletion context identifies the only field that
+should not be deleted. By not checking whether the elemetns 
+we are applying to match the ones that should be deleted, we get
+an application function that applies to more elements for free.
 
 \begin{myhs}
 \begin{code}
@@ -474,7 +483,6 @@ delCtx (T a ctx)   (at      :* p) = delCtx ctx p
 nothing but selecting whether we should use the spine
 functionality or insertion and deletion of a context.
 
-\victor{Did we even explain |EqHO|?}
 \begin{myhs}
 \begin{code}
 applyAlmu  :: (IsNat ix, IsNat iy, EqHO kappa)
