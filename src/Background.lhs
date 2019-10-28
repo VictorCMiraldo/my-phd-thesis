@@ -16,6 +16,8 @@ up in many different areas.
 
   For more, check surveys \cite{Bille2005,Paassen2018}
 
+  tree merging: 3DM~\cite{Lindholm2004,Vassena2016}
+
 \section{Tree Edit Distance}
 \label{sec:background:tree-edit-dist}
 
@@ -107,7 +109,7 @@ shows the implementation of the edit script with the minimum Levenshtein distanc
 \begin{figure}
 \begin{myhs}
 \begin{code}
-lev :: String -> String -> [EOp]
+lev :: String -> String -> [EditOp]
 lev []      []      = []
 lev (x:xs)  []      = Del x : lev xs []
 lev []      (y:ys)  = Ins y : lev [] ys
@@ -144,29 +146,35 @@ lev "ab" "ba" =?  [ Del 'a' , Subst 'b' 'b' , Ins 'a']
 \end{myhs}
 
   From a edit distance point of view, there is not an issue. The Levenshtein
-distance between |"ab"| and |"ba"| is 2. But from an operational point of view,
-in which we are interested in transforming one string into another, this ambiguity
-poses a problem. There is no criteria to prefer one edit script over another.
-\victor{more...}
+distance between |"ab"| and |"ba"| is 2, regardless of the edit
+script chosen. But from an operational point of view,
+, \ie, transforming one string into another, this ambiguity
+poses a problem. The lack of creiteria to prefer one edit script over another
+means that the result of the differencing algorithm is hard to predict.
+Consequently, developing a satsifactory merging algorithm becomes a difficult task.
+
+  In practice, we are interested on the \emph{Longest Common Subsequence (LCS)},
+which is a restriction of the Levenshtein distance. The LCS problem provides
+the specification to the \unixdiff{}~\cite{McIlroy1976} utility.
 
 \subsubsection*{Longest Common Subsequence}
 
-  The LCS can be seen as a restriction of the Levenshtein distance, in
-which it only considers identity substitutons, that is, |Subst x y|
-with |x == y|. It is different from the longest common substring
-problem for subsequences need not be contiguous. The LCS metric
-is the base for the \unixdiff{}~\cite{McIlroy1976} utility and therefore,
-particularly interesting for us.
+  If we take the |lev| function and modify it in such 
+a way to only considers identity substitutons, that is, |Subst x y|
+with |x == y|, we end up with a function that computes the
+classic longest common subsequence. It is different from the longest common substring
+problem for subsequences need not be contiguous. 
 
   The \unixdiff{}~\cite{McIlroy1976} performs a slight generalization
 of the LCS problem by considering the distance between two \emph{files}, seen as a list of
-\emph{strings}, opposed to a list of \emph{characters}.
+\emph{strings}, opposed to a list of \emph{characters}. Hence, the edit operations
+become:
 
 \begin{myhs}
 \begin{code}
 data EditOp = Ins String | Del String | Cpy
 
-cost :: EOp -> Int
+cost :: EditOp -> Int
 cost (Ins _)  = 1
 cost (Del _)  = 1
 cost Cpy      = 0
@@ -201,9 +209,10 @@ lcs (x:xs)  (y:ys)  =
 Running the |lcs x y| function, \Cref{fig:background:string-lcs}, will yield an
 \emph{edit script} that enables us to read out one longest common subsequence of |x| and
 |y|. Note that the ambituity problem is still present. We do have
-slightly less ambituigy than with the Levenshtein distance, though.
+less ambituigy than with the Levenshtein distance.
 In this case, there are only two edit scripts with minimum cost
-on |lcs ["a", "b"] ["b" , "a"]|.
+on |lcs ["a", "b"] ["b" , "a"]|. The ambiguity is not gone, however.
+In fact, this is a general problem with any \emph{edit-script} based approaches.
 
   A practical implementation of the \unixdiff{} will use a number of
 algorithmic techniques that make it performant. For starter, it is
@@ -215,18 +224,19 @@ situations.  One example is the \texttt{diff --patience} algorithm~\cite{patienc
 that will emphasize the matching of lines that appear only once in the
 source and destintion files.
 
-\victor{More detail? Less detail?}
- 
 \subsection{Classic Tree Edit Distance}
 \label{sec:background:tree-edit-distance}
 
   The \unixdiff{} conceptually generalizes the notion of string edit
-distance to a notion of edit distance between two arbitrary lists.
-The notion of (untyped) tree edit
+distance to a notion of edit distance lists containing data of arbitrary types.
+The only requirement being that we must be able to compare this data for equality.
+Next, we would like to generalize on the shape that this data comes in.
+That is where the notion of (untyped) tree edit
 distance~\cite{Akutsu2010,Demaine2007,Klein1998,Bille2005,Autexier2015,Chawathe1997}
-goes one step further, and considers \emph{arbitrary} trees as the
-objects under scrutiny. Because of that, there is a lot of freedom on
-the edit operations that we can consider in this untyped scenario. To
+comes in. It considers \emph{arbitrary} trees as the
+objects under scrutiny. This added degree of freedom carries over
+to the design of edit operations. Suddenly, there are many more edit
+operations one could conceive to compose ones edit scripts. To
 name a few we can have flattening insertions and deletions, where the
 children of the deleted node are inserted or removed in-place in the
 parent node. Another operation that only exists in the untyped world
@@ -404,11 +414,61 @@ one can always compute an edit script from a tree mapping.
   \item typed approach is very hard to merge
 \end{enumerate}}
 
-\section{Three-Way Merging}
-\label{sec:background:three-way-merging}
+\section{Synchronizing Changes}
+\label{sec:background:synchronizing-changes}
 
-\victor{I should write a page or twoabour \texttt{diff3}?}
+  When aplplying differencing algorithms to help in managing local
+copies of replicated data, such as in software version control
+systems, one is inevitably faced with the problem of
+\emph{synchronizing}~\cite{Balasubramaniam1998} or \emph{merging}
+changes --- when an offline machine goes online with new versions,
+when two changes happened simultaneously, etc. The \emph{synchronizer}
+is responsible to recognize changes and reconcile them in the most
+automatic way possible.  Modern synchronizers are denoted
+\emph{state-based}, that is, they see only the current version of the
+replicas to be synchronized and the last common version between the
+diverging histories. The \texttt{diff3} is still the best known tool
+for textual synchronization. It was developed by Randy Smith in 1988.
+The algorithm itself has received some formal
+treatment~\cite{Khanna2007} and some generalizations to tree shaped
+data~\cite{Lindholm2004,Vassena2016}.
 
+  Generally speaking, synchronization of changes can be seen in one of two ways,
+as illustrated by \Cref{fig:background:mergesquare}.
+\Cref{fig:background:mergesquare-resid} shows a residual system~\cite{Terese2003}
+approach whereas \Cref{fig:background:mergesquare-threeway} illustrates
+a direct approach, such as used by the \texttt{diff3} utility.
+
+\begin{figure}
+\centering
+\subfloat[Residual based merge operation]{%
+\qquad $$
+\xymatrix{ & o \ar[dl]_{p} \ar[dr]^{q} & \\
+          a \ar[dr]_{|merge q p|} & & b \ar[dl]^{|merge p q|} \\
+            & c &}
+$$ \qquad
+\label{fig:background:mergesquare-resid}}%
+\qquad%
+\subfloat[Three-way based merge operation]{%
+\qquad $$
+\xymatrix{ & o \ar[dl]_{p} \ar[dr]^{q} \ar[dd]^(0.8){|merge p q|} & \\
+          a & & b \\
+            & c &}
+$$ \qquad
+\label{fig:background:mergesquare-threeway}}
+\caption{Two different ways to look at the merge problem.}
+\label{fig:background:mergesquare}
+\end{figure}
+
+  The residual approach tends to be more involved in the sense
+that a residual system~\cite{Terese2003} is a well studied algebraic structure.
+To prove that the |merge| operation makes a residual system over patches
+is a non-trivial exercise. A particular difficulty comes from proving
+the relation of |merge| and patch composition.
+
+\victor{I wonder the level of detail we should put in here; Should we go in depth
+about the diff3 algorithm?}
+  
 \section{Generic Programming}
 \label{sec:background:generic-programming}
 

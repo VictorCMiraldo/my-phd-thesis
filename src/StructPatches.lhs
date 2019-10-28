@@ -1,4 +1,3 @@
-\newcommand{\ie}{i.e.}
 
   When working with \texttt{gdiff}-style patches, where a patch that
 transforms a list of trees |xs| into a list of trees |ys| is given by
@@ -928,8 +927,8 @@ good  = Spn (SChg Bin Tri (AX (diff a a') (AIns c (AX (diff b b') A0))))
 
 bad   = Del Bin (There a  (Here
             (Ins Tri (There a' (There c (Here (diff b b') [] End)))) End))
-\end{myhs}
 \end{code}
+\end{myhs}
 
 
 \begin{figure}

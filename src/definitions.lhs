@@ -46,4 +46,5 @@
 %% Denotations
 
 \newcommand{\unixdiff}{\texttt{UNIX diff}}
+\newcommand{\ie}{i.e.}
 

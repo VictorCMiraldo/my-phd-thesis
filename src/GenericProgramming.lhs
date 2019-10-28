@@ -791,8 +791,8 @@ of kind |k -> Star|, defined below. The library also provide
 \begin{code}
 class EqHO (f :: a -> Star) where
   eqHO :: forall x . f x -> f x -> Bool
-\end{myhs}
 \end{code}
+\end{myhs}
 
   We decided to provide and keep this custom equality in
 \texttt{generics-mrsop} for two main reasons. Firstly, when we started
