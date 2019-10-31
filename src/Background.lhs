@@ -433,8 +433,16 @@ The algorithm itself has received some formal
 treatment~\cite{Khanna2007} and some generalizations to tree shaped
 data~\cite{Lindholm2004,Vassena2016}.
 
-  Generally speaking, synchronization of changes can be seen in one of two ways,
-as illustrated by \Cref{fig:background:mergesquare}.
+  Generally speaking, synchronization of changes $p$ and $q$ can be modelled in one
+of two ways. Either we produce one change that works on the common
+ancestor of $p$ and $q$, \Cref{fig:background:mergesquare-threeway}, or we produce two changes
+that act directly on the images of $p$ and $q$, \Cref{fig:background:mergesquare-resid}.
+We often call the the former a \emph{three-way merge} and the later a \emph{residual} merge.
+
+  Residual merges, specially if based on actual residual systems~\cite{Terese2003}
+pose a few technical challenges --- proving the that the laws required for 
+estabilishing an actual residual system is non trivial.
+
 \Cref{fig:background:mergesquare-resid} shows a residual system~\cite{Terese2003}
 approach whereas \Cref{fig:background:mergesquare-threeway} illustrates
 a direct approach, such as used by the \texttt{diff3} utility.
