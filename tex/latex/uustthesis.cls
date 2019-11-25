@@ -304,20 +304,20 @@ I'll pass it to 'book' just in case.}
 \begin{center}
 %%%%%%%%%%%%%
 %% Headings
-  \vspace*{0.11\paperheight} % 2cm on b5
+  \vspace*{0.08\paperheight} % 
   \begin{LARGE}
   {\bf \@title}
   \end{LARGE}
-  \vspace*{0.08\paperheight} % 1.5cm on b5
+  \vspace*{0.08\paperheight} %
   
   \begin{Large}
   \@titleDUTCH
-  \vspace{0.008\paperheight} % 0.2cm on b5
+  \vspace{0.008\paperheight} % 
 
   (met een samenvatting in het Nederlands)
   \end{Large}
 
-  \vspace{0.19\paperheight} % 4.7cm on b5
+  \vspace*{0.17\paperheight} %
   
   Proefschrift
 
@@ -331,15 +331,11 @@ I'll pass it to 'book' just in case.}
   % op maandag 23 april 2018 des ochtends te 10.30 uur
   \end{tabular}
 
-  \
-
   door
 
   \
 
   {\Large \@author}
-
-  \
 
   geboren op \@authorbirthdate \\
   te \@authorbirthplace
