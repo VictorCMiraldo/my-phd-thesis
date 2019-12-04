@@ -1,4 +1,4 @@
-\documentclass[10pt,b5paper]{uustthesis}
+\documentclass[10pt,b5paper,draft,noseaweed]{uustthesis}
 %% Remove the 'noseaweed' option to draw the fractal
 %% at the section headings. This slows compilation down, though.
 
@@ -43,16 +43,8 @@
 Thanks to family, supervisor, friends and hops!
 
 \chapter{Abstract}
-Some amazing abstract should come here.
-Some amazing abstract should come here.
-Some amazing abstract should come here.
-Some amazing abstract should come here.
-Some amazing abstract should come here.
-Some amazing abstract should come here.
-Some amazing abstract should come here.
-Some amazing abstract should come here.
-Some amazing abstract should come here.
-Some amazing abstract should come here.
+\lhsinclude{Abstract.lhs}
+%include src/Abstract.lhs
 
 \chapter{Sammenvatting}
 Sommige goed samenvatting in het Nederlands.
