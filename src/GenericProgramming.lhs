@@ -1,6 +1,19 @@
+  In order to implement our prototyes and explore our ideas on
+differencing of abstract syntax trees, we musto improve support for
+programming with mutually recursive families in Haskell first,
+which is the main concern of this chapter.  The
+\texttt{generics-mrsop} is in the intersection of both the
+expressivity of \texttt{multirec}~\cite{Yakushev2009}, allowing the encoding of mutually
+recursive families, with the convenience of the more modern
+\texttt{generics-sop}~\cite{deVries2014} style. In fact, it is worth noting that neither
+of the aforementioned libraries \emph{compete} with out work. We
+extend both in orthogonal directions, resulting in a new design
+altogether, that takes advantage of some modern Haskell extensions
+that the authors of the previous work could not enjoy, as discussed in
+\Cref{sec:background:generic-programming}.
 
-  The syntax of many programming languages,
-for instance, is expressed naturally using a mutually recursive
+  The syntax of many programming languages
+is expressed naturally using a mutually recursive
 family. Consider Haskell itself, one of the possibilities of an
 expression is to be a |do| block, while a |do| block itself is
 composed by a list of statements which may include expressions.
@@ -12,7 +25,7 @@ data Stmt  = Assign Var Expr | Let Var Expr
 \end{code}
 \end{myhs}
 
-Another example is found in HTML and XML documents. 
+  Another example is found in HTML and XML documents. 
 They are better described by a Rose tree, 
 which can be described by this family of datatypes:
 
@@ -23,7 +36,7 @@ data []    a  =  [] | a : [a]
 \end{code}
 \end{myhs}
 
-The mutual recursion becomes apparent once one instantiaties |a| to some
+  The mutual recursion becomes apparent once one instantiaties |a| to some
 ground type, for instance:
 
 \begin{myhs}
@@ -32,20 +45,11 @@ data RoseI  =  Fork Int ListI
 data ListI  =  Nil | RoseI : ListI
 \end{code}
 \end{myhs}
-  
-  In order to implement our prototyes and explore our ideas on
-differencing abstract syntax trees, we had to improve that support for
-programming with mutually recursive families.  The
-\texttt{generics-mrsop} is in the intersection of both the
-expressivity of \texttt{multirec}, allowing the encoding of mutually
-recursive families, with the convenience of the more modern
-\texttt{generics-sop} style. In fact, it is worth noting that neither
-of the aforementioned libraries \emph{compete} with out work. We
-extend both in orthogonal directions, resulting in a new design
-altogether, that takes advantage of some modern Haskell extensions
-that the authors of the previous work could not enjoy, as discussed in
-\Cref{sec:background:generic-programming},
 
+  The rest of this chapter is concerned with extending the existing
+generic programming capabilities of Haskell to mutually recursive
+types.
+  
 \section{Explicit Fixpoints}
 \label{sec:gp:explicitfix}
 

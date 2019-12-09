@@ -1,10 +1,6 @@
 
-\victor{This is some loose paragraphs that need gluing}
-
   Version Control is an essential technique for any kind of distributed
-collaborative work. 
-
-  Any form of distributed collaborative work must address the situation
+collaborative work. And, as any form of distributed work it must address the situation
 where two maintainers changed a piece of information in seemingly
 different ways. One option is to lock further edits until a human
 decides how to reconcile the changes, regardless of the changes. 
@@ -80,7 +76,7 @@ under comparison should dictate the granularity of change to be
 considered. This is precisely the goal of \emph{structural
 differencing} tools.
 
-  If we reconsider the example aboce, we could give a more accurate
+  If we reconsider the example above, we could give a more accurate
 description of the modification made to the |head| function by
 describing the changes made to the constituent declarations and
 expressions:
@@ -92,7 +88,9 @@ head (x :: xs) \{+d+\} = x
 There is more structure here than mere lines of text. In particular,
 the granularity is at the abstract syntax elements level.
 
-  In general, we aim to compute the difference between two values
+  \Cref{chap:structural-patches,chap:pattern-expression-patches}
+explores two different ways of representing changes to the granularity of the
+example above. In general, we aim to compute the difference between two values
 of type |a|, and represent these changes in some type, |Patch a|.  The
 |diff| function computes these differences between two values of type
 |a|, and |apply| attempts to transform one value according to the
@@ -125,6 +123,11 @@ copies that transform the source into the destination and choose the
 `best' one. This design has some challenges at its core as we 
 can see in \Cref{sec:background:string-edit-distance}.
 
+  \victor{I'd like to talk a bit about other areas where 
+diffing can be interesting, i.e., biology; Should it go here?
+I'm leaning towards leaving them on the discussion section
+at the end.}
+
 \subsection{Literature Review}
 
   Tree-differencing shows up in many different areas, from Computational Biology,
@@ -150,86 +153,38 @@ algorithms with a number of different edit operations.
   GumTree~\cite{Falleri2014}
 
   Refactoring Tools~\cite{Tonder2019} and a plethora of domain specific tools,
-such as \texttt{latexdiff}~\cite{LatexDiff}
- 
-\section{Chronology of Contributions} 
+such as \texttt{latexdiff}~\cite{LatexDiff} 
+
+\section{Contributions} 
 \label{sec:intro:contributions}
 
-  This thesis arises from a number of contributions.  In this section
-we summarize their contributions and direct the reader to the relevant
-chapter for more information. \Cref{chap:generic-programming,
-chap:structural-patches, chap:pattern-expression-patches} contain our
-scientific contributions whereas the rest of the thesis contains
-general discussions.  Here we outline the thesis in its chronological
-order, instead of chapter order.
+  Next we outline the provenance of
+the constributions on which this thesis is built upon.
 
-  In \Cref{chap:background} one can find some preliminary important
-notions underlying the topic of generic structural differencing. We
-start by reviewing the \emph{longest common subsequence} algorithm,
-then showing how it generalizes to (untyped) trees and finish with a
-short summary of how we enforce well-typedness onto said
-generalization. We also provide some background on generic
-programming, mainly explaining the existing approaches that led to our
-developments.
+\begin{enumerate}
+  \item \Cref{chap:generic-programming} discusses the 
+\texttt{generics-mrsop}~\cite{Miraldo2018} library, which improves
+the Haskell ecosystem with combinator-based generic programming for
+mutually recursive families. This work came out of close
+collaboration with Alejandro Serrano on a variety of
+generic programming topics.
 
-  \Cref{chap:structural-patches} portrays my first research visti.
-Back in October of 2016 I made my first visit to Pierre-\'{E}variste
-Dagand, where we worked on our first attempt on datatype-generic,
-type-safe differencing~\cite{Miraldo2017}. This work consisted mainly
-in crafting a representation for patches that could distance itself
-from edit-scripts and better exploit the structure of the datatype in
-question. Up to this point, all of our work was done in the Agda
-programming language. Much later, in 2018, Arian van
-Puten~\cite{Putten2019} adapted our Agda code into Haskell as part of
-his Master thesis, implementing a few of our ideas on how to tackle
-the computation of patches. We base the presentation in
-\Cref{chap:structural-patches} on Arian's code, keeping the
-programming language consistent throughtout this thesis. Nevertheless,
-\Cref{chap:structural-patches} explores a definition of patches for
-arbitrary mutually recursive types that support a simple merging
-algorithm.  This algorithm has been proven to correctly merge disjoint
-patches, but the computation of patches was still a challange.
+  \item \Cref{chap:structural-patches} is derived from a published
+joint collaboration \cite{Miraldo2017} with Pierre-\'{E}variste 
+Dagand. We worked closely together to define a type-indexed datatype
+used to represent changes in a more structured way than edit-scripts.
+\Cref{chap:structural-patches} goes further onto developing
+a merging algorthm and exploring different ways to compute 
+patches given two concrete values.
 
-  After my first visit to Paris, it was clear that we needed some
-better way of computing patches if we ever wanted a practical approach
-to structural differencing. Any algorithm slower than amortized linear
-time would be too much for a tool supposed to be called many times
-during the process of developing software. This would require a
-significant re-engineering of our algorithms and a change of
-programming language. It was time to rely to Haskell as our main
-language. For that, however, we would need to create our own generic
-programming tools. Together with Alejandro Serrano, we wrote and
-published the \texttt{generics-mrsop}~\cite{Miraldo2018} library.
-\Cref{chap:generic-programming} explains how the
-\texttt{generics-mrsop} and shows its streamlined generic programming 
-capabilities for mutually recursive families.
+  \item \Cref{chap:pattern-expression-patches} comes as the refinement
+of our paper~\cite{Miraldo2019} on an efficient algorithm for
+computing patches, where we attempt to tackle the problems from
+\Cref{chap:structural-patches} with a different representation
+for patches altogether.
 
-  With \texttt{generics-mrsop} at hand, the cost of creating prototypes
-suddenly decreased significantly. In middle 2018 we decided to try
-a radically different approach. Instead of modelling the patches first
-then attempting to write an efficient algorithm that could compute
-said patches, we started with writing a fast algorithm and explore what
-are the patch definitions that would arise from it. 
-\victor{bla... bla... bla..}
-
-\subsection*{Summary of Papers}
-\label{sec:intro:paper-summary}
-
-  \Cref{chap:generic-programming} introduces the generic programming library we
-have developed, \texttt{generics-mrsop}~\cite{Miraldo2018}. This library enabled
-us to represent and manipulate mutually recursive families of datatype in Haskell, being the backbone of our differencing algorithms.
-
-  During our period studying differeinving, two approaches have stood out. 
-In \Cref{chap:structural-patches} we look into our first attempt at representing
-patches~\cite{Miraldo2017}. This work was developed in Agda and later translated to Haskell using by A. van Putten~\cite{Putten2019}, during his Master Thesis.
-\victor{mention Giovanni?}
-\victor{Polish; present ins and outs}
-
-\victor{mention trips to Paris}
-
-  Finally, whilst on the quest of searching for an efficient algorithm,
-we forked into a radically different approach, explored in \Cref{chap:pattern-expression-patches}.
-
+  \item \victor{Hopefully we will publish something on experiments?}
+\end{enumerate}
 
 % chapter X is based on paper Y, which was wrote with Alice and Bob
 % and my contribution is Z to that paper.

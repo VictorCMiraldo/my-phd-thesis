@@ -1,3 +1,16 @@
+  Computing and representing differences in a finer granularity than
+\emph{lines-of-code} can be readily achieved with the existing
+technology by parsing the data into a tree and later flattening
+said tree into a list of nodes, where we can then reuse existing techniques.
+To an extend, this is how classical tree edit distance works,
+as we shall see in \Cref{sec:background:tree-edit-distance}.
+
+  Recycling linear edit distance into tree edit distance, however,
+comes with some drawbacks. There include computationally expensive
+algorithms as a result of ambiguity in the representation of patches;
+complex merging algorithms which might produce ill-typed trees as a
+result~\cite{Vassena2016}.
+
 \victor{
 Planned Skeleton
 \begin{itemize}
@@ -18,7 +31,7 @@ up in many different areas.
 
   tree merging: 3DM~\cite{Lindholm2004,Vassena2016}
 
-\section{Tree Edit Distance}
+\section{Edit Distances}
 \label{sec:background:tree-edit-dist}
 
 \victor{this is bad; I need a better intro to it}

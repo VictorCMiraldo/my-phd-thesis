@@ -1,7 +1,17 @@
+  The \texttt{gdiff} approach -- which flattens a tree
+into a list, like classical tree edit distance algorithms,
+but provides type-safe edit scripts -- borrows the problems
+of edit-script based approaches. These include ambiguity on the
+representation of patches, non-uniqueness of optimal solutions
+and difficulty of merging.
 
-  When working with \texttt{gdiff}-style patches, where a patch that
-transforms a list of trees |xs| into a list of trees |ys| is given by
-a heterogeneous type -- |PatchGDiff xs ys| -- it is inevitable to
+  This chapter discusses the \texttt{stdiff} approach, which was our
+first attempt at detaching from edit-scripts to achieve a better
+tpe-safe merging algorithm. Our approach consists mainly in
+crafting a homgeneous type of patches, in contrast with
+\texttt{gdiff}'s heterogeeous representation. A value of type |PatchGDiff xs ys|
+transforms a list of trees |xs| into a list of trees |ys|.
+The heterogeneity of |PatchGDiff| makes it inevitable to
 stumble upon a difficult issue when dealing with the merge problem.
 If we are given two patches |PatchGDfiff xs ys| and |PatchGDiff xs
 zs|, we would like to produce two patches |PatchGDiff ys rs| and
@@ -9,10 +19,10 @@ zs|, we would like to produce two patches |PatchGDiff ys rs| and
 here is determining |rs| correctly and sometimes, said |rs| might not
 even exist~\cite{Vassena2016}.
 
-  \emph{Structural Patches} was our first attempt at detaching from
-edit-scripts, looking for a homogeneous representation for patches,
-\ie, a patch transforms two values of the same type. Consequently, we do
-not have a problem to determine the indexes when merging patches, all
+  \emph{Structural Patches} detaches from
+edit-scripts in the sense that its type of patches are also tree-shaped
+and, consequently, are homogeneous -- a patch transforms two values of the same type. 
+This eases the problem of determining the indexes when merging patches, all
 the patches involved will be of type |PatchST x|, where |x| is the
 type of the object being merged. The \texttt{stdiff} algorithm support
 a similar set of operations to edit scripts, but these are structured
