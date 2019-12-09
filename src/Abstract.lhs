@@ -17,6 +17,6 @@ complex to reason about and merge.
 Finally, we empirically evaluate our algorithms by a number of experiments
 over real conflicts gathered from \texttt{GitHub}. Our evaluation reveals
 that at least 22\% of the conflicts that developers face on an everyday
-basis could have been automatically merged. This suggest there is a real 
+basis could have been automatically merged. This suggest there can be a benefit
 in using structural differencing tools as the basis for software version control.
   
