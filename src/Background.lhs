@@ -1,15 +1,28 @@
   Computing and representing differences in a finer granularity than
 \emph{lines-of-code} can be readily achieved with the existing
-technology by parsing the data into a tree and later flattening
-said tree into a list of nodes, where we can then reuse existing techniques.
-To an extend, this is how classical tree edit distance works,
-as we shall see in \Cref{sec:background:tree-edit-distance}.
+technology by parsing the data into a tree and later flattening said
+tree into a list of nodes, where we can then reuse existing
+techniques.  In short, this is how classical tree edit distance works
+-- \Cref{sec:background:tree-edit-distance}. Flatten the trees into a
+list of nodes and compute the least cost edit script between them.
+
+  Edit scripts are composed of atomic operations, which traditionally
+include operations such as \emph{insert}, \emph{delete} and
+\emph{copy}. These scripts are later interpreted by the application
+function, which gives the semantics to these operations.
 
   Recycling linear edit distance into tree edit distance, however,
-comes with some drawbacks. There include computationally expensive
-algorithms as a result of ambiguity in the representation of patches;
-complex merging algorithms which might produce ill-typed trees as a
-result~\cite{Vassena2016}.
+comes with the drawbacks of edit-scripts. There include
+computationally expensive algorithms as a result of ambiguity in the
+representation of patches and merging algorithms which might
+produce ill-typed trees as a result~\cite{Vassena2016}. Moreover,
+if we wish to write these algorithms in a way that they are guaranteed
+to preserve the \emph{schema} of the objects under revision, we must
+employ a number of modern generic programming techniques.
+
+  This chapter is concerned with reviewing classic notions 
+of edit-distance and introducing the basic generic programming
+mechanisms that exists within the Haskell ecosystem.
 
 \victor{
 Planned Skeleton
@@ -34,19 +47,13 @@ up in many different areas.
 \section{Edit Distances}
 \label{sec:background:tree-edit-dist}
 
-\victor{this is bad; I need a better intro to it}
-  The notion of \emph{tree edit distance} is vague and varies from
-author to author \cite{Bille2005}.  Abstractly, it is a number that
-represents the \emph{cost} of transforming a source tree into a
-destination tree. Whereas this transformation is performed by a select
-number of \emph{edit operations}. Which operations to consider will
-heavily influence the cost of transforming a tree into another and,
-consequently, the algorithms for computing the minimal sequence of
-said operations. The most common choice of operations are insertions,
-deletions and relabelings, whih stems from the edit operations that
-are generally used in the \emph{string edit distance}~\cite{Bergroth2000}
-domain. The \unixdiff{}, however, does not consider relabelings
-as a basic operation, for example.
+  The \emph{edit distance} between to objects is
+defined as the least cost edit script that transforms
+the source object into the target object. Naturally,
+variations in the notions of cost and edit script will
+yield different distances between the same objects. 
+This freedom is responsible for the large degree of variation
+in the literature \cite{Bergroth2000,Bille2005}. 
 
 \victor{more glue???}
 
@@ -65,14 +72,16 @@ consequences of working with typed trees in
   The distance between two strings, |s| and |d|, is defined by the
 (minimal) cost of transforming |s| into |d| by the means of some edit
 operations with associated \emph{cost} metric. Many different such
-combinations can be achieved by tweaking these parameters.
-In this section we look at two widespread notions for edit distance.
-The \emph{Levenshtein Distance}~\cite{Levenshtein1966,Bergroth2000},
-for example, works well for detecting spelling mistakes\victor{find citation}. It
-considers insertions, deletions and substitutions of characters as its
-edit operations. The \emph{Longest Common Subsequence (LCS)}~\cite{Bergroth2000}, on the other hand
-considers insertions, deletions and copies as edit operations and is better
-suited for identifying long identical sequences, as sugested by its name.
+combinations can be achieved by tweaking these parameters.  In this
+section we look at two widespread notions for edit distance.  The
+\emph{Levenshtein Distance}~\cite{Levenshtein1966,Bergroth2000}, for
+example, works well for detecting spelling mistakes\victor{find
+citation}. It considers insertions, deletions and substitutions of
+characters as its edit operations. The \emph{Longest Common
+Subsequence (LCS)}~\cite{Bergroth2000}, on the other hand considers
+insertions, deletions and copies as edit operations and is better
+suited for identifying long identical sequences, as sugested by its
+name.
 
 \subsubsection*{Levenshtein Distance}
 
@@ -116,8 +125,10 @@ cost (Subst c d)  = if c == d then 0 else 1
 
   We can compute the \emph{edit script}\index{Edit Script}, i.e. a
 list of edit operations, with the minimum cost quite easily with a
-naive, inefficient, recursive implementation. \Cref{fig:background:string-leveshtein}
-shows the implementation of the edit script with the minimum Levenshtein distance.
+naive, inefficient, recursive
+implementation. \Cref{fig:background:string-leveshtein} shows the
+implementation of the edit script with the minimum Levenshtein
+distance.
 
 \begin{figure}
 \begin{myhs}
@@ -172,16 +183,16 @@ the specification to the \unixdiff{}~\cite{McIlroy1976} utility.
 
 \subsubsection*{Longest Common Subsequence}
 
-  If we take the |lev| function and modify it in such 
-a way to only considers identity substitutons, that is, |Subst x y|
-with |x == y|, we end up with a function that computes the
-classic longest common subsequence. It is different from the longest common substring
-problem for subsequences need not be contiguous. 
+  If we take the |lev| function and modify it in such a way to only
+considers identity substitutons, that is, |Subst x y| with |x == y|,
+we end up with a function that computes the classic longest common
+subsequence. Note that this is different from the longest common
+substring problem for subsequences need not be contiguous.
 
   The \unixdiff{}~\cite{McIlroy1976} performs a slight generalization
-of the LCS problem by considering the distance between two \emph{files}, seen as a list of
-\emph{strings}, opposed to a list of \emph{characters}. Hence, the edit operations
-become:
+of the LCS problem by considering the distance between two
+\emph{files}, seen as a list of \emph{strings}, opposed to a list of
+\emph{characters}. Hence, the edit operations become:
 
 \begin{myhs}
 \begin{code}
@@ -241,21 +252,22 @@ source and destintion files.
 \label{sec:background:tree-edit-distance}
 
   The \unixdiff{} conceptually generalizes the notion of string edit
-distance to a notion of edit distance lists containing data of arbitrary types.
-The only requirement being that we must be able to compare this data for equality.
-Next, we would like to generalize on the shape that this data comes in.
-That is where the notion of (untyped) tree edit
-distance~\cite{Akutsu2010,Demaine2007,Klein1998,Bille2005,Autexier2015,Chawathe1997}
-comes in. It considers \emph{arbitrary} trees as the
-objects under scrutiny. This added degree of freedom carries over
-to the design of edit operations. Suddenly, there are many more edit
-operations one could conceive to compose ones edit scripts. To
-name a few we can have flattening insertions and deletions, where the
-children of the deleted node are inserted or removed in-place in the
-parent node. Another operation that only exists in the untyped world
-is node relabeling, among others. This degree of variation is
-responsible for the high number of different approaches and techniques we
-see in practice~\cite{Farinier2015,Hashimoto2008,Falleri2014,Paassen2018,Finis2013}.
+distance to a notion of edit distance between lists containing data of
+arbitrary types. The only requirement being that we must be able to
+compare this data for equality. Generalizing on the shape of the data
+gives rise to the notion of (untyped) tree edit
+distance~\cite{Akutsu2010,Demaine2007,Klein1998,%
+Bille2005,Autexier2015,Chawathe1997}.
+It considers \emph{arbitrary} trees as the objects under
+scrutiny. This added degree of freedom carries over to the design of
+edit operations. Suddenly, there are many more edit operations one
+could conceive to compose ones edit scripts. To name a few we can have
+flattening insertions and deletions, where the children of the deleted
+node are inserted or removed in-place in the parent node. Another
+operation that only exists in the untyped world is node relabeling.
+This degree of variation is responsible for the high
+number of different approaches and techniques we see in
+practice~\cite{Farinier2015,Hashimoto2008,Falleri2014,Paassen2018,Finis2013}.
 
 \begin{figure}
 \centering
@@ -274,7 +286,7 @@ on a forest}
 node insertions, deletions and copies. The cost function is borrowed
 entirely from string edit distance and so is the longest common
 subsequence function, that instead of working with |[a]| will work
-with |[Tree]|. \Cref{fig:background:tree-es-operation} illsutrates
+with |[Tree]|. \Cref{fig:background:tree-es-operations} illsutrates
 insertions and deletions of (untyped) labels on a forest. 
 The interpretation of these edit operations is shown in
 \Cref{fig:background:apply-tree-edit}. 
@@ -304,11 +316,11 @@ apply (Ins l : ops) ts
 
   We label these approaches as ``untyped'' because there exists edit
 scripts that yield non-well formed trees. For example, imagine |l| is
-a label with arity 2, that is, it is supposed to receive two
+a label with arity 2 -- supposed to receive two
 arguments. Now consider the edit script |Ins l : []|, which will yield
 the tree |Node l []| once applied to the empty forest. If the objects
-under differencing are required to abide by a certain schema, think of
-abstract syntax trees, for example, this becomes an issue.  This is
+under differencing are required to abide by a certain schema, such as
+abstract syntax trees for example, this becomes an issue.  This is
 particularly important when one wants the ability to manipulate
 patches independently of the objects they have been created from.
 Imagine a merge function that needs to construct a patch
@@ -446,15 +458,18 @@ The algorithm itself has received some formal
 treatment~\cite{Khanna2007} and some generalizations to tree shaped
 data~\cite{Lindholm2004,Vassena2016}.
 
-  Generally speaking, synchronization of changes $p$ and $q$ can be modelled in one
-of two ways. Either we produce one change that works on the common
-ancestor of $p$ and $q$, \Cref{fig:background:mergesquare-threeway}, or we produce two changes
-that act directly on the images of $p$ and $q$, \Cref{fig:background:mergesquare-resid}.
-We often call the the former a \emph{three-way merge} and the later a \emph{residual} merge.
+  Generally speaking, synchronization of changes $p$ and $q$ can be
+modelled in one of two ways. Either we produce one change that works
+on the common ancestor of $p$ and $q$,
+\Cref{fig:background:mergesquare-threeway}, or we produce two changes
+that act directly on the images of $p$ and $q$,
+\Cref{fig:background:mergesquare-resid}.  We often call the the former
+a \emph{three-way merge} and the later a \emph{residual} merge.
 
-  Residual merges, specially if based on actual residual systems~\cite{Terese2003}
-pose a few technical challenges --- proving the that the laws required for 
-estabilishing an actual residual system is non trivial.
+  Residual merges, specially if based on actual residual
+systems~\cite{Terese2003} pose a few technical challenges --- proving
+the that the laws required for estabilishing an actual residual system
+is non trivial.
 
 \Cref{fig:background:mergesquare-resid} shows a residual system~\cite{Terese2003}
 approach whereas \Cref{fig:background:mergesquare-threeway} illustrates

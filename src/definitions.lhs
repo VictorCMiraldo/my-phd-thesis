@@ -48,3 +48,4 @@
 \newcommand{\unixdiff}{\texttt{UNIX diff}}
 \newcommand{\ie}{i.e.}
 
+\newcommand{\TODOsuccessrate}{???\%}

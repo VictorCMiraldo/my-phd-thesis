@@ -1,17 +1,3 @@
-  In order to implement our prototyes and explore our ideas on
-differencing of abstract syntax trees, we musto improve support for
-programming with mutually recursive families in Haskell first,
-which is the main concern of this chapter.  The
-\texttt{generics-mrsop} is in the intersection of both the
-expressivity of \texttt{multirec}~\cite{Yakushev2009}, allowing the encoding of mutually
-recursive families, with the convenience of the more modern
-\texttt{generics-sop}~\cite{deVries2014} style. In fact, it is worth noting that neither
-of the aforementioned libraries \emph{compete} with out work. We
-extend both in orthogonal directions, resulting in a new design
-altogether, that takes advantage of some modern Haskell extensions
-that the authors of the previous work could not enjoy, as discussed in
-\Cref{sec:background:generic-programming}.
-
   The syntax of many programming languages
 is expressed naturally using a mutually recursive
 family. Consider Haskell itself, one of the possibilities of an
@@ -46,21 +32,34 @@ data ListI  =  Nil | RoseI : ListI
 \end{code}
 \end{myhs}
 
-  The rest of this chapter is concerned with extending the existing
-generic programming capabilities of Haskell to mutually recursive
-types.
+  In order to implement our prototyes and explore our ideas on
+differencing of abstract syntax trees, we must first improve support
+for programming with mutually recursive families in Haskell first.
+The \texttt{generics-mrsop} library, which is discussed in this chapter,
+lies in the intersection of \texttt{multirec}~\cite{Yakushev2009}, allowing the
+encoding of mutually recursive families, and the
+more modern \texttt{generics-sop}~\cite{deVries2014}, providing
+a more convenient programming style. In fact,
+it is worth noting that neither of the aforementioned libraries
+\emph{compete} with our work. We extend both in orthogonal directions,
+resulting in a new design altogether, that takes advantage of some
+modern Haskell extensions that the authors of the previous work could
+not enjoy, as discussed in \Cref{sec:background:generic-programming}.
+
+  This chapter is concerned with extending the existing generic
+programming capabilities of Haskell to mutually recursive types. With
+the generic programming capabilities at hand, we illustrate the
+\texttt{gdiff}~\cite{Lempsink2009} approach, which follows the
+classical tree-edit distance but in a typed fashion. It uses
+a heterogeneous type, |PatchGDiff xs ys|, for representing
+transformations of elements in the forest |xs| into elements of |ys|.
   
 \section{Explicit Fixpoints}
 \label{sec:gp:explicitfix}
 
-  In this section we will start to look at our approach, essentially
-combining the techniques from the \texttt{regular} and
-\texttt{generics-sop} libraries. Later we extend the constructions to
-handle mutually recursive families instead of simple recursion. In any
-way, we need an explicit description of which fields of a constructor
-are recursive and which are not.
-
-  Introducing information about the recursive positions in a type
+  The first step in representing recursive structures
+generically is to encode fixpoints explicitely.
+Introducing information about the recursive positions in a type
 requires more expressive codes than in \Cref{sec:background:explicitsop}, where
 our \emph{codes} were a list of lists of types, which could be
 anything. Instead, we will now have a list of lists of |Atom| to be

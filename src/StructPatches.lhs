@@ -1,14 +1,14 @@
-  The \texttt{gdiff} approach -- which flattens a tree
+  The \texttt{gdiff}~\cite{Lempsink2009} approach -- which flattens a tree
 into a list, like classical tree edit distance algorithms,
 but provides type-safe edit scripts -- borrows the problems
 of edit-script based approaches. These include ambiguity on the
 representation of patches, non-uniqueness of optimal solutions
 and difficulty of merging.
 
-  This chapter discusses the \texttt{stdiff} approach, which was our
-first attempt at detaching from edit-scripts to achieve a better
-tpe-safe merging algorithm. Our approach consists mainly in
-crafting a homgeneous type of patches, in contrast with
+  In this chapter, we look into our first alternative, \texttt{stdiff}. 
+This approach attempt at detaching from edit-scripts to achieve a better
+type-safe merging algorithm. The main ingredient is
+crafting a homogeneous type of patches, in contrast with
 \texttt{gdiff}'s heterogeeous representation. A value of type |PatchGDiff xs ys|
 transforms a list of trees |xs| into a list of trees |ys|.
 The heterogeneity of |PatchGDiff| makes it inevitable to

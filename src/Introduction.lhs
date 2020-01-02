@@ -86,11 +86,12 @@ head []        \{+d+\} = error \{-"?!"-\} \{+"Expect..."+\}
 head (x :: xs) \{+d+\} = x 
 \end{alltt}
 There is more structure here than mere lines of text. In particular,
-the granularity is at the abstract syntax elements level.
+the granularity is at the abstract syntax elements level. \Cref{chap:structural-patches,chap:pattern-expression-patches} discusses two different 
+approaches for representing changes to this desired granularity of
+AST elements.
 
-  \Cref{chap:structural-patches,chap:pattern-expression-patches}
-explores two different ways of representing changes to the granularity of the
-example above. In general, we aim to compute the difference between two values
+  In general, our approaches share a simple framework. 
+We aim to compute the difference between two values
 of type |a|, and represent these changes in some type, |Patch a|.  The
 |diff| function computes these differences between two values of type
 |a|, and |apply| attempts to transform one value according to the
@@ -120,8 +121,28 @@ have been several attempts at generalizing these results to handle
 arbitrary datatypes~\cite{Lempsink2009,Miraldo2017}, but following the
 same recipe: enumerate all combinations of insertions, deletions and
 copies that transform the source into the destination and choose the
-`best' one. This design has some challenges at its core as we 
-can see in \Cref{sec:background:string-edit-distance}.
+`best' one. Consequently, these attempts suffer from the same
+downsides as classic edit-distance, which we will discuss in
+in \Cref{sec:background:string-edit-distance}.
+
+  Aside from the edit-distance perspective, to be able to
+provide type-safe |diff| and |apply| functions above, we must also
+delve into generic programming techniques.
+\victor{more on GP; I keep on forgetting to mention it an
+it is a ``central'' pivot of the thesis}
+
+  Once we have a |diff| and an |apply| functions handy, we
+move on to the |merge| function. Which is supposed to
+combine the differences in two patches.
+Not all patches can be merged, in fact, we can only merge
+those patches that alter \emph{disjoint} parts of the AST. 
+Hence, the merge function must be partial, returning a conflict whenever
+patches change the same part of the tree.
+\begin{myhs}
+\begin{code}
+merge :: Patch a -> Patch a -> Either Conflicts (Patch a)
+\end{code}
+\end{myhs}
 
   \victor{I'd like to talk a bit about other areas where 
 diffing can be interesting, i.e., biology; Should it go here?
@@ -130,30 +151,40 @@ at the end.}
 
 \subsection{Literature Review}
 
-  Tree-differencing shows up in many different areas, from Computational Biology,
-where it is used to align phylogentic trees and compare RNA secondary structures
-\cite{Akutsu2010b,Henikoff1992,McKenna2010}, all the way to inteligent tutoring systems
-where we must provide good hints to student's solutions to exercises by
-understanding how far they are from the correct solutions \cite{Paassen2017,Rohan2016}.
-Our particular focus lies in the application of structural differencing to software
-components.
+  Tree-differencing shows up in many different areas, from
+Computational Biology, where it is used to align phylogentic trees and
+compare RNA secondary structures
+\cite{Akutsu2010b,Henikoff1992,McKenna2010}, all the way to inteligent
+tutoring systems where we must provide good hints to student's
+solutions to exercises by understanding how far they are from the
+correct solutions \cite{Paassen2017,Rohan2016}.  Our particular focus
+lies in the application of structural differencing to software
+components. Currently, the best tree edit-distance algorithm
+is \emph{RTED}~\cite{Pawlik2013}...
+\victor{Mine more related work, RWS-Diff has a good related work section}
 
-  There has been a large body of work on providing better tooling for
-software engineers by the means of structure-aware differencing
-tools. A number of algorithms have been created with the intent of
-being better suited towards operations over source code. Notable
-examples include \emph{GumTree}~\cite{Falleri2014} which is a full
-suite for source code differencing and
+  A number of algorithms have been created with the intent of being
+better suited towards operations over source code. Notable examples
+include \emph{GumTree}~\cite{Falleri2014} which is a full suite for
+source code differencing with a custom algorithn and
 \emph{RWS-Diff}~\cite{Finis2013} which is a tree differencing
-algorithms with a number of different edit operations.
+algorithms supporting some custom edit operations, such as node relabeling.
+Both \emph{GumTree} and \emph{RWS-Diff} are tools created to handle source
+code, in contrast with general purpose tree differencing algorithms.
+\victor{more text; some merging?}
 
-
-  Coccinelle~\cite{Andersen2008,Palix2011}
-
-  GumTree~\cite{Falleri2014}
+  Neighbouring source-code differencing we have patch inference
+and tools, where Coccinelle~\cite{Andersen2008,Palix2011} is the
+\emph{de-facto} standard. These tools receive as input a number of
+patches, $P_0, \cdots, P_n$, that come from differencing many 
+source and target files, $P_i = \mathit{diff }s_i\;t_i$. 
+The objective then is to infer a common transformation that was 
+applied everywhere. One can think of determining the \emph{common
+denominator} of $P_0, \cdots, P_n$.
 
   Refactoring Tools~\cite{Tonder2019} and a plethora of domain specific tools,
-such as \texttt{latexdiff}~\cite{LatexDiff} 
+such as \texttt{latexdiff}~\cite{LatexDiff} are also worth mentioning.
+\victor{Find more; for example, efficient xml diffs and the 3DM algo}
 
 \section{Contributions} 
 \label{sec:intro:contributions}
@@ -185,9 +216,6 @@ for patches altogether.
 
   \item \victor{Hopefully we will publish something on experiments?}
 \end{enumerate}
-
-% chapter X is based on paper Y, which was wrote with Alice and Bob
-% and my contribution is Z to that paper.
 
 %%% Local Variables:
 %%% mode: latex
