@@ -21,6 +21,7 @@
 
 \usetikzlibrary{fit}
 \usetikzlibrary{backgrounds}
+\usetikzlibrary{positioning}
 
 \definecolor{forest-digems-constr}{RGB}{80,88,113}
 \definecolor{forest-digems-change-bg}{RGB}{220,224,238}
@@ -35,9 +36,9 @@
       for tree={text=forest-digems-constr, edge=forest-digems-black},
     },
   metavar/.style={%
-      shape=rectangle,
+      %shape=rectangle,
+      %draw=forest-digems-black,
       text=forest-digems-metavar,
-      draw=forest-digems-black,
     },
   triang/.style={%
       shape=regular polygon,
@@ -48,6 +49,10 @@
       minimum width=1.3em,
       inner sep=0pt,
     },
+  widen/.style n args={1}{%
+    text=forest-digems-black,
+    s sep=#1mm,
+   },
   change/.style={%
     text=forest-digems-black,
     s sep=4mm,

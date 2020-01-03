@@ -4,7 +4,7 @@ much coupled with edit-scripts. We still suffered the ambuiguity problem,
 and this was reflected on the coputationally expensive algorithm. We were also
 subject to being unable to represent permutations and moves efficiently.
 These drawbacks motivated us to look for a better solution, which is
-turned out to become |PatchH x|, our second attempt at detaching from 
+turned out to become |PatchPE x|, our second attempt at detaching from 
 edit scripts.
 
   Suppose we want to have a patch that modifies the left element
@@ -30,7 +30,23 @@ the matching of the pattern as a \emph{deletion} phase and the construction
 of the resulting tree as a \emph{insertion} phase. The overall idea of
 the \texttt{hdiff} approach is to represent the patch |p| exactly as
 that: a pattern and a expression. Essentially, we could write |p|
-as |patch (Bin (Leaf 10) y) (Bin (Leaf 42) y)|.
+as |patch (Bin (Leaf 10) y) (Bin (Leaf 42) y)|, or, graphically
+as in \Cref{fig:pepatches:example-01}.
+\victor{Find a graphical repr for metavars that does not rely on color;
+explain it here}
+
+\begin{figure}
+\centering
+\begin{forest}
+[,rootchange
+  [|Bin| [|Leaf| [10]] [y,metavar]]
+  [|Bin| [|Leaf| [42]] [y,metavar]]
+]
+\end{forest}
+\caption{Graphical represntation of a patch that modifies the left
+children of a binary node}
+\label{fig:pepatches:example-01}
+\end{figure}
 
   With this added expressivity we can represent more transformations
 than before. Take the patch that swaps two subtrees, which cannot
@@ -60,11 +76,11 @@ us to think of some metatheory.
 
 \section{The Type of Patches}
 
-  Just like \texttt{stdiff}, \Cref{chap:structural-patches}, we will rely on
-\texttt{generics-mrsop} to encode our operations. The first step in representing
-our patches here is to augment the generic representation of our trees
-with metavariables. Luckily, \texttt{generics-mrsop} provides the |Holes|
-type (\Cref{sec:gp:holes}). Recall its definition:
+  Just like \texttt{stdiff}, discussed in \Cref{chap:structural-patches}, we will rely on
+\texttt{generics-mrsop} to encode our operations and algorithms generically. 
+The first step in representing our patches is to augment the generic representation of our trees
+with metavariables. This was, in fact, the reason for us to add the |Holes| datatype 
+to \texttt{generics-mrsop} (\Cref{sec:gp:holes}). Recall its definition:
 
 \begin{myhs}
 \begin{code}
@@ -82,17 +98,106 @@ type (\Cref{sec:gp:holes}). Recall its definition:
   If we put values of type |Const Int| in the holes,
 as in |Holes ki codes (Const Int)|, we would get a functor mapping an
 index of the family into its representation, augmented with integers,
-representing metavariables. 
-
-\victor{an example, please; also, try simplifying |MetaVarIK ki| in the code;
-on the latest version is looks like we can remove it altogether}
-
+representing metavariables. This is almost enough, yet, we would run into 
+problems whenever we tried to inder the type of a metavariable over
+an opaque value. For this reason, we must keep the opaque values
+around in order to be able to compare their type-level indicies.
 
 \begin{myhs}
 \begin{code}
-type Chg ki codes at = (Holes ki codes (MetaVar ki) :*: Holes ki codes (MetaVar kki)) at
+data Annotate (x :: Star) (f :: k -> Star) :: k -> Star where
+  Annotate :: x -> f i -> Annotate x f i
+
+type MetaVar ki = NA (Annotate Int ki) (Const Int)
 \end{code}
 \end{myhs}
+
+  With |MetaVar| as defined above, we can always fetch the |Int| identifying
+the metavar but we posses much more type-level information that is inspectable
+at run-time. 
+
+  Next we define \emph{changes} to be a pair of a deletion context
+and an insertion context for the same type. As expected, these contexts
+are values of the mutually recursive family in question augmented
+with metavariables.
+
+\begin{myhs}
+\begin{code}
+data Chg ki codes at = Chg
+  { chgDel  :: Holes ki codes (MetaVar ki) at
+  , chgIns  :: Holes ki codes (MetaVar ki) at
+  }
+\end{code}
+\end{myhs}
+
+  It is worth noting that there might be a lot of redundant information
+in a value of type |Chg ki codes at|. Take for example the
+change that swaps two elements of a binary tree. Both the deletion context
+and the insertion context contains a |Bin| constructor -- as
+illustrated in \Cref{fig:pepatches:change-versus-patch:chg}.
+This indicates, in fact, that the |Bin| constructor is being
+copied from the source to the destination. To make this evident
+we define a |Patch| to be the anti-unification of a change's
+deletion and insertion contexts -- in this case, illustrated
+in \Cref{fig:pepatches:change-versus-patch:patch} and defined below.
+We call the prefix of constructors that are copied from source
+to the destination the \emph{spine} of the patch.
+
+\begin{figure}
+\centering
+\subfloat[swap as a \emph{change}]{%
+\begin{forest}
+[,rootchange 
+  [|Bin| [x,metavar] [y,metavar]]
+  [|Bin| [y,metavar] [x,metavar]]
+]
+\end{forest}
+\label{fig:pepatches:change-versus-patch:chg}}%
+\quad\quad\quad
+\subfloat[swap as a \emph{patch}]{%
+\begin{forest}
+[|Bin|,s sep = 5mm%make it wider
+  [,change [x,metavar] [y,metavar]]
+  [,change [y,metavar] [x,metavar]]
+]
+\end{forest}
+\label{fig:pepatches:change-versus-patch:patch}}%
+\caption{Two isomorphic representations -- with and without
+an explicit spine -- for the patch that swaps the children
+of a binary node}
+\label{fig:pepatches:change-versus-patch}
+\end{figure}
+
+\begin{myhs}
+\begin{code}
+type PatchPE ki codes = Holes ki codes (Chg ki codes)
+\end{code}
+\end{myhs}
+
+  This distinction between patches and changes only plays
+an important role when defining the merging algorithm. 
+but since one can easily convert between one another
+the graphical representation of patches will be that without
+a spine.
+\victor{If it only matters there, why did I put it here?}
+
+  Converting between patches and changes is simple. Moreover,
+if we assume that |PatchPE ki codes| is in fact the result
+of anti-unifying the deletion and insertion contexts of a change
+-- has a maximal spine -- then we have an isomorphism.
+
+\begin{myhs}
+\begin{code}
+change2patch :: Chg ki codes at -> PatchPE ki codes at
+change2patch (Chg d i) = holesMap (uncurry' Chg) (holesLCP d i)
+
+patch2change :: PatchPE ki codes at -> Chg ki codes at
+patch2change p = Chg  (holesJoin (holesMap chgDel  p))
+                      (holesJoin (holesMap chgIns  p))
+\end{code}
+\end{myhs}
+
+
 
 
 
@@ -103,9 +208,48 @@ in its domain can be transformed into a |PatchGDiff|.
 
   Not of optimal cost, though.
 
+\subsection{Meta Theory}
+
+  The disadvantage of using a completely different technique
+to talk about patches is that we must discuss its metatheory.
+In this section we show this design offers a reasnable option
+for representing patches.
+
+\victor{
+The |PatchPE ki codes| forms either:
+\begin{itemize}
+\item Partial monoid, if we want |vars ins <= vars del|
+\item Grupoid, if we take |vars ins == vars del|
+\end{itemize}
+}
+\section{Merging Patches}
+
 \section{Computing |PatchPE|}
 
-\section{Merging Patches}
+\begin{figure}
+\centering
+\subfloat[|DM_NoNest| extraction]{%
+\begin{forest}
+[,rootchange 
+  [|Bin| [x,metavar] [k]]
+  [|Bin| [x,metavar] [t]]
+]
+\end{forest}
+\label{fig:pepatches:extraction-01:nonest}}%
+\quad\quad
+\subfloat[|DM_Proper| extraction]{%
+\begin{forest}
+[,rootchange 
+  [|Bin| [|Bin| [x,metavar] [y,metavar]] [k]]
+  [|Bin| [|Bin| [x,metavar] [y,metavar]] [x,metavar]]
+]
+\end{forest}
+\label{fig:pepatches:extraction-01:proper}}%
+\caption{Computing the |diff| between |Bin (Bin t u) k| and
+|Bin (Bin t u) t| using two different extraction methods}
+\label{fig:pepatches:extraction-01}
+\end{figure}
+
 
 
 %%% Local Variables:

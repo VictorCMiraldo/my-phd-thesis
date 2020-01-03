@@ -65,7 +65,12 @@ mock: $(BUILD_DEPENDS) tex/latex/uustthesis.cls
 	lhs2TeX -o dist/mock-chapter.tex dist/mock-chapter.lhs
 	export TEXMFHOME=".:$(TEXMFHOME)" && \
 	$(LATEX) dist/mock-chapter.tex
-
+	
+remock: $(BUILD_DEPENDS) tex/latex/uustthesis.cls
+	lhs2TeX -o dist/mock-chapter.tex dist/mock-chapter.lhs
+	export TEXMFHOME=".:$(TEXMFHOME)" && \
+	$(LATEX) dist/mock-chapter.tex
+	
 cover: cover/cover.svg default
 	$(MAKE) -C cover/
 	pdftk cover/frontcover.pdf dist/thesis.pdf cat output dist/with-cover.pdf

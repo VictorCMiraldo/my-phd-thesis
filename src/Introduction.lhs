@@ -125,17 +125,11 @@ copies that transform the source into the destination and choose the
 downsides as classic edit-distance, which we will discuss in
 in \Cref{sec:background:string-edit-distance}.
 
-  Aside from the edit-distance perspective, to be able to
-provide type-safe |diff| and |apply| functions above, we must also
-delve into generic programming techniques.
-\victor{more on GP; I keep on forgetting to mention it an
-it is a ``central'' pivot of the thesis}
-
   Once we have a |diff| and an |apply| functions handy, we
-move on to the |merge| function. Which is supposed to
-combine the differences in two patches.
-Not all patches can be merged, in fact, we can only merge
-those patches that alter \emph{disjoint} parts of the AST. 
+move on to the |merge| function. Which is responsible for
+synchronizing two different changesets into a single
+one, when possible. Naturally not all patches can be merged, 
+in fact, we can only merge those patches that alter \emph{disjoint} parts of the AST. 
 Hence, the merge function must be partial, returning a conflict whenever
 patches change the same part of the tree.
 \begin{myhs}
@@ -143,6 +137,14 @@ patches change the same part of the tree.
 merge :: Patch a -> Patch a -> Either Conflicts (Patch a)
 \end{code}
 \end{myhs}
+
+  How many patches can be merged by the |merge| function is 
+a consequence of the degree of information provided by the |Patch| 
+datatype. As we have seen, if we only posses information on the
+line-level of the source code, there is very little we can merge.
+In order to have more information available about the structure of
+the changes being performed, then, we need more expressive |Patch| types.
+\victor{bla bla generic programming is also important for us bla bla}
 
   \victor{I'd like to talk a bit about other areas where 
 diffing can be interesting, i.e., biology; Should it go here?

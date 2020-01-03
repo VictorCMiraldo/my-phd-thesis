@@ -271,13 +271,24 @@ practice~\cite{Farinier2015,Hashimoto2008,Falleri2014,Paassen2018,Finis2013}.
 
 \begin{figure}
 \centering
-\subfloat[Insertion of a node on a forest]{%
-Picture of insertion
-}\qquad%
-\subfloat[Deletion of a node from a forest]{%
-Picture of deletion
-}%
-\caption{Insetion, Deletion and Copying of a node with arity $n$
+\victor{make this pretty}
+
+
+\begin{tikzpicture}
+\node (f1) {\begin{forest} 
+    [[x , no edge , l = 0mm [y] [z]] 
+     [a , no edge , l = 0mm] 
+     [w , no edge , l = 0mm [y]]
+    ]
+  \end{forest}};
+\node [below = of f1] (f2) {\begin{forest}
+    [[x , no edge , l = 0mm [x [y] [z]] [a]] 
+     [w , no edge , l = 0mm [y]]
+    ]
+  \end{forest}};
+\draw (f1) -- node {|ins x|} (f2);
+\end{tikzpicture}
+\caption{Insetion and Deletion a node |x| with arity 2
 on a forest}
 \label{fig:background:tree-es-operations}
 \end{figure}
