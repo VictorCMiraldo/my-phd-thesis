@@ -86,7 +86,8 @@ head []        \{+d+\} = error \{-"?!"-\} \{+"Expect..."+\}
 head (x :: xs) \{+d+\} = x 
 \end{alltt}
 There is more structure here than mere lines of text. In particular,
-the granularity is at the abstract syntax elements level. \Cref{chap:structural-patches,chap:pattern-expression-patches} discusses two different 
+the granularity is at the abstract syntax elements level. 
+\Cref{chap:structural-patches,chap:pattern-expression-patches} discusses two different 
 approaches for representing changes to this desired granularity of
 AST elements.
 
@@ -152,41 +153,80 @@ I'm leaning towards leaving them on the discussion section
 at the end.}
 
 \subsection{Literature Review}
+  
+  Computing the tree edit distance -- classically -- is the
+problem of computing a minimum cost edit script that transforms a
+target into a source ordered tree.  This edit script can be seen as a
+sequence of edit operations. These operations often include, for
+example, \emph{insert node}, \emph{delete node} and \emph{relabel
+node}.  Zhang and Sasha~\cite{Zhang1989} provide a number of
+algorithms which were later improved on by Klein et
+al.~\cite{Klein1998} and Dulucq et al.~\cite{Dulucq2003}. Finally,
+Demaine et al.~\cite{Demaine2007} presents an algorithm of cubic
+complexity and proves this is the best possible worst case. Zhang and
+Sasha algorithm is still faster in many pratical scenarios,
+though. The more recent \emph{RTED}~\cite{Pawlik2012} algorithm
+maintains the cubic worst case complexity and compares or outruns any
+of the other algorithms, rendering it the standard choice for
+computing tree edit distance based on the classic edit operations.  In
+the case of unordered trees the best we can rely on are approximations
+\cite{Augsten2008,Augsten2010} since the problem is
+NP-hard~\cite{Zhang1992}.
 
-  Tree-differencing shows up in many different areas, from
+  Tree edit distance has seen multidisciplinary interest. From
 Computational Biology, where it is used to align phylogentic trees and
 compare RNA secondary structures
 \cite{Akutsu2010b,Henikoff1992,McKenna2010}, all the way to inteligent
 tutoring systems where we must provide good hints to student's
 solutions to exercises by understanding how far they are from the
-correct solutions \cite{Paassen2017,Rohan2016}.  Our particular focus
-lies in the application of structural differencing to software
-components. Currently, the best tree edit-distance algorithm
-is \emph{RTED}~\cite{Pawlik2013}...
-\victor{Mine more related work, RWS-Diff has a good related work section}
+correct solutions \cite{Paassen2017,Rohan2016}.  In fact, from the
+\emph{tree edit distance} point of view, we are only concerned with a
+number, the \emph{distance} between objects, quantifying how similar
+they are. 
 
-  A number of algorithms have been created with the intent of being
-better suited towards operations over source code. Notable examples
-include \emph{GumTree}~\cite{Falleri2014} which is a full suite for
-source code differencing with a custom algorithn and
-\emph{RWS-Diff}~\cite{Finis2013} which is a tree differencing
-algorithms supporting some custom edit operations, such as node relabeling.
-Both \emph{GumTree} and \emph{RWS-Diff} are tools created to handle source
-code, in contrast with general purpose tree differencing algorithms.
-\victor{more text; some merging?}
+  From the perspective of \emph{tree differencing}, on the other hand,
+we actually care about the edit operations and might want to perform
+computations such as composition and merging of
+differences. Naturally, however, the choice of edit operations heavily
+influence the complexity of the |diff| algorithm. Allowing a
+\emph{move} operation already renders string differencing
+NP-complete~\cite{Shapira2002}. Tree differencing algorithms,
+therefore, tend to run approximations of the best edit distance. Most
+of then still suffer from at least quadratic time complexity, which is
+prohibitive for most pratical applications or are defined for domain
+specific data, such as the \texttt{latexdiff}~\cite{LatexDiff} tool.
+A number of algorithms specific for XML and imposing different
+requirements on the schemas have been developped~\cite{Peters2005}.
+LaDiff~\cite{Chawathe1996}, for example, imposes restrictions on the
+hierarchy between labels, it is implemented into the
+\texttt{DiffXML}~\cite{Mouat2002} and
+\texttt{GumTree}~\cite{Falleri2014} tools and is responsible
+from deducing an edit script given tree matchings, the tree matching
+phase differs in each tool. A notable mention is the \texttt{XyDiff}~\cite{Marian2002}, which uses hashes to compute matchings and, therefore,
+supports \emph{move} operations maintaining almost linear complexity.
+This is perhaps the closes to our approach in \Cref{chap:pattern-expression-patches}. The \texttt{RWS-Diff}~\cite{Finis2013} uses approximate
+matchings by finding trees that are not necessarily equal but \emph{similar}, this yeilds a robust algorithm, which is applicable in practice.
 
-  Neighbouring source-code differencing we have patch inference
-and tools, where Coccinelle~\cite{Andersen2008,Palix2011} is the
-\emph{de-facto} standard. These tools receive as input a number of
-patches, $P_0, \cdots, P_n$, that come from differencing many 
-source and target files, $P_i = \mathit{diff }s_i\;t_i$. 
-The objective then is to infer a common transformation that was 
-applied everywhere. One can think of determining the \emph{common
-denominator} of $P_0, \cdots, P_n$.
+  Neighbouring source-code differencing we have patch inference and
+generation tools. Some infer patches from human created data
+\cite{Kim2013}, whereas other, such as
+\texttt{Coccinelle}~\cite{Andersen2008,Palix2011}, receive as input a
+number of diffs, $P_0, \cdots, P_n$, that come from differencing many
+source and target files, $P_i = \mathit{diff }s_i\;t_i$.  The
+objective then is to infer a common transformation that was applied
+everywhere. One can think of determining the \emph{common denominator}
+of $P_0, \cdots, P_n$. Refactoring and Rewritting Tools
+\cite{Medeiros2017,Maletic2015} must also be mentioned. Some of these
+tools define each supported language AST
+separately~\cite{Bravenboer2008,Klint2009}, whereas others
+\cite{Tonder2019} support a universal approach similar to
+\emph{S-expressions}. They identify only parenthesis, braces and
+brackets and hence, can be applied to a plethora of programming
+languages out-of-the-box.
 
-  Refactoring Tools~\cite{Tonder2019} and a plethora of domain specific tools,
-such as \texttt{latexdiff}~\cite{LatexDiff} are also worth mentioning.
-\victor{Find more; for example, efficient xml diffs and the 3DM algo}
+\victor{should I go into this next paragraph?}
+  Which brings us to the second underlying aspect of this thesis,
+\emph{generic programming}. Although different ... 
 
 \section{Contributions} 
 \label{sec:intro:contributions}
