@@ -152,7 +152,8 @@ diffing can be interesting, i.e., biology; Should it go here?
 I'm leaning towards leaving them on the discussion section
 at the end.}
 
-\subsection{Literature Review}
+\section{Literature Review}
+\label{sec:intro:literature-review}
   
   Computing the tree edit distance -- classically -- is the
 problem of computing a minimum cost edit script that transforms a
@@ -202,10 +203,14 @@ hierarchy between labels, it is implemented into the
 \texttt{DiffXML}~\cite{Mouat2002} and
 \texttt{GumTree}~\cite{Falleri2014} tools and is responsible
 from deducing an edit script given tree matchings, the tree matching
-phase differs in each tool. A notable mention is the \texttt{XyDiff}~\cite{Marian2002}, which uses hashes to compute matchings and, therefore,
-supports \emph{move} operations maintaining almost linear complexity.
-This is perhaps the closes to our approach in \Cref{chap:pattern-expression-patches}. The \texttt{RWS-Diff}~\cite{Finis2013} uses approximate
-matchings by finding trees that are not necessarily equal but \emph{similar}, this yeilds a robust algorithm, which is applicable in practice.
+phase differs in each tool. A notable mention is the
+\texttt{XyDiff}~\cite{Marian2002}, which uses hashes to compute
+matchings and, therefore, supports \emph{move} operations maintaining
+almost linear complexity.  This is perhaps the closes to our approach
+in \Cref{chap:pattern-expression-patches}. The
+\texttt{RWS-Diff}~\cite{Finis2013} uses approximate matchings by
+finding trees that are not necessarily equal but \emph{similar}, this
+yeilds a robust algorithm, which is applicable in practice.
 
   Neighbouring source-code differencing we have patch inference and
 generation tools. Some infer patches from human created data
@@ -258,6 +263,14 @@ for patches altogether.
 
   \item \victor{Hopefully we will publish something on experiments?}
 \end{enumerate}
+
+\section{Thesis Outline}
+
+\victor{I'd also like to write a bit about how things 
+took place: the GHC bug, which means we can't run our |PatchStruct| 
+in the same amount of data as |PatchPE|; developping two generic programming
+libraries; the time spent on Agda, etc... Is there a place for this in
+the introduction or not?}
 
 %%% Local Variables:
 %%% mode: latex

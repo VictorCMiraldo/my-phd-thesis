@@ -27,6 +27,7 @@ enforce=("data|type"    # enforce spelling of 'datatype', forbids 'data-type' an
          "non interfering"
          "well-typed"
          "non-trivial"
+         "edit-script"
          )
 
 ok=true

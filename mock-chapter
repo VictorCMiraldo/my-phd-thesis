@@ -23,6 +23,7 @@ chap=$(( $chap + 1 ))
 
 process=true
 if [[ -e dist/mock-chapter.lhs ]]; then
+  echo "A chapter was already mocked"
   num=$(grep "mock-chapter-num" dist/mock-chapter.lhs | cut -d':' -f2)
   if [[ "$?" -eq "0" ]] && [[ "$chap" -eq "$num" ]]; then
     process=false

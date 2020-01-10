@@ -53,8 +53,13 @@ the generic programming capabilities at hand, we illustrate the
 classical tree-edit distance but in a typed fashion. It uses
 a heterogeneous type, |PatchGDiff xs ys|, for representing
 transformations of elements in the forest |xs| into elements of |ys|.
+
+\section{The \texttt{generics-mrsop} library}
+\ref{sec:gp:mrsop}
+
+\victor{On this section we ilustrate the \texttt{generics-mrsop} library}
   
-\section{Explicit Fixpoints}
+\subsection{Explicit Fixpoints}
 \label{sec:gp:explicitfix}
 
   The first step in representing recursive structures
@@ -313,7 +318,7 @@ handling real life applications is the limited form of recursion. When
 a user requires a generic programming library, chances are they need
 to traverse and consume mutually recursive structures.
 
-\section{Mutual Recursion}
+\subsection{Mutual Recursion}
 \label{sec:gp:family}
 
   Conceptually, going from regular types (\Cref{sec:gp:explicitfix})
@@ -596,7 +601,7 @@ when trying to write \emph{values} of the representation of that code, the
 |Lkup| function detects the out-of-bounds index, raising a type error and
 preventing the program from compiling.
 
-\subsection{Parametrized Opaque Types}
+\subsubsection{Parametrized Opaque Types}
 \label{sec:gp:konparameter}
 
 Up to this point we have considered |Atom| to include a predetermined
@@ -710,7 +715,7 @@ the \texttt{TypeInType} language extension~\cite{Weirich2013,Weirich2017}.
 %For convenience we also provide a basic set of opaque types which includes the
 %most common primitive datatypes.
 
-\subsection{Selection of Useful Combinators}
+\subsubsection{Selection of Useful Combinators}
 \label{sec:gp:combinators}
 
   The advantages or a \emph{code based} approach to generic progrmming
@@ -811,7 +816,7 @@ case was very simple, not extracting any of the advantages of
 quantified constraints. Eventually decided to rollback to the lifted
 |EqHO| presented above in \texttt{generics-mrsop-2.3.0}.
 
-\section{Advanced Features}
+\subsection{Advanced Features}
 \label{sec:gp:advancedfeatures}
 
   The development of the \texttt{generics-mrsop} library started
@@ -823,7 +828,7 @@ make the adoption of a generic programming library much more likely.
 This section is a small tutorial into some of these features and document
 the engineering effort that was put in \texttt{generics-mrsop}.
 
-\subsection{Annotated Fixpoints}
+\subsubsection{Annotated Fixpoints}
 \label{sec:gp:annfix}
 
   Catamorphisms are used in a big number of computations over recursive
@@ -875,7 +880,7 @@ data AnnFix (kappa :: k -> Star) (codes :: P [ P [ P [Atom k]]]) (phi :: Nat -> 
 keep auxiliary values around, as annotations in a larger structure.
 In this way, 
 
-\subsection{Values with Holes}
+\subsubsection{Values with Holes}
 \label{sec:gp:holes}
 
   Dually to annotated fixpoints, we can borrow the \emph{free monad}
@@ -932,7 +937,7 @@ values, for example, by passing a custom datatype to |phi| that does so.
 
   \victor{More info here; show conversion functions; talk about $LCP$ and anti-unification}
 
-\subsection{Template Haskell}
+\subsubsection{Template Haskell}
 \label{sec:gp:templatehaskell}
 
   Having a convenient and robust way to get the |Family| instance for
@@ -1064,7 +1069,7 @@ instance Family Singl FamRoseInt CodesRoseInt where dots
 \end{myhs}
 
 
-\subsection{Metadata}
+\subsubsection{Metadata}
 \label{sec:gp:metadata}
 
   There is one final ingredient missing to make
@@ -1189,7 +1194,7 @@ instance HasDatatypeInfo Singl FamRose CodesRose Z where
 \end{code} %$
 \end{myhs}
 
-\section{Well-Typed Tree Differencing} 
+\subsection{Well-Typed Tree Differencing} 
 \label{sec:gp:well-typed-tree-diff}
 
   Next we look into a detailed implementation of a type-safe
@@ -1327,6 +1332,25 @@ inability to find a suitable |ks|.
 
   Moreover, this suffers from all problems that edit scripts also suffer
 \victor{make it look nice}
+
+\section{The \texttt{generics-simplistic} Library}
+
+  Unfortunately, the \texttt{generics-mrsop} came accross a memory
+leak in the Haskell compiler itself, which renders the library unusable
+for large families at the time being. The bugs have been reported
+in the trac\footnote{
+\url{https://gitlab.haskell.org/ghc/ghc/issues/17223} and 
+\url{https://gitlab.haskell.org/ghc/ghc/issues/14987}}
+but at the time of writing of this thesis, have not been resolved.
+This means that if we were to collect large scale real data
+for our experiments, we must develop and alternative approach.
+
+  We then had to develop another option. As it turns out,
+extending the \texttt{generics-simplistic} (A. Serrano, private communication) 
+library to support deep encodings would be the best. The difficulty here
+is that \texttt{generics-simplistic} does not have the notion of codes.
+
+\victor{finish}
 
 %%% Local Variables:
 %%% mode: latex

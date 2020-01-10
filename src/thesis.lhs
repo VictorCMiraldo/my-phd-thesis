@@ -84,7 +84,7 @@ Sommige goed samenvatting in het Nederlands.
 \lhsinclude{Background.lhs}
 %include src/Background.lhs
 
-\chapter{The \texttt{generics-mrsop} Library}
+\chapter{Generic Programming with Mutually Recursive Types}
 \label{chap:generic-programming}
 \lhsinclude{GenericProgramming.lhs}
 %include src/GenericProgramming.lhs

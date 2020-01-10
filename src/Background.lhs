@@ -1,10 +1,11 @@
+
   Computing and representing differences in a finer granularity than
 \emph{lines-of-code} can be readily achieved with the existing
 technology by parsing the data into a tree and later flattening said
 tree into a list of nodes, where we can then reuse existing
 techniques.  In short, this is how classical tree edit distance works
 -- \Cref{sec:background:tree-edit-distance}. Flatten the trees into a
-list of nodes and compute the least cost edit script between them.
+list of nodes and compute the least cost edit-script between them.
 
   Edit scripts are composed of atomic operations, which traditionally
 include operations such as \emph{insert}, \emph{delete} and
@@ -12,17 +13,26 @@ include operations such as \emph{insert}, \emph{delete} and
 function, which gives the semantics to these operations.
 
   Recycling linear edit distance into tree edit distance, however,
-comes with the drawbacks of edit-scripts. There include
-computationally expensive algorithms as a result of ambiguity in the
-representation of patches and merging algorithms which might
-produce ill-typed trees as a result~\cite{Vassena2016}. Moreover,
-if we wish to write these algorithms in a way that they are guaranteed
-to preserve the \emph{schema} of the objects under revision, we must
-employ a number of modern generic programming techniques.
+comes with the drawbacks of edit-scripts --- their abiguity.  For
+example, the least cost edit-script is chosen arbitrarily in some
+situations, namelly, when it is not unique. This makes the results
+computed by these algorithms hard to predict. Anotther issue, perhaps
+even more central, is the inherently slow algorithms that arise from
+this ambiguity.  The algorithms computing edit-scripts must either
+return an approximation of the least cost edit-script or check
+countless ambiguous choices to return the optimal one.  Finally,
+manipulating edit-scripts in an untyped fashion, say, for instance in
+order to merge then, might produce ill-typed trees -- as in \emph{not
+abiding by a schema} -- as a result~\cite{Vassena2016}.  We can get
+around this last issue by writing edit scripts in a typed
+form~\cite{Lempsink2009}, but this requires some non trivial generic
+programming techniques to scale.
 
-  This chapter is concerned with reviewing classic notions 
-of edit-distance and introducing the basic generic programming
-mechanisms that exists within the Haskell ecosystem.
+  The second half of important background is the state-of-the-ast
+of the generic programming ecosystem in Haskell. This includes
+the \texttt{GHC.Generics} and \texttt{generics-sop}
+libraries, which introduce all the necessary parts for us to build
+our own solutions later, in \Cref{chap:generic-programming}.
 
 \victor{
 Planned Skeleton
@@ -48,14 +58,22 @@ up in many different areas.
 \label{sec:background:tree-edit-dist}
 
   The \emph{edit distance} between to objects is
-defined as the least cost edit script that transforms
-the source object into the target object. Naturally,
-variations in the notions of cost and edit script will
-yield different distances between the same objects. 
-This freedom is responsible for the large degree of variation
-in the literature \cite{Bergroth2000,Bille2005}. 
+defined as the cost of the least cost edit script that transforms
+the source object into the target object. The edit-script
+computation is often called \emph{differencing} of objects.
+Where \emph{edit distance} is only concerned with how
+\emph{similar} one object is to another, \emph{differencing}
+is actually concerned with which manner makes objects
+similar. Although very closely related, these do make up
+different problems. In the biology domain \cite{Akutsu2010b,Henikoff1992,McKenna2010},
+for example, one is concerned solely in finding similar
+structures in a large set of structures, whereas
+in software version control systems\victor{cite VCS} we actually want to store,
+manipulate and combine the differences between objects.
 
-\victor{more glue???}
+  The large applicability of differencing and edit distances
+lead to a large degree of variation of cost notions, edit-script
+operations and algorithms for computing them~\cite{Bille2005,Bergroth2000,Paassen2018}.
 
   On this section we will review some of the important notions and
 background work on edit distance. We start by looking at the string
@@ -157,7 +175,7 @@ levenshteinDist s d = cost (head (lev s d))
 \end{myhs}
 
   Note that although the Levenshtein distance is unique, the edit
-scripts witnessing this are not. Consider the case of |lev "ab" "ba"|
+scripts witnessing it is \emph{not}. Consider the case of |lev "ab" "ba"|
 for instance. All of the edit scripts below have cost 2, which is the
 minimum possible cost.
 
@@ -260,14 +278,15 @@ distance~\cite{Akutsu2010,Demaine2007,Klein1998,%
 Bille2005,Autexier2015,Chawathe1997}.
 It considers \emph{arbitrary} trees as the objects under
 scrutiny. This added degree of freedom carries over to the design of
-edit operations. Suddenly, there are many more edit operations one
-could conceive to compose ones edit scripts. To name a few we can have
+edit operations. Suddenly, there are more edit operations one
+could use to create edit scripts. To name a few, we can have
 flattening insertions and deletions, where the children of the deleted
 node are inserted or removed in-place in the parent node. Another
 operation that only exists in the untyped world is node relabeling.
 This degree of variation is responsible for the high
 number of different approaches and techniques we see in
-practice~\cite{Farinier2015,Hashimoto2008,Falleri2014,Paassen2018,Finis2013}.
+practice~\cite{Farinier2015,Hashimoto2008,Falleri2014,Paassen2018,Finis2013},
+which have been briefly outlined in \Cref{sec:intro:literature-review}.
 
 \begin{figure}
 \centering
@@ -295,12 +314,12 @@ on a forest}
   
   Basic tree edit distance~\cite{Demaine2007}, however, considers only
 node insertions, deletions and copies. The cost function is borrowed
-entirely from string edit distance and so is the longest common
-subsequence function, that instead of working with |[a]| will work
+entirely from string edit distance together with the longest common
+subsequence function, that instead of working with |[a]| will now work
 with |[Tree]|. \Cref{fig:background:tree-es-operations} illsutrates
 insertions and deletions of (untyped) labels on a forest. 
-The interpretation of these edit operations is shown in
-\Cref{fig:background:apply-tree-edit}. 
+The interpretation of these edit operations as actions
+on forests is shown in \Cref{fig:background:apply-tree-edit}. 
 
 \begin{figure}
 \begin{myhs}
@@ -436,10 +455,47 @@ of edit scripts. Nevertheless, the definition of tree mapping is still very rest
 accross ancestor boundaries. These restrictions are there to ensure that
 one can always compute an edit script from a tree mapping.
 
+\victor{continue: With a tree mapping at hand, one can develop algorithms 
+to extract edit scripts out of it, such as XyDiff which matches trees
+with hasehs of LaDiff which extracts performance from additional
+restrictions}
+
  
 \subsection{Shortcommings of Edit Script Based Approaches}
 
+  Now that we built a basic understanding of how edit-scripts
+classically represent transformations between objects, let us look
+at a few of the difficulties that arise from basing ourselves
+in edit scripts. The first and most striking is the lack of cannonicity.
+Consider the following trees,
 
+\begin{center}
+\begin{forest}
+[,rootchange clean = 12
+  [|Bin| [|T|] [|U|]]
+  [|Bin| [|U|] [|T|]]]
+\end{forest}
+\end{center}
+  
+  From an \emph{edit distance} point of view, their distance is
+2. This fact can be witnessed by two distinct edit scripts: either
+|[Cpy Bin , Del T , Cpy U , Ins T]| or |[Cpy Bin , Ins U , Cpy T , Del
+U]| transform the target into the destination correctly. Yet, from
+a \emph{differencing} point of view, they are fairly different.
+Do we care more about |U| or |T|? What if |U| and |T| are also
+trees, but happen to have the same size (so that inserting one or the
+oter yields edit-scripts with equal costs)? Ultimately, 
+differencing algorithms that support no \emph{swap} operation
+must choose to copy |T| or |U| arbitrarily. This decision is often
+guided by heuristics and the existence of the choice point inherently
+slows algotihms down, as a decision must be made.
+
+  Leaving the computation of edit-scripts aside, when manipulating
+them it is often the case one wants to normalize edit scripts. Note
+how insertions and deletions can be shuffled indefinitely. Take,
+for example, |[Ins Bin , Ins A , Del Un , Cpy T]|, it is
+the same as |[Ins Bin , Del Un , Ins A , Cpy T]| or 
+|[Del Un , Ins Bin , Ins A , Cpy T]|. \victor{finish!}
 
 \victor{
 \begin{enumerate}
