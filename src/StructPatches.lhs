@@ -8,7 +8,7 @@ and difficulty of merging.
   In this chapter, we look into our first alternative, \texttt{stdiff}. 
 This approach attempt at detaching from edit-scripts to achieve a better
 type-safe merging algorithm. The main ingredient is
-crafting a homogeneous type of patches, in contrast with
+crafting a homogeneous type of patches, contrasting with
 \texttt{gdiff}'s heterogeeous representation. A value of type |PatchGDiff xs ys|
 transforms a list of trees |xs| into a list of trees |ys|.
 The heterogeneity of |PatchGDiff| makes it inevitable to
@@ -91,8 +91,12 @@ to present all of our work in a single programming language in an
 effort to lower the burden on the reader on having to learn different
 notations for the same concepts.
 
-\victor{Shall we present things with or without |kappa|? I'm leaning
-towards without}
+  This chapter must use the \texttt{generics-mrsop} library as its
+generic programming toolbox for two reasons. First, due to \texttt{stdiff}
+requiring the concept of explicit sums of products in the very 
+definition of |PatchST x|. Secondly, we need \texttt{gdiff}'s
+assistance in computing patches, for enumerating them is too
+expensive and \texttt{gdiff} also requires the notion of sums of products.
 
 \section{The Type of Patches}
 \label{sec:stdiff:patches}

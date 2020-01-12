@@ -46,16 +46,6 @@ Thanks to family, supervisor, friends and hops!
 \lhsinclude{Abstract.lhs}
 %include src/Abstract.lhs
 
-\chapter{Sammenvatting}
-Sommige goed samenvatting in het Nederlands.
-Sommige goed samenvatting in het Nederlands.
-Sommige goed samenvatting in het Nederlands.
-Sommige goed samenvatting in het Nederlands.
-Sommige goed samenvatting in het Nederlands.
-Sommige goed samenvatting in het Nederlands.
-Sommige goed samenvatting in het Nederlands.
-Sommige goed samenvatting in het Nederlands.
-
 %% Starts the mainmatter
 \mainmatter
 
@@ -94,10 +84,6 @@ Sommige goed samenvatting in het Nederlands.
 \lhsinclude{StructPatches.lhs}
 %include src/StructPatches.lhs
 
-% Show the code in Haskell, talk about the Agda model.
-% Mention that Arian translated the Agda to Haskell and
-% added mutual recursion to the model.
-
 \chapter{Pattern-Expression Patches}
 \label{chap:pattern-expression-patches}
 \lhsinclude{PEPatches.lhs}
@@ -116,12 +102,24 @@ Sommige goed samenvatting in het Nederlands.
 % \listoffigures
 % \listoftables
 
-\bibliographystyle{abbrvnat}
+\bibliographystyle{acm}
 \bibliography{references}
 
 \printindex
 
 \chapter{Curriculum Vitae}
+
+\chapter{Sammenvatting}
+Sommige goed samenvatting in het Nederlands.
+Sommige goed samenvatting in het Nederlands.
+Sommige goed samenvatting in het Nederlands.
+Sommige goed samenvatting in het Nederlands.
+Sommige goed samenvatting in het Nederlands.
+Sommige goed samenvatting in het Nederlands.
+Sommige goed samenvatting in het Nederlands.
+Sommige goed samenvatting in het Nederlands.
+
+
 
 \end{document}
 

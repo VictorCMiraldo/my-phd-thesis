@@ -32,32 +32,71 @@ data ListI  =  Nil | RoseI : ListI
 \end{code}
 \end{myhs}
 
-  In order to implement our prototyes and explore our ideas on
-differencing of abstract syntax trees, we must first improve support
-for programming with mutually recursive families in Haskell first.
-The \texttt{generics-mrsop} library, which is discussed in this chapter,
-lies in the intersection of \texttt{multirec}~\cite{Yakushev2009}, allowing the
-encoding of mutually recursive families, and the
-more modern \texttt{generics-sop}~\cite{deVries2014}, providing
-a more convenient programming style. In fact,
-it is worth noting that neither of the aforementioned libraries
+  Working with generic mutually recursive families in Haskell, however, is a
+non trivial task.  The best solution at the time of writing was the
+\texttt{multirec}~\cite{Yakushev2009} library, which was unfortunately
+unfit for our use case -- the lack of sums-of-products
+structure made it hard to port our algorithms and the pattern functor
+(\Cref{sec:background:patternfunctors}) approach makes writing the
+algorithms a difficult task.
+
+  This meant we had to devise new generic programming libraries to
+tackle the added complexity of mutual recursion. We have devised two
+different ways of doing so. First, we wrote the
+\texttt{generics-mrsop}~\cite{Miraldo2018} library, which combines a
+combinator based (\Cref{sec:background:explicitsop}) approach to
+generic programming with mutually recursive types, in fact,
+\texttt{generics-mrsop} lies in the intersection of \texttt{multirec}
+and the more modern \texttt{generics-sop}~\cite{deVries2014}.  It is
+worth noting that neither of the aforementioned libraries
 \emph{compete} with our work. We extend both in orthogonal directions,
 resulting in a new design altogether, that takes advantage of some
 modern Haskell extensions that the authors of the previous work could
 not enjoy, as discussed in \Cref{sec:background:generic-programming}.
 
+  The \texttt{generics-mrsop} library, \Cref{sec:gp:mrsop}, was a
+conceptual success. It enabled us to prototype and tweak the
+algorithms discussed in \Cref{chap:structural-patches} and
+\Cref{chap:pattern-expression-patches} with ease, yet, a memory leak
+in the Glasgow Haskell Compiler\footnote{\victor{get bug report
+numbers}} yield it unusable for encoding real programming languages
+such as \texttt{language-python} or \emph{language-java}
+examples. This frustrating outcome meant that a different approach --
+that did not rely as heavily on type families -- was necessary if we
+ever wanted to look at real world sofware version control conflict
+data.
+
+\victor{Fix a name with alejandro} The \texttt{generics-mrsop}
+approach was to identify the types that belong to the mutually
+recursive family and go from there.  Turns out that this is the only
+possibility if we want to have a code based generic programming
+library, but if we can get by with a pattern functor style, turns out
+we can take a dual road. The \texttt{generics-simplistic-deep}
+approach, \Cref{sec:gp:simplistic}, instead defines a list of
+primitive types, which are \emph{not} in the family, and considers all
+other types as part of the family.
+  
   This chapter is concerned with extending the existing generic
-programming capabilities of Haskell to mutually recursive types. With
-the generic programming capabilities at hand, we illustrate the
-\texttt{gdiff}~\cite{Lempsink2009} approach, which follows the
-classical tree-edit distance but in a typed fashion. It uses
-a heterogeneous type, |PatchGDiff xs ys|, for representing
-transformations of elements in the forest |xs| into elements of |ys|.
+programming capabilities of Haskell to mutually recursive types. 
+We introduce two different approaches with similar expressivity.
+In \Cref{sec:gp:mrsop} we explore the \texttt{generics-mrsop}
+library. With its ability of representing explitic sums of products
+we are able to illustrate the \texttt{gdiff}~\cite{Lempsink2009} differencing
+algorithm, which follows the classical tree-edit distance but in a typed fashion. 
+The \texttt{generics-simplistic-deep}, \Cref{sec:gp:simplistic}, on the other hand,
+works on the pattern functor spectrum of generic programming, which
+makes it difficult to talk about constructors explicitely. 
+Because of the presence of bugs in the compiler, however,
+it does present a compeling case for its use in practice.
 
 \section{The \texttt{generics-mrsop} library}
-\ref{sec:gp:mrsop}
+\label{sec:gp:mrsop}
 
-\victor{On this section we ilustrate the \texttt{generics-mrsop} library}
+  The \texttt{generics-mrsop} library is an intersection of \texttt{multirec}
+and \texttt{generics-sop}. It uses explicit codes in the sums of products style
+to guide the representation of datatypes. This enables a simple explicit fixpoint
+construction and a variety of recursion schemes, which makes the development
+of generic programs fairly straightforward.
   
 \subsection{Explicit Fixpoints}
 \label{sec:gp:explicitfix}
@@ -1333,11 +1372,12 @@ inability to find a suitable |ks|.
   Moreover, this suffers from all problems that edit scripts also suffer
 \victor{make it look nice}
 
-\section{The \texttt{generics-simplistic} Library}
+\section{The \texttt{generics-simplistic-deep} Library}
+\label{sec:gp:simplistic}
 
   Unfortunately, the \texttt{generics-mrsop} came accross a memory
 leak in the Haskell compiler itself, which renders the library unusable
-for large families at the time being. The bugs have been reported
+for large recursive families. The bugs have been reported
 in the trac\footnote{
 \url{https://gitlab.haskell.org/ghc/ghc/issues/17223} and 
 \url{https://gitlab.haskell.org/ghc/ghc/issues/14987}}
@@ -1345,12 +1385,59 @@ but at the time of writing of this thesis, have not been resolved.
 This means that if we were to collect large scale real data
 for our experiments, we must develop and alternative approach.
 
-  We then had to develop another option. As it turns out,
-extending the \texttt{generics-simplistic} (A. Serrano, private communication) 
-library to support deep encodings would be the best. The difficulty here
-is that \texttt{generics-simplistic} does not have the notion of codes.
+  After realizing that the algorithms in
+\Cref{chap:pattern-expression-patches} did not explicitely require
+sums of products to work, I was able to hack together a workaround
+into \texttt{GHC.Generics} to encode mutually recursive families. The
+main idea is to take the dual approach from
+\texttt{generics-mrsop}. Instead of defining which types belong in the
+family, we define which types \emph{do not} belong, and consider all
+other types to belong in the family. Corresponding with A. Serrano
+about it, he mentioned this approach could be seen as an extension of
+his \texttt{generics-simplistic} (private communication) library. This
+lead me into writing the layer that handles deep representations with
+support for mutual recursion on top of the
+\texttt{generics-simplistic} library, giving rise to
+\texttt{generics-simplistic-deep}.
 
-\victor{finish}
+\subsection{The Simplistic View}
+
+  The \texttt{generics-simplistic} library (A. Serrano, private communication)
+can be seen as a layer on top of \texttt{GHC.Generics} to ease out the 
+definition of new generic functionality. The pattern functor approach 
+used by \texttt{GHC.Generics}, shown in \Cref{sec:background:pattern-functor},
+requires the user to write a number of typeclass instances to define
+even basic generic functions. Yet, the pattern functors generated by GHC
+are restricted to sums, products, unit, constants and metadata information.
+This means we can write a representation in a single GADT, |SRep|
+defined below, indexed by the pattern functor it inhabits.
+
+\begin{myhs}
+\begin{code}
+data SRep (phi :: Star -> Star) :: (Star -> Star) -> Star where
+  S_U1   ::                                 SRep phi U1
+
+  S_K1   ::                 phi a       ->  SRep phi (K1 i a)
+
+  S_L1   ::                 SRep phi f  ->  SRep phi (f :+: g)
+  S_R1   ::                 SRep phi g  ->  SRep phi (f :+: g)
+
+  (:**:) :: SRep phi f  ->  SRep phi g  ->  SRep phi (f :*: g)
+
+  S_M1   :: SMeta i t   ->  SRep phi f  ->  SRep phi (M1 i t f)
+\end{code}
+\end{myhs}
+
+\victor{
+\begin{itemize} 
+  \item We only borrow |SRep| from Alejandro;
+  \item The |SRep| as defined above is shallow; we need a deep one
+  \item Next, we define |Holes|, the cofree comonad and free monad
+        structure on top of |SRep| and show how it is convenient to
+        have both on the same datatype.
+  \item Introduce some combinators
+\end{itemize}
+} 
 
 %%% Local Variables:
 %%% mode: latex

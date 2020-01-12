@@ -3,22 +3,26 @@
 \emph{lines-of-code} can be readily achieved with the existing
 technology by parsing the data into a tree and later flattening said
 tree into a list of nodes, where we can then reuse existing
-techniques.  In short, this is how classical tree edit distance works
--- \Cref{sec:background:tree-edit-distance}. Flatten the trees into a
-list of nodes and compute the least cost edit-script between them.
-
-  Edit scripts are composed of atomic operations, which traditionally
-include operations such as \emph{insert}, \emph{delete} and
-\emph{copy}. These scripts are later interpreted by the application
-function, which gives the semantics to these operations.
+techniques for computing differences over lists.  
+This is how most of the classic work on tree edit distance work.
+-- \Cref{sec:background:tree-edit-distance}. 
 
   Recycling linear edit distance into tree edit distance, however,
-comes with the drawbacks of edit-scripts --- their abiguity.  For
-example, the least cost edit-script is chosen arbitrarily in some
-situations, namelly, when it is not unique. This makes the results
-computed by these algorithms hard to predict. Anotther issue, perhaps
-even more central, is the inherently slow algorithms that arise from
-this ambiguity.  The algorithms computing edit-scripts must either
+also comes with its drawbacks. Linear differencing uses \emph{
+edit-scripts} to represent the differences between two objects.  Edit
+scripts are composed of atomic operations, which traditionally include
+operations such as \emph{insert}, \emph{delete} and \emph{copy}. These
+scripts are later interpreted by the application function, which gives
+the semantics to these operations. The notion of \emph{edit distance}
+between two objects is defined as the cost of the least cost
+\emph{edit-script} between them, where cost is some defined metric,
+often context dependent. One major drawback, for example, is the least
+cost edit-script is chosen arbitrarily in some situations, namelly,
+when it is not unique. This makes the results computed by these
+algorithms hard to predict. Another issue, perhaps even more central,
+is the inherently slow algorithms that arise from this ambiguity.
+
+  The algorithms computing edit-scripts must either
 return an approximation of the least cost edit-script or check
 countless ambiguous choices to return the optimal one.  Finally,
 manipulating edit-scripts in an untyped fashion, say, for instance in
@@ -33,26 +37,6 @@ of the generic programming ecosystem in Haskell. This includes
 the \texttt{GHC.Generics} and \texttt{generics-sop}
 libraries, which introduce all the necessary parts for us to build
 our own solutions later, in \Cref{chap:generic-programming}.
-
-\victor{
-Planned Skeleton
-\begin{itemize}
-  \item explain edit-scripts
-  \item make point: least-cost ES is arbitrary! 
-  \item make point: ES are easy to compute but hard to merge!
-  \item explain some generic programming
-\end{itemize}}
-
-  The problem of tree edit distance~\cite{Bergroth2000} has been showing
-up in many different areas. 
-
-  ted in bioinformatics: \cite{Akutsu2010b,Henikoff1992,McKenna2010}
-
-  ted in tutorin systems: \cite{Paassen2017,Rohan2016}
-
-  For more, check surveys \cite{Bille2005,Paassen2018}
-
-  tree merging: 3DM~\cite{Lindholm2004,Vassena2016}
 
 \section{Edit Distances}
 \label{sec:background:tree-edit-dist}
@@ -659,6 +643,7 @@ treatment of recursion and on their choice of type level combinators
 used to represent generic values.
 
 \begin{figure}\centering
+\victor{add simplistics here?}
 \begin{tabular}{@@{}lll@@{}}\toprule
                         & Pattern Functors       & Codes                 \\ \midrule
   No Explicit Recursion & \texttt{GHC.Generics}  & \texttt{generics-sop} \\

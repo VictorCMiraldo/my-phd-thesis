@@ -1,15 +1,21 @@
   The \texttt{stdiff} approach, which provided a first representation
 of tree-sructured patches for tree-structured data was stil very
-much coupled with edit-scripts. We still suffered the ambuiguity problem,
-and this was reflected on the coputationally expensive algorithm. We were also
+much coupled with edit-scripts: we still suffered the ambuiguity problem,
+which was reflected on the coputationally expensive algorithm. We were also
 subject to being unable to represent permutations and moves efficiently.
-These drawbacks motivated us to look for a better solution, which is
-turned out to become |PatchPE x|, our second attempt at detaching from 
-edit scripts.
+Overcoming these drawbacks required a significant shift in perspective and
+represents a complete decoupling from edit-script based differencing algorithms.
 
-  Suppose we want to have a patch that modifies the left element
-of a binary tree. If we had Haskell available to us, we would probably
-write somethgin in the lines of:
+  In general, differening algorithms are divided in a matching phase, which
+identifies which subtrees should be copied, and later extrapolates one edit-script
+from said tree matching. The main idea of \texttt{hdiff} is to forget about the
+second part altogether and use the tree matching \emph{as the patch}.
+This gave rise to the |PatchPE x| type, our second attempt at detaching from 
+edit scripts, which will be explored in this chapter.
+
+  Suppose we want to write a patch that modifies the left element
+of a binary tree. If we had the full Haskell programming language available
+as the patch language, we would probably write somethgin in the lines of:
 
 \begin{myhs}
 \begin{code}
@@ -55,9 +61,20 @@ given by |patch (Bin x y) (Bin y x)|. Another helpful consequence of
 our design is that we bypass the \emph{choice} phase of the
 algorithm. When computing the differences between |Bin Leaf Leaf|
 and |Leaf|, for example, we do not have to chose one |Leaf| to copy
-because we can simply copy both with a contraction. The patch
+because we can copy both with the help of a contraction operation. The patch
 that witnesses this would be |patch (Bin x x) x|. This optimization
-enables us to write linear |diff| algorithms. 
+enables us to write linear |diff| algorithms even in the presence
+of permutations and duplications. 
+
+  This chapter arises as a refinement from our ICFP'19 publication~\cite{Miraldo2019},
+where we explore the representation and computation aspects of \texttt{hdiff}.
+The big shift in paradigm of \texttt{hdiff} also requires a more careful look into 
+the metatheory and nuances of the algorithm, which were not present in said contribution.
+Moreover, we first wrote our algorithm~\cite{Miraldo2019} using the \texttt{generics-mrsop}
+library even though \texttt{hdiff} does not require an explicit sums of products. This means
+we can port it to \texttt{generics-simplistic-deep} and gather real world data fort
+his approach. We present our code in this section on the \texttt{generics-simplistic-deep} framework.
+\victor{Maybe we write a paper with pierre about it?}
 
 \victor{
   Unfortunately with the added complexity reasoning about patches

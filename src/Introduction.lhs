@@ -139,18 +139,35 @@ merge :: Patch a -> Patch a -> Either Conflicts (Patch a)
 \end{code}
 \end{myhs}
 
-  How many patches can be merged by the |merge| function is 
-a consequence of the degree of information provided by the |Patch| 
-datatype. As we have seen, if we only posses information on the
-line-level of the source code, there is very little we can merge.
-In order to have more information available about the structure of
-the changes being performed, then, we need more expressive |Patch| types.
-\victor{bla bla generic programming is also important for us bla bla}
+  The success rate of the |merge| function is a consequence of the
+degree of information provided by the |Patch| datatype. As we have
+seen, if we only posses information on the line-level of the source
+code, there is very little we can merge.  In order to have more
+information available about the structure of the changes being
+performed, then, we need to represent patches in a datatype that
+closely follows the structure of the data being differenced.
 
-  \victor{I'd like to talk a bit about other areas where 
-diffing can be interesting, i.e., biology; Should it go here?
-I'm leaning towards leaving them on the discussion section
-at the end.}
+\victor{What follows is a little bridge into ``GP is also important for us'';
+I'm not 100\% happy with it, though}
+
+  Structural differencing can be seen as a textbook example of generic
+programming: we want our differencing algorithms to work over
+arbitrary datatypes, but maintaining the type-safety that a language
+like Haskell provides. This added safety means that all the
+manipulations we perform on the patches are guaranteed to never break
+the abstract syntax, which is often not the case.  It is common to
+translate abstract syntax trees into a XML-like datatype and only then
+compute the differences. We call these \emph{untyped} tree
+differencing algorithms in contrast with our \emph{typed} approach.
+  
+  Writing \emph{typed} generic programming algorithms for regular
+types is an estabilished technique\victor{find some citations}. 
+Translating these techniques to mutually recursive datatypes -- as is
+the case of most real programming languages abstract syntaxes --
+is non-trivial and, in fact, is almost non existent. Consequently,
+we must also overtake these challanges and create generic programming
+techniques to write our algorithms and be able to test them against
+real world data.
 
 \section{Literature Review}
 \label{sec:intro:literature-review}
@@ -211,6 +228,28 @@ in \Cref{chap:pattern-expression-patches}. The
 \texttt{RWS-Diff}~\cite{Finis2013} uses approximate matchings by
 finding trees that are not necessarily equal but \emph{similar}, this
 yeilds a robust algorithm, which is applicable in practice.
+Most of these techniques recycle list differencing and can be seen
+as some form of string differencing over the preorder (or postorder)
+traversal of trees, which has quadratic upper bound~\cite{Guha2002}.
+A careful encoding of the edit operations enables one to have edit scripts
+that are guarnateed to preserve the schema of the data under manipulation
+\cite{Lempsink2009}.
+
+
+  Besides computing differences, we are also interested in merging the
+computed differences, effectively synchronizing
+changes~\cite{Balasubramaniam1998}. Naturally, merging algorithms are
+heavily dependent on the representation of differences. 
+The \texttt{diff3}, developed by Randy Smith in 1988, is still the
+most widely used such algorithm. It has received a formal treatment
+and specification \cite{Khanna2007} posterior to its development, however.
+Tree shaped data, however, has not seen many merging algorithms.
+A notable exception is \texttt{3DM}~\cite{Lindholm2004} which merges
+changes over XML documents. Also worth mentioning is the generalization
+of \texttt{diff3} to tree structured data using well-typed approaches
+due to Vassena~\cite{Vassena2016}, which uncovered the demotivating flaw
+of failure due to schema violations, even in the presence of 
+type edit scripts.
 
   Neighbouring source-code differencing we have patch inference and
 generation tools. Some infer patches from human created data
@@ -233,11 +272,11 @@ languages out-of-the-box.
   Which brings us to the second underlying aspect of this thesis,
 \emph{generic programming}. Although different ... 
 
-\section{Contributions} 
+\section{Contributions and Outline} 
 \label{sec:intro:contributions}
 
-  Next we outline the provenance of
-the constributions on which this thesis is built upon.
+  The main chapters of this thesis are based on peer-reviewed
+publications. Namellly,  
 
 \begin{enumerate}
   \item \Cref{chap:generic-programming} discusses the 
@@ -263,8 +302,6 @@ for patches altogether.
 
   \item \victor{Hopefully we will publish something on experiments?}
 \end{enumerate}
-
-\section{Thesis Outline}
 
 \victor{I'd also like to write a bit about how things 
 took place: the GHC bug, which means we can't run our |PatchStruct| 
