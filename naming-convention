@@ -28,6 +28,10 @@ enforce=("data|type"    # enforce spelling of 'datatype', forbids 'data-type' an
          "well-typed"
          "non-trivial"
          "edit-script"
+         "general-purpose"
+         "real-world"
+         "type class"
+         "type family"
          )
 
 ok=true

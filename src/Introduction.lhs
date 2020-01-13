@@ -235,17 +235,22 @@ A careful encoding of the edit operations enables one to have edit scripts
 that are guarnateed to preserve the schema of the data under manipulation
 \cite{Lempsink2009}.
 
-
   Besides computing differences, we are also interested in merging the
 computed differences, effectively synchronizing
 changes~\cite{Balasubramaniam1998}. Naturally, merging algorithms are
-heavily dependent on the representation of differences. 
-The \texttt{diff3}, developed by Randy Smith in 1988, is still the
-most widely used such algorithm. It has received a formal treatment
+heavily dependent on the representation of objects and edit scripts imposed 
+by the underlying differencing algorithm.
+The \texttt{diff3}~\cite{Smith1988}, developed by Randy Smith in 1988, is still the
+most widely used synchronizer. It has received a formal treatment
 and specification \cite{Khanna2007} posterior to its development, however.
-Tree shaped data, however, has not seen many merging algorithms.
-A notable exception is \texttt{3DM}~\cite{Lindholm2004} which merges
-changes over XML documents. Also worth mentioning is the generalization
+Algorithms for synchronizing changes over tree shaped data 
+include \texttt{3DM}~\cite{Lindholm2004} which merges
+changes over XML documents, \texttt{Harmony}~\cite{Foster2007},
+which works internally with unordered edge-labelled trees and
+\texttt{FCDP}~\cite{Lanham2002}, which uses XML as its internal
+representation.
+
+ Also worth mentioning is the generalization
 of \texttt{diff3} to tree structured data using well-typed approaches
 due to Vassena~\cite{Vassena2016}, which uncovered the demotivating flaw
 of failure due to schema violations, even in the presence of 

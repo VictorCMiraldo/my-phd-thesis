@@ -503,9 +503,8 @@ is responsible to recognize changes and reconcile them in the most
 automatic way possible.  Modern synchronizers are denoted
 \emph{state-based}, that is, they see only the current version of the
 replicas to be synchronized and the last common version between the
-diverging histories. The \texttt{diff3} is still the best known tool
-for textual synchronization. It was developed by Randy Smith in 1988.
-The algorithm itself has received some formal
+diverging histories. The \texttt{diff3}~\cite{Smith1988} is still the best known tool
+for textual synchronization. The algorithm itself has received some formal
 treatment~\cite{Khanna2007} and some generalizations to tree shaped
 data~\cite{Lindholm2004,Vassena2016}.
 
@@ -516,11 +515,6 @@ on the common ancestor of $p$ and $q$,
 that act directly on the images of $p$ and $q$,
 \Cref{fig:background:mergesquare-resid}.  We often call the the former
 a \emph{three-way merge} and the later a \emph{residual} merge.
-
-  Residual merges, specially if based on actual residual
-systems~\cite{Terese2003} pose a few technical challenges --- proving
-the that the laws required for estabilishing an actual residual system
-is non trivial.
 
 \Cref{fig:background:mergesquare-resid} shows a residual system~\cite{Terese2003}
 approach whereas \Cref{fig:background:mergesquare-threeway} illustrates
@@ -547,15 +541,33 @@ $$ \qquad
 \label{fig:background:mergesquare}
 \end{figure}
 
-  The residual approach tends to be more involved in the sense
-that a residual system~\cite{Terese2003} is a well studied algebraic structure.
-To prove that the |merge| operation makes a residual system over patches
-is a non-trivial exercise. A particular difficulty comes from proving
-the relation of |merge| and patch composition.
+  Residual merges, specially if based on actual residual
+systems~\cite{Terese2003} pose a few technical challenges --- proving
+the that the laws required for estabilishing an actual residual system
+is non trivial. Moreover, they tend to be harder to generalize
+to $n$-ary inputs. They do have the advantage of enabling one to
+model merges as pushouts~\cite{Mimram2013}, which provides a desirable
+metatheoretical layer. 
 
-\victor{I wonder the level of detail we should put in here; Should we go in depth
-about the diff3 algorithm?}
-  
+  In spite of a \emph{three-way} or \emph{residual} synchronizer, though,
+its most important aspect are the properties we can expect from it.
+Khanna et al~\cite{Khanna2007} identified a number intuitive properties
+we could expect out of a synchronizer and showed that \texttt{diff3}, in fact,
+enjoys only one of them: locality.
+
+  Locality states that changes two ``well separated'' parts of a given
+object can always be synchronized without conflicts. In fact, we argue
+this is the only property we can expect out of a general-purpose
+synchronizer.  The reason being that a general-purpose synchronize can
+only blindly rely on propositional equality structural disjointness as
+the criteria to estabilish changes as synchronizable.  Other criteria
+will invariantly require knowledge of the semantics of the data under
+synchronization. It is worth noting that although ``well separated''
+is difficult to define for an underlying list, tree shaped data has
+the advantage of possessing simpler such notions.
+
+\victor{more, less, ok?}
+ 
 \section{Generic Programming}
 \label{sec:background:generic-programming}
 

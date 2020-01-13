@@ -1,18 +1,19 @@
-  The \texttt{gdiff}~\cite{Lempsink2009} approach -- which flattens a tree
-into a list, like classical tree edit distance algorithms,
-but provides type-safe edit scripts -- borrows the problems
-of edit-script based approaches. These include ambiguity on the
-representation of patches, non-uniqueness of optimal solutions
-and difficulty of merging.
+  The \texttt{gdiff}~\cite{Lempsink2009} approach -- which flattens a
+tree into a list, following classical tree edit distance algorithms
+but using type-safe edit scripts -- borrows the problems of
+edit-script based approaches. These include ambiguity on the
+representation of patches, non-uniqueness of optimal solutions and
+difficulty of merging. The \texttt{stdiff} approach, or,
+\emph{structural patches}, marks our first alternative at overcoming
+these issues. This attempt at detaching from edit-scripts achieves a
+simpler type-safe merging algorithm at the expense of the diffing
+algorithm.
 
-  In this chapter, we look into our first alternative, \texttt{stdiff}. 
-This approach attempt at detaching from edit-scripts to achieve a better
-type-safe merging algorithm. The main ingredient is
-crafting a homogeneous type of patches, contrasting with
-\texttt{gdiff}'s heterogeeous representation. A value of type |PatchGDiff xs ys|
-transforms a list of trees |xs| into a list of trees |ys|.
-The heterogeneity of |PatchGDiff| makes it inevitable to
-stumble upon a difficult issue when dealing with the merge problem.
+  The main ingredient is crafting a homogeneous type of patches,
+contrasting with \texttt{gdiff}'s heterogeeous representation. A value
+of type |PatchGDiff xs ys| transforms a list of trees |xs| into a list
+of trees |ys|.  The heterogeneity of |PatchGDiff| makes it inevitable
+to stumble upon a difficult issue when dealing with the merge problem.
 If we are given two patches |PatchGDfiff xs ys| and |PatchGDiff xs
 zs|, we would like to produce two patches |PatchGDiff ys rs| and
 |PatchGDiff zs rs| such that the cannonical square commutes. The issue
@@ -95,8 +96,9 @@ notations for the same concepts.
 generic programming toolbox for two reasons. First, due to \texttt{stdiff}
 requiring the concept of explicit sums of products in the very 
 definition of |PatchST x|. Secondly, we need \texttt{gdiff}'s
-assistance in computing patches, for enumerating them is too
-expensive and \texttt{gdiff} also requires the notion of sums of products.
+assistance in computing patches (\Cref{sec:stdiff:oraclesenum})
+and \texttt{gdiff} also requires some notion of sums of products and hence,
+is easily written with \texttt{generics-mrsop}. 
 
 \section{The Type of Patches}
 \label{sec:stdiff:patches}
@@ -533,13 +535,25 @@ construction}. This is unlike the line-based or untyped approaches
 (which may generate ill-formed values) and similar to earlier
 results on type-safe differences~\cite{Lempsink2009}.
 
+\subsection{Patch Algebra}
+\label{sec:stdiff:algebra}
+
+\victor{Should I write something here?}
+
 \section{Merging Patches}
 \label{sec:stdiff:merging}
 
+  The patches encoded in the |PatchST| type clearly identify 
+a prefix of constructors copied from the root of a tree up unil the
+location of the changes and any insertion or deletions that might happen
+along the way. Moreover, since these patches alss mirrors the tree structure
+of the data in question, it becomes quite natural to identify separate changes.
+For example, if one change works on the left subtree of the root, and another
+on the right, they are clearly disjoint and can be merged.
 
-  One advantage of the |PatchST| approach is the natural merging
-algorithm it yields. A merging algorithm reconciles changes from two
-different patches whenever these are non interfering, for example, as
+  On this section we discuss a simple merging algorithm,
+which reconciles changes from two different patches whenever these 
+are \emph{non interfering}, for example, as
 in \Cref{fig:stdiff:merging0}. We call non interfering patches
 \emph{disjoint}, as they operate on separate parts of a tree.
 
@@ -550,49 +564,21 @@ Draw a simple example of mergeable patches here
 \label{fig:stdiff:merging0}
 \end{figure}
 
-\victor{%
-\begin{itemize}
-  \item We have done this in Agda; show the types!
-  \item Talk about disjointness and conflict placement.
-  \end{itemize}}
-
-\victor{\Huge temporary}
-
-There are two
-ways of looking into merging 
-
-receives a span of patches,
-that is, patches |p| and |q| with a common element in their
-domains, and computes a patch that apply the changes
-of |p| adapted to work over the codomain of |q|, as shown
-in \Cref{fig:stdiff:mergesquare}.
-
-\begin{figure}
-\centering
-\subfloat[Residual based merge operation]{%
-\qquad $$
-\xymatrix{ & o \ar[dl]_{p} \ar[dr]^{q} & \\
-          a \ar[dr]_{|merge q p|} & & b \ar[dl]^{|merge p q|} \\
-            & c &}
-$$ \qquad
-\label{fig:stdiff:mergesquare-resid}}%
-\qquad%
-\subfloat[Three-way based merge operation]{%
-\qquad $$
-\xymatrix{ & o \ar[dl]_{p} \ar[dr]^{q} \ar[dd]^(0.8){|merge p q|} & \\
-          a & & b \\
-            & c &}
-$$ \qquad
-\label{fig:stdiff:mergesquare-threeway}}
-\caption{Two different ways to look at the merge problem.}
-\label{fig:stdiff:mergesquare}
-\end{figure}
+  Prior to prototyping \texttt{stdiff} in Haskell, we had a working model
+of \texttt{stdiff} in Agda\victor{cite?}, where our main goal was proving
+that the merging algorithm would respect locality. Back in \Cref{sec:background:synchronizing-changes},
+we ilustrated two differnt ways of looking at a merging algorithm -- \emph{three-way}
+versus \emph{residual} based. We decided to encode our |mergeST| function
+as a \emph{residual} based since it enables us to more concisely express
+the property of commutativity, and hence, would enable us to continue
+making progress on the Agda front. 
 
   A positive aspect of the |PatchST| approach in comparison with
 a purely edit-scripts based approach is the significantly
 simpler merge function. This is due to |PatchST| being homogeneous.
-Consequently, the type of the merge function very simple
-and corresponds to what one would expect.
+Consequently, the type of the merge function is simple
+and reflects the fact that we expect a patch that operates over
+the same object as a result:
 
 \begin{myhs}
 \begin{code}
@@ -600,7 +586,7 @@ mergeST :: PatchST kappa codes ix -> PatchST kappa codes ix -> Maybe (PatchST ka
 \end{code}
 \end{myhs}
 
-  A call to |mergeST| returns |Nothing| if the patches have non-disjoint changes,
+  A call to |mergeST|, in Haskell, returns |Nothing| if the patches have non-disjoint changes,
 that is, if both patches want to change the \emph{same part} of the source tree.
 In our agda model, we have divided the merge function and the notion of disjointness,
 which yields a total merge function:
@@ -614,10 +600,10 @@ merge : (p q : Patch kappa codes ix) -> Disjoint p q -> Patch kappa codes ix
 \end{code}
 \end{myhs}
 
-  Where a value of type |Disjoint p q| is essentially a proof that |p|
+  Where a value of type |Disjoint p q| corresponts to a proof that |p|
 and |q| change different parts of the source tree. This makes reasoning about
 the merge function much easier. In fact, we have proven that the merge function
-commutes as one would expect. A simplified statement of our theorem
+commutes. A simplified statement of our theorem
 given below, with |sym| witnessing the fact the disjointness is a symmetric relation.
 
 \begin{myhs}
@@ -630,9 +616,9 @@ mergecommutes  :   (p q : Patch kappa codes ix)
 
 %}
 
-  Comming back to Haskell, it is simpler to rely on the |Maybe| monad for disjointness.
-In fact, we could define disjointness as whether or not merge returns
-a |Just|:
+  Back on the Haskell front, however, it is simpler to rely on the
+|Maybe| monad for disjointness.  In fact, we define disjointness
+as whether or not merge returns a |Just|:
 
 \begin{myhs}
 \begin{code}
@@ -641,12 +627,13 @@ disjoint p q = maybe (const True) False (merge p q)
 \end{code}
 \end{myhs}
 
-  The definition of the |mergeST| function can be seen in \Cref{fig:stdiff:mergest},
-where we outline the classes of situations, some of which deserve some attention.
-For example, when the numerator deletes a constructor but the denominator performs
-a change within said constructor we must check that they operator over \emph{the same}
-constructor. When that is the case, we must go ahead and ensure the deletion
-context, |ctx|, and the changes in the product of atoms, |at|, are compatible.
+  The definition of the |mergeST| function is given in its entirety in
+\Cref{fig:stdiff:mergest}, but we discuss some interesting cases
+inline next.  For example, when one change deletes a constructor
+but the other performs a change within said constructor we must
+check that they operate over \emph{the same} constructor. When that
+is the case, we must go ahead and ensure the deletion context, |ctx|,
+and the changes in the product of atoms, |at|, are compatible. 
 
 \begin{myhs}
 \begin{code}
@@ -678,14 +665,14 @@ mergeCtxAt (T at ctx) (x :* xs)
 \end{code} %$
 \end{myhs}
 
-  Note the |textEquality| ensuring the patches to be merged are producing
+  The |testEquality| is there to ensure the patches to be merged are producing
 the same element of the mutually recursive family. This is one of the two
 places where we need these checks when adapting our Agda model to work
-over mutually recursive types.
+over mutually recursive types. The second adaptation is shown shortly.
 
-  The |mergeAtCtx| function, which is dual to |mergeCtxAt|, merges a
+  The |mergeAtCtx| function, dual to |mergeCtxAt|, merges a
 |NP (At kappa codes) xs| and a |DelCtx kappa codes iy xs| into a |Maybe
-(DelCtx kappa codes iy xs)|, essentially preserving the |T at| it find on
+(DelCtx kappa codes iy xs)|, essentially preserving the |T at| it finds on
 the recursive calls.  Another interesting case happens on one of the
 |mergeSpine| cases, whose full implementation can be seen in
 \Cref{fig:stdiff:mergespine}.  The |SChg| over |SCns| case must ensure
@@ -769,27 +756,12 @@ mergeSpine ix iy (SChg cx cy al) (SCns cz zs)  = do  Refl <- testEquality ix iy
 \label{fig:stdiff:mergespine}
 \end{figure}
 
-\victor{I'm here}
-
-
-  Our merge function is very simple and returns |Nothing| if the patches have
-non-disjoint changes, that is, if the 
-
-\victor{I need examples on the previous section to which I
-can refer here}
-
-  Intuitively, if two patches work over different parts of the abstract
-syntax tree, we should be able to merge them quite easily. This is
-what we call disjoint patches.
-
-  The main advantage of the \texttt{stdiff} approach is the simple
-merging algorithm that comes with it. 
-
-\victor{%
+\victor{
 \begin{itemize}
-\item Easy to define disjointness
-\item algo follows from it
-\end{itemize}}
+\item Should we discuss results?
+\item Should I mention I had to reimplement and re-run Arian's experiments?
+\end{itemize}
+}
 
 \section{Computing |PatchST|}
 \label{sec:stdiff:diff}
@@ -799,10 +771,11 @@ differences. We have seen that this representation is interesting in
 and by itself: being richly-structured and typed, it can be thought of
 as a non-trivial programming language whose denotation is given by the
 application function. Moreover, we have seen how to
-merge two disjoin differences. However, as programmers, we are mainly 
+merge two disjoint differences. However, as programmers, we are mainly 
 interested in \emph{computing} patches from a source and a
-destination. Unfortunately, this is one of the main downsides
-from the |PatchST| approach.
+destination. Unfortunately, however, this is where the good news
+stop. Computing a value of type |PatchST| is computationally expensive
+and represents one of the main downsides of the |PatchST| approach.
 
   In this section we start by outlining a nondeterministic specification
 of an algorithm for computing a |PatchST|, in \Cref{sec:stdiff:naiveenum}.
@@ -918,7 +891,7 @@ enumAl (x :* xs) (y :* ys)
 \end{code} %$
 \end{myhs}
 
-\subsubsection{The Cost Dynamics}
+\subsubsection{The Failure of the Cost Dynamics}
 
   With a systematic way to produce a list of patches,
 |[Almu kappa codes ix iy]|, all that is left to the specification
@@ -964,77 +937,50 @@ bad   = Del Bin (There a  (Here
 \label{fig:stdiff:patch1}
 \end{figure}
 
-
   Recall that on the longest common subsequence scenario,
 \Cref{sec:background:string-edit-distance}, the cost function was
 essentially counting insertions and deletions and the heuristics were
 to minizesaid count. Another way to look at it was to count possible
 copies and maxime it. This duality is not present on the tree world.
-Counting copies can be misleading: 
-\victor{is it really misleading though? We should just be counting
-isertions and deletions and minimizing them; our spine function does
-not even attempt to not porsue a copy}.
+Counting copies can be misleading. If |cost (diff a a')|, above, is high,
+it is likely that the |bad| patch is chosen instead of what we would expect.
+The reason is because deletions and insertions for tree shaped
+data are not atomic, and hence, should not have a fixed cost. They insert
+and delete entire trees. 
 
-
- how to sort these patches. This is where
-we come to a problem. The notion of \emph{cost} is not
-as simple as in the linear or in the \emph{gdiff} case.
-
-  With the hability to copy entire trees, we must decide
-whether to prioritize the number of copies, essentially pushing them
-down to the leaves of the patch; or to copy large portions of 
-data by prefering copies that show up. Counting copies is not enough.
-
-
-
-
-
-
-
-\victor{I'm unsure whether we should spell out the details of the
-enumeration; it's pretty straightforward...}
-
-\victor{Answer is yes; talk about it and use it to show the tensions
-around copy definitions: counting copies; depth of copies; size of copied subtrees etc;
-each definition will have corner cases}
-
-
-\victor{
-Very slow; suffers from the same heuristic
-problems as the edit-script approaches. Plus,
-definition of cost is more complicated here.
-}
+\victor{We do not have a full answer to this problem; how should I write this?}
 
 \subsection{Translating from \texttt{gdiff}}
 \label{sec:stdiff:oraclesenum}
 
-  Enumerating all possible patches and then filtering the one
-with the least cost is a very time consuming. That is due to
-the exponential number of patches that transforms a tree into another tree.
-Most of these patches are far from optimal and, therefore, we should not be
-spending time with them. We have attempted two approaches to
-filter the unintersting patches out.
+  Since enumerating all possible patches and then filtering a chosen
+one is time consuming and requires an complex notion
+of cost over |PatchST|, it was clear we should be porsuing better
+algorithms for our |diff| function. We have attempted two similar approaches to
+filter the unintersting patches out and optimize the search space.
 
-  A first attempt was done by \citet{Garuffi2018}, where
-the notion of oracles where used to restrict the paths of the enumeration engine.
-This enables one to easily instruct the enumeration engine to traverse
-the search space in specific ways, for example, to never attempt
-a deletion after an insertion. Moreover, the oracle approach
-can receive external information. Ultimately, \citet{Garuffi2018}
-used the \unixdiff{} as an oracle, instructing the enumeration engine
-to only pursue insertions or deletions on the lines that were
-marked as such by the \unixdiff{}. The performance was still very
-low and could not compute the |PatchST| of two real Clojure files in
+  A first idea, which arose in conjuncton with P.E. Dagand (private communication),
+was to use the already existing \unixdiff{} tool as some sort of \emph{oracle}.
+That is, we should only consider inserting and deleting elements that fall
+on lines marked as such by \unixdiff{}. This idea was translated
+into Haskell by G. Garuffi~\cite{Garuffi2018}, but the performance was still very
+low and could not compute the |PatchST| of two real-world Clojure files in
 less than a couple minutes.
 
-  From the experiments of \citet{Garuffi2018} we learnt that restricting
-the search space was not sufficient. The reasons were manifold, really. 
-Besides the complexity introduced by arbitrary heuristics, using the \unixdiff{}
-to flag elements of the AST was still too coarse. Many elements of the AST
-fall under the same line. The next idea was then to use \texttt{gdiff}~\Cref{sec:gp:well-typed-tree-diff},
-as the oracle, enabling us to annotate every node of the source and destination
-trees with a information about whether that node was copied or not.
-\victor{Mention that Arian implemented our original Agda model}
+  From these experiments \cite{Garuffi2018} we learnt that restricting
+the search space was not sufficient. The reasons were manifold,
+really.  Besides the complexity introduced by arbitrary heuristics,
+using the \unixdiff{} to flag elements of the AST was still too
+coarse. Many elements of the AST fall under the same line. Which
+brings us to the next idea: use
+\texttt{gdiff}~\Cref{sec:gp:well-typed-tree-diff} as the oracle,
+enabling us to annotate every node of the source and destination trees
+with a information about whether that node was copied or not.  This
+strategy was translated into Haskell by A. van
+Putten~\cite{Putten2019} as part of his MSc work. The gist of it
+is that we can use annotated fixpoints to tag each constructor
+of a tree with added information. In this case, we are interested
+in whether this node would be copied or not by \texttt{gdiff}:
 
 \begin{myhs}
 \begin{code}
@@ -1145,6 +1091,16 @@ annotation flag a copy.
 
 \section{Discussion}
 
+  With \texttt{stdiff} we learnt that the difficulties 
+of edit-script based approaches are not due, exclusively, to
+using linear data to represent transformations to tree structured data.
+Another important aspect that we unknowingly overlooked, and ultimately did 
+lead to a prohibitively expensive |diff| function, was the necessity to choose
+a single copy oportunity, whenever a subtree could be copied in two or
+more different ways.
+
+\victor{What else do we want to discuss here?}
+\victor{Mention results and forward to experiments for further details?}
 
 %%% Local Variables:
 %%% mode: latex
