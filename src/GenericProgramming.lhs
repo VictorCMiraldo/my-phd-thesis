@@ -1428,10 +1428,10 @@ data SRep (phi :: Star -> Star) :: (Star -> Star) -> Star where
 \end{code}
 \end{myhs}
 
-  The handling of metadata is completely borrowed from \texttt{GHC.Generics}
+  Handling of metadata is borrowed entirely from \texttt{GHC.Generics}
 and captured by the |SMeta| datatype, which remembers which kind of
 metainformation is stored at the type level and exposes the necessary
-typeclasses for extracting information.
+typeclasses when pattern matched.
 
 \begin{myhs}
 \begin{code}
@@ -1441,6 +1441,29 @@ data SMeta i t where
   SM_S  :: Selector    s  => SMeta S s
 \end{code}
 \end{myhs}
+
+  The |SRep| datatype enables us to write generic functionality
+in a much more concise way. Take the |gsize| function from 
+\Cref{sec:background:patternfunctors} as an example.
+With pure \texttt{GHC.Generics} we must use |Size| and |GSize|
+typeclasses. With |SRep| we can write it directly, provided
+we have a way to count the size of the leaves of type |phi|.
+
+\begin{myhs}
+\begin{code}
+gsize  :: (forall x dot phi x -> Int)
+       -> SRep phi f -> Int
+gsize r S_U1         = 0
+gsize r (S_K1    x)  = r x
+gsize r (S_M1 _  x)  = gsize r x
+gsize r (S_L1    x)  = gsize r x
+gsize r (S_R1    x)  = gsize r x
+gsize r (x :**: y)   = gsize r x + gsize r y
+\end{code}
+\end{myhs}
+
+  Naturally, we still need to convert values of |GHC.Generics.Rep f x|
+into |SRep phi (GHC.Generics.Rep f)| for some choice of |phi|. 
 
 \victor{say the following; better?}
   The |SRep| datatype is, in fact, the only ingredient we need 
