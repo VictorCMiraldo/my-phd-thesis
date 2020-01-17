@@ -1443,7 +1443,7 @@ data SMeta i t where
 \end{myhs}
 
   The |SRep| datatype enables us to write generic functionality
-in a much more concise way. Take the |gsize| function from 
+in more concisely than \texttt{GHC.Generics}. Take the |gsize| function from 
 \Cref{sec:background:patternfunctors} as an example.
 With pure \texttt{GHC.Generics} we must use |Size| and |GSize|
 typeclasses. With |SRep| we can write it directly, provided
@@ -1463,14 +1463,34 @@ gsize r (x :**: y)   = gsize r x + gsize r y
 \end{myhs}
 
   Naturally, we still need to convert values of |GHC.Generics.Rep f x|
-into |SRep phi (GHC.Generics.Rep f)| for some choice of |phi|. 
+into |SRep phi (GHC.Generics.Rep f)| for some choice of |phi|. The
+\texttt{generics-simplistic} library uses |K1 R| as |phi|, essentially
+translating only the first layer into a generic representation.
+The \texttt{generics-simplistic-deep}, on the other hand, translates
+the entire value and uses a fixpoint combinator in |phi|, as we shall see
+in \Cref{sec:gp:simplistic-deep}.
 
-\victor{say the following; better?}
-  The |SRep| datatype is, in fact, the only ingredient we need 
-to borrow from the \texttt{generics-simplistic} library. The rest of
-\texttt{generics-simplistic-deep} is original.
+  Even though |SRep| lacks a \emph{codes-based} approach, it still
+admits some combinators that can assist a programmer writing their
+generic code. Honorable mentions to |repMap|, |repZip| and |repLeaves|,
+which lay in the base of virtually all other combinators. Their
+simple types are shown below, but it is worth noting that these simple
+types are just the cannonical instantiation of the combinator's
+respective monadic versions.
+
+\begin{myhs}
+\begin{code}
+repMap     :: (forall x dot phi x -> psi x) -> SRep phi f -> SRep psi f
+
+repZip     :: SRep phi f -> SRep psi f -> Maybe (SRep (phi :*: psi) f)
+
+repLeaves  :: SRep phi f -> [Exists phi]
+\end{code}
+\end{myhs}
+
 
 \subsection{Deep Representations with |SRep|}
+\label{sec:gp:simplistic-deep}
 
   The |SRep phi f| datatype enables us to write generic functions
 without resorting to typeclasses and also provides a simple
@@ -1481,7 +1501,8 @@ any type that is \emph{not} a primitive type, where
 the choice of primitive type shall be parametrizable.
 
   Recursion is easily achieved through a |SFix prim| combinator,
-where |prim :: P [ Star ]| is a list of primitive types. The |SFix|
+where |prim :: P [ Star ]| is a list of types to be considered primitive,
+that is, will not be unfolded into a generic representaion. The |SFix|
 combinator will have two constructors, one for carrying values
 of primitive types and one for unfolding a next layer of the generic
 representation, as defined below.
@@ -1497,6 +1518,94 @@ data SFix prim :: Star -> Star where
 \end{code}
 \end{myhs}
 
+  The |Elem| and |NotElem| are custom constraints that state whether
+or not a type is an element of a list of types. They are defined with
+the help of the boolean type family |IsElem|, below.
+
+\begin{myhs}
+\begin{code}
+type family IsElem (a :: Star) (as :: [ Star ]) :: Bool where
+  IsElem a (P [])        = P False
+  IsElem a (a (P :) as)  = P True
+  IsElem a (b (P :) as)  = IsElem a as
+
+type Elem    a as = (IsElem a as ~ P True , HasElem a as)
+type NotElem a as = IsElem a as ~ P False
+\end{code}
+\end{myhs}
+
+  Where |HasElem a as| is a typeclass that produces an actual proof
+that the list |as| contains |a| -- encoded in a datatype |ElemPrf a as|. 
+Pattern matching on a value of type |ElemPrf a as| will unfold the structure of |as|.
+This is crucial in, for example, acessing typeclass instances for
+types in |SFix prim|. The |HasElem| typeclass and |ElemPrf| datatype 
+are defined below.
+
+\begin{myhs}
+\begin{code}
+data ElemPrf a as where
+  Here   :: ElemPrf a (a (P :) as)
+  There  :: ElemPrf a as -> ElemPrf a (b (P :) as)
+
+class HasElem a as where
+  hasElem :: ElemPrf a as
+\end{code}
+\end{myhs}
+
+  Suppose we would like to write an equality operator for values of type |SFix prim a|,
+as in the |Eq| typeclass. This would require us
+to ultimately compare values of type |x|, for some |x| such that |Elem x prim|.
+Naturally, this can only be done if all elements of |prim| are members
+of the |Eq| typeclass. We can write that with the |All| type family.
+
+\begin{myhs}
+\begin{code}
+type family All c xs :: Constraint where
+  All c  (P [])        = ()
+  All c  (x (P :) xs)  = (c x , All c xs)
+\end{code}
+\end{myhs}
+
+  Now, given a function with type |(All Eq prim) => SFix prim a -> dots|,
+we must extract the |Eq x| instance from |All Eq prim|, for some |x| 
+such that |IsElem x prim ~ P True|. This is where |ElemPrf| comes in
+handy. By pattern matching on |ElemPrf| we are able to extract the
+necessary instance, as shown by the |witness| function below. Naturally,
+once we find the instance we are looking for, we record it in a datatype
+for easier access. The |Eq| instance for |SFix| is shown in \Cref{fig:gp:sfix-eq}
+
+\begin{myhs}
+\begin{code}
+data Witness c x where
+  Witness :: (c x) => Witness c x
+
+witness  :: forall x xs c
+          . (HasElem x xs , All c xs)
+         => Proxy xs -> Witness c x
+witness _ = witnessPrf (hasElem :: ElemPrf x xs)
+  where 
+    witnessPrf :: (All c xs) => ElemPrf x xs -> Witness c x
+    witnessPrf Here       = Witness
+    witnessPrf (There p)  = witnessPrf p
+\end{code}
+\end{myhs}
+
+\begin{figure}
+\begin{myhs}
+\begin{code}
+instance (All Eq prim) => Eq (SFix prim f) were
+  (Prim x) == (Prim y) = 
+    case witness (Proxy :: Proxy prim) of
+      Witness -> x == y
+  (SFix x) == (SFix y) = 
+    case repZip x y of
+      Just r   -> all (==) (repLeavesList r)
+      Nothing  -> False
+\end{code}
+\end{myhs}
+\caption{Equality instance for |SFix|, illustrating how to work with |Witness|.}
+\label{fig:gp:sfix-eq}
+\end{figure}
 
 \begin{figure}
 \begin{myhs}
@@ -1520,79 +1629,6 @@ class GDeep prim f where
 \caption{Declaration of |Deep| and |GDeep| typeclasses}
 \label{fig:gp:gdeep}
 \end{figure}
-
-
-  The |Elem| and |NotElem| are custom constraints that state whether
-or not a type is an element of a list of types. They are defined with
-the help of the boolean type family |IsElem|, below.
-
-\begin{myhs}
-\begin{code}
-type family IsElem (a :: Star) (as :: [ Star ]) :: Bool where
-  IsElem a (P [])        = P False
-  IsElem a (a (P :) as)  = P True
-  IsElem a (b (P :) as)  = IsElem a as
-
-type Elem    a as = (IsElem a as ~ P True , HasElem a as)
-type NotElem a as = IsElem a as ~ P False
-\end{code}
-\end{myhs}
-
-  Where |HasElem a as| is a typeclass that produces an actual proof
-that the list |as| contains |a|, of type |ElemPrf a as|. Pattern matching
-on a value of type |ElemPrf a as| will unfold the structure of |as|
-as necessary, enabling us to extract information and help the typeclass
-resolution where necessary, as we shal see next. 
-
-\begin{myhs}
-\begin{code}
-data ElemPrf a as where
-  Here   :: ElemPrf a (a (P :) as)
-  There  :: ElemPrf a as -> ElemPrf a (b (P :) as)
-
-class HasElem a as where
-  hasElem :: ElemPrf a as
-\end{code}
-\end{myhs}
-
-  Being able to produce said proof is important if we ever need to
-assume that the primitive types posses some functionality, for
-example, that they posses a comparisson operator. Say, for example,
-we want to compare two values of type |SFix prim a|. This will require us
-to ultimately compare values of type |x|, for some |x| such that |Elem x prim|.
-Naturally, this can only be done if all elements of |prim| are members
-of the |Ord| typeclass. We can write that with the |All| type family.
-
-\begin{myhs}
-\begin{code}
-type family All c xs :: Constraint where
-  All c  (P [])        = ()
-  All c  (x (P :) xs)  = (c x , All c xs)
-\end{code}
-\end{myhs}
-
-  Now, given a function with type |(All Ord prim) => SFix prim a -> ...|,
-we must extract the |Ord x| instance from |All Ord prim|, for some |x| 
-such that |IsElem x prim ~ P True|. With the help of |ElemPrf| this becomes
-easy. By pattern matching on |ElemPrf| we are able to extract the
-necessary dictionary. We make use of another auxiliary type, |Witness|,
-to record that. 
-
-\begin{myhs}
-\begin{code}
-data Witness c x where
-  Witness :: (c x) => Witness c x
-
-witness  :: forall x xs c
-          . (HasElem x xs , All c xs)
-         => Proxy xs -> Witness c x
-witness _ = witnessPrf (hasElem :: ElemPrf x xs)
-  where 
-    witnessPrf :: (All c xs) => ElemPrf x xs -> Witness c x
-    witnessPrf Here       = Witness
-    witnessPrf (There p)  = witnessPrf p
-\end{code}
-\end{myhs}
 
 \paragraph{Converting to a deep representation.}
   With representational issues out of the way, all we are left to do
@@ -1645,7 +1681,11 @@ instance (GDeepAtom prim (IsElem a prim) a) => GDeep prim (K1 R a) where
 it does not allow for too much flexibility: it does not support
 annotations nor holes. In fact, a lesson we learnt from \texttt{generics-mrsop} is
 that we can, and should, use the very same type to represent 
-all these common variations over fixpoints.
+all these common variations over fixpoints. This can be achieved
+combining the free monad and the cofree comonad in the same type,
+which we name |HolesAnn prim phi h a|. A value of type |HolesAnn prim phi h a|
+is isomorphic to a value of type a, where each constructor is annotated 
+with |phi| and we might have holes of type |h|. 
 
 \victor{Make names consistent with mrsop in the thesis and in the code!}
 \begin{myhs}
@@ -1663,8 +1703,12 @@ data HolesAnn prim phi h a where
 \end{code}
 \end{myhs}
 
-  The |SFix| combinator presented earlier is easily seen as a special case.
-Moreover, we can represnt fixpoints with annotations or values with holes.
+  The |SFix| combinator presented earlier is easily seen as the special
+case where annotations are the unit type, |U1|, and holes do not exist,
+captured by the empty type |V1|. Moreover, we can also represent 
+fixpoints with annotations but no holes or values with holes but no annotations.
+This means that the generic combinators we develop can be used in a variety
+of different contexts, whih is certainly desirable. 
 
 \begin{myhs}
 \begin{code}
@@ -1674,19 +1718,58 @@ type Holes    prim      = HolesAnn prim U1
 \end{code}
 \end{myhs}
 
-\victor{Finish!}
+  Finally, with the
+help of pattern synonyms and \texttt{COMPLETE} pragmas we can do an acceptable
+job at hiding this overloading from the user. The \texttt{COMPLETE} pragma
+affects the warnings issued by the exhaustiveness checker in \texttt{GHC}.
+The |SFix| datatype from the previous section can easily be simulated
+with the following synonym:
+  
+\begin{myhs}
+\begin{code}
+pattern SFix  :: () => (NotElem a prim , Generic a)
+              => SRep (SFix prim) (Rep a)
+              -> SFix prim a
+pattern SFix x = Roll' U1 x
+{-# COMPLETE SFix , Prim #-}
+\end{code}
+\end{myhs}
 
+\victor{What else?}
 
-\victor{
-\begin{itemize} 
-  \item We only borrow |SRep| from Alejandro;
-  \item The |SRep| as defined above is shallow; we need a deep one
-  \item Next, we define |Holes|, the cofree comonad and free monad
-        structure on top of |SRep| and show how it is convenient to
-        have both on the same datatype.
-  \item Introduce some combinators
-\end{itemize}
-} 
+\section{Discussion}
+\label{sec:gp:discussion}
+
+\begin{figure}\centering
+\victor{add simplistics here?}
+\begin{tabular}{@@{}lll@@{}}\toprule
+                        & Pattern Functors  & Codes                 \\ \midrule
+  No Explicit Recursion & \texttt{GHC.Generics}  & \texttt{generics-sop} \\
+  Simple Recursion      &  \multirow{2}{*}{\textbf{\texttt{generics-simplistic-deep}}} & \multirow{2}{*}{\textbf{\texttt{generics-mrsop}}} \\
+  Mutual Recursion      &   &   \\
+\bottomrule
+\end{tabular}
+\caption{Updated spectrum of generic programming libraries}
+\label{fig:gp:gplibraries}
+\end{figure}
+
+  On this chapter we explored two different ways of writting generic programs
+that must work over mutually recursive families. Looking back at the spectrum
+of generic programming libraries, in \Cref{fig:background:gplibraries}, we had
+a unfilled hole for \emph{code-based} approach with explicit recursion of any type,
+which can be filld by \texttt{generics-mrsop}. When it comes to pattern functors,
+although \texttt{regular} and \texttt{multirec} already exist, using those libraries
+imposes a significantly bigger overhead when compared to \texttt{generics-simplistic-deep}.
+The updated table of generic programming libraries is given in \Cref{fig:gp:gplibraries}.
+
+\victor{sketched topics below; what else?}
+
+  Unfortunately, the \texttt{generics-mrsop} heavy usage of type families triggers
+a memory leak in the compiler. This hinders the library unusable for large families
+of mutually recursive datatypes.
+
+  It goes without saying that the remainder of this thesis would not have been
+possible without these generic programming libraries.
 
 %%% Local Variables:
 %%% mode: latex

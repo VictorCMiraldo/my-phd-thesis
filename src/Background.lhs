@@ -650,16 +650,15 @@ type classes instead of static type level information to provide
 generic functionality.  These are a completely different strand of
 work from what we seek. The other approach relies on type level
 representations of datatypes. \Cref{fig:background:gplibraries} shows the main
-libraries relying on the typed approach. These can be compared in their
+existing libraries relying on the typed approach. These can be compared in their
 treatment of recursion and on their choice of type level combinators
 used to represent generic values.
 
 \begin{figure}\centering
-\victor{add simplistics here?}
 \begin{tabular}{@@{}lll@@{}}\toprule
                         & Pattern Functors       & Codes                 \\ \midrule
   No Explicit Recursion & \texttt{GHC.Generics}  & \texttt{generics-sop} \\
-  Simple Recursion      &  \texttt{regular}      &  \multirow{2}{*}{\textbf{\texttt{generics-mrsop}}} \\
+  Simple Recursion      &  \texttt{regular}      &  \\
   Mutual Recursion      &  \texttt{multirec}     &   \\
 \bottomrule
 \end{tabular}
