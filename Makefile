@@ -50,6 +50,7 @@ dist/%.tex: src/%.lhs $(addprefix src/,$(LHS_DEPENDENCIES))
 ## Builds the target.
 default : $(BUILD_DEPENDS) tex/latex/uustthesis.cls
 	@mkdir -p dist
+	(git log --format='\def\PHD@latestcommit{%h}' | head -n 1 > dist/version.tex)
 	export TEXMFHOME=".:$(TEXMFHOME)" && \
 	$(LATEX) $(MAIN_FILE)
 

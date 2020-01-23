@@ -182,6 +182,14 @@ I'll pass it to 'book' just in case.}
 %% Page style %%
 %%%%%%%%%%%%%%%%
 
+%% Hacky way of bringing the latest git commit
+%% into here; byt hey, it works! makes it easy
+%% to know which version of the thesis the feedback came from.
+\ifPHD@isdraft
+\input{dist/version.tex}
+\fi
+% \@ifundefined{\PHD@latestcommit}{\def\PHD@latestcommit{000000}}{}
+
 %% Adds the uppercase title of the current chapter to
 %% the top of the page, centered. Numbers go alternating
 %% left to right or centered, depending on oneside or twoside options.
@@ -193,6 +201,9 @@ I'll pass it to 'book' just in case.}
   \fancyfoot{}
   \renewcommand{\headrulewidth}{0pt}
   \fancyhead[RO, LE]{\thepage}
+\ifPHD@isdraft
+  \fancyhead[LO, RE]{\texttt{\PHD@latestcommit}}
+\fi
   \fancyhead[CO]{\leftmark}
   \fancyhead[CE]{\rightmark}
 }
