@@ -55,6 +55,13 @@
 \PHD@isdrawseaweedtrue
 \DeclareOption{noseaweed}{\PHD@isdrawseaweedfalse}
 
+\newif\ifPHD@isdraft
+\PHD@isdraftfalse
+\DeclareOption{draft}{
+\PHD@isdrafttrue
+\PassOptionsToClass{draft}{book}
+}
+
 %% Here we can pass undeclared options to some class
 %% or package
 \DeclareOption*{%
@@ -491,3 +498,9 @@ project \@NWOproject{} (\@NWOgrantnumber).
 %% \setlength{\parskip}{1em}
 
 \usepackage[numbers,square]{natbib}
+
+
+\ifPHD@isdraft
+\usepackage[displaymath,mathlines]{lineno}
+\linenumbers
+\fi
