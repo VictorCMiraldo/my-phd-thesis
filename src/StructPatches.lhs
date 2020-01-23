@@ -1099,6 +1099,15 @@ lead to a prohibitively expensive |diff| function, was the necessity to choose
 a single copy oportunity, whenever a subtree could be copied in two or
 more different ways.
 
+\victor{These patches are easy to merge precisely because alignment
+has alerady been done; that is, deletions and insertions are so restrictive
+through their one-hole contexts that there is no missing out}
+\victor{Actually; \texttt{hdiff} with alignment really improves on that
+by essentially enabling permutations and duplications over \texttt{stdiff}}
+\victor{Another aspect is that \texttt{hdiff} actually uses type information
+when doing synchronization; this is pretty neat and apparently the (only) use for
+types in structural diffing}
+
 \victor{What else do we want to discuss here?}
 \victor{Mention results and forward to experiments for further details?}
 
