@@ -500,25 +500,17 @@ systems, one is inevitably faced with the problem of
 changes --- when an offline machine goes online with new versions,
 when two changes happened simultaneously, etc. The \emph{synchronizer}
 is responsible to recognize changes and reconcile them in the most
-automatic way possible.  Modern synchronizers are denoted
+automatic way possible.  Most modern synchronizers are denoted
 \emph{state-based}, that is, they see only the current version of the
 replicas to be synchronized and the last common version between the
-diverging histories. The \texttt{diff3}~\cite{Smith1988} is still the best known tool
-for textual synchronization. The algorithm itself has received some formal
-treatment~\cite{Khanna2007} and some generalizations to tree shaped
-data~\cite{Lindholm2004,Vassena2016}.
+diverging histories; as opposed to \emph{operaton-based} synchronizers,
+which have access to the whole history of modifications of the objects
+under synchronization. 
 
-  Generally speaking, synchronization of changes $p$ and $q$ can be
-modelled in one of two ways. Either we produce one change that works
-on the common ancestor of $p$ and $q$,
-\Cref{fig:background:mergesquare-threeway}, or we produce two changes
-that act directly on the images of $p$ and $q$,
-\Cref{fig:background:mergesquare-resid}.  We often call the the former
-a \emph{three-way merge} and the later a \emph{residual} merge.
-
-\Cref{fig:background:mergesquare-resid} shows a residual system~\cite{Terese2003}
-approach whereas \Cref{fig:background:mergesquare-threeway} illustrates
-a direct approach, such as used by the \texttt{diff3} utility.
+   The \texttt{diff3}~\cite{Smith1988} tool, for example, still is the
+best known tool for textual (\emph{state-based}) synchronization.  The
+algorithm itself has received some formal treatment~\cite{Khanna2007}
+and some generalizations to tree shaped data~\cite{Lindholm2004,Vassena2016}.
 
 \begin{figure}
 \centering
@@ -541,25 +533,99 @@ $$ \qquad
 \label{fig:background:mergesquare}
 \end{figure}
 
+  Generally speaking, synchronization of changes $p$ and $q$ can be
+modelled in one of two ways. Either we produce one change that works
+on the common ancestor of $p$ and $q$,
+\Cref{fig:background:mergesquare-threeway}, or we produce two changes
+that act directly on the images of $p$ and $q$,
+\Cref{fig:background:mergesquare-resid}.  We often call the the former
+a \emph{three-way merge} and the later a \emph{residual} merge.
+
+\Cref{fig:background:mergesquare-resid} shows a residual system~\cite{Terese2003}
+approach whereas \Cref{fig:background:mergesquare-threeway} illustrates
+a direct approach, such as used by the \texttt{diff3} utility.
+
   Residual merges, specially if based on actual residual
 systems~\cite{Terese2003} pose a few technical challenges --- proving
 the that the laws required for estabilishing an actual residual system
 is non trivial. Moreover, they tend to be harder to generalize
 to $n$-ary inputs. They do have the advantage of enabling one to
-model merges as pushouts~\cite{Mimram2013}, which provides a desirable
+model merges as pushouts~\cite{Mimram2013}, which could provide a desirable
 metatheoretical layer. 
 
-  In spite of a \emph{three-way} or \emph{residual} synchronizer, though,
-its most important aspect are the properties we can expect from it.
-Khanna et al~\cite{Khanna2007} identified a number intuitive properties
-we could expect out of a synchronizer and showed that \texttt{diff3}, in fact,
-enjoys only one of them: locality.
+  Regardless of choosing a \emph{three-way} or \emph{residual} based approach,
+any state-based synchronizer will invariably have to deal with the problem of 
+\emph{aligning} the changes. That is, deciding which parts of the replicas are
+copied from the same part of the common denominator, \ie{}, which parts of the replicas
+are ``the same''. Most of the time, this is solved by the differencing algorithm
+that underlies the synchronizer -- \texttt{diff3}, for example, calls \texttt{diff} to
+decide the aligment to use. 
 
-  Locality states that changes two ``well separated'' parts of a given
+\begin{figure}
+\subfloat[][inputs]{%
+\begin{myhs}[.45\textwidth]
+\begin{code}
+a = [1,4,5,2,3,6]
+o = [1,2,3,4,5,6]
+b = [1,2,4,5,3,6]
+\end{code}
+\end{myhs}
+\label{fig:background:example-diff3:inputs}}%
+\hfill%
+\subfloat[][Running \texttt{diff} to produce alignments]{%
+\begin{myhs}[.5\textwidth]
+\begin{code}
+diff o a =  [ Cpy 1 , Ins 4 , Ins 5 ,  Cpy 2 
+            , Cpy 3 , Del 4 , Del 5 , Cpy 5]
+
+diff o b =  [ Cpy 1 , Cpy 2 , Del 3 , Cpy 4 
+            , Cpy 5 , Ins 3 , Cpy 6]
+\end{code}
+\end{myhs}
+\label{fig:background:example-diff3:align}}%
+
+\subfloat[][\texttt{diff3} parse of alignments]{%
+\begin{tabular}{c||c||c||c||c||c}
+a & 1 & 4,5 & 2 & 3 & 6 \\ 
+o & 1 &     & 2 & 3,4,5 & 6 \\ 
+b & 1 &     & 2 & 4,5,3 & 6 \\
+\end{tabular}
+\label{fig:background:example-diff3:parse}}%
+\hfill%
+\subfloat[][\texttt{diff3} propagate]{%
+\begin{tabular}{c||c||c||c||c||c}
+a & 1 & 4,5 & 2 & 3 & 6 \\ 
+o & 1 & 4,5 & 2 & 3,4,5 & 6 \\ 
+b & 1 & 4,5 & 2 & 4,5,3 & 6 \\
+\end{tabular}
+\label{fig:background:example-diff3:propagate}}%
+\caption{A simple \texttt{diff3} run}
+\label{fig:background:example-diff3}
+\end{figure}
+
+  \Cref{fig:background:example-diff3} illustrates a run of \texttt{diff3}
+in a simple example, borrowed from Khanna et al.~\cite{Khanna2007}, where
+Alice swaps $2,3$ for $4,5$ in the original file but Bob moves $3$ before $6$.
+In a very simplified way, the first thing that happens if we run \texttt{diff3} in the inputs 
+(\Cref{fig:background:example-diff3:inputs}) is that \texttt{diff3} 
+will compute the longest common subsequences between the objects, essentialy 
+yielding the alignments it needs (\Cref{fig:background:example-diff3:align}).
+The next step is to put the copies side by side and understand which regions
+are \emph{stable} or \emph{unstable}. The stable regions are those where
+no replicas changed. In our case, its on $1$, $2$ and $6$ (\Cref{fig:background:example-diff3:parse}).
+Finally, \texttt{diff3} can decide which changes to propagate and which
+changes are a conflict. In our case, the $4,5$ was only changed in one replica,
+so it is safe to propagate (\Cref{fig:background:example-diff3:propagate}).
+
+  Different synchronization algorithms algorithms will naturally offer
+slightly different properties, yet, one that seems to be central
+to synchronization is locality~\cite{Khanna2007} -- which 
+is enjoyed by \texttt{diff3}~\cite{Khanna2007}. 
+Locality states that changes two ``well separated'' parts of a given
 object can always be synchronized without conflicts. In fact, we argue
-this is the only property we can expect out of a general-purpose
-synchronizer.  The reason being that a general-purpose synchronize can
-only blindly rely on propositional equality structural disjointness as
+this is the only property we can expect out of a general-purpose generic
+synchronizer.  The reason being that said synchronize can
+only blindly rely on propositional equality of trees and structural disjointness as
 the criteria to estabilish changes as synchronizable.  Other criteria
 will invariantly require knowledge of the semantics of the data under
 synchronization. It is worth noting that although ``well separated''
@@ -567,7 +633,7 @@ is difficult to define for an underlying list, tree shaped data has
 the advantage of possessing simpler such notions.
 
 \victor{more, less, ok?}
- 
+
 \section{Generic Programming}
 \label{sec:background:generic-programming}
 

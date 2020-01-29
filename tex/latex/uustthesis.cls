@@ -170,7 +170,7 @@ I'll pass it to 'book' just in case.}
 % \captionsetup[figure]{labelfont={sc},textfont={sl},justification=RaggedRight,singlelinecheck=false}
 
 % Front matter.
-\setcounter{tocdepth}{1}
+\setcounter{tocdepth}{2} %% Show subsections in TOC
 \usepackage[titles]{tocloft}
 \usepackage[titletoc]{appendix}
 \renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
@@ -492,8 +492,8 @@ project \@NWOproject{} (\@NWOgrantnumber).
 %% Recommented to give more professionally-looking tables.
 \renewcommand{\arraystretch}{1.3}
 
-%% number up to subsections
-\setcounter{secnumdepth}{2}
+%% number up to subsubsections
+\setcounter{secnumdepth}{3}
 
 %% Theorems and Definitions
 \usepackage{amsthm}

@@ -241,6 +241,13 @@ The |PatchPE ki codes| forms either:
 }
 \section{Merging Patches}
 
+\victor{Check \cite{Saito2002}; place our algos in their taxonomy}
+
+\victor{Harmoy has a similar problem as we found with lists;
+check page 13 for \cite{Foster2007}; we do it differently overall.
+Our merge proposes a mix of local and global alignments to solve this
+in a satisfactory manner}
+
 \section{Computing |PatchPE|}
 
 \begin{figure}

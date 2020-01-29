@@ -20,7 +20,7 @@
 \newcounter{commentctr}[section]
 \setcounter{commentctr}{0}
 \renewcommand{\thecommentctr}{%
-\arabic{section}.\arabic{commentctr}}
+\arabic{chapter}.\arabic{section}.\arabic{commentctr}}
 
 \newcommand{\warnme}[1]{%
 {\color{red} \textbf{$[$} #1 \textbf{$]$}}}
@@ -41,7 +41,7 @@
 
 %% LaTeX stuff
 
-\newenvironment{myhs}{\vspace{0.15em}\par\noindent\begin{minipage}{0.95\textwidth}\small}{\end{minipage}\vspace{0.15cm}}
+\newenvironment{myhs}[1][0.95\textwidth]{\vspace{0.15em}\par\noindent\begin{minipage}{#1}\small}{\end{minipage}\vspace{0.15cm}}
 
 %% Denotations
 

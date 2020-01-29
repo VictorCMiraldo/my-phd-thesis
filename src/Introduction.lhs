@@ -246,7 +246,8 @@ and specification \cite{Khanna2007} posterior to its development, however.
 Algorithms for synchronizing changes over tree shaped data 
 include \texttt{3DM}~\cite{Lindholm2004} which merges
 changes over XML documents, \texttt{Harmony}~\cite{Foster2007},
-which works internally with unordered edge-labelled trees and
+which works internally with unordered edge-labelled trees and is
+focused primarily in unordered containers and, finally,
 \texttt{FCDP}~\cite{Lanham2002}, which uses XML as its internal
 representation.
 
