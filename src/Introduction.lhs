@@ -34,7 +34,7 @@ example, consider the following modification that extends an existing
 \texttt{for}-loop to not only compute the sum of the elements of an
 array, but also compute their product:
 %
-\begin{alltt}
+\begin{alltt}\small
     sum := 0;
  +  prod := 1;
     for (i in is) \{
@@ -48,20 +48,21 @@ However, the bias towards \emph{lines} of code may lead to
 languages. For instance, consider the following diff between two
 Haskell functions that adds a new argument to an existing function:
 %
-\begin{alltt}
+\begin{alltt}\small
  - head []        = error "?!"
  - head (x :: xs) = x
  + head []        d = d
  + head (x :: xs) d = x
 \end{alltt}
-This modest change impacts all the lines of the function's definition.
+This modest change impacts all the lines of the function's definition,
+even though it affects relatively few elements of the abstract syntax.
 
 The line-based bias of the diff algorithm may lead to unnecessary
 \emph{conflicts} when considering changes made by multiple developers.
 Consider the following innocuous improvement of the original |head|
 function, that improves the error message raised when the list is empty:
 %
-\begin{alltt}
+\begin{alltt}\small
 head []        = error "Expecting a non-empty list."
 head (x :: xs) = x
 \end{alltt}
@@ -81,22 +82,61 @@ description of the modification made to the |head| function by
 describing the changes made to the constituent declarations and
 expressions:
 %
-\begin{alltt}
+\begin{alltt}\small
 head []        \{+d+\} = error \{-"?!"-\} \{+"Expect..."+\}
 head (x :: xs) \{+d+\} = x 
 \end{alltt}
 There is more structure here than mere lines of text. In particular,
-the granularity is at the abstract syntax elements level. 
-\Cref{chap:structural-patches,chap:pattern-expression-patches} discusses two different 
-approaches for representing changes to this desired granularity of
-AST elements.
+the granularity is at the abstract syntax level. It is worthwhile to note
+that this problem is by no means absent just because a programming
+language tends to be organized in a line-by-line manner. Modern languages
+which contain any degree of object-orientation will also lay several
+abstract syntax elements under the same line. Take the Java function below,
+%
+\begin{alltt}\small
+public void test(obj) \{
+  assert(obj.size(), equalTo(5));
+\}
+\end{alltt}
 
-  In general, our approaches share a simple framework. 
-We aim to compute the difference between two values
-of type |a|, and represent these changes in some type, |Patch a|.  The
-|diff| function computes these differences between two values of type
-|a|, and |apply| attempts to transform one value according to the
-information stored in the |Patch| provided to it.
+ Now consider that one developer updated the test to 
+require the size of \texttt{obj} to be 6, but another developer
+changed the function that makes the comparisson, resulting
+in the two orthogonal versions below;
+
+
+\begin{minipage}[t]{.45\textwidth}
+\begin{alltt}\small
+public void test(obj) \{
+  assert(obj).hasSize(5);
+\}
+\end{alltt}
+\end{minipage}%
+\begin{minipage}[t]{.5\textwidth}
+\begin{alltt}\small
+public void test(obj) \{
+  assert(obj.size(), equalTo(6));
+\}
+\end{alltt}
+\end{minipage}
+
+
+  It is straightforward to see that the desired \emph{synchronized} version
+can incorporate both changes, calling { \small \verb!assert(obj).hasSize(6)!}.
+Combining these changes would be impossible without access to information
+about the old and new state of \emph{individual abstract syntax elements}.
+Simple line-based information is still unsufficiend, even in line-oriented
+languages.
+
+  In \Cref{chap:structural-patches,chap:pattern-expression-patches} we discuss
+two different approaches for representing and synchronizing changes at the desired 
+granularity of abstract syntax elements. Overall, all of the
+differencing and synchronization algorithms follow a common framework --
+compute the difference between two values
+of some type |a|, and represent these changes in some type, |Patch a|. 
+We usually denote by |diff| the function that \emph{computes} the differences
+between two values of type |a|, whereas |apply| attempts to transform one 
+value according to the information stored in the |Patch| provided to it.
 \begin{myhs}
 \begin{code}
 diff   :: a -> a -> Patch a
@@ -104,7 +144,7 @@ apply  :: Patch a -> a -> Maybe a
 \end{code}
 \end{myhs}
 
-  Note that the |apply| function may fail, for example, when attempting
+  Note that the |apply| function is inherently partial, for example, when attempting
 to delete data that is not present. Yet when it succeeds, the |apply|
 function must return a value of type |a|. This may seem like an
 obvious design choice, but this property does not hold for the
@@ -113,23 +153,25 @@ approaches~\cite{Asenov2017,Falleri2014} using \texttt{xml} or
 result of applying a patch may produce ill-typed results, i.e.,
 schema violations.
 
-  The \unixdiff{}~\cite{McIlroy1976} satisfies these properties
+  The \unixdiff{}~\cite{McIlroy1976} follows this very framework too, but
 for the specific type of lines of text, or, |a == [String]|.  It
 represents patches as a series of insertions, deletions and copies of
 lines and works by enumerating all possible patches that transform the
 source into the destination and chooses the `best' such patch.  There
-have been several attempts at generalizing these results to handle
-arbitrary datatypes~\cite{Lempsink2009,Miraldo2017}, but following the
-same recipe: enumerate all combinations of insertions, deletions and
+have been attempts at generalizing these results to handle
+arbitrary datatypes~\cite{Lempsink2009}, including
+our own attempt discussed in \Cref{sec:structural-patches}. 
+All of these did follow the same recipe: enumerate all combinations of 
+insertions, deletions and
 copies that transform the source into the destination and choose the
-`best' one. Consequently, these attempts suffer from the same
+`best' one. Consequently, they also suffer from the same
 downsides as classic edit-distance, which we will discuss in
 in \Cref{sec:background:string-edit-distance}.
 
   Once we have a |diff| and an |apply| functions handy, we
 move on to the |merge| function. Which is responsible for
-synchronizing two different changesets into a single
-one, when possible. Naturally not all patches can be merged, 
+synchronizing two different changes into a single
+one, when they are compatible. Naturally not all patches can be merged, 
 in fact, we can only merge those patches that alter \emph{disjoint} parts of the AST. 
 Hence, the merge function must be partial, returning a conflict whenever
 patches change the same part of the tree.
@@ -139,36 +181,58 @@ merge :: Patch a -> Patch a -> Either Conflicts (Patch a)
 \end{code}
 \end{myhs}
 
-  The success rate of the |merge| function is a consequence of the
-degree of information provided by the |Patch| datatype. As we have
-seen, if we only posses information on the line-level of the source
-code, there is very little we can merge.  In order to have more
-information available about the structure of the changes being
-performed, then, we need to represent patches in a datatype that
-closely follows the structure of the data being differenced.
+  A industrial-strength synchronizer would ideally distribute conflicts
+to their specific locations inside the merged patch and still try to
+synchronize non-conflicting parts of the changes. This is orthogonal
+to our objective, however. The abstract idea is still the same: 
+two patches can either be reconciled fully or there exists conflicts
+between them.
 
-\victor{What follows is a little bridge into ``GP is also important for us'';
-I'm not 100\% happy with it, though}
+  The success rate of the |merge| function -- that is, how often it
+is able to reconcile changes -- can never be 100\%. There will always exist
+changes that will require human intervention to be synchronized.
+Nevertheless, the more information that is provided by the |Patch| 
+datatype, the better the synchronization algorithms we can write.
+With information solely on the which lines of the source have changed, 
+there is little we can merge.  Hence, we want that values of type |Patch a| 
+carry information about the structure of |a|. Think of, for example,
+|Patch JavaProg| being the type of changes that can be performed over \texttt{java}
+programs. One option is to build one domain specific tool for each programming
+language we wish to have source files under version control -- which is
+at least impractical. The better option is to use a \emph{generic representation},
+which can be used to encode arbitrary programming languages, and describe
+the |Patch| datatype generically.
 
-  Structural differencing can be seen as a textbook example of generic
-programming: we want our differencing algorithms to work over
+  Structural differencing, in fact, is a textbook example of generic
+programming: we would like to have differencing algorithms to work over
 arbitrary datatypes, but maintaining the type-safety that a language
 like Haskell provides. This added safety means that all the
 manipulations we perform on the patches are guaranteed to never break
-the abstract syntax, which is often not the case.  It is common to
-translate abstract syntax trees into a XML-like datatype and only then
-compute the differences. We call these \emph{untyped} tree
-differencing algorithms in contrast with our \emph{typed} approach.
+the abstract syntax -- hence, do not want to use something like XML to represent
+our data, even though there exists differencing tools that do so.
+We refer to these as \emph{untyped} tree differencing algorithms in contrast
+the \emph{typed} approach, which guarantees type safety by construction.
   
-  Writing \emph{typed} generic programming algorithms for regular
-types is an estabilished technique\victor{find some citations}. 
-Translating these techniques to mutually recursive datatypes -- as is
-the case of most real programming languages abstract syntaxes --
-is non-trivial and, in fact, is almost non existent. Consequently,
-we must also overtake these challanges and create generic programming
-techniques to write our algorithms and be able to test them against
-real world data.
+  The Haskell typesystem is strong enough to enable one to write
+\emph{typed} gemeric prorgamming algorithms. These algorithms, however,
+can only be applied to datatypes that belong in the set of types
+handled by the generic programming library of choice. For example, 
+the \texttt{regular}~\cite{Noort2008} is capable of handling types which have
+a \emph{regular} recursive structure -- lists, $n$-ary trees, etc --, but
+cannot represent nested types, for example. In \Cref{sec:background:generic-programming}
+we will go over existing approaches to generic programming in Haskell and how
+they relate. No library, however, was capable of handling mutually recursive
+types -- which is the universe of datatypes that context free languages belong in --
+in a satisfactory manner. This means that in order to explore differencing
+algorithms for various programming languages we would have to first
+develop the generic programming functionality necessary for it.
+Gladly, Haskell's type system has evolved enough since the initial
+efforts on generic programming for mutually recursive types 
+(\texttt{multirec}~\cite{Yakushev2009}), enabling us to write significantly
+better libraries, as we will discuss in \Cref{chap:generic-programming}.
 
+\victor{Is this enough intro? Should we have a section on the structure of the thesis?}
+  
 \section{Literature Review}
 \label{sec:intro:literature-review}
   
@@ -274,9 +338,7 @@ separately~\cite{Bravenboer2008,Klint2009}, whereas others
 brackets and hence, can be applied to a plethora of programming
 languages out-of-the-box.
 
-\victor{should I go into this next paragraph?}
-  Which brings us to the second underlying aspect of this thesis,
-\emph{generic programming}. Although different ... 
+\victor{Should I also do some literature review of generic programming here?}
 
 \section{Contributions and Outline} 
 \label{sec:intro:contributions}
