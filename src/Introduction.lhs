@@ -279,7 +279,7 @@ prohibitive for most pratical applications or are defined for domain
 specific data, such as the \texttt{latexdiff}~\cite{LatexDiff} tool.
 A number of algorithms specific for XML and imposing different
 requirements on the schemas have been developped~\cite{Peters2005}.
-LaDiff~\cite{Chawathe1996}, for example, imposes restrictions on the
+\texttt{LaDiff}~\cite{Chawathe1996}, for example, imposes restrictions on the
 hierarchy between labels, it is implemented into the
 \texttt{DiffXML}~\cite{Mouat2002} and
 \texttt{GumTree}~\cite{Falleri2014} tools and is responsible

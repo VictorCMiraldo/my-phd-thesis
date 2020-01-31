@@ -52,7 +52,7 @@ similar. Although very closely related, these do make up
 different problems. In the biology domain \cite{Akutsu2010b,Henikoff1992,McKenna2010},
 for example, one is concerned solely in finding similar
 structures in a large set of structures, whereas
-in software version control systems\victor{cite VCS} we actually want to store,
+in software version control systems we actually want to store,
 manipulate and combine the differences between objects.
 
   The large applicability of differencing and edit distances
@@ -77,8 +77,9 @@ operations with associated \emph{cost} metric. Many different such
 combinations can be achieved by tweaking these parameters.  In this
 section we look at two widespread notions for edit distance.  The
 \emph{Levenshtein Distance}~\cite{Levenshtein1966,Bergroth2000}, for
-example, works well for detecting spelling mistakes\victor{find
-citation}. It considers insertions, deletions and substitutions of
+example, works well for detecting spelling mistakes\cite{Navarro2001}
+or measuring how similar two languages are \cite{Thije2007}. 
+It considers insertions, deletions and substitutions of
 characters as its edit operations. The \emph{Longest Common
 Subsequence (LCS)}~\cite{Bergroth2000}, on the other hand considers
 insertions, deletions and copies as edit operations and is better
@@ -274,24 +275,34 @@ which have been briefly outlined in \Cref{sec:intro:literature-review}.
 
 \begin{figure}
 \centering
-\victor{make this pretty}
-
-
 \begin{tikzpicture}
-\node (f1) {\begin{forest} 
-    [[x , no edge , l = 0mm [y] [z]] 
-     [a , no edge , l = 0mm] 
-     [w , no edge , l = 0mm [y]]
+\node (f1) at (0, 0) {\begin{forest} 
+    [, s sep=0mm
+     [a , no edge , l = 0mm [b] [c]] 
+     [|::|, no edge , l = 0mm]
+     [d , no edge , l = 0mm] 
+     [|::|, no edge , l = 0mm]
+     [e , no edge , l = 0mm [f]]
+     [|::|, no edge , l = 0mm]
+     [|...|, no edge, l = 0mm]
     ]
   \end{forest}};
-\node [below = of f1] (f2) {\begin{forest}
-    [[x , no edge , l = 0mm [x [y] [z]] [a]] 
-     [w , no edge , l = 0mm [y]]
+\node (f2) at (6, 0) {\begin{forest}
+    [, s sep=0mm
+     [x , no edge , l = 0mm [a [b] [c]] [d]] 
+     [|::|, no edge , l = 0mm]
+     [e , no edge , l = 0mm [f]]
+     [|...|, no edge, l = 0mm]
     ]
   \end{forest}};
-\draw (f1) -- node {|ins x|} (f2);
+\draw[->] ($ (f1.east) + (0,0.15) $) 
+          to[out=45,in=135] node[midway,above] {|ins x|} 
+          ($ (f2.west) + (0,0.15) $);
+\draw[->] ($ (f2.west) - (0,0.15) $) 
+          to[out=225,in=315] node[midway,below] {|del x|} 
+          ($ (f1.east) - (0,0.15) $);
 \end{tikzpicture}
-\caption{Insetion and Deletion a node |x| with arity 2
+\caption{Insetion and Deletion of node |x|, with arity 2
 on a forest}
 \label{fig:background:tree-es-operations}
 \end{figure}
@@ -356,12 +367,15 @@ to be type-safe by construction.
 transformations over a tree, they are very redundant. Making it hard to 
 develop algorithms based solely on edit scripts. It is often the case
 that the notion of \emph{tree mapping} comes in handy. It works as
-a \emph{normal form} version of edit scripts. 
+a \emph{normal form} version of edit scripts and represents only the
+nodes that are either relabeled or copied. We must impose a series of
+restrictions on these mappings in order to maintain the ability to
+produce edit scripts out of it. \Cref{fig:brackground:tree-mapping} 
+illustrates four invalid and one valid such mappings.
 
-\victor{Make sure I got this right!}
 \begin{definition}[Tree Mapping]
 Let |t| and |u| be two trees, a tree mapping 
-between |t| and |u| is a bijective order preserving partial mapping between the
+between |t| and |u| is an order preserving partial bijection between the
 nodes of a flattened representation of |t| and |u| according
 to their preorder traversal. Moreover, it must preserve the 
 ancenstral order of nodes. That is, take two subtrees in the domain
@@ -439,19 +453,23 @@ of edit scripts. Nevertheless, the definition of tree mapping is still very rest
 accross ancestor boundaries. These restrictions are there to ensure that
 one can always compute an edit script from a tree mapping.
 
-\victor{continue: With a tree mapping at hand, one can develop algorithms 
-to extract edit scripts out of it, such as XyDiff which matches trees
-with hasehs of LaDiff which extracts performance from additional
-restrictions}
+  Most tree differencing algorithms start by producing a tree mapping and
+then extracting an edit script from it. There are a plethora of design
+decisions on how to produce a mapping and often the domain of application
+of the tool will enable one to impose extra restrictions to attempt to squeeze
+maximum performance out of the algorithm. The \texttt{LaDiff}~\cite{Chawathe1996} tool, 
+for example, works for hierarchicaly structured trees -- used primarily for 
+\LaTeX source files -- and use a variant of the LCS to compute matchings of elements
+appearing in the same order, starting at the leaves of the document.
+Tools such as \texttt{XyDiff}~\cite{Marian2002}, used to identify changes in XML documents,
+use hashes to produce matchings efficiently.
 
- 
 \subsection{Shortcommings of Edit Script Based Approaches}
 
-  Now that we built a basic understanding of how edit-scripts
-classically represent transformations between objects, let us look
-at a few of the difficulties that arise from basing ourselves
-in edit scripts. The first and most striking is the lack of cannonicity.
-Consider the following trees,
+  Regardless of the process by which an edit script is obtained,
+we argue that edit scripts have inherent shortcommings when they
+are used to compare tree structured data. The first and most striking 
+is that the use of heuristics to compute optimal solutions is unavoidable.
 
 \begin{center}
 \begin{forest}
@@ -465,30 +483,43 @@ Consider the following trees,
 2. This fact can be witnessed by two distinct edit scripts: either
 |[Cpy Bin , Del T , Cpy U , Ins T]| or |[Cpy Bin , Ins U , Cpy T , Del
 U]| transform the target into the destination correctly. Yet, from
-a \emph{differencing} point of view, they are fairly different.
+a \emph{differencing} point of view, these two edit scripts are fairly different.
 Do we care more about |U| or |T|? What if |U| and |T| are also
 trees, but happen to have the same size (so that inserting one or the
 oter yields edit-scripts with equal costs)? Ultimately, 
 differencing algorithms that support no \emph{swap} operation
 must choose to copy |T| or |U| arbitrarily. This decision is often
-guided by heuristics and the existence of the choice point inherently
-slows algotihms down, as a decision must be made.
+guided by heuristics, which makes the result of different algorithms
+hard to predict. Moreover, the existence of this type of choice point inherently
+slows algotihms down since the algorithm \emph{must decide} which
+tree to copy. 
 
-  Leaving the computation of edit-scripts aside, when manipulating
-them it is often the case one wants to normalize edit scripts. Note
-how insertions and deletions can be shuffled indefinitely. Take,
-for example, |[Ins Bin , Ins A , Del Un , Cpy T]|, it is
-the same as |[Ins Bin , Del Un , Ins A , Cpy T]| or 
-|[Del Un , Ins Bin , Ins A , Cpy T]|. \victor{finish!}
+  Another worrysome issue when dealing with edit script is
+that they are type unsafe. It is quite easy to write an edit
+script that produce an \emph{ill-formed} tree, according to some
+arbitrary schema. Even when writing the edit operations in a
+type safe way~\cite{Lempsink2009} the synchronization of said changes
+is not guarnateed to be type safe~\cite{Vassena2016}.
+  
+  Finally, we cannot oversee the lack of expressivity
+that comes from edit scripts, from the \emph{differencing} point of fiew.
+Consider the trees below,
 
-\victor{
-\begin{enumerate}
-  \item Non-cannonicity
-  \item Can't express commonly seen changes (are they really commonly seen?)
-  \item Many longest-common-subsequences
-  \item algorithms are heavily heuristic
-  \item typed approach is very hard to merge
-\end{enumerate}}
+\begin{center}
+\begin{forest}
+[,rootchange clean = 12
+  [|A|]
+  [|Bin| [|A|] [|A|]]]
+\end{forest}
+\end{center}
+
+  Optimal edit scripts obliges us to chose between copying |A| 
+as the left or the right subtree, there is no possibility to represent
+duplications, permutations or contractions of subtrees. This means
+that a number of common changes, such as refactorings, yield
+edit scripts with a very high cost even though a good part of the information
+being moved (which must be done by deletions and insertions) should essentially
+be copied.
 
 \section{Synchronizing Changes}
 \label{sec:background:synchronizing-changes}
