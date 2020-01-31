@@ -922,7 +922,7 @@ In this way,
 \subsubsection{Values with Holes}
 \label{sec:gp:holes}
 \victor{Should this become a subsection and mirror the simplistic's \emph{cofree comonad free monad}?
-I'm leaning towards yes}
+I'm leaning towards yes [YES]; with a bit more details and consistent names}
 
   Dually to annotated fixpoints, we can borrow the \emph{free monad}
 arising from term algebras to represent values with \emph{holes}
@@ -1493,7 +1493,7 @@ repLeaves  :: SRep phi f -> [Exists phi]
 \subsection{Mutual Recursion}
 \label{sec:gp:simplistic-deep}
 \victor{would be great to use the same notation for constants everywhere...
-why not |kappa| in here too?}
+why not |kappa| in here too? [Yes; use |phi| |kappa|]}
 
   The |SRep phi f| datatype enables us to write generic functions
 without resorting to typeclasses and also provides a simple
@@ -1803,7 +1803,7 @@ pattern Prim x = Prim' U1 x
 \end{myhs}
 
 \victor{What else? Is there place for the ``Adv Features'' below or should
-we just cut it short?}
+we just cut it short? YES; everything we use for diffing.}
 
 \subsection{Advanced Features}
 
@@ -1821,7 +1821,6 @@ expressive applications.
 \label{sec:gp:discussion}
 
 \begin{figure}\centering
-\victor{add simplistics here?}
 \begin{tabular}{@@{}lll@@{}}\toprule
                         & Pattern Functors  & Codes                 \\ \midrule
   No Explicit Recursion & \texttt{GHC.Generics}  & \texttt{generics-sop} \\

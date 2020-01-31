@@ -538,7 +538,8 @@ results on type-safe differences~\cite{Lempsink2009}.
 \subsection{Patch Algebra}
 \label{sec:stdiff:algebra}
 
-\victor{Should I write something here?}
+\victor{Should I write something here? No; we stopped working on this approach
+dua to a lack of a proper algorithm; mention this story in smoe discussion}
 
 \section{Merging Patches}
 \label{sec:stdiff:merging}
@@ -761,6 +762,7 @@ mergeSpine ix iy (SChg cx cy al) (SCns cz zs)  = do  Refl <- testEquality ix iy
 \item Should we discuss results?
 \item Should I mention I had to reimplement and re-run Arian's experiments?
 \end{itemize}
+No; and no...
 }
 
 \section{Computing |PatchST|}
