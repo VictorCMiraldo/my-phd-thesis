@@ -1,3 +1,20 @@
+
+%% We are interested in writing differencing algorithms for
+%% abstract syntax trees, hence our datatypes will be mutually recursive
+%% families.  Our programs must operate over \emph{any} such
+%% family. Consequently, we must have a powerful generic programming
+%% approach that is capable of (A) representing mutually recursive
+%% datatypes and (B) easily operating over them by the means of
+%% expressive combinators. At the time of writing thesis, no such
+%% library existed. In fact, one of the contributions of this
+%% thesis is the \texttt{generics-mrsop}~\cite{Miraldo2018} library,
+%% \Cref{chap:generic-programming} which provides such a combinator-based
+%% approach to generic programming with mutually recursive types.
+%% In this section, however, we explore the approaches that existed
+%% before \texttt{generics-mrsop} and outline their main differences.
+
+
+
   The syntax of many programming languages
 is expressed naturally using a mutually recursive
 family. Consider Haskell itself, one of the possibilities of an
