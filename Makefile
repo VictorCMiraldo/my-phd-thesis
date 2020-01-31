@@ -101,3 +101,9 @@ fonts:
 ## Runs a font-check on the generated pdf.
 pdf-font-check: dist/$(TGT).pdf
 	pdffonts dist/$(TGT).pdf
+
+
+pdf-get-color-pages: dist/$(TGT).pdf
+	@gs -o - -sDEVICE=inkcov dist/$(TGT).pdf |\
+	awk '$$1 ~ /Page/{ page=$$2; } /CMYK/{ if ($$1 != 0 || $$2 != 0 || $$3 != 0) print page; }' |\
+	paste -s -d,
