@@ -473,7 +473,7 @@ is that the use of heuristics to compute optimal solutions is unavoidable.
 
 \begin{center}
 \begin{forest}
-[,rootchange clean = 12
+[,rootchange clean={9} % Why text leaks over if I add two digits?
   [|Bin| [|T|] [|U|]]
   [|Bin| [|U|] [|T|]]]
 \end{forest}
@@ -507,7 +507,7 @@ Consider the trees below,
 
 \begin{center}
 \begin{forest}
-[,rootchange clean = 12
+[,rootchange clean={9}
   [|A|]
   [|Bin| [|A|] [|A|]]]
 \end{forest}
