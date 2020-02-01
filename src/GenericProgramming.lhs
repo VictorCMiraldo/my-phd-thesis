@@ -1966,11 +1966,7 @@ about the types in question.
 \begin{myhs}
 \begin{code}
 data Zipper c f g t where
-  Zipper :: c
-         => { ctx  :: SZip t f (Rep t)
-            , sel  :: g t
-            }
-         -> Zipper c f g t
+  Zipper :: c => SZip t f (Rep t) -> g t -> Zipper c f g t
 \end{code}
 \end{myhs}
 
@@ -2113,17 +2109,24 @@ of generic programming libraries, in \Cref{fig:background:gplibraries}, we had
 a unfilled hole for \emph{code-based} approach with explicit recursion of any type,
 which can be filld by \texttt{generics-mrsop}. When it comes to pattern functors,
 although \texttt{regular} and \texttt{multirec} already exist, using those libraries
-imposes a significantly bigger overhead when compared to \genericssimpl{}.
-The updated table of generic programming libraries is given in \Cref{fig:gp:gplibraries}.
-
-\victor{sketched topics below; what else?}
+imposes a significantly bigger overhead when compared to \genericssimpl{},
+for they do not support combinator-based generic programming.
+The updated table of generic programming libraries is given in \Cref{fig:gp:gplibraries},
+where we place our libraries in the spectrum of generic programming variants.
 
   Unfortunately, the \texttt{generics-mrsop} heavy usage of type families triggers
 a memory leak in the compiler. This hinders the library unusable for large families
-of mutually recursive datatypes.
+of mutually recursive datatypes at the time of writing this thesis. Luckily, however,
+we were able to work around that by dropping the sums of products structure but
+maintaining a combinator-based approach in \genericssimpl{}, which enabled us to
+run our experiments with real world data, as discussed in \Cref{chap:experiments}.
 
-  It goes without saying that the remainder of this thesis would not have been
-possible without these generic programming libraries.
+  While developing \texttt{generics-mrsop} and \genericssimpl{} under close
+collaboration with Alejandro Serrano, we also explored a number
+of variants of these libraries such as \texttt{kind-generics}~\cite{Serrano2018},
+which enables a user to represent almost any Haskell datatype generically,
+including \emph{GADTs}. These are out of the scope of this thesis since 
+we do not require all of that expressivity to write our differencing algorithms.
 
 %%% Local Variables:
 %%% mode: latex
