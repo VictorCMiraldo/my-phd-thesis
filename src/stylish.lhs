@@ -134,6 +134,7 @@
 %format dot        = "\mathrel{\HSSym{.}}"
 %format :>:        = "\mathbin{\HSCon{\triangleright}}"
 %format :*:        = "\mathbin{\HSCon{:\!\!*\!\!:}}"
+%format :**:       = "\mathbin{\HSCon{:\!\!*\!\!:}}"
 %format :~:        = "\mathbin{\HSCon{:\!\sim\!:}}"
 %format :+:        = "\mathbin{\HSCon{:\!\!+\!\!:}}"
 %format :++:       = "\mathbin{\HSCon{:\!\!\plus\!\!:}}"
