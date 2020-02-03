@@ -153,8 +153,8 @@ with metavariables.
 \begin{myhs}
 \begin{code}
 data Chg kappa fam at = Chg
-  { chgDel :: HolesMV kappa fam at
-  , chgIns :: HolesMV kappa fam at
+  {  chgDel  :: HolesMV kappa fam at
+  ,  chgIns  :: HolesMV kappa fam at
   }
 \end{code}
 \end{myhs}
@@ -191,13 +191,21 @@ the right}
 \label{fig:pepatches:example-02}
 \end{figure}
 
+\victor{Justify why do I care about scoping... I mean; we could just don't care,
+but it helps in isolating changes and making sure they are independent;}
+\victor{Would it be interesting to compare the performance of alignment
+with and without scoping?}
+
 \victor{decide... is |vars del == vars ins| or |vars ins < vars del|}?
 
-  However, as is usual around calculi involving names and binding, we are bound
-to have issues if are not careful. Therefore, we impose the invariant
-that |vars (chgDel c) == vars (chgIns c)|, where |vars| returns the
-set of metavariables used in a |HolesMV| together with their arity, \ie,
-how many times do they occur.
+  However, as is usual around calculi involving names and binding, we
+are bound to have issues if are not careful. Therefore, we impose the
+invariant that changes are \emph{well-scoped}, that is, |vars (chgDel
+c) == vars (chgIns c)|.  The |vars| function below the set of
+metavariables used in a |HolesMV| together with their arity, \ie, how
+many times do they occur. This ensures that all the variables needed to
+fully instantiate the insertion context of a change are provided
+by the deletion context of the same change.
 
 \begin{myhs}
 \begin{code}
@@ -228,7 +236,35 @@ patch2change p = Chg  (holesJoin (holesMap chgDel  p))
 \end{code}
 \end{myhs}
 
-  The other way around, however, is slightly more complicated.
+  The other way around is not so simple since we must ensure
+that changes remain \emph{well-scoped}. For example, 
+performing a simple antiunification of the deletion
+context against the insertion context might break 
+variable scoping.
+
+\begin{figure}
+\centering
+\subfloat[\emph{well-scoped} swap}]{%
+\begin{forest}
+[,rootchange 
+  [|Bin| [x,metavar] [y,metavar]]
+  [|Bin| [y,metavar] [x,metavar]]
+]
+\end{forest}
+\label{fig:pepatches:example-03:A}}%
+\quad\quad\quad
+\subfloat[\emph{non-well-scoped} swap]{%
+\begin{forest}
+[|Bin|,s sep = 5mm%make it wider
+  [,change [x,metavar] [y,metavar]]
+  [,change [y,metavar] [x,metavar]]
+]
+\end{forest}
+\label{fig:pepatches:example-03:B}}%
+\caption{How antiunification of the deletion and insertion context of
+a change might break scoping.}
+\label{fig:pepatches:example-03}
+\end{figure}
 
 \subsection*{Computing Closures}
 
@@ -249,30 +285,6 @@ in \Cref{fig:pepatches:change-versus-patch:patch} and defined below.
 We call the prefix of constructors that are copied from source
 to the destination the \emph{spine} of the patch.
 
-\begin{figure}
-\centering
-\subfloat[swap as a \emph{change}]{%
-\begin{forest}
-[,rootchange 
-  [|Bin| [x,metavar] [y,metavar]]
-  [|Bin| [y,metavar] [x,metavar]]
-]
-\end{forest}
-\label{fig:pepatches:change-versus-patch:chg}}%
-\quad\quad\quad
-\subfloat[swap as a \emph{patch}]{%
-\begin{forest}
-[|Bin|,s sep = 5mm%make it wider
-  [,change [x,metavar] [y,metavar]]
-  [,change [y,metavar] [x,metavar]]
-]
-\end{forest}
-\label{fig:pepatches:change-versus-patch:patch}}%
-\caption{Two isomorphic representations -- with and without
-an explicit spine -- for the patch that swaps the children
-of a binary node}
-\label{fig:pepatches:change-versus-patch}
-\end{figure}
 
 \begin{myhs}
 \begin{code}
