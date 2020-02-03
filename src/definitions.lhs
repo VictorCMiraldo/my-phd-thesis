@@ -47,5 +47,6 @@
 
 \newcommand{\unixdiff}{\texttt{UNIX diff}}
 \newcommand{\ie}{i.e.}
+\newcommand{\genericssimpl}{\texttt{generics-simplistic}}
 
 \newcommand{\TODOsuccessrate}{???\%}

@@ -68,7 +68,6 @@ ever wanted to look at real world sofware version control conflict
 data.
 
 \victor{Fix a name for the library with alejandro} 
-\newcommand{\genericssimpl}{\texttt{generics-simplistic}}
 
   As it turns out, we can sacrifice the sums-of-products
 structure of \texttt{generics-mrsop} -- significantly decreasing
@@ -916,9 +915,9 @@ augmented with holes:
 
 \begin{myhs}
 \begin{code}
-type SFix     kappa codes      = HolesAnn kappa codes U1 V1
-type SFixAnn  kappa codes phi  = HolesAnn kappa codes phi V1
-type Holes    kappa codes      = HolesAnn kappa codes U1
+type Fix     kappa codes      = HolesAnn kappa codes U1 V1
+type FixAnn  kappa codes phi  = HolesAnn kappa codes phi V1
+type Holes   kappa codes      = HolesAnn kappa codes U1
 \end{code}
 \end{myhs}
 
@@ -935,13 +934,13 @@ maximum flexibility.
  
 \begin{myhs}
 \begin{code}
-pattern SFix  :: () => (IsNat i , IsNat n)
-              => Constr ((P I) i)
-              -> NP (SFix kappa codes) (Lkup n (Lkup i codes))
-              -> SFix kappa codes ((P I) i)
-pattern SFix c xs = Roll' U1 c xs
+pattern Fix  :: () => (IsNat i , IsNat n)
+             => Constr ((P I) i)
+             -> NP (SFix kappa codes) (Lkup n (Lkup i codes))
+             -> Fix kappa codes ((P I) i)
+pattern Fix c xs = Roll' U1 c xs
 
-pattern Prim  :: prim k -> SFix kappa codes ((P k) k)
+pattern Prim  :: prim k -> Fix kappa codes ((P k) k)
 pattern Prim x = Prim' U1 x
 {-# COMPLETE SFix , Prim #-}
 \end{code}

@@ -1,21 +1,24 @@
-  The \texttt{stdiff} approach, which provided a first representation
-of tree-sructured patches for tree-structured data was stil very
-much coupled with edit-scripts: we still suffered the ambuiguity problem,
-which was reflected on the coputationally expensive algorithm. We were also
-subject to being unable to represent permutations and moves efficiently.
+  The \texttt{stdiff} approach gave us a first representation
+of tree-sructured patches over tree-structured data but was still flawed in
+many ways. These flaws were partly due to the hidden connection to edit
+scripts that still remained: subtrees could only be copied once and could not
+be permuted. This meant we still suffered the ambuiguity problem,
+which was reflected on the coputationally expensive algorithm.
 Overcoming these drawbacks required a significant shift in perspective and
-represents a complete decoupling from edit-script based differencing algorithms.
+represents, finally, a more thorough decoupling from edit-script based 
+differencing algorithms.
 
-  In general, differening algorithms are divided in a matching phase, which
+  Classically, tree differencing algorithms are divided in a matching phase, which
 identifies which subtrees should be copied, and later extrapolates one edit-script
-from said tree matching. The main idea of \texttt{hdiff} is to forget about the
-second part altogether and use the tree matching \emph{as the patch}.
-This gave rise to the |PatchPE x| type, our second attempt at detaching from 
-edit scripts, which will be explored in this chapter.
+from said tree matching (\Cref{sec:background:tree-edit-distnace}). This separation of
+concerns means that we do not have to deal with the ambiguities of edit scripts,
+but the desire to obtain said edit script still means that the matchings produced
+by these algorithms are very restrictive -- order preserving partial bijections
+between the flattened nodes of the trees in question, \Cref{fig:background:tree-mapping}.
 
-  Suppose we want to write a patch that modifies the left element
+  Suppose we want to write a change that modifies the left element
 of a binary tree. If we had the full Haskell programming language available
-as the patch language, we would probably write somethgin in the lines of:
+as the patch language, we would probably write something in the lines of:
 
 \begin{myhs}
 \begin{code}
@@ -33,26 +36,34 @@ by the pattern and guards, and we see it has a clear transformation
 for each tree in the domain: it replaces the |10| by |42| inplace.
 Taking a magnifying glass at that definition, we can interpret
 the matching of the pattern as a \emph{deletion} phase and the construction
-of the resulting tree as a \emph{insertion} phase. The overall idea of
-the \texttt{hdiff} approach is to represent the patch |p| exactly as
+of the resulting tree as a \emph{insertion} phase. 
+The \texttt{hdiff} approach represents the change in |p| exactly as
 that: a pattern and a expression. Essentially, we could write |p|
 as |patch (Bin (Leaf 10) y) (Bin (Leaf 42) y)|, or, graphically
-as in \Cref{fig:pepatches:example-01}.
-\victor{Find a graphical repr for metavars that does not rely on color;
-explain it here}
+as in \Cref{fig:pepatches:example-01}. The notation $\digemFormatMetavar{\square}$ is
+used to indicate $\square$ is a metavariable, that is, given a successful
+matching of the deletion context against an element $\digemFormatMetavar{\square}$
+will be given a value.
 
 \begin{figure}
 \centering
 \begin{forest}
-[,rootchange
-  [|Bin| [|Leaf| [10]] [y,metavar]]
-  [|Bin| [|Leaf| [42]] [y,metavar]]
+[|Bin| 
+  [|Leaf| [,change [|10|] [|42|]]]
+  [,change [y,metavar] [y,metavar]]
 ]
 \end{forest}
 \caption{Graphical represntation of a patch that modifies the left
 children of a binary node}
 \label{fig:pepatches:example-01}
 \end{figure}
+
+  In fact, the core idea behind \texttt{hdiff} is to forget about 
+translating matchings back to edit scripts, using instead the tree matching \emph{as the patch}.
+Consequently, we can also drop the restrictions on tree matchings and use any matching
+that we can compute. On this chapter we shall study how the |PatchPE x| will encode
+(relaxed) tree matchings, how to write a synchronizer for these patches and finally
+how to compute these patches efficiently.
 
   With this added expressivity we can represent more transformations
 than before. Take the patch that swaps two subtrees, which cannot
@@ -66,89 +77,167 @@ that witnesses this would be |patch (Bin x x) x|. This optimization
 enables us to write linear |diff| algorithms even in the presence
 of permutations and duplications. 
 
+
   This chapter arises as a refinement from our ICFP'19 publication~\cite{Miraldo2019},
 where we explore the representation and computation aspects of \texttt{hdiff}.
 The big shift in paradigm of \texttt{hdiff} also requires a more careful look into 
 the metatheory and nuances of the algorithm, which were not present in said contribution.
 Moreover, we first wrote our algorithm~\cite{Miraldo2019} using the \texttt{generics-mrsop}
 library even though \texttt{hdiff} does not require an explicit sums of products. This means
-we can port it to \texttt{generics-simplistic-deep} and gather real world data fort
-his approach. We present our code in this section on the \texttt{generics-simplistic-deep} framework.
+we can port it to \genericssimpl{} and gather real world data fort
+his approach. We present our code in this section on the \genericssimpl{} library.
+
 \victor{Maybe we write a paper with pierre about it?}
-
-\victor{
-  Unfortunately with the added complexity reasoning about patches
-becomes more complicated. Moreover, an altogether new approach requires 
-us to think of some metatheory.
-}
-
-\victor{
-\begin{itemize}
-  \item Deatch from edit-scripts;
-  \item talk about hash-consing and how to use different extraction
-        algorithms (no-nested; proper-share and patience)
-  \item overall complexity of patches is a big deal; see composition and merging (if we eventually make one)
-\end{itemize}
-}
 
 \section{The Type of Patches}
 
-  Just like \texttt{stdiff}, discussed in \Cref{chap:structural-patches}, we will rely on
-\texttt{generics-mrsop} to encode our operations and algorithms generically. 
-The first step in representing our patches is to augment the generic representation of our trees
-with metavariables. This was, in fact, the reason for us to add the |Holes| datatype 
-to \texttt{generics-mrsop} (\Cref{sec:gp:holes}). Recall its definition:
+  The type |PatchPE x| encapsulates the supported transformations
+over elements of type |x|. In general lines, it consists in (A) a \emph{pattern}, or
+deletion context, which instantiates a number of metavariables when matched against
+an actual value; and (B) a \emph{expression}, or insertion context, which uses
+the instantiation provided by the deletion context to substitute its variables,
+yielding the final result.
+
+  In order to represent the metavariables in the deletion and inertion contexts we
+must augment the type |x| with said capacity. The \genericssimpl{} library provides
+an expressive fixpoint combinator, |HolesAnn| from \Cref{sec:gp:simplistic:holes}, 
+which perfectly fits the bill. Recall its definition below, presented
+without annotations to foster readability here:
 
 \begin{myhs}
 \begin{code}
- data Holes :: (kon -> Star) -> [[[Atom kon]]] -> (Atom kon -> Star) -> Atom kon -> Star
-    where
-  Hole   :: phi at  -> Holes kappa codes phi at
-  HOpq   :: kappa k -> Holes kappa codes phi ((P K) k)
-  HPeel  :: (IsNat n , IsNat i)
-         => Constr (Lkup i codes) n
-         -> NP (Holes kappa codes phi) (Lkup n (Lkup i codes))
-         -> Holes kappa codes phi ((P I) i) 
+data Holes kappa fam h a where
+  Hole  :: h a -> Holes kappa fam h a
+  Prim  :: (PrimCnstr kappa fam a)
+        => a -> Holes kappa fam h a
+  Roll  :: (CompoundCnstr kappa fam a)
+        => SRep (Holes kappa fam h) (Rep a)
+        -> Holes kappa fam h a
 \end{code}
 \end{myhs}
 
-  If we put values of type |Const Int| in the holes,
-as in |Holes ki codes (Const Int)|, we would get a functor mapping an
-index of the family into its representation, augmented with integers,
-representing metavariables. This is almost enough, yet, we would run into 
-problems whenever we tried to inder the type of a metavariable over
-an opaque value. For this reason, we must keep the opaque values
-around in order to be able to compare their type-level indicies.
+  With values of type |Const Int| in place of the holes,
+as in |Holes ki codes (Const Int)|, we get a functor mapping an
+element of the family into its representation, augmented with integers,
+representing metavariables. Which is almost good enough, if not for
+not being able to infer whether a metavariable matches over
+an opaque type or a recursive position. For this reason, we must keep 
+the opaque values around in order to be able to compare their type-level indicies.
 
 \begin{myhs}
 \begin{code}
-data Annotate (x :: Star) (f :: k -> Star) :: k -> Star where
-  Annotate :: x -> f i -> Annotate x f i
-
-type MetaVar ki = NA (Annotate Int ki) (Const Int)
+data MetaVar kappa fam at where
+  MV_Prim  :: (PrimCnstr kappa fam at)
+           => Int -> MetaVar kappa fam at
+  MV_Comp  :: (CompoundCnstr kappa fam at)
+           => Int -> MetaVar kappa fam at
 \end{code}
 \end{myhs}
 
   With |MetaVar| as defined above, we can always fetch the |Int| identifying
-the metavar but we posses much more type-level information that is inspectable
-at run-time. 
+the metavar but we posses all the type-level information that we will need
+to inspect at run-time later. In fact, it is handy to define the |HolesMV| synonym
+for values augmented with metavariables, below.
 
-  Next we define \emph{changes} to be a pair of a deletion context
-and an insertion context for the same type. As expected, these contexts
-are values of the mutually recursive family in question augmented
+\begin{myhs}
+\begin{code}
+type HolesMV kappa fam = Holes kappa fam (MetaVar kappa fam)
+\end{code}
+\end{myhs}
+
+  These gives us all the ingredients we need to define \emph{changes},
+which consist in a pair of a deletion context and an insertion context for the same type. 
+As expected, these contexts are values of the mutually recursive family in question augmented
 with metavariables.
 
 \begin{myhs}
 \begin{code}
-data Chg ki codes at = Chg
-  { chgDel  :: Holes ki codes (MetaVar ki) at
-  , chgIns  :: Holes ki codes (MetaVar ki) at
+data Chg kappa fam at = Chg
+  { chgDel :: HolesMV kappa fam at
+  , chgIns :: HolesMV kappa fam at
   }
 \end{code}
 \end{myhs}
 
-  It is worth noting that there might be a lot of redundant information
-in a value of type |Chg ki codes at|. Take for example the
+  Ideally, a change should \emph{not} contain redundant information.
+For example, take the change illustrated in
+\Cref{fig:pepatches:example-02:chg}: it inserts the |Bin 84| constructor
+at the right child of the root. Note now the |Bin| at the root ant its
+left child, |42| are duplicated in the deletion and insertion context.
+Instead, we prefer to have the redundant information distributed
+out of the change, as in \Cref{fig:pepatches:example-02:patch}.
+
+\begin{figure}
+\centering
+\subfloat[Insertion as a \emph{redundant change}]{%
+\begin{forest}
+[,rootchange 
+  [|Bin| [|42|] [x,metavar]]
+  [|Bin| [|42|] [|Bin| [|84|] [x,metavar]]]
+]
+\end{forest}
+\label{fig:pepatches:example-02:chg}}%
+\quad\quad\quad
+\subfloat[Insertion as a \emph{patch}]{%
+\begin{forest}
+[|Bin|,s sep = 5mm%make it wider
+  [|42|]
+  [,change [x,metavar] [|Bin| [|84|] [x,metavar]]]
+]
+\end{forest}
+\label{fig:pepatches:example-02:patch}}%
+\caption{A change on the left and its minimal representation on
+the right}
+\label{fig:pepatches:example-02}
+\end{figure}
+
+\victor{decide... is |vars del == vars ins| or |vars ins < vars del|}?
+
+  However, as is usual around calculi involving names and binding, we are bound
+to have issues if are not careful. Therefore, we impose the invariant
+that |vars (chgDel c) == vars (chgIns c)|, where |vars| returns the
+set of metavariables used in a |HolesMV| together with their arity, \ie,
+how many times do they occur.
+
+\begin{myhs}
+\begin{code}
+vars :: HolesMV kappa fam at -> Map Int Arity
+\end{code}
+\end{myhs}
+
+  A \emph{patch} is in fact defined as a member of the mutually
+recursive family augmented with \emph{non-redundant changes}, or, to put
+it in another way, it contains a spine that is copied from
+source to destination and has changes in its leaves:
+
+\begin{myhs}
+\begin{code}
+type PatchPE kapa fam = Holes kappa fam (Chg kappa fam)
+\end{code}
+\end{myhs}
+
+  Converting from patch back into a potentially redundant change
+is very easy. The free monad structure of |Holes| gives us
+the monadic multiplication trivially, yielding:
+
+\begin{myhs}
+\begin{code}
+patch2change :: PatchPE ki codes at -> Chg ki codes at
+patch2change p = Chg  (holesJoin (holesMap chgDel  p))
+                      (holesJoin (holesMap chgIns  p))
+\end{code}
+\end{myhs}
+
+  The other way around, however, is slightly more complicated.
+
+\subsection*{Computing Closures}
+
+\subsection*{Aligning Closed Changes}
+ 
+\victor{\huge I'm here!}
+
+
+Take for example the
 change that swaps two elements of a binary tree. Both the deletion context
 and the insertion context contains a |Bin| constructor -- as
 illustrated in \Cref{fig:pepatches:change-versus-patch:chg}.
@@ -231,6 +320,20 @@ in its domain can be transformed into a |PatchGDiff|.
 to talk about patches is that we must discuss its metatheory.
 In this section we show this design offers a reasnable option
 for representing patches.
+
+
+  This yields a formal definition of \emph{changes} over elements
+of a term algebra.
+
+\newcommand{\termalg}{\ensuremath{\Gamma}}
+\newcommand{\varset}{\ensuremath{\mathcal{V}}}
+\begin{definition}[Change]
+A change consists in an element of \termalg ...
+is a term algebra augmented with variables taken from a countable set \varset. We denote the first and
+second projections by \emph{deletion} and \emph{insertion} contexts, respectively.
+\end{definition}
+
+
 
 \victor{
 The |PatchPE ki codes| forms either:

@@ -929,7 +929,8 @@ enabling us to annotate every node of the source and destination trees
 with a information about whether that node was copied or not.  This
 strategy was translated into Haskell by A. van
 Putten~\cite{Putten2019} as part of his MSc work. The gist of it
-is that we can use annotated fixpoints to tag each constructor
+is that we can use annotated fixpoints -- provided by \texttt{generics-mrsop},
+\Cref{sec:gp:mrsop:holes} -- to tag each constructor
 of a tree with added information. In this case, we are interested
 in whether this node would be copied or not by \texttt{gdiff}:
 
@@ -971,7 +972,7 @@ of |annDst| is symmetric.
 \begin{code}
 annSrc :: NP (NA kappa (Fix kappa codes)) xs
        -> ES kappa codes xs ys
-       -> NP (NA kappa (AnnFix kappa codes (Const Ann))) xs
+       -> NP (NA kappa (FixAnn kappa codes (Const Ann))) xs
 annSrc xs         ES0         = Nil
 annSrc Nil        _           = Nil
 annSrc xs         (Ins c es)  = annSrc' xs es
@@ -997,10 +998,10 @@ and inserts the entire destination tree.
 
 \begin{myhs}
 \begin{code}
-diffAlmu  :: AnnFix kappa codes (Const Ann) ix
-          -> AnnFix kappa codes (Const Ann) iy
+diffAlmu  :: FixAnn kappa codes (Const Ann) ix
+          -> FixAnn kappa codes (Const Ann) iy
           -> Almu kappa codes ix iy
-diffAlmu x@(AnnFix ann1 rep1) y@(AnnFix ann2 rep2) =
+diffAlmu x@(FixAnn ann1 rep1) y@(FixAnn ann2 rep2) =
   case (getAnn ann1, getAnn ann2) of
     (Copy, Copy)      -> Spn (diffSpine  (getSNat $ Proxy @ix) 
                                          (getSNat $ Proxy @iy) 
@@ -1029,13 +1030,13 @@ are placed on the rigid part of the context.
 \begin{myhs}
 \begin{code}
 diffCtx  :: InsOrDel kappa codes p
-         -> AnnFix kappa codes (Const Ann) ix
-         -> NP (NA kappa (AnnFix kappa codes (Const Ann))) xs
+         -> FixAnn kappa codes (Const Ann) ix
+         -> NP (NA kappa (FixAnn kappa codes (Const Ann))) xs
          -> Ctx kappa codes p ix xs
 \end{code}
 \end{myhs}
 
-  The other functions for translating two |AnnFix kappa codes (Const Ann) ix|
+  The other functions for translating two |FixAnn kappa codes (Const Ann) ix|
 into a |PatchST| are straightforward and follow a similar reasoning process:
 extract the anotations and defer copies until both source and destination
 annotation flag a copy.
