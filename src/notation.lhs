@@ -60,6 +60,13 @@
 %format PatchST    = "\HTNI{\mathit{Patch}_\textsc{st}}"
 
 
+%%% HDiff Notation
+
+%format PatchPE    = "\HTNI{\mathit{Patch}_\textsc{pe}}"
+%format MV_Prim i  = "\HTNI{\digemFormatMetavarKappaFam{\kappa}{" i "}}"
+%format MV_Comp i  = "\HTNI{\digemFormatMetavarKappaFam{\mathit{fam}}{" i "}}"
+
+
 %%% TMP?
 
 %format NilRoseTree  = "\HS{[]_{\mathsf{RoseTree}}}"

@@ -244,7 +244,7 @@ variable scoping.
 
 \begin{figure}
 \centering
-\subfloat[\emph{well-scoped} swap}]{%
+\subfloat[\emph{well-scoped} swap]{%
 \begin{forest}
 [,rootchange 
   [|Bin| [x,metavar] [y,metavar]]
