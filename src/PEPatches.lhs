@@ -248,6 +248,16 @@ check page 13 for \cite{Foster2007}; we do it differently overall.
 Our merge proposes a mix of local and global alignments to solve this
 in a satisfactory manner}
 
+\victor{Actually; \texttt{hdiff} with alignment really improves on that
+by essentially enabling permutations and duplications over \texttt{stdiff}}
+\victor{Another aspect is that \texttt{hdiff} actually uses type information
+when doing synchronization; this is pretty neat and apparently the (only) use for
+types in structural diffing}
+
+\victor{What else do we want to discuss here?}
+\victor{Mention results and forward to experiments for further details?}
+
+
 \section{Computing |PatchPE|}
 
 \begin{figure}
