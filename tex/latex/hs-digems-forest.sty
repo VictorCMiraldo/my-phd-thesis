@@ -23,11 +23,17 @@
 \usetikzlibrary{backgrounds}
 \usetikzlibrary{positioning}
 
+%%old: \definecolor{forest-digems-metavar}{RGB}{171,72,46}
+%%darker: \definecolor{forest-digems-metavar}{RGB}{108,40,23}
+%%purple:\definecolor{forest-digems-metavar}{RGB}{56,25,110}
+\definecolor{forest-digems-metavar}{RGB}{0,112,33}
+
 \definecolor{forest-digems-constr}{RGB}{80,88,113}
 \definecolor{forest-digems-change-bg}{RGB}{220,224,238}
-\definecolor{forest-digems-metavar}{RGB}{171,72,46}
 \definecolor{forest-digems-black}{RGB}{97,108,132}
 \definecolor{forest-digems-change-border}{RGB}{0,112,33}
+
+\newcommand{\digemFormatMetavar}[1]{\ensuremath{\#_{#1}}}
 
 %% This was based on: https://tex.stackexchange.com/questions/342334/drawing-super-nodes-in-a-tree 
 \forestset{%
@@ -36,10 +42,13 @@
       for tree={text=forest-digems-constr, edge=forest-digems-black},
     },
   metavar/.style={%
-      %shape=rectangle,
-      %draw=forest-digems-black,
-      text=forest-digems-metavar,
-    },
+    text=forest-digems-metavar,
+    %% delay is crucial here; otherwise the default content
+    %% is used. See manual page 6!
+    delay={content/.wrap pgfmath arg={%
+       \digemFormatMetavar{##1}
+     }{content()}}
+   },
   triang/.style={%
       shape=regular polygon,
       regular polygon sides=3,
