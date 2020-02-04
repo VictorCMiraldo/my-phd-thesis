@@ -34,7 +34,7 @@ set xrange [100:60000]
 set format x "%2.0t{/Symbol \327}10^{%L}"
 set format y "10^{%L}"
 plot '$aux' using 2:1 w dots lc 6 notitle\
-   , 7.94e-8*x*x title 'c{/Symbol \327}x^2'\
-   , 7.94e-8*x   title 'c{/Symbol \327}x'
+   , 1.2e-7*x*x title '  c{/Symbol \327}x^2'\
+   , 1.2e-7*x   title '  c{/Symbol \327}x'
 GNUPLOTSCRIPT
 
