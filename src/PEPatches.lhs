@@ -8,13 +8,15 @@ Overcoming these drawbacks required a significant shift in perspective and
 represents, finally, a more thorough decoupling from edit-script based 
 differencing algorithms.
 
-  Classically, tree differencing algorithms are divided in a matching phase, which
-identifies which subtrees should be copied, and later extrapolates one edit-script
-from said tree matching (\Cref{sec:background:tree-edit-distnace}). This separation of
-concerns means that we do not have to deal with the ambiguities of edit scripts,
-but the desire to obtain said edit script still means that the matchings produced
-by these algorithms are very restrictive -- order preserving partial bijections
-between the flattened nodes of the trees in question, \Cref{fig:background:tree-mapping}.
+  Classically, tree differencing algorithms are divided in a matching
+phase, which identifies which subtrees should be copied, and later
+extrapolates one edit-script from said tree matching
+(\Cref{sec:background:tree-edit-distnace}). This separation of
+concerns means that we do not have to deal with the ambiguities of
+edit scripts, but the desire to obtain said edit script still means
+that the matchings produced by these algorithms are very restrictive
+-- order preserving partial bijections between the flattened nodes of
+the trees in question, \Cref{fig:background:tree-mapping}.
 
   Suppose we want to write a change that modifies the left element
 of a binary tree. If we had the full Haskell programming language available
@@ -39,8 +41,11 @@ the matching of the pattern as a \emph{deletion} phase and the construction
 of the resulting tree as a \emph{insertion} phase. 
 The \texttt{hdiff} approach represents the change in |p| exactly as
 that: a pattern and a expression. Essentially, we could write |p|
-as |patch (Bin (Leaf 10) y) (Bin (Leaf 42) y)|, or, graphically
-as in \Cref{fig:pepatches:example-01}. The notation $\digemFormatMetavar{\square}$ is
+as |patch (Bin (Leaf 10) y) (Bin (Leaf 42) y)| -- represented graphically
+as in \Cref{fig:pepatches:example-01}. An important aspect here
+is that the graphical notation makes it evident which
+constructors were copied until we reach the point where a change
+must be made. The notation $\digemFormatMetavar{\square}$ is
 used to indicate $\square$ is a metavariable, that is, given a successful
 matching of the deletion context against an element $\digemFormatMetavar{\square}$
 will be given a value.
@@ -58,12 +63,13 @@ children of a binary node}
 \label{fig:pepatches:example-01}
 \end{figure}
 
-  In fact, the core idea behind \texttt{hdiff} is to forget about 
-translating matchings back to edit scripts, using instead the tree matching \emph{as the patch}.
-Consequently, we can also drop the restrictions on tree matchings and use any matching
-that we can compute. On this chapter we shall study how the |PatchPE x| will encode
-(relaxed) tree matchings, how to write a synchronizer for these patches and finally
-how to compute these patches efficiently.
+  In fact, the core idea behind \texttt{hdiff} is to forget about
+translating matchings back to edit scripts, using instead the tree
+matching \emph{as the patch}.  Consequently, we can also drop the
+restrictions on tree matchings and use any matching that we can
+compute. On this chapter we shall study how the |PatchPE x| will
+encode (relaxed) tree matchings, how to write a synchronizer for these
+patches and finally how to compute these patches efficiently.
 
   With this added expressivity we can represent more transformations
 than before. Take the patch that swaps two subtrees, which cannot
@@ -78,31 +84,37 @@ enables us to write linear |diff| algorithms even in the presence
 of permutations and duplications. 
 
 
-  This chapter arises as a refinement from our ICFP'19 publication~\cite{Miraldo2019},
-where we explore the representation and computation aspects of \texttt{hdiff}.
-The big shift in paradigm of \texttt{hdiff} also requires a more careful look into 
-the metatheory and nuances of the algorithm, which were not present in said contribution.
-Moreover, we first wrote our algorithm~\cite{Miraldo2019} using the \texttt{generics-mrsop}
-library even though \texttt{hdiff} does not require an explicit sums of products. This means
-we can port it to \genericssimpl{} and gather real world data fort
-his approach. We present our code in this section on the \genericssimpl{} library.
+  This chapter arises as a refinement from our ICFP'19
+publication~\cite{Miraldo2019}, where we explore the representation
+and computation aspects of \texttt{hdiff}.  The big shift in paradigm
+of \texttt{hdiff} also requires a more careful look into the
+metatheory and nuances of the algorithm, which were not present in
+said contribution.  Moreover, we first wrote our
+algorithm~\cite{Miraldo2019} using the \texttt{generics-mrsop} library
+even though \texttt{hdiff} does not require an explicit sums of
+products. This means we can port it to \genericssimpl{} and gather
+real world data fort his approach. We present our code in this section
+on the \genericssimpl{} library.
 
 \victor{Maybe we write a paper with pierre about it?}
 
 \section{The Type of Patches}
 
-  The type |PatchPE x| encapsulates the supported transformations
+  The type |PatchPE x| encapsulates the transformations we wish to support
 over elements of type |x|. In general lines, it consists in (A) a \emph{pattern}, or
 deletion context, which instantiates a number of metavariables when matched against
 an actual value; and (B) a \emph{expression}, or insertion context, which uses
 the instantiation provided by the deletion context to substitute its variables,
-yielding the final result.
+yielding the final result. Both insertion and deletion contexts are simply inhabitants
+of the type |x| augmented with \emph{metavariables}.
 
-  In order to represent the metavariables in the deletion and inertion contexts we
-must augment the type |x| with said capacity. The \genericssimpl{} library provides
-an expressive fixpoint combinator, |HolesAnn| from \Cref{sec:gp:simplistic:holes}, 
-which perfectly fits the bill. Recall its definition below, presented
-without annotations to foster readability here:
+  Augmenting the set of elements of a type with an additional constructor
+is a well known technique and is usually done through something in
+the lines of a \emph{free monad}. The \genericssimpl{} library provides
+exactly what we need: the |HolesAnn kappa fam phi h| datatype 
+from \Cref{sec:gp:simplistic:holes}, which is a free monad in |h|. 
+Recall its definition below, presented without annotations, that is, |phi = V1|, 
+fostering readability here:
 
 \begin{myhs}
 \begin{code}
@@ -116,13 +128,15 @@ data Holes kappa fam h a where
 \end{code}
 \end{myhs}
 
-  With values of type |Const Int| in place of the holes,
-as in |Holes ki codes (Const Int)|, we get a functor mapping an
+  At first, one would think of simply passing |Const Int| in place of |h|,
+as in |Holes ki codes (Const Int)|. This gives a functor mapping an
 element of the family into its representation, augmented with integers,
 representing metavariables. Which is almost good enough, if not for
 not being able to infer whether a metavariable matches over
-an opaque type or a recursive position. For this reason, we must keep 
-the opaque values around in order to be able to compare their type-level indicies.
+an opaque type or a recursive position, which is crucial if we
+are to produce good alignments later on \Cref{sec:pepatches:alignment}.
+Consequently, we must keep the opaque values around in order to be 
+able to compare their type-level indicies.
 
 \begin{myhs}
 \begin{code}
@@ -145,7 +159,7 @@ type HolesMV kappa fam = Holes kappa fam (MetaVar kappa fam)
 \end{code}
 \end{myhs}
 
-  These gives us all the ingredients we need to define \emph{changes},
+  So far we have seen the machinery necessary to define \emph{changes},
 which consist in a pair of a deletion context and an insertion context for the same type. 
 As expected, these contexts are values of the mutually recursive family in question augmented
 with metavariables.
@@ -159,13 +173,14 @@ data Chg kappa fam at = Chg
 \end{code}
 \end{myhs}
 
-  Ideally, a change should \emph{not} contain redundant information.
-For example, take the change illustrated in
+  Ideally, however, we would like changes to \emph{not} contain 
+redundant information. For example, take the change illustrated in
 \Cref{fig:pepatches:example-02:chg}: it inserts the |Bin 84| constructor
-at the right child of the root. Note now the |Bin| at the root ant its
-left child, |42| are duplicated in the deletion and insertion context.
-Instead, we prefer to have the redundant information distributed
-out of the change, as in \Cref{fig:pepatches:example-02:patch}.
+at the right child of the root -- but the |Bin| at the root and its
+left child, |42|, are duplicated in the deletion and insertion context.
+In \Cref{fig:pepatches:example-02:patch}, on the other hand, we see that this
+redundant information has been undistributed, making it clear they are 
+copied from the source to the destination.
 
 \begin{figure}
 \centering
@@ -190,6 +205,36 @@ out of the change, as in \Cref{fig:pepatches:example-02:patch}.
 the right}
 \label{fig:pepatches:example-02}
 \end{figure}
+
+  The process of extracting and evidentiating the common constructors
+in a |Chg|s deletion and insertion context is, in its simplest form,
+plain \emph{anti-unification}~\cite{Plotkin1971}. We denote it
+by the longest common (tree) prefix of two terms and its definition
+is straight forward and is given in \Cref{fig:pepatches:antiunif}.
+
+\begin{figure}
+\begin{myhs}
+\begin{code}
+lcp  :: (All Eq kappa)
+     => Holes kappa fam phi at
+     -> Holes kappa fam psi at
+     -> Holes kappa fam (Holes kappa fam phi :*: Holes kappa fam psi) at
+lcp (Prim x) (Prim y) = 
+  case witness :: Witness Eq at of -- retrieve correct Eq instance
+    Witness ->  if x == y then Prim x else (Prim x :*: Prim y)
+lcp x@(Roll rx) y@(Roll ry) = 
+  case zipSRep rx ry of
+    Nothing  -> Hole (x :*: y)
+    Just r   -> Roll (repMap (uncurry' lcp) r)
+lcp x y = Hole (x :*: y)
+\end{code}
+\end{myhs}
+\label{fig:pepatches:antiunif}
+\caption{Classic anti-unification algorithm~\cite{Plotkin1971}, 
+producing the least general generalization of two trees}
+\end{figure}
+
+   
 
 \victor{Justify why do I care about scoping... I mean; we could just don't care,
 but it helps in isolating changes and making sure they are independent;}
@@ -269,6 +314,7 @@ a change might break scoping.}
 \subsection*{Computing Closures}
 
 \subsection*{Aligning Closed Changes}
+\label{sec:pepatches:alignments}
  
 \victor{\huge I'm here!}
 
