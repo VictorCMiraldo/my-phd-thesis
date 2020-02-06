@@ -100,6 +100,12 @@ on the \genericssimpl{} library.
 
 \section{The Type of Patches}
 
+\victor{Actually, my thesis is about understanding the tradeoffs; do we
+want alignments? Well, inly if we are interested in merging. Do we
+want to identify duplications: different extraction strategies; etc...
+There are many design choices in this domain that I have studied;
+the point being: no right answer here}
+
   The type |PatchPE x| encapsulates the transformations we wish to support
 over elements of type |x|. In general lines, it consists in (A) a \emph{pattern}, or
 deletion context, which instantiates a number of metavariables when matched against

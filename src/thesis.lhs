@@ -89,6 +89,11 @@ Thanks to family, supervisor, friends and hops!
 \lhsinclude{PEPatches.lhs}
 %include src/PEPatches.lhs
 
+\chapter{Experiments}
+\label{chap:experiments}
+\lhsinclude{Experiments.lhs}
+%include src/Experiments.lhs
+
 \chapter{Discussion}
 \label{chap:discussion}
 \lhsinclude{Discussion.lhs}
