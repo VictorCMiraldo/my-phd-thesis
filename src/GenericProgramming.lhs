@@ -2076,6 +2076,7 @@ unify  :: ( Ord (Exists phi) , EqHO phi)
 \end{code}
 \end{myhs}
 
+\victor{define substApply?}
 
   Detailing the implementation og the unification algorithm itself is 
 out of the scope of this thesis. \victor{cite some tutorials} 

@@ -481,9 +481,9 @@ project \@NWOproject{} (\@NWOgrantnumber).
 
 %% Hacks for preventing orphan lines
 %% https://tex.stackexchange.com/questions/4152/how-do-i-prevent-widow-orphan-lines
-\clubpenalty = 10000
-\widowpenalty = 10000
-\displaywidowpenalty = 10000
+\clubpenalty=10000
+\widowpenalty=10000
+\displaywidowpenalty=10000
 
 % hyperref MUST be loaded first. Check section 14.1 of cleveref manual.
 \usepackage[pdfpagelabels,plainpages=false]{hyperref}
