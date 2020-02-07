@@ -7,31 +7,32 @@ function getForbiddenPat() {
   pat=$1
   if [[ "${pat:0:1}" == "!" ]]; then
     aux=${pat:1}
-    echo "${aux//\|/[ -]\?}"
+    echo "${aux//\|/[\\n -]?}"
   elif [[ "$pat" =~ .*\|.* ]]; then
-    echo "${pat//\|/[ -]}"
+    echo "${pat//\|/[\\n -]}"
   elif [[ "$pat" =~ .*\ .* ]]; then
-    echo "${pat// /[-]\?}"
+    echo "${pat// /[-]?}"
   elif [[ "$pat" =~ .*-.* ]]; then
-    echo "${pat//-/[ ]\\?}"
+    echo "${pat//-/[ \\n]?}"
   fi
 }
 
 enforce=("data|type"    # enforce spelling of 'datatype', forbids 'data-type' and 'data type'
          "fix|point"
          "!fixed|point" # forbids all combinations of fixedpoint
-         "pattern functor"
          "sub|tree"
+         "pattern functor"
          "type level"
          "type safe"
-         "non interfering"
-         "well-typed"
-         "non-trivial"
-         "edit-script"
-         "general-purpose"
-         "real-world"
+         "well typed"
+         "edit script"
+         "general purpose"
+         "real world"
          "type class"
          "type family"
+         "non-interfering"
+         "non-trivial"
+         "anti-unif"
          )
 
 ok=true
@@ -39,7 +40,8 @@ IFS=,
 for enf in ${enforce[*]}; do
   pat=$(getForbiddenPat "$enf")
   echo "{Enforcing: $pat}"
-  grep -n --colour "$pat" src/*.lhs
+  # grep -n --colour "$pat" src/*.lhs
+  pcregrep -i -M -n -H --colour "$pat" src/*.lhs
   if [[ "$?" == "0" ]]; then
     ok=false
   fi
