@@ -407,90 +407,6 @@ producing the least general generalization of two trees
 
 \subsection{Aligning Closed Changes}
 \label{sec:pepatches:alignments}
- 
-\victor{\huge I'm here!}
-
-
-
-
-
-
-
-Besides space optimality, this also means that
-we could only look at changes as a monolithic operation that operates
-over the whole tree. This is undesirable for us since we would like
-to merge these changes later on. Large global changes
-merge less often \victor{cite experiments? I meant with our merge algorithm. How 
-to say that there might be better ways undiscovered?} and, when 
-merging fails it does so with one single spanning the whole tree. 
-
- Hence, we would like changes to \emph{not} contain redundant
-information and be as minimal as possible. For example, take the
-change illustrated in \Cref{fig:pepatches:example-02:chg}: it inserts
-the |Bin 84| constructor at the right child of the root -- but the
-|Bin| at the root and its left child, |42|, are duplicated in the
-deletion and insertion context.  In
-\Cref{fig:pepatches:example-02:patch}, on the other hand, we see that
-this redundant information has been undistributed, making it clear
-they are copied from the source to the destination. We call this a
-\emph{spine} which leads to changes.
-
-  In fact, we distinguish between \emph{changes} and \emph{patches}
-in the sense that the later contains a spine that leads to
-changes with no redundant information.
-
-  Converting a change into a patch, however, is not so simple. 
-The process of extracting and evidentiating the common constructors
-in a |Chg|s deletion and insertion context is plain 
-\emph{anti-unification}~\cite{Plotkin1971}. We denote it
-by the longest common (tree) prefix of two terms and its definition
-is straight forward and is given in \Cref{fig:pepatches:antiunif}.
-Yet, this process is unaware of binders and might produce
-ill-scoped changes.
-
-
-Take for example the
-change that swaps two elements of a binary tree. Both the deletion context
-and the insertion context contains a |Bin| constructor -- as
-illustrated in \Cref{fig:pepatches:change-versus-patch:chg}.
-This indicates, in fact, that the |Bin| constructor is being
-copied from the source to the destination. To make this evident
-we define a |Patch| to be the anti-unification of a change's
-deletion and insertion contexts -- in this case, illustrated
-in \Cref{fig:pepatches:change-versus-patch:patch} and defined below.
-We call the prefix of constructors that are copied from source
-to the destination the \emph{spine} of the patch.
-
-
-\begin{myhs}
-\begin{code}
-type PatchPE ki codes = Holes ki codes (Chg ki codes)
-\end{code}
-\end{myhs}
-
-  This distinction between patches and changes only plays
-an important role when defining the merging algorithm. 
-but since one can easily convert between one another
-the graphical representation of patches will be that without
-a spine.
-\victor{If it only matters there, why did I put it here?}
-
-  Converting between patches and changes is simple. Moreover,
-if we assume that |PatchPE ki codes| is in fact the result
-of anti-unifying the deletion and insertion contexts of a change
--- has a maximal spine -- then we have an isomorphism.
-
-\begin{myhs}
-\begin{code}
-change2patch :: Chg ki codes at -> PatchPE ki codes at
-change2patch (Chg d i) = holesMap (uncurry' Chg) (holesLCP d i)
-
-patch2change :: PatchPE ki codes at -> Chg ki codes at
-patch2change p = Chg  (holesJoin (holesMap chgDel  p))
-                      (holesJoin (holesMap chgIns  p))
-\end{code}
-\end{myhs}
-
 
 
 
@@ -548,6 +464,10 @@ types in structural diffing}
 \victor{What else do we want to discuss here?}
 \victor{Mention results and forward to experiments for further details?}
 
+\victor{Best mereg rate so far is:
+\texttt{hdiff merge -d nonest -k spine *.java}
+with 900 successes (and 500 merge diffs); check commit \texttt{11aebdf9cf0b57b97734ede0285c7df8d4dfe28a}
+on hdiff to reproduce}
 
 \section{Computing |PatchPE|}
 
@@ -555,9 +475,9 @@ types in structural diffing}
 \centering
 \subfloat[|DM_NoNest| extraction]{%
 \begin{forest}
-[,rootchange 
-  [|Bin| [x,metavar] [k]]
-  [|Bin| [x,metavar] [t]]
+[|Bin|, s sep=5mm 
+  [,change [x,metavar] [x,metavar]]
+  [,change [k] [t]]
 ]
 \end{forest}
 \label{fig:pepatches:extraction-01:nonest}}%

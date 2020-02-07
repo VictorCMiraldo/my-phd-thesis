@@ -1,5 +1,7 @@
 %% Logistic Stuff
 
+\usepackage{supertabular}
+
 %include stylish.lhs
 
 % Easy to typeset Haskell types using the \HSCon
