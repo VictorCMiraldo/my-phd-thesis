@@ -43,6 +43,13 @@
 
 \newenvironment{myhs}[1][0.95\textwidth]{\vspace{0.15em}\par\noindent\begin{minipage}{#1}\small}{\end{minipage}\vspace{0.15cm}}
 
+%% Typography
+
+%% Parenthetical sentences; a command makes it easy
+%% to keep it homogeneous.
+\newcommand{\parens}[1]{ -- #1 -- }
+
+
 %% Denotations
 
 \newcommand{\unixdiff}{\texttt{UNIX diff}}

@@ -165,10 +165,11 @@ type HolesMV kappa fam = Holes kappa fam (MetaVar kappa fam)
 \end{code}
 \end{myhs}
 
-  So far we have seen the machinery necessary to define \emph{changes},
-which consist in a pair of a deletion context and an insertion context for the same type. 
-As expected, these contexts are values of the mutually recursive family in question augmented
-with metavariables.
+  So far we have seen the machinery necessary to define
+\emph{changes}, which consist in a pair of a deletion context and an
+insertion context for the same type.  As expected, these contexts are
+values of the mutually recursive family in question augmented with
+metavariables.
 
 \begin{myhs}
 \begin{code}
@@ -179,18 +180,26 @@ data Chg kappa fam at = Chg
 \end{code}
 \end{myhs}
 
-  Ideally, however, we would like changes to \emph{not} contain 
-redundant information. For example, take the change illustrated in
-\Cref{fig:pepatches:example-02:chg}: it inserts the |Bin 84| constructor
-at the right child of the root -- but the |Bin| at the root and its
-left child, |42|, are duplicated in the deletion and insertion context.
-In \Cref{fig:pepatches:example-02:patch}, on the other hand, we see that this
-redundant information has been undistributed, making it clear they are 
-copied from the source to the destination.
+  Naturally, we expect a change to be well-scoped, that is,
+all the variables that are present in the insertion context
+must also occur on the deletion context. Given a function |vars|
+that returns the multiset of variables in a term,
+we define well-scoped in Haskell as:
+
+\begin{myhs}
+\begin{code}
+vars        :: HolesMV kappa fam at -> Map Int Arity
+
+wellscoped  :: Chg kappa fam at -> Bool
+wellscoped (Chg d i) = keys (vars i) == keys (vars d) 
+\end{code}
+\end{myhs}
+
+\victor{decide... is |vars del == vars ins| or |vars ins < vars del|}?
 
 \begin{figure}
 \centering
-\subfloat[Insertion as a \emph{redundant change}]{%
+\subfloat[Insertion as a \emph{change}]{%
 \begin{forest}
 [,rootchange 
   [|Bin| [|42|] [x,metavar]]
@@ -207,18 +216,72 @@ copied from the source to the destination.
 ]
 \end{forest}
 \label{fig:pepatches:example-02:patch}}%
-\caption{A change on the left and its minimal representation on
-the right}
+\caption{A change with redundant information on the left 
+and its minimal representation on the right, with an
+evident \emph{spine}}.
 \label{fig:pepatches:example-02}
 \end{figure}
 
-  The process of extracting and evidentiating the common constructors
-in a |Chg|s deletion and insertion context is, in its simplest form,
-plain \emph{anti-unification}~\cite{Plotkin1971}. We denote it
+\victor{I'm unsure with this justification of pushing
+changes down; I mean... we could just have written a ``better''
+merge algorithm}
+
+  Looking at the definition of |Chg| we see that the deletion
+context might delete many constructors that the insertion context
+will later insert. Besides space optimality, this also means that
+we could only look at changes as a monolithic operation that operates
+over the whole tree. This is undesirable for us since we would like
+to merge these changes later on. Large global changes
+merge less often \victor{cite experiments? I meant with our merge algorithm. How 
+to say that there might be better ways undiscovered?} and, when 
+merging fails it does so with one single spanning the whole tree. 
+
+ Hence, we would like changes to \emph{not} contain redundant
+information and be as minimal as possible. For example, take the
+change illustrated in \Cref{fig:pepatches:example-02:chg}: it inserts
+the |Bin 84| constructor at the right child of the root -- but the
+|Bin| at the root and its left child, |42|, are duplicated in the
+deletion and insertion context.  In
+\Cref{fig:pepatches:example-02:patch}, on the other hand, we see that
+this redundant information has been undistributed, making it clear
+they are copied from the source to the destination. We call this a
+\emph{spine} which leads to changes.
+
+  In fact, we distinguish between \emph{changes} and \emph{patches}
+in the sense that the later contains a spine that leads to
+changes with no redundant information.
+
+\begin{myhs}
+\begin{code}
+type PatchPE kappa fam = Holes kappa fam (Chg kappa fam)
+\end{code}
+\end{myhs}
+
+  Converting a patch back into a change -- which might contain
+redundant information -- is simple. The free monad structure of |Holes| gives us
+the monadic multiplication trivially, yielding:
+
+\begin{myhs}
+\begin{code}
+patch2change :: PatchPE ki codes at -> Chg ki codes at
+patch2change p = Chg  (holesJoin (holesMap chgDel  p))
+                      (holesJoin (holesMap chgIns  p))
+\end{code}
+\end{myhs}
+
+  Converting a change into a patch, however, is not so simple. 
+The process of extracting and evidentiating the common constructors
+in a |Chg|s deletion and insertion context is plain 
+\emph{anti-unification}~\cite{Plotkin1971}. We denote it
 by the longest common (tree) prefix of two terms and its definition
 is straight forward and is given in \Cref{fig:pepatches:antiunif}.
+Yet, this process is unaware of binders and might produce
+ill-scoped changes.
+
+
 
 \begin{figure}
+\victor{Move code this to the generic-prog section?}
 \begin{myhs}
 \begin{code}
 lcp  :: (All Eq kappa)
@@ -237,85 +300,42 @@ lcp x y = Hole (x :*: y)
 \end{myhs}
 \label{fig:pepatches:antiunif}
 \caption{Classic anti-unification algorithm~\cite{Plotkin1971}, 
-producing the least general generalization of two trees}
+producing the least general generalization of two trees
+\victor{should I call it |lgg| maybe?}}
 \end{figure}
-
-   
-
-\victor{Justify why do I care about scoping... I mean; we could just don't care,
-but it helps in isolating changes and making sure they are independent;}
-\victor{Would it be interesting to compare the performance of alignment
-with and without scoping?}
-
-\victor{decide... is |vars del == vars ins| or |vars ins < vars del|}?
-
-  However, as is usual around calculi involving names and binding, we
-are bound to have issues if are not careful. Therefore, we impose the
-invariant that changes are \emph{well-scoped}, that is, |vars (chgDel
-c) == vars (chgIns c)|.  The |vars| function below the set of
-metavariables used in a |HolesMV| together with their arity, \ie, how
-many times do they occur. This ensures that all the variables needed to
-fully instantiate the insertion context of a change are provided
-by the deletion context of the same change.
-
-\begin{myhs}
-\begin{code}
-vars :: HolesMV kappa fam at -> Map Int Arity
-\end{code}
-\end{myhs}
-
-  A \emph{patch} is in fact defined as a member of the mutually
-recursive family augmented with \emph{non-redundant changes}, or, to put
-it in another way, it contains a spine that is copied from
-source to destination and has changes in its leaves:
-
-\begin{myhs}
-\begin{code}
-type PatchPE kapa fam = Holes kappa fam (Chg kappa fam)
-\end{code}
-\end{myhs}
-
-  Converting from patch back into a potentially redundant change
-is very easy. The free monad structure of |Holes| gives us
-the monadic multiplication trivially, yielding:
-
-\begin{myhs}
-\begin{code}
-patch2change :: PatchPE ki codes at -> Chg ki codes at
-patch2change p = Chg  (holesJoin (holesMap chgDel  p))
-                      (holesJoin (holesMap chgIns  p))
-\end{code}
-\end{myhs}
-
-  The other way around is not so simple since we must ensure
-that changes remain \emph{well-scoped}. For example, 
-performing a simple antiunification of the deletion
-context against the insertion context might break 
-variable scoping.
 
 \begin{figure}
 \centering
 \subfloat[\emph{well-scoped} swap]{%
 \begin{forest}
 [,rootchange 
-  [|Bin| [x,metavar] [y,metavar]]
-  [|Bin| [y,metavar] [x,metavar]]
+  [|Bin| [|42|] [|Bin| [x,metavar] [y,metavar]]]
+  [|Bin| [|42|] [|Bin| [y,metavar] [x,metavar]]]
 ]
 \end{forest}
 \label{fig:pepatches:example-03:A}}%
 \quad\quad\quad
 \subfloat[\emph{non-well-scoped} swap]{%
 \begin{forest}
-[|Bin|,s sep = 5mm%make it wider
+[|Bin|, s sep = 5mm 
+ [|42|]
+ [|Bin|,s sep = 5mm%make it wider
   [,change [x,metavar] [y,metavar]]
-  [,change [y,metavar] [x,metavar]]
+  [,change [y,metavar] [x,metavar]]]
 ]
 \end{forest}
 \label{fig:pepatches:example-03:B}}%
-\caption{How antiunification of the deletion and insertion context of
-a change might break scoping.}
+\caption{Naive anti-unification of the deletion and insertion context of
+a change can break scoping.}
 \label{fig:pepatches:example-03}
 \end{figure}
+
+  Take the change with superfluous constructors
+in \Cref{fig:patches:example-03}, for instance. On the left we see 
+a change which is well-scoped -- all variables used in the insertion
+context are defined in the deletion context. On the right, we see
+the result of naively anti-unifying such chance, producing a spine
+which leads to two individual ill-scoped changes. 
 
 \subsection*{Computing Closures}
 
