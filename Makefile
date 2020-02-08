@@ -48,7 +48,7 @@ dist/%.tex: src/%.lhs $(addprefix src/,$(LHS_DEPENDENCIES))
 	lhs2TeX -o $@ $<
 
 ## Builds the target.
-default : $(BUILD_DEPENDS) tex/latex/uustthesis.cls
+default : $(BUILD_DEPENDS) tex/latex/uustthesis.cls images
 	@mkdir -p dist
 	(git log --format='\def\PHD@latestcommit{%h}' | head -n 1 > dist/version.tex)
 	export TEXMFHOME=".:$(TEXMFHOME)" && \
@@ -61,13 +61,13 @@ index:
 ## forces rebuild for bibliography.
 dist/$(TGT).aux: default
 
-mock: $(BUILD_DEPENDS) tex/latex/uustthesis.cls
+mock: $(BUILD_DEPENDS) tex/latex/uustthesis.cls images
 	./mock-chapter
 	lhs2TeX -o dist/mock-chapter.tex dist/mock-chapter.lhs
 	export TEXMFHOME=".:$(TEXMFHOME)" && \
 	$(LATEX) dist/mock-chapter.tex
 	
-remock: $(BUILD_DEPENDS) tex/latex/uustthesis.cls
+remock: $(BUILD_DEPENDS) tex/latex/uustthesis.cls images
 	lhs2TeX -o dist/mock-chapter.tex dist/mock-chapter.lhs
 	export TEXMFHOME=".:$(TEXMFHOME)" && \
 	$(LATEX) dist/mock-chapter.tex
@@ -90,6 +90,9 @@ clean:
 nix-install: default
 	cp -r dist/*  ${out}
 
+
+images:
+	make -C src/img
 
 ## Installs the math fonts locally
 ## Unfortunately, this is necessary for
