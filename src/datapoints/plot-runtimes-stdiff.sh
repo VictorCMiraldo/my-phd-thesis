@@ -12,13 +12,17 @@ else
   aux=$1
 fi
 
+
 # Using 'ubuntu-mono' also looks pretty cool, gotta say
-stixtwomath="../../tex/latex/fonts/STIXTwoMath.otf"
+myfonts="../../tex/latex/fonts"
+
+export GDFONTPATH=$myfonts
+export GNUPLOT_FONTPATH=$myfonts
 
 # http://triclinic.org/2015/04/publication-quality-plots-with-gnuplot/
 gnuplot <<GNUPLOTSCRIPT
-set terminal svg enhanced size 500,500 font '$stixtwomath, 12'
-set output 'runtimes.svg'
+set terminal svg enhanced size 500,500 font 'STIX Two Math, 12'
+set output '../img/runtimes-stdiff.svg'
 set encoding iso_8859_1
 set xlabel 'AST Size (n + m)'
 set ylabel 'Time (s)'
