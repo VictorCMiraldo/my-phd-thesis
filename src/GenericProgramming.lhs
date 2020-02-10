@@ -1996,16 +1996,18 @@ zippers :: forall fam prim ann phi t
 \end{code}
 \end{myhs}
 
-\subsubsection{Unification}
+\subsubsection{Unification and Anti-Unification}
 \label{sec:gp:simplistic-unif}
 
   Syntatic unification algorithms \cite{Robinson1965} receive as input
 two terms |t| and |u| with variables and outputs a substitution
 |sigma| such that |sigma t == sigma u| or it signals the terms
-cannot be unified. It is amongst the most widespread concepts 
-in Computer Science and somewhat unsurprisingly, will also be necessary
-when we come to define the second approach to structural differencing,
-in \Cref{chap:pattern-expression-patches}.
+cannot be unified. Anti-unification\cite{Plotkin1971}, on the other hand, 
+receives two tems |t| and |u| and outputs one term |r| and two substitutions
+|sigma| and |pho| such that |t == sigma r| and |u = pho r|.
+In this section we do a light review of both concepts and how
+they are implemented in \genericssimpl{}.
+
 
   With our current setup, we want to unify two terms of type |Holes kappa fam phi at|,
 that is, two elements of the mutually recursive family |fam| with unification
@@ -2087,6 +2089,37 @@ the substitution. A substitution |[(x , Bin w z) , (w , Bin y y)]|
 can be minimized to |[(x , Bin (Bin y y) z) , (w , Bin y y)]|, where
 no metavariable in the image could be futher refined under the current
 substitution. \victor{I believe there is a name for this...}
+
+  Anti-unification~\cite{Plotkin1971} is dual to unification. It is the process of identifying the
+the longest prefixes that two terms agree. Given |x = Bin (Bin 1 2) Leaf| and |y = Bin (Bin 1 3) (Bin 4 5)|,
+the term |Bin (Bin 1 a) b| is the least general generalization of |x| and |y|. That is,
+there exists two instantiations of |a| and |b| yielding |x| or |y|. The term |Bin c b| is also
+a generalization of |x| and |y|, but it is not the \emph{least} general because to obtain
+|x| or |y| we would have instantiate |c| as |Bin 1 2| or |Bin 1 3|, and these terms
+can be further anti-unified. \Cref{fig:gp:antiunif} illustrates the implementation
+of the syntatical anti-unification algorithm.
+
+\begin{figure}
+\begin{myhs}
+\begin{code}
+lgg  :: (All Eq kappa)
+     => Holes kappa fam phi at
+     -> Holes kappa fam psi at
+     -> Holes kappa fam (Holes kappa fam phi :*: Holes kappa fam psi) at
+lgg (Prim x) (Prim y) = 
+  case witness :: Witness Eq at of -- retrieve correct Eq instance
+    Witness ->  if x == y then Prim x else (Prim x :*: Prim y)
+lgg x@(Roll rx) y@(Roll ry) = 
+  case zipSRep rx ry of
+    Nothing  -> Hole (x :*: y)
+    Just r   -> Roll (repMap (uncurry' lgg) r)
+lgg x y = Hole (x :*: y)
+\end{code}
+\end{myhs}
+\label{fig:gp:antiunif}
+\caption{Classic anti-unification algorithm~\cite{Plotkin1971}, 
+producing the least general generalization of two trees.}
+\end{figure}
 
 \section{Discussion}
 \label{sec:gp:discussion}
