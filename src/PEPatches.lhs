@@ -475,6 +475,7 @@ apply  = applyChg . chgDistr
 \end{code}
 \end{myhs}
 
+\victor{From here onwards its very drafty}
   In the next subsections we shall explore a couple algorithms and
 variations over the definition of changes and patches. 
 
@@ -656,10 +657,42 @@ close' gl (Roll x) =
 \subsection{Aligning Closed Changes}
 \label{sec:pepatches:alignments}
 
-  So far we have placed some conern over the scope of changes, that is,
-which constructors constitute the spine, which inform us about where
-the changes actually occur.
+\victor{
+\begin{itemize} 
+  \item Also regardless of scope we'd like to flag insertions!
+  \item This is an important use of type-level information!
+  \item Conjecture: arbitrarily deep zippers will give edit-script like complexity!
+that's where the log n is hidden.
+\end{itemize}
+}
 
+\begin{figure}
+\centering
+\subfloat[Change that deletes |42| at the head of a list.]{%
+\begin{forest}
+[,rootchange , s sep=1mm
+  [|Bin| [|42|] [|Bin| [x,metavar] [|Bin| [y,metavar] [z,metavar]]]]
+  [|Bin| [x,metavar] [|Bin| [y,metavar] [z,metavar]]]
+]
+\end{forest}
+\label{fig:pepatches:alignment-01:A}}
+\quad\quad
+\subfloat[Deletion of |Bin 42| correctly identified.]{%
+\begin{forest}
+[|Bin| , delctx=2
+  [|42|]
+  [|Bin|, s sep=-4mm
+    [,change [x,metavar] [x,metavar]]
+    [|Bin|, s sep=4mm
+      [,change [y,metavar] [y,metavar]]
+      [,change [z,metavar] [z,metavar]]]
+  ]
+]
+\end{forest}
+\label{fig:pepatches:alignment-01:B}}%
+\caption{Properly aligned version of \Cref{fig:pepatches:misaligment}.}
+\label{fig:pepatches:alignment-01}
+\end{figure}
 
 
 \subsection{Meta Theory}

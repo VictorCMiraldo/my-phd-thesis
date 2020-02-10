@@ -144,6 +144,17 @@
                            for 2={l=2mm}},
     },
   },
+%%%%%%%%%%%% 
+  delctx/.style n args={1}{%
+    text=forest-digems-black,
+    edge=forest-digems-black,
+    for #1={replace by={%
+      [$\square$ 
+        , text=forest-digems-black
+        , edge=forest-digems-black
+        , append
+      ]}},
+  },
 }
 
 \endinput
