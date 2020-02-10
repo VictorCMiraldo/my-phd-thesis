@@ -33,6 +33,9 @@
 \definecolor{forest-digems-black}{RGB}{97,108,132}
 \definecolor{forest-digems-change-border}{RGB}{0,112,33}
 
+\definecolor{delctx-bg}{RGB}{240,190,190}
+\definecolor{delctx-border}{RGB}{205,81,81}
+
 \newcommand{\digemFormatMetavar}[1]{\ensuremath{\#_{#1}}}
 \newcommand{\digemFormatMetavarKappaFam}[2]{\ensuremath{\#^{#1}_{#2}}}
 
@@ -148,6 +151,15 @@
   delctx/.style n args={1}{%
     text=forest-digems-black,
     edge=forest-digems-black,
+    before typesetting nodes={%
+      tikz+={\begin{scope}[on background layer]
+               \node (n) [ fill=delctx-bg
+                         , draw=delctx-border
+                         , rounded corners
+                         , fit=(!first)(!last)(!c)] {};
+             \end{scope}
+            },
+    },
     for #1={replace by={%
       [$\square$ 
         , text=forest-digems-black
