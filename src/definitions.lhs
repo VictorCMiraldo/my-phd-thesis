@@ -50,6 +50,12 @@
 \end{minipage}\vspace{0.15cm}%
 }
 
+\newenvironment{myforest}{%
+\bgroup\footnotesize\forest%
+}{%
+\endforest\egroup%
+}
+
 %% Typography
 
 %% Parenthetical sentences; a command makes it easy

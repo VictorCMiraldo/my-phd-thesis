@@ -39,6 +39,7 @@ enforce=("data|type"    # enforce spelling of 'datatype', forbids 'data-type' an
          "well-known"
          "non-interfering"
          "non-trivial"
+         "non-minimal"
          "anti-unif"
          )
 

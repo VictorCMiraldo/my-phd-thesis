@@ -43,7 +43,8 @@
 \forestset{%
   debug=nodewalks,
   default preamble={%
-      for tree={text=forest-digems-constr, edge=forest-digems-black},
+      for tree={text=forest-digems-constr, 
+                edge=forest-digems-black},
     },
   metavar/.style={%
     text=forest-digems-metavar,
@@ -77,7 +78,8 @@
                            l'=\savedinnerysep,
                            l=-1.8mm,
                            for 1={l=2mm},
-                           for 2={l=2mm}},
+                           for 2={l=2mm}
+                           },
       replace by/.wrap pgfmath arg={%
         [\phantom{##1} , append, fit=rectangle, no edge,
           before drawing tree={%

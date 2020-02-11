@@ -52,12 +52,12 @@ will be given a value.
 
 \begin{figure}
 \centering
-\begin{forest}
+\begin{myforest}
 [|Bin| 
   [|Leaf| [,change [|10|] [|42|]]]
   [,change [y,metavar] [y,metavar]]
 ]
-\end{forest}
+\end{myforest}
 \caption{Graphical represntation of a patch that modifies the left
 children of a binary node}
 \label{fig:pepatches:example-01}
@@ -216,21 +216,21 @@ applyChg (Chg d i) x =
 \begin{figure}
 \centering
 \subfloat{%
-\begin{forest}
+\begin{myforest}
 [,rootchange 
-  [|Bin| [x,metavar] [|5|]]
-  [|Bin| [x,metavar] [|6|]]
+  [|Bin| [x,metavar] [|Leaf| [|5|]]]
+  [|Bin| [x,metavar] [|Leaf| [|6|]]]
 ]
-\end{forest}
+\end{myforest}
 \label{fig:pepatches:example-04:A}}%
 \quad\quad\quad
 \subfloat{%
-\begin{forest}
+\begin{myforest}
 [,rootchange 
-  [|Bin| [|42|] [z,metavar]]
-  [|Bin| [|84|] [|Bin| [z,metavar] [z,metavar]]]
+  [|Bin| [|Leaf| [|42|]] [z,metavar]]
+  [|Bin| [|Leaf| [|84|]] [|Bin| [z,metavar] [z,metavar]]]
 ]
-\end{forest}
+\end{myforest}
 \label{fig:pepatches:example-04:B}}%
 \caption{Example of disjoint changes.}
 \label{fig:pepatches:example-04}
@@ -265,21 +265,21 @@ and \Cref{sec:pepatches:alignments} we detail our choices withing de design spac
 \begin{figure}
 \centering
 \subfloat[Insertion as a \emph{change}]{%
-\begin{forest}
+\begin{myforest}
 [,rootchange 
-  [|Bin| [|42|] [x,metavar]]
-  [|Bin| [|42|] [|Bin| [|84|] [x,metavar]]]
+  [|Bin| [|Leaf| [|42|]] [x,metavar]]
+  [|Bin| [|Leaf| [|42|]] [|Bin| [|Leaf| [| 84|]] [x,metavar]]]
 ]
-\end{forest}
+\end{myforest}
 \label{fig:pepatches:example-02:chg}}%
 \quad\quad\quad
-\subfloat[Insertion as a \emph{spined-change}]{%
-\begin{forest}
+\subfloat[Insertion as a \emph{patch}]{%
+\begin{myforest}
 [|Bin|,s sep = 5mm%make it wider
-  [|42|]
-  [,change [x,metavar] [|Bin| [|84|] [x,metavar]]]
+  [|Leaf| [|42|]]
+  [,change [x,metavar] [|Bin| [|Leaf| [|84|]] [x,metavar]]]
 ]
-\end{forest}
+\end{myforest}
 \label{fig:pepatches:example-02:patch}}%
 \caption{A change with redundant information on the left 
 and its minimal representation on the right, with an
@@ -332,34 +332,34 @@ leaves of the tree.
 \begin{figure}
 \centering
 \subfloat[\emph{well-scoped} swap, as a |Chg|]{%
-\begin{forest}
+\begin{myforest}
 [,rootchange 
-  [|Bin| [|42|] [|Bin| [x,metavar] [y,metavar]]]
-  [|Bin| [|42|] [|Bin| [y,metavar] [x,metavar]]]
+  [|Bin| [|Leaf| [|42|]] [|Bin| [x,metavar] [y,metavar]]]
+  [|Bin| [|Leaf| [|42|]] [|Bin| [y,metavar] [x,metavar]]]
 ]
-\end{forest}
+\end{myforest}
 \label{fig:pepatches:example-03:A}}
 
 \subfloat[\emph{globally-scoped} swap patch]{%
-\begin{forest}
+\begin{myforest}
 [|Bin|, s sep = 5mm 
- [|42|]
+ [|Leaf| [|42|]]
  [|Bin|,s sep = 5mm%make it wider
   [,change [x,metavar] [y,metavar]]
   [,change [y,metavar] [x,metavar]]]
 ]
-\end{forest}
+\end{myforest}
 \label{fig:pepatches:example-03:B}}%
 \quad\quad\quad
 \subfloat[\emph{locally-scoped} swap patch]{%
-\begin{forest}
+\begin{myforest}
 [|Bin|, s sep = 5mm 
- [|42|]
+ [|Leaf| [|42|]]
  [,change
   [|Bin| [x,metavar] [y,metavar]]
   [|Bin| [y,metavar] [x,metavar]]]
 ]
-\end{forest}
+\end{myforest}
 \label{fig:pepatches:example-03:C}}%
 \caption{A change that swaps some elements; naive anti-unification of the 
 deletion and insertion context breaking scoping; and finally the 
@@ -413,22 +413,22 @@ small parts of the tree instead of the whole patch.
 \begin{figure}
 \centering
 \subfloat[Change that deletes |42| at the head of a list.]{%
-\begin{forest}
+\begin{myforest}
 [,rootchange , s sep=1mm
-  [|Bin| [|42|] [|Bin| [x,metavar] [|Bin| [y,metavar] [z,metavar]]]]
-  [|Bin| [x,metavar] [|Bin| [y,metavar] [z,metavar]]]
+  [|(:)| [|42|] [|(:)| [x,metavar] [|(:)| [y,metavar] [z,metavar]]]]
+  [|(:)| [x,metavar] [|(:)| [y,metavar] [z,metavar]]]
 ]
-\end{forest}
+\end{myforest}
 \label{fig:pepatches:misalignment:A}}
 \quad\quad
 \subfloat[Top-down spine obscuring deletion at head.]{%
-\begin{forest}
-[|Bin| , s sep=-3mm
+\begin{myforest}
+[|(:)| , s sep=-3mm
   [,change [|42|] [x,metavar]]
-  [|Bin|, s sep=4mm
+  [|(:)|, s sep=4mm
     [,change [x,metavar] [y,metavar]]
-    [,change [|Bin| [y,metavar] [z,metavar]] [z,metavar]]]]
-\end{forest}
+    [,change [|(:)| [y,metavar] [z,metavar]] [z,metavar]]]]
+\end{myforest}
 \label{fig:pepatches:misalignment:B}}%
 \caption{Misaligned metavariables due to deletinos
 in the head of linearly-structured data. This is hard to reconcile.}
@@ -487,48 +487,48 @@ variations over the definition of changes and patches.
 \centering
 \subfloat[Not minimal; |Bin| is repeated.]{%
 \quad
-\begin{forest}
+\begin{myforest}
 [,rootchange 
-  [|Bin| [|42|] [x,metavar]]
-  [|Bin| [|84|] [x,metavar]]
+  [|Bin| [|Leaf| [|42|]] [x,metavar]]
+  [|Bin| [|Leaf| [|84|]] [x,metavar]]
 ]
-\end{forest}
+\end{myforest}
 \quad
 \label{fig:pepatches:example-minimal:A}}%
 \quad\quad
 \subfloat[Not minimal; root constructors differ.]{%
 \quad
-\begin{forest}
+\begin{myforest}
 [,rootchange 
-  [|Bin| [|42|] [x,metavar]]
-  [|Tri| [|42|] [x,metavar] [|84|]]
+  [|Bin| [|Leaf| [|42|]] [x,metavar]]
+  [|Tri| [|Leaf| [|42|]] [x,metavar] [|Leaf| [|84|]]]
 ]
-\end{forest}
+\end{myforest}
 \quad
 \label{fig:pepatches:example-minimal:B}}%
 
 \subfloat[Not minimal; change is ill-scoped.]{%
 \quad
-\begin{forest}
+\begin{myforest}
 [|Bin|, s sep=5mm
-  [,change [|42|] [|84|]]
+  [|Leaf| [,change [|42|] [|84|]]]
   [,change [x,metavar] [y,metavar]]
 ]
-\end{forest}
+\end{myforest}
 \quad
 \label{fig:pepatches:example-minimal:C}}%
 \quad\quad
 \subfloat[Minimal change equivalent to \ref{fig:pepatches:example-minimal:A}]{%
 \quad
-\begin{forest}
+\begin{myforest}
 [|Bin|, s sep=5mm
-  [,change [|42|] [|84|]]
+  [|Leaf| [,change [|42|] [|84|]]]
   [,change [x,metavar] [x,metavar]]
 ]
-\end{forest}
+\end{myforest}
 \quad
 \label{fig:pepatches:example-minimal:D}}%
-\caption{Two non minimal and one miminal change.}
+\caption{Some non-minimal and one miminal change.}
 \label{fig:pepatches:example-minimal}
 \end{figure}
 
@@ -539,13 +539,13 @@ variations over the definition of changes and patches.
 %format ij = "\HSVar{i_j}"
   A change |c :: Chg kappa fam at| is said to be in \emph{minimal}
 form if and only if is closed with respect to some global scope 
-and either |chgDel c| and |chgIns c| have different
+and, either |chgDel c| and |chgIns c| have different
 constructors at their root or,  they contain the same constructor and said constructor
 is necessary to maintain well-scopedness. That is, when |chgDel c| and
 |chgIns c| contain the same constructor, say, |inj|, we have that
 |chgDel c = inj d0 dots dn| and |chgIns c = inj i0 dots in|.
 If there exists a variable |v| that occurs in |ij| but is not defined in |dj|
-then we cannot pull |inj| into a spine and still maintain all
+then we cannot pull |inj| into a spine and whilst maintaining all
 changes well scoped, as is the case in \Cref{fig:pepatches:example-03:C},
 for example. \Cref{fig:pepatches:example-minimal} illustrates some cases
 of non minimal changes and one minimal change.
@@ -573,12 +573,12 @@ isClosedChg global (Chg d i) = isClosed global (vars d) (vars i)
 \end{code}
 \end{myhs}
 
-  Given a well-scoped change |c|, we can then minimize it
+  Given a well-scoped change |c|, we minimize it
 by computing the least general generalization |s = lcp (chgDel c) (chdIns c)|, 
 which might contain \emph{locally ill-scoped} changes, then pushing
 constructors that are in the spine into the changes until they are
-all in minimal form. \Cref{fig:pepatches:example-03} provides a good
-illustration for this process. Computing the closure of
+all closed. \Cref{fig:pepatches:example-03} provides a good
+illustration of this process. Computing the closure of
 \Cref{fig:pepatches:example-03:A} is done by computing
 \Cref{fig:pepatches:example-03:B}, then \emph{pushing} the the |Bin|
 constructor down the changes, fixing their scope, resulting in
@@ -588,74 +588,161 @@ constructor down the changes, fixing their scope, resulting in
 constructors through the least general generalization until they
 represent minimal changes. It calls an auxiliary version that receives 
 the global scope and keeps track of the variables it seen so far.
-The worst case scenario is when the we need \emph{all} constructors
-of the spine to close the change, but if we pass a well-scoped change
-change to |close|, we must be able to produce a closed change.
+The worst case scenario happens when the we need \emph{all} constructors
+of the spine to close the change, in which case, |close c = Hole c|;
+yet, if we pass a well-scoped change change to |close|, we must be able 
+to produce a patch.
   
 \begin{myhs}
 \begin{code}
-close  :: Holes kappa fam (Holes kappa fam :*: Holes kappa fam) at
-       -> Holes kappa fam (Chg kappa fam) at
-close h =  let global = vars h
-           in case close' global (holesMap (uncurry' annWithVars) h) of
-                InL _  -> error "invariant failure: h is not well-scoped."
-                InR b  -> Just (holesMap body b)
+close :: Chg kappa fam at -> Holes kappa fam (Chg kappa fam) at
+close c =  let  global  = vars h
+                aux     = holesMap annWithVars (lgg (chgDel d) (chgIns d))
+            in case close' global aux of
+                 InL _  -> error "invariant failure: c was not well-scoped."
+                 InR b  -> Just (holesMap body b)
 \end{code}
 \end{myhs}
-
-  The |annWithVars| function computes the variables that occur in
-two contexts and annotates a change with them:
+  
+  Deciding whether a given change is closed or not requires us to keep
+track of the variables we have seen being declared and used in a change.
+Recomputing this multisets would be a waste of resources and would yield
+a much slower algorithm. The |annWithVars| function below computes the 
+variables that occur in two contexts and annotates a change with them:
   
 \begin{myhs}
 \begin{code}
-data WithVars kappa fam at
-  = WithVars  { decls  :: Map Int Arity
-              , uses   :: Map Int Arity
-              , body   :: Chg kappa fam x
-              }
+data WithVars x at = WithVars  { decls  :: Map Int Arity
+                               , uses   :: Map Int Arity
+                               , body   :: x at
+                               }
 
-annWithVars :: (Holes kappa fam :*: Holes kappa fam) at -> WithVars kappa fam at
+annWithVars :: (Holes kappa fam :*: Holes kappa fam) at -> WithVars (Chg kappa fam) at
 annWithVars (d :*: i) = WithVars (vars d) (vars i) (Chg d i)
 \end{code}
 \end{myhs}
   
-  The |close'| function, shown in its entirety in \Cref{dif:pepatches:close-aux},
-receveies a spine with |WithVars| and returns that very spine if
-all its children are already closed or a |WithVars|, indicating
-some children are not yet closed. 
+  The |close'| function albeit having a somewhat intimidating
+implementation, is conceptually simple.
+It receveies a spine |s|, with leaves of type |WithVars (Chg dots)|, and attemps
+to ``enlarge'' those leaves if necessary. When it is not possible to close 
+the current spine, it returns a |WithVars (Chg dots)| equivalent to pusing all the
+constructors of |s| down the deletion and insertion contexts.
+The implementation of |close'| is shown in its entirety in \Cref{dif:pepatches:close-aux}.
+\victor{I'm thinking of moving all these large functions to a separate 
+section or chapter somewhere. Does that make sense?}
 
 \begin{figure}
-\begin{myhs}
+\begin{myhs}[0.99\textwidth]
 \begin{code}
 close'  :: M.Map Int Arity
-         -> Holes kappa fam (ChgVars kappa fam) at
-         -> Sum (ChgVars kappa fam) (Holes kappa fam (ChgVars kappa fam)) at 
+        -> Holes kappa fam (WithVars (Chg kappa fam)) at
+        -> Sum (WithVars (Chg kappa fam)) (Holes kappa fam (WithVars (Chg kappa fam))) at 
+-- Primitive values are trivially closed;
 close' _  (Prim x)  = InR (Prim x)
+-- Changes might be closed, or they require no more work;
 close' gl (Hole cv)
-  | isClosed gl (decls cv) (uses cv) = InR (Hole cv)
-  | otherwise   = InL cv
+  | isClosed gl (decls cv) (uses cv)  = InR (Hole cv)
+  | otherwise                         = InL cv
+-- Recursive calls need to understand whether /all/ recursive components
+-- are closed.
 close' gl (Roll x) =
   let aux = repMap (close' gl) x
    in case repMapM fromInR aux of
+        -- When all recursive components are closed, /Roll/ goes in the spine.
         Just res -> InR (Roll res)
-        Nothing  ->
-          -- Distributing closed changes yields closed changes;
-          let chgs = repMap (either' InL (InR . chgVarsDistr)) aux
-              cD   = Roll $$ repMap (codelta (chgDel . body)) chgs
-              cI   = Roll $$ repMap (codelta (chgIns . body)) chgs
-              dels = repLeaves (codelta decls) (M.unionWith (+)) M.empty chgs
-              inss = repLeaves (codelta uses)  (M.unionWith (+)) M.empty chgs
-           in if isClosed gl dels inss
-              then InR (Hole (ChgVars dels inss (Chg cD cI)))
-              else InL (ChgVars dels inss (Chg cD cI))
+        -- If at least one component is not closed, we need to distribute /Roll/
+        -- through the deletion and insertion contexts and decide whether that
+        -- closed the change or not.
+        Nothing  -> let  chgs  = repMap (either' id (chgDistr . body)) aux
+                         -- Compute unions of the /decls/ and /uses/ multisets
+                         dels  = foldr (\c -> unionWith (+) (getDecls c)) empty 
+                                       $$ repLeaves chgs
+                         inss  = foldr (\c -> unionWith (+) (getUses c)) empty 
+                                       $$ repLeaves chgs
+                         -- Compute the final deletion and insertion contexts
+                         cD    = Roll (repMap (chgDel . body)) chgs
+                         cI    = Roll (repMap (chgIns . body)) chgs
+                     in if isClosed gl dels inss
+                        then InR (Hole  (ChgVars dels inss (Chg cD cI)))
+                        else InL        (ChgVars dels inss (Chg cD cI))
+  where
+    getDecls  :: Exists (WithVars (Chg kappa fam)) -> Map Int Arity
+    getUses   :: Exists (WithVars (Chg kappa fam)) -> Map Int Arity
+    fromInR   :: Sum f g x -> Maybe (g x)
 \end{code}
 \end{myhs}
 \caption{The |close'| auxiliar function}
 \label{fig:pepatches:close-aux}
 \end{figure}
 
+  It is worth noting that computing a \emph{locally scoped} patch
+from a large monolithic change only helps in preventing situations
+such the bad alignment presented in \Cref{fig:pepatches:misalignment:A}.
+In fact, let |c| be as in \Cref{fig:pepatches:misaligment:A},
+a call to |close c| would return |Hole c| -- meaning |c| is already
+in minimal closed form and cannot have a larger spine whilst maintaining
+well-scopedness. Another way of putting it is that we at least
+do not make things worse, but we surely are not able to recognize
+the deletion of |Bin 42| effectively either. 
+
+  Recognizing deletions and insertions is crucial for us: no
+synchronization algorithm can achieve effective results if it cannot
+separate old information from new information. Flagging |Bin 42| as a
+deletion in \Cref{fig:pepatches:misaligment:A} means we still must
+produce an \emph{aligment} of the minimal changes produced by |close|.
+
 \subsection{Aligning Closed Changes}
 \label{sec:pepatches:alignments}
+
+  An \emph{aligment} for a |c :: Chg kappa fam at| consists in 
+connecting the parts of the deletion context with those that
+represent \emph{the same} part in the insertion context. 
+Take \Cref{fig:pepatches:alignment-01:A}, for example.
+It shows the same problematic change as \Cref{fig:pepatches:misalignment:A}, 
+with a deletion at the root. \Cref{fig:pepatches:aligment-01:B},
+however, shows what we would expect from a properly aligned version of it:
+A clear indication that |Bin 42| was deleted, which in turn, enables us
+to identify that the other subtrees have been merely copied.
+
+  Much like in \texttt{stdiff} we will be representing a deletion
+or insertion of a recursive ``layer'' by identifying one position
+\emph{where} this modification must take place. Note that
+we can only do this because we have access to type-level information.
+The deletion of |Bin 42| in \Cref{fig:pepatches:alignment-01:B} is identified
+because all except one field of the deleted |Bin| constructor contain no metavariables,
+hence, their information is not copied anywhere. Moreover, the exception
+field is recursive: expects something of the same type produced by |Bin 42|.
+This clearly indicates \emph{where} the deletion is being applied to.
+
+
+of the deletion context which contains no metavariables -- denoted
+\emph{rigid} -- 
+by metavariables. 
+
+Once again, we rely on the lessons from \texttt{stdiff}: the generalization
+of insertions and deletions of constructors in a structure is naturally 
+represented by zippers.
+
+  
+\begin{myhs}
+\begin{code}
+data Al kappa fam f x where
+  Del  :: Zipper (CompoundCnstr kappa fam x) 
+                (SFix kappa fam) 
+                (Al kappa fam f)  x
+       -> Al kappa fam f x
+  Ins  :: Zipper (CompoundCnstr kappa fam x) (SFix kappa fam) (Al kappa fam f) x
+       -> Al kappa fam f x 
+  Spn  :: (CompoundCnstr kappa fam x)
+       => SRep (Al kappa fam f) (Rep x)
+       -> Al kappa fam f x
+
+  Cpy  :: MetaVar kappa fam x                       -> Al kappa fam f x
+  Prm  :: MetaVar kappa fam x -> MetaVar kappa fam x -> Al kappa fam f x
+  Mod  :: f x                                      -> Al kappa fam f x
+\end{code}
+\end{myhs}
 
 \victor{
 \begin{itemize} 
@@ -669,16 +756,16 @@ that's where the log n is hidden.
 \begin{figure}
 \centering
 \subfloat[Change that deletes |42| at the head of a list.]{%
-\begin{forest}
+\begin{myforest}
 [,rootchange , s sep=1mm
   [|Bin| [|42|] [|Bin| [x,metavar] [|Bin| [y,metavar] [z,metavar]]]]
   [|Bin| [x,metavar] [|Bin| [y,metavar] [z,metavar]]]
 ]
-\end{forest}
+\end{myforest}
 \label{fig:pepatches:alignment-01:A}}
 \quad\quad
 \subfloat[Deletion of |Bin 42| correctly identified.]{%
-\begin{forest}
+\begin{myforest}
 [|Bin| , delctx=2
   [|42|]
   [|Bin|, s sep=-4mm
@@ -688,7 +775,7 @@ that's where the log n is hidden.
       [,change [z,metavar] [z,metavar]]]
   ]
 ]
-\end{forest}
+\end{myforest}
 \label{fig:pepatches:alignment-01:B}}%
 \caption{Properly aligned version of \Cref{fig:pepatches:misaligment}.}
 \label{fig:pepatches:alignment-01}
@@ -734,21 +821,21 @@ on hdiff to reproduce}
 \begin{figure}
 \centering
 \subfloat[|DM_NoNest| extraction]{%
-\begin{forest}
+\begin{myforest}
 [|Bin|, s sep=5mm 
   [,change [x,metavar] [x,metavar]]
   [,change [k] [t]]
 ]
-\end{forest}
+\end{myforest}
 \label{fig:pepatches:extraction-01:nonest}}%
 \quad\quad
 \subfloat[|DM_Proper| extraction]{%
-\begin{forest}
+\begin{myforest}
 [,rootchange 
   [|Bin| [|Bin| [x,metavar] [y,metavar]] [k]]
   [|Bin| [|Bin| [x,metavar] [y,metavar]] [x,metavar]]
 ]
-\end{forest}
+\end{myforest}
 \label{fig:pepatches:extraction-01:proper}}%
 \caption{Computing the |diff| between |Bin (Bin t u) k| and
 |Bin (Bin t u) t| using two different extraction methods}
