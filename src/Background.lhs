@@ -373,7 +373,7 @@ restrictions on these mappings in order to maintain the ability to
 produce edit scripts out of it. \Cref{fig:brackground:tree-mapping} 
 illustrates four invalid and one valid such mappings.
 
-\begin{definition}[Tree Mapping]
+\begin{definition}[Tree Mapping] \label{def:background:tree-mapping}
 Let |t| and |u| be two trees, a tree mapping 
 between |t| and |u| is an order preserving partial bijection between the
 nodes of a flattened representation of |t| and |u| according

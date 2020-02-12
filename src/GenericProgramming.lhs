@@ -1917,6 +1917,12 @@ Moreover, we can compute all the necessary synthesized attributes an algortihm
 needs in a single preprocessing phase. This is a crucial maneouver to
 make sure our generic programs can scale to real world inputs.
 
+  Is is worth mentioning that |cata| and |synthesize| are
+actually implemented in their monadic form and over |HolesAnn| for maximal
+generality. We invite the interested reader to check the source code
+for gory details.
+\victor{Well... this is a thesis; wouldn't I be better off just showing the monsters?}
+
 \subsection{Practical Features}
 
   Whilst developing \texttt{hdiff} (\Cref{chap:pattern-expression-patches}) we
@@ -1988,9 +1994,7 @@ type Zipper' fam prim ann phi t
            (HolesAnn fam prim ann phi)
            (HolesAnn fam prim ann phi) t
 
-zippers :: forall fam prim ann phi t
-         . (HasDecEq fam)
-        => (forall a . (Elem t fam) => phi a -> Maybe (a :~: t)) 
+zippers :: (forall a . (Elem t fam) => phi a -> Maybe (a :~: t)) 
         -> HolesAnn fam prim ann phi t
         -> [Zipper' fam prim ann phi t] 
 \end{code}

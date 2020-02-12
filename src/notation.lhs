@@ -62,9 +62,10 @@
 
 %%% HDiff Notation
 
-%format PatchPE    = "\HTNI{\mathit{Patch}_\textsc{pe}}"
-%format MV_Prim i  = "\HTNI{\digemFormatMetavarKappaFam{\kappa}{" i "}}"
-%format MV_Comp i  = "\HTNI{\digemFormatMetavarKappaFam{\mathit{fam}}{" i "}}"
+%format PatchPE     = "\HTNI{\mathit{Patch}_\textsc{pe}}"
+%format (metavar i) = "\HTNI{\digemFormatMetavar{" i "}}"
+%format MV_Prim i   = "\HTNI{\digemFormatMetavarKappaFam{\kappa}{" i "}}"
+%format MV_Comp i   = "\HTNI{\digemFormatMetavarKappaFam{\mathit{fam}}{" i "}}"
 
 
 %%% TMP?

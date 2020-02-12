@@ -238,29 +238,31 @@ applyChg (Chg d i) x =
 
 \paragraph{Patch versus Changes.} Our current definition of change is
 akin to what is known as a \emph{tree-matching} in the literature of
-classical tree differencing, \Cref{sec:background:tree-edit-distance}.
-Our changes are more permissive though -- since we do not want to
+classical tree differencing, \Cref{sec:background:tree-edit-distance},
+albeit our changes are more permissive. Since we do not want to
 obtain an edit-script we do not need to enforce any of the
 restrictions.  In fact, the engine of our differencing algorithm,
 \Cref{sec:pepatches:diff}, will only be concerned with producing a
 single |Chg| that transforms the source into the
-destination. Actually, if all one wants to do with \emph{changes} is
-applying them, we should go and discuss how to compute \emph{changes}
-efficiently, in \Cref{sec:pepatches:diff}.
+destination. In fact, \emph{changes} and their application
+semantics already gives rise to a satisfactory structure,
+which we shall see shortly in \Cref{rec:pepatches:meta-theory}.
+Yet, we are interested in more than just applying changes, we would
+like to synchronize them, which will require a more refined approach.
 
-  A big part of the motivation of this thesis is in synchronizting
-changes effectivelly. And this will certainly require a deeper 
-understanding of changes. For example, which constructors in the deletion 
-context are, in fact, just being copied over in the insertion
-context. Take \Cref{fig:pepatches:example-04}, where one change operates
-exclusively on the right child of a binary tree whereas the other 
+  In order to synchronize changes effectively we must
+understand which constructors in the deletion context are, in fact, just being 
+copied over in the insertion context. Take \Cref{fig:pepatches:example-04}, where 
+one change operates exclusively on the right child of a binary tree whereas the other 
 alters the left child and duplicates the right child in-place. 
 These changes are disjoint and should be possible to be automatically synchronizable. 
-Recognizing them as such will require a more expressive type than |Chg|;
+Recognizing them as such will require more expressivity than what is provided by |Chg|.
 Let there be |PatchPE|.
 
-  In the following we discuss the design space whereas in \Cref{sec:pepatches:closures}
-and \Cref{sec:pepatches:alignments} we detail our choices withing de design space.
+  In the following we distinguish \emph{changes} from \emph{patches}
+and discuss the design space. \Cref{sec:pepatches:closures,sec:pepatches:alignments} 
+go more in depth about computing a \emph{patch} from a \emph{change} in a way
+that makes synchronization easier.
 
 \begin{figure}
 \centering
@@ -475,10 +477,12 @@ apply  = applyChg . chgDistr
 \end{code}
 \end{myhs}
 
-\victor{From here onwards its very drafty}
-  In the next subsections we shall explore a couple algorithms and
-variations over the definition of changes and patches. 
-
+  In \Cref{sec:pepatches:meta-theory} we will look at how
+this simple application semantics for patches already gives rise to 
+familiar structures -- a partial grupoid or monoid depending on whether we
+allow metavariables to be left unused. Finally, we discuss how to
+optimize our patches for synchronization in \Cref{sec:pepatches:closures}
+and \Cref{sec:pepatches:alignment}.
 \subsection{Computing Closures}
 \label{sec:pepatches:closures}
 
@@ -610,28 +614,6 @@ Recomputing this multisets would be a waste of resources and would yield
 a much slower algorithm. The |annWithVars| function below computes the 
 variables that occur in two contexts and annotates a change with them:
   
-\begin{myhs}
-\begin{code}
-data WithVars x at = WithVars  { decls  :: Map Int Arity
-                               , uses   :: Map Int Arity
-                               , body   :: x at
-                               }
-
-annWithVars :: (Holes kappa fam :*: Holes kappa fam) at -> WithVars (Chg kappa fam) at
-annWithVars (d :*: i) = WithVars (vars d) (vars i) (Chg d i)
-\end{code}
-\end{myhs}
-  
-  The |close'| function albeit having a somewhat intimidating
-implementation, is conceptually simple.
-It receveies a spine |s|, with leaves of type |WithVars (Chg dots)|, and attemps
-to ``enlarge'' those leaves if necessary. When it is not possible to close 
-the current spine, it returns a |WithVars (Chg dots)| equivalent to pusing all the
-constructors of |s| down the deletion and insertion contexts.
-The implementation of |close'| is shown in its entirety in \Cref{dif:pepatches:close-aux}.
-\victor{I'm thinking of moving all these large functions to a separate 
-section or chapter somewhere. Does that make sense?}
-
 \begin{figure}
 \begin{myhs}[0.99\textwidth]
 \begin{code}
@@ -676,6 +658,28 @@ close' gl (Roll x) =
 \label{fig:pepatches:close-aux}
 \end{figure}
 
+\begin{myhs}
+\begin{code}
+data WithVars x at = WithVars  { decls  :: Map Int Arity
+                               , uses   :: Map Int Arity
+                               , body   :: x at
+                               }
+
+annWithVars :: (Holes kappa fam :*: Holes kappa fam) at -> WithVars (Chg kappa fam) at
+annWithVars (d :*: i) = WithVars (vars d) (vars i) (Chg d i)
+\end{code}
+\end{myhs}
+  
+  The |close'| function albeit having a somewhat intimidating
+implementation, is conceptually simple.
+It receveies a spine |s|, with leaves of type |WithVars (Chg dots)|, and attemps
+to ``enlarge'' those leaves if necessary. When it is not possible to close 
+the current spine, it returns a |WithVars (Chg dots)| equivalent to pusing all the
+constructors of |s| down the deletion and insertion contexts.
+The implementation of |close'| is shown in its entirety in \Cref{dif:pepatches:close-aux}.
+\victor{I'm thinking of moving all these large functions to a separate 
+section or chapter somewhere. Does that make sense?}
+
   It is worth noting that computing a \emph{locally scoped} patch
 from a large monolithic change only helps in preventing situations
 such the bad alignment presented in \Cref{fig:pepatches:misalignment:A}.
@@ -695,63 +699,37 @@ produce an \emph{aligment} of the minimal changes produced by |close|.
 \subsection{Aligning Closed Changes}
 \label{sec:pepatches:alignments}
 
-  An \emph{aligment} for a |c :: Chg kappa fam at| consists in 
-connecting the parts of the deletion context with those that
-represent \emph{the same} part in the insertion context. 
-Take \Cref{fig:pepatches:alignment-01:A}, for example.
+  An \emph{aligment} for a change |c| consists in 
+connecting which parts of the deletion context correspond
+to which pars of the insertion context, that is, which constructors
+or metavariables represent \emph{the same information} in the 
+source object of the change.
+
+  Much like in \texttt{stdiff} we will be representing a deletion or
+insertion of a recursive ``layer'' by identifying the position
+\emph{where} this modification must take place. Moreover, said position
+must be a recursive field of the inserted or deleted constructor -- that is, 
+the deletions or insertions must not alter the type that our patch
+is operating over. This is easy to identify since we 
+thanks to our typed approach, where we always have access to type-level 
+information. \victor{should I talk a bit about how harmony ``solved'' this differently?}
+
+  Take \Cref{fig:pepatches:alignment-01:A}, for example.
 It shows the same problematic change as \Cref{fig:pepatches:misalignment:A}, 
-with a deletion at the root. \Cref{fig:pepatches:aligment-01:B},
-however, shows what we would expect from a properly aligned version of it:
-A clear indication that |Bin 42| was deleted, which in turn, enables us
-to identify that the other subtrees have been merely copied.
+, which had a deletion at the root. Yet, \Cref{fig:pepatches:alignment-01:B}
+illustrates what an \emph{aligned} variant of the same change:
+The |Bin 42| at the root is identified as a deletion, which in turn, 
+puts matches the subsequent |(:)| constructors correctly. As a result, 
+it is trivial to identify that |metavar x|, |metavar y| and |metavar z|
+are mere copies.
 
-  Much like in \texttt{stdiff} we will be representing a deletion
-or insertion of a recursive ``layer'' by identifying one position
-\emph{where} this modification must take place. Note that
-we can only do this because we have access to type-level information.
-The deletion of |Bin 42| in \Cref{fig:pepatches:alignment-01:B} is identified
-because all except one field of the deleted |Bin| constructor contain no metavariables,
-hence, their information is not copied anywhere. Moreover, the exception
-field is recursive: expects something of the same type produced by |Bin 42|.
-This clearly indicates \emph{where} the deletion is being applied to.
-
-
-of the deletion context which contains no metavariables -- denoted
-\emph{rigid} -- 
-by metavariables. 
-
-Once again, we rely on the lessons from \texttt{stdiff}: the generalization
-of insertions and deletions of constructors in a structure is naturally 
-represented by zippers.
-
-  
-\begin{myhs}
-\begin{code}
-data Al kappa fam f x where
-  Del  :: Zipper (CompoundCnstr kappa fam x) 
-                (SFix kappa fam) 
-                (Al kappa fam f)  x
-       -> Al kappa fam f x
-  Ins  :: Zipper (CompoundCnstr kappa fam x) (SFix kappa fam) (Al kappa fam f) x
-       -> Al kappa fam f x 
-  Spn  :: (CompoundCnstr kappa fam x)
-       => SRep (Al kappa fam f) (Rep x)
-       -> Al kappa fam f x
-
-  Cpy  :: MetaVar kappa fam x                       -> Al kappa fam f x
-  Prm  :: MetaVar kappa fam x -> MetaVar kappa fam x -> Al kappa fam f x
-  Mod  :: f x                                      -> Al kappa fam f x
-\end{code}
-\end{myhs}
-
-\victor{
-\begin{itemize} 
-  \item Also regardless of scope we'd like to flag insertions!
-  \item This is an important use of type-level information!
-  \item Conjecture: arbitrarily deep zippers will give edit-script like complexity!
-that's where the log n is hidden.
-\end{itemize}
-}
+  The deletion of |Bin 42| in \Cref{fig:pepatches:alignment-01:B}
+has all fields, except one recursive field, contain no metavariables. 
+We call such trees with no metavariables \emph{rigid} trees.
+Since \emph{rigid} trees contain no metavariables, none of their
+subtrees is being copied, moved or changed anywhere. In fact,
+they have been entirely deleted from the source or inserted
+at the destination of the change.
 
 \begin{figure}
 \centering
@@ -781,8 +759,243 @@ that's where the log n is hidden.
 \label{fig:pepatches:alignment-01}
 \end{figure}
 
+  In the remainder of this section we shall discuss how to represent
+an aligned change, such as \Cref{fig:pepatches:alignment-01:B}, and
+how to compute them from a |Chg kappa fam at|. All in all, we are interested
+in defining the |align| function, declared below.
+
+\begin{myhs}
+\begin{code}
+alignChg  :: Chg kappa fam at -> Al kappa fam (Chg kappa fam) at
+\end{code}
+\end{myhs}
+
+  In general, we represent insertions and deletions with a |Zipper|~\cite{Huet1991}, 
+discussed in \ref{sec:gp:simplistic-zipper}, which carries
+trees with no holes (encoded by |SFix kappa fam|) in all its positions 
+except one, where we continue aligning. An alignment |Al kappa fam f at|
+represents a sequence of insertions and deletions interleaved with
+spines which ultimately lead to \emph{modifications}, which
+are typed according to the |f| parameter.
+
+\begin{myhs}
+\begin{code}
+data Al kappa fam f at where
+  Del  :: Zipper (CompoundCnstr kappa fam at) (SFix kappa fam) (Al kappa fam f)  x 
+       -> Al kappa fam f at
+  Ins  :: Zipper (CompoundCnstr kappa fam at) (SFix kappa fam) (Al kappa fam f) x
+       -> Al kappa fam f at
+\end{code}
+\end{myhs}
+
+  The |CompountCnstr| constraint must be carried around to indicate we are 
+aligning a type that belongs to the mutually recursive family and therefore has 
+a generic representation -- just a Haskell technicality.
+
+  Naturally, if no insertion or deletion can be made but both 
+insertion and deletion contexts have the same constructor, we want to
+recognize this constructor as part of the spine and continue aligning
+its fields pairwise.
+
+\begin{myhs}
+\begin{code}
+  Spn  :: (CompoundCnstr kappa fam x)
+       => SRep (Al kappa fam f) (Rep x)
+       -> Al kappa fam f x
+\end{code}
+\end{myhs}
+
+  When no |Ins|, |Del| or |Spn| can be used,
+we must be fallback to recording a modification, which here
+is of type |f at|.
+  
+\begin{myhs}
+\begin{code}
+  Mod  :: f at -> Al kappa fam f at
+\end{code}
+\end{myhs}
+
+  Finally, it is useful to flag copies and permutations early
+for they are easy to synchronize. A copy is witnessed by
+a change |c = Chg (metavar x) (metavar x)| such that |metavar x|
+only occurs twice globally. This means all occurences of |metavar x| have
+been accounted for in |c| and the tree at |metavar x| in the source
+of the change is not being duplicated anywhere else.
+
+  A permutation, on the other hand, is witnessed
+by |c = Chg (metavar x) (metavar y)|, where both |metavar x|
+and |metavar y| only occur twice globally. It is a bit more
+restrictive than a copy, since this represents that the tree at |metavar x|
+is being moved, but at least we know it is not being duplicated
+or contracted.
+
+\begin{myhs}
+\begin{code}
+  Cpy  :: MetaVar kappa fam at                          -> Al kappa fam f at
+  Prm  :: MetaVar kappa fam at -> MetaVar kappa fam at  -> Al kappa fam f at
+\end{code}
+\end{myhs}
+
+\victor{Show how to convert back to |Chg|?}
+
+  Equipped with a definition for aligments, let us
+look at how to actually define |alignChg|.
+Given a change |c|, the first step of |alignChg c| is to check whether the 
+root of |chgDel c| (resp. |chgIns c|) can
+be deleted (resp. inserted) -- that is, all of its fields are \emph{rigid}
+trees with the exception of a single recursive field. If
+we can delete the root, we flag it as a deletion and continue through
+the recursive \emph{non-rigid} field. If we cannot perform a
+deletion at the root of |chgDel c| nor an insertion at
+the root of |chgIns c| but they are constructed with the
+same constructor, we recurse on trying on the children.
+If |chgDel c| and |chgIns c| do not even have the same constructor
+at the root, we fallback and flag an arbitrary modification. 
+
+  Checking for rigid subtrees must be carefully translated into an algorithm if
+we ever want to squeeze any performance out of it: we must compute
+whether each tree in our input is rigid and annotate this at their root,
+otherwise we will be looking into an exponential time alignment algorithm.  
+Luckily, our generic programming library has great support for
+all variations over fixpoints. Annotating a tree augmented with
+holes with information about whether or not any |Hole| constructor
+occurs can be done as in \Cref{fig:pepatches:rigidity}.
+  
+\begin{figure}
+\begin{myhs}
+\begin{code}
+type IsRigid = Const Bool
+
+isRigid :: HolesAnn kappa fam IsRigid h x -> Bool
+isRigid = getConst . getAnn
+
+annotRigidity  :: Holes     kappa fam          h x
+               -> HolesAnn  kappa fam IsRigid  h x
+annotRigidity = synthesize  aggr                    -- aggregate recursive values
+                            (\ _ _ -> Const True)   -- primitives are rigid
+                            (\ _ _ -> Const False)  -- holes are not!
+  where
+    aggr :: U1 b -> SRep IsRigid (Rep b) -> Const Bool b
+    aggr _ = Const . repLeaves getConst (&&) True
+\end{code}
+\end{myhs}
+\caption{Annotates a tree augmented with holes with information
+about whether or not it actually contains a hole.}
+\label{fig:pepatches:rigidity}
+\end{figure}
+
+  The extraction of a zipper flagging an insertion or deletion
+is done by the |hasRigidZipper| function, which first extracts
+\emph{all} possible zippers from the root and checks whether there
+is a single on that satisfy the criteria. If there is, we return it
+wrapped in a |Just|. 
+
+\begin{myhs}
+\begin{code}
+hasRigidZipper  :: HolesAnn kappa fam IsRigid (MetaVar kappa fam) t
+                -> Maybe (Zipper  (CompoundCnstr kappa fam t)
+                                  (SFix kappa fam)
+                                  (HolesAnn kappa fam IsRigid (MetaVar kappa fam)) t)
+\end{code}
+\end{myhs}
+
+  The return type is almost what the |Del| and |Ins|
+constructors expect: a value of type |t| where all but one
+recursive positions are populated by the |SFix kappa fam| datatype, \ie{},
+trees with \emph{no holes} or \emph{rigid}. The identified
+recursive position is of type |HolesAnn kappa fam IsRigid dots|,
+which is what we will use to continue aligning against.
+We ommit the implementation of |hasRigidZipper| but invite the interested
+reader to check the source code.\victor{where?}
+
+
+\victor{
+Stop here on go on with:
+
+
+  We assemble everything up into the family of functions 
+illustrated in \Cref{fig:pepatches:alignChg} ... }
+
+
+\victor{
+Still mention:
+\begin{itemize} 
+  \item This is an important use of type-level information!
+  \item Conjecture: arbitrarily deep zippers will give edit-script like complexity!
+that's where the log n is hidden.
+\end{itemize}
+}
 
 \subsection{Meta Theory}
+\label{sec:pepatches:meta-theory}
+
+  The |Chg| datatype represents a complete detachment from
+edit-scripts. We can represent arbitrary structural transformations
+through the ability to duplicate, permute and contract arbitrary
+subtrees.  Effectively, we argue that an arbitrary function between
+the nodes of a source tree and the desired destination tree make for
+an effective representation of a patch. By avoiding translating this
+mapping to an edit-script, we also avoid all the restrictions imposed
+by classic \emph{tree mappings} (\Cref{def:background:tree-mapping}),
+which are very restrictive -- order preserving partial bijections
+which preserve the ancestry order.
+
+  On this setion we will look into how |Chg| admits a simple
+composition operation and forms a partial monoid or
+a partial grupoid depending on whether we allow metavariables to
+be left unused or not. We shall be ignoring the \emph{change-versus-patch}
+distinction and working solely with \emph{changes} in this section.
+We can always recompute a patch from a change if we wish to do so and,
+for metatheoretical concerns, the distinction is artificial nevertheless
+ -- it was put in place as a means to better drive
+the synchronization algorithm.
+
+  Through the remainder of this section we will assume changes have
+all been $\alpha$-converted to never capture names.
+
+  Composing two changes |c0 = Chg d0 i0| with |c1 = Chg d1 i1| is
+possible if and only if the image of |applyChg c0| has elements in common
+with the domain of |applyChg c1|. This can be easily witnessed
+by trying to unify |i0| with |d1|. If they are unifiable, the changes
+are composable. In fact, let |sigma = unify i0 d1|, the
+change that witnesses the composition is given by 
+|c = Chg (substApply sigma d0) (substApply sigma i1)|.
+
+\begin{myhs}
+\begin{code}
+after :: Chg kappa fam at -> Chg kappa fam at -> Maybe (Chg kappa fam at)
+q `after` p =
+  case unify (chgDel q) (chgIns p) of
+    Left   _      -> Nothing
+    Right  sigma  -> Just (Chg  (substApply sigma (chgDel p))
+                                (substApply sigma (chgIns q)))
+\end{code}
+\end{myhs}
+
+        
+  
+
+\begin{myhs}
+\begin{code}
+after :: Chg kappa fam at
+      -> Chg kappa fam at
+      -> Maybe (Chg kappa fam at)
+after q p = do
+
+(.!) :: Patch kappa fam at
+     -> Patch kappa fam at
+     -> Maybe (Patch kappa fam at)
+q .! p = chgPatch <$$> (chgDistr q) `after` (chgDistr p')
+  where
+    p' = p `withFreshNamesFrom` q
+
+composes :: Patch kappa fam at
+         -> Patch kappa fam at
+         -> Bool
+composes q p = maybe False (const True) (q .! p)
+\end{code}
+\end{myhs}
+
 
 
 \victor{
@@ -792,6 +1005,8 @@ The |PatchPE ki codes| forms either:
 \item Grupoid, if we take |vars ins == vars del|
 \end{itemize}
 }
+
+
 \section{Merging Patches}
 
 \victor{Check \cite{Saito2002}; place our algos in their taxonomy}
