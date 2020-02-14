@@ -744,8 +744,8 @@ at the destination of the change.
 \quad\quad
 \subfloat[Deletion of |Bin 42| correctly identified.]{%
 \begin{myforest}
-[|Bin| , delctx=2
-  [|42|]
+[, delctx=2
+  [|Bin| [|Leaf| [|42|]] [SQ]]
   [|Bin|, s sep=-4mm
     [,change [x,metavar] [x,metavar]]
     [|Bin|, s sep=4mm
@@ -1114,8 +1114,8 @@ mergeAl p q = case runExcept (evalStateT (mrg p q) mrgSt0) of
 \begin{myforest}
 [|Bin| , s sep=4mm
   [,change [x,metavar] [x,metavar]]
-  [|Bin| , delctx=2
-    [|Leaf| [|42|]]
+  [,delctx
+    [|Bin| [|Leaf| [|42|]] [SQ]]
     [,change [y,metavar] [y,metavar]]]]
 \end{myforest}
 \label{fig:pepatches:merge-01:A}}
