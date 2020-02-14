@@ -158,18 +158,17 @@
   delctx/.style={%
     text=forest-digems-black,
     s sep=4mm,
-    for 1={fit=band,no edge},
-    for 2={fit=band,no edge},
+    for children={no edge},
     before typesetting nodes={%
       no edge,
       before computing xy={/pgf/inner ysep/.get=\savedinnerysep, 
                            l'=\savedinnerysep,
                            l=-1.8mm,
                            for 1={l=2mm},
-                           for 2={l=2mm}
+                           %for 2={l=2mm}
                            },
       replace by/.wrap pgfmath arg={%
-        [\phantom{##1} , append, fit=rectangle, no edge,
+        [\phantom{##1} , append, no edge,
           before drawing tree={%
             if level=0{%
               tikz+={%
@@ -195,9 +194,9 @@
         ]
       }{content()}
     },
-    tikz+={ \node (m1) at ($ (!1)!0.5!(!2) $) {}; 
-            \node (m2) at ($ (m1) $)          {};
-            \node [text=forest-digems-black] at ($ (m1)!0.5!(m2) $) {$\square$};
+    tikz+={ \node [text=delctx-border,fill=white] (m1) at ($ (!1.north) + (-.35,0.1) $) {\texttt{Del}}; 
+            \node (hmid) at ($ (!1)!0.5!(!2) $) {};
+            \node [text=forest-digems-black] at ($ (hmid) + (0.2,0.3) $) {$\square =$};
           },
   },
 %%%%%%%%%%%% 
