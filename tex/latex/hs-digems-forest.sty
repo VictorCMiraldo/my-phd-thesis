@@ -165,7 +165,7 @@
                            l'=\savedinnerysep,
                            l=-1.8mm,
                            for 1={l=2mm},
-                           %for 2={l=2mm}
+                           for 2={l=2mm}
                            },
       replace by/.wrap pgfmath arg={%
         [\phantom{##1} , append, no edge,
@@ -196,7 +196,7 @@
     },
     tikz+={ \node [text=delctx-border,fill=white] (m1) at ($ (!1.north) + (-.35,0.1) $) {\texttt{Del}}; 
             \node (hmid) at ($ (!1)!0.5!(!2) $) {};
-            \node [text=forest-digems-black] at ($ (hmid) + (0.2,0.3) $) {$\square =$};
+            \node [text=forest-digems-black] at ($ (hmid) $) {$\square =$};
           },
   },
 %%%%%%%%%%%% 
