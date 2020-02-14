@@ -1051,6 +1051,93 @@ The |PatchPE ki codes| forms either:
 
 \section{Merging Aligned Patches}
 
+\victor{bridge!}
+
+\victor{should I call it |merge| instead of |diff3|? Maybe...
+diff3 already exists and is the unix diff3.}
+
+  Synchronizing changes is done by the |diff3| function,
+which receives two aligned patches |p| and |q| with
+a disjoint set of metavariables and such that
+|domain p| and |domain q| contain at least one common element
+and produces a spine annotated with either conflicts or
+changes:
+
+\begin{myhs}
+\begin{code}
+type PatchC kappa fam at
+  = Holes kappa fam (Sum (Conflict kappa fam) (Chg kappa fam)) at
+\end{code}
+\end{myhs}
+
+  A conflict is issued whenever we were not able to reconcile
+the alignments in question. This can happen for two reaons: either
+we could not detect that two edits to the same region are safe
+or we could not infer that a given metavariable was equal to 
+some other, when we are replicating edits through duplications and
+contractions. 
+
+\begin{myhs}
+\begin{code}
+data Conflict kappa fam at where
+  FailedContr  :: [Exists (MetaVar kappa fam)]
+               -> Conflict kappa fam at
+  Conflict     :: String
+               -> Aligned kappa fam at
+               -> Aligned kappa fam at
+               -> Conflict kappa fam at
+\end{code}
+\end{myhs}
+
+  Since our patches are locally scopped, the |diff3| can safely
+map an auxiliary |mergeAl| over the anti-unification of the 
+spines of the patches being merged.
+
+\begin{myhs}
+\begin{code}
+   in holesMap (uncurry' mergeAl . delta alignDistr) $ lcp oa' ob'
+ where
+   delta f (x :*: y) = (f x :*: f y)
+
+mergeAl :: Aligned kappa fam x -> Aligned kappa fam x
+        -> Sum (Conflict kappa fam) (Chg kappa fam) x
+mergeAl p q = case runExcept (evalStateT (mrg p q) mrgSt0) of
+                Left err -> InL $ Conflict err p q
+                Right r  -> InR (disalign r)
+\end{code}
+\end{myhs}
+
+
+\begin{figure}
+\centering
+\subfloat[Aligned patch, |p|.]{%
+\begin{myforest}
+[|Bin| , s sep=4mm
+  [,change [x,metavar] [x,metavar]]
+  [|Bin| , delctx=2
+    [|Leaf| [|42|]]
+    [,change [y,metavar] [y,metavar]]]]
+\end{myforest}
+\label{fig:pepatches:merge-01:A}}
+\quad\quad
+\subfloat[Aligned patch, |q|.]{%
+\begin{myforest}
+[|Bin|
+  [|Bin|, s sep=4mm
+    [,change [a,metavar] [b,metavar]]
+    [,change [b,metavar] [a,metavar]]]
+  [|Bin| , insctx=1
+    [,change [c,metavar] [c,metavar]]
+    [|Leaf| [|84|]]]
+]
+\end{myforest}
+\label{fig:pepatches:merge-01:B}}%
+\caption{Properly aligned version of \Cref{fig:pepatches:misaligment}.}
+\label{fig:pepatches:merge-01}
+\end{figure}
+
+
+
 \victor{Check \cite{Saito2002}; place our algos in their taxonomy}
 
 \victor{Harmoy has a similar problem as we found with lists;
