@@ -1511,16 +1511,21 @@ the choice of primitive type shall be parametrizable.
   This approach works well for simpler applications, but by defining a
 mutually recursive family in an \emph{open} fashion, \ie{} |t| is an
 element iff |not (t `elem` kappa)|, for some list |kappa| of types
-regarded as primitive, we will not have the ability to check whether
-the index of two generic representations are the same, a feature which
-was trivial in \texttt{generics-mrsop} and is crucial for the
-definition of many advanced generic concepts, such as zippers in
-\Cref{sec:gp:simplistic-zipper}. For that reason, we define a family as two
+regarded as primitive, we would only be able to check for index equality
+through the |Typeable| machinery~\cite{PeytonJones2016},
+which would have to spreac accross the library, inherently breaking 
+parametricity of maps and catamorphisms besides polluting the interface.
+Checking for index equality is crucial for the definition of many 
+generic concepts -- zippers being a prominent example, \Cref{sec:gp:simplistic:zipper} --
+and was trivial to define  in \texttt{generics-mrsop}, thanks
+to its \emph{closed} approach: if two types where identified by the same index
+into a list containing all members of the family, then they are the same type.
+
+  In order to avoid spreading |Typeable|s around but maintaining decideable
+type index equality we will play the same trick here: define a family as two
 disjoint lists: A type-level list |fam| for the elements that belong
 in the family and one for the primitive types, usually denoted |kappa|.
 Note that unlike \texttt{generics-mrsop}, |kappa| here has kind |P [ Star ]|.
-\victor{Makes me wonder whethe the same notation helps or not. What does
-the reader think?}
 
   Recursion is easily achieved through a |SFix kappa fam| combinator,
 where |fam :: P [ Star ]| is the list of types that belong
@@ -1673,7 +1678,6 @@ sameType _ _ _
       sameIdx _           _          = Nothing
 \end{code}
 \end{myhs}
-
 
 \begin{figure}
 \begin{myhs}
