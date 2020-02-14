@@ -879,7 +879,7 @@ annotRigidity = synthesize  aggr                    -- aggregate recursive value
     aggr _ = Const . repLeaves getConst (&&) True
 \end{code}
 \end{myhs}
-\caption{Annotates a tree augmented with holes with information
+\caption{Annotating a tree augmented with holes with information
 about whether or not it actually contains a hole.}
 \label{fig:pepatches:rigidity}
 \end{figure}
@@ -908,14 +908,81 @@ which is what we will use to continue aligning against.
 We ommit the implementation of |hasRigidZipper| but invite the interested
 reader to check the source code.\victor{where?}
 
+  Assembling all these pieces will yield the definition of |alignChg|,
+which will compute the multiset of variables used througout a change,
+annotate the deletion and insertion context with |IsRigid| and proceed
+to actually align them with the |al| function, whose full
+definition can be found in \Cref{fig:pepatches:align-fulldef}, and,
+albeit long, is rather simple. In general lines, |al| attempts to delete as many
+constructors as possible, followed by inserting as many constructors
+as possible; whenever it finds that it deleted and inserted the same constructor,
+it issues a |Spn| alignment and calls itself recursively on the leaves
+of the |Spn|. Ultimately it falls back to |Cpy|, |Prm| or |Mod|.
 
-\victor{
-Stop here on go on with:
+\begin{myhs}
+\begin{code}
+alignChg  :: Chg kappa fam at -> Al kappa fam (Chg kappa fam) at
+alignChg (Chg d i) = al vars (annotRigidity d) (annotRigidity i)
+  where vars = chgVars (Chg d i)
+\end{code}
+\end{myhs}
+
+\begin{figure}
+\begin{myhs}
+\begin{code}
+type Aligner kappa fam  = HolesAnn kappa fam IsStiff (MetaVar kappa fam) t
+                        -> HolesAnn kappa fam IsStiff (MetaVar kappa fam) t
+                        -> Aligned kappa fam t 
 
 
-  We assemble everything up into the family of functions 
-illustrated in \Cref{fig:pepatches:alignChg} ... }
+al :: Map Int Arity -> Aligner kappa fam
+al vars d i = alD (alS vars (al vars)) d i
+ where
+   -- Try deleting many; try inserting one; decide whether to delete,
+   -- insert or spn in case both Del and Ins are possible. Fallback to
+   -- inserting many.
+   alD :: Aligner kappa fam -> Aligner kappa fam
+   alD f d i = case hasRigidZipper d of -- Is the root a potential deletion?
+       Nothing              -> alI f d i
+       -- If so, we must check whether we also have a potential insertion.
+       Just (Zipper zd rd)  -> case hasRigitZipper i of
+           Nothing              -> Del (Zipper zd (alD f rd i))
+           Just (Zipper zi ri)  -> case zipSZip zd zi of -- are zd and zi the same?
+                Just res -> Spn $$ plug (zipperMap Mod res) (alD f rd ri)
+                Nothing  -> Del (Zipper zd (Ins (Zipper zi (alD f rd ri))))
 
+   -- Try inserting many; fallback to parametrized action.
+   alI :: Aligner kappa fam -> Aligner kappa fam
+   alI f d i = case hasRigidZipper i of
+       Nothing              -> f d i
+       Just (Zipper zi ri)  -> Ins (Zipper zi (alI f d ri))
+
+   -- Try extracting spine and executing desired action
+   -- on the leaves; fallback to deleting; inserting then modifying
+   -- if no spine is possible.
+   alS :: Map Int Arity -> Aligner kappa fam -> Aligned kappa fam
+   alS vars f d@(Roll' _ sd) i@(Roll' _ si) =
+     case zipSRep sd si of
+       Nothing -> alD (alMod vars) d i
+       Just r  -> Spn (repMap (uncurry' f) r)
+   syncSpine vars _ d i = alD (alMod vars) d i
+
+   -- Records a modification, copy or permutation.
+   alMod :: Map Int Arity -> Aligned kappa fam
+   alMod vars (Hole' _ vd) (Hole' _ vi) =
+     -- are both vd and vi with arity 2?
+     | all (== Just 2 . flip lookup vars) [metavarGet vd , metavarGet vi]
+        =  if vd == vi 
+           then Cpy vd 
+           else Prm vd vi
+     | otherwise 
+        = Mod (Chg (Hole vd) (Hole vi))
+   alMod _ d i = Mod (Chg d i)
+\end{code}
+\end{myhs}
+\caption{Complete definition of |al|.}
+\label{fig:pepatches:align-fulldef}
+\end{figure}
 
 \victor{
 Still mention:
@@ -928,6 +995,8 @@ that's where the log n is hidden.
 
 \subsection{Meta Theory}
 \label{sec:pepatches:meta-theory}
+
+\victor{UNFINISHED SUBSECTION}
 
   The |Chg| datatype represents a complete detachment from
 edit-scripts. We can represent arbitrary structural transformations
@@ -972,32 +1041,6 @@ q `after` p =
 \end{code}
 \end{myhs}
 
-        
-  
-
-\begin{myhs}
-\begin{code}
-after :: Chg kappa fam at
-      -> Chg kappa fam at
-      -> Maybe (Chg kappa fam at)
-after q p = do
-
-(.!) :: Patch kappa fam at
-     -> Patch kappa fam at
-     -> Maybe (Patch kappa fam at)
-q .! p = chgPatch <$$> (chgDistr q) `after` (chgDistr p')
-  where
-    p' = p `withFreshNamesFrom` q
-
-composes :: Patch kappa fam at
-         -> Patch kappa fam at
-         -> Bool
-composes q p = maybe False (const True) (q .! p)
-\end{code}
-\end{myhs}
-
-
-
 \victor{
 The |PatchPE ki codes| forms either:
 \begin{itemize}
@@ -1006,8 +1049,7 @@ The |PatchPE ki codes| forms either:
 \end{itemize}
 }
 
-
-\section{Merging Patches}
+\section{Merging Aligned Patches}
 
 \victor{Check \cite{Saito2002}; place our algos in their taxonomy}
 
