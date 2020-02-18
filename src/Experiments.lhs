@@ -65,17 +65,16 @@ to gather real world data
 
 \begin{figure}
 \centering
-\subfloat[Runtimes from \texttt{stdiff --with-stats} over 7000 datapoints. 
+\subfloat[Runtimes from \texttt{stdiff} over 7000 datapoints. 
 Both axis are in a log-scale and the displayed lines are for reference]{%
 \includegraphics[width=0.4\textwidth]{src/img/runtimes-stdiff.pdf}
 \label{fig:eval:perf:stdiff}}
 \quad
-\subfloat[Runtimes from \texttt{hdiff --with-stats} over 14000 datapoints.]{%
+\subfloat[Runtimes from \texttt{hdiff} over 14000 datapoints.]{%
 \includegraphics[width=0.4\textwidth]{src/img/runtimes-hdiff.pdf}
 \label{fig:eval:perf:hdiff}}
 \caption{Performance evaluation of \texttt{stdiff} and \texttt{hdiff}.}
 \label{fig:eval:perf}
-\end{figure}
 \end{figure}
 
   The measurements displayed in \Cref{fig:eval:perf} were obtained from computing
@@ -96,14 +95,15 @@ time act = do
 \end{code}
 \end{myhs}
 
-  For each conflict in our dataset, we attempted to compute: |diff O A|,
-|diff O B|, |diff O M| and |diff A B|, which produced four individual datapoints.
-We also limited the memory usage to 8GB and overal time to 30s. If a call
-to |diff| used more than the enabled temporal and spacial resources
-it was automatically killed. Albeit we timed both \texttt{stdiff} and
-\texttt{hdiff} on the same computer, the absolute values are of little interest.
-The real take away from the graphs in \Cref{fig:eval:perf} is the empirical
-validation of the complexity class of each algorithm.
+  For each conflict in our dataset, we attempted to compute:
+\texttt{diff O A}, \texttt{diff O B}, \texttt{diff O M} and
+\texttt{diff A B}, which produced four individual datapoints.  We also
+limited the memory usage to 8GB and overal time to 30s. If a call to
+|diff| used more than the enabled temporal and spacial resources it
+was automatically killed. Albeit we timed both \texttt{stdiff} and
+\texttt{hdiff} on the same computer, the absolute values are of little
+interest.  The real take away from the graphs in \Cref{fig:eval:perf}
+is the empirical validation of the complexity class of each algorithm.
 
   \Cref{fig:eval:perf:stdiff} illustrated the measured performance of
 the differencing algorithm underlying \texttt{stdiff}, our first
@@ -123,7 +123,8 @@ the differencing algorithm underlying \texttt{hdiff}, discussed in
 \Cref{sec:pepatches:diff}, with different extraction techniques. The timed
 function as |diff fa fb|, hence it also excludes parsing. Nevertheless,
 the linear behavior is evident and in general, an order of magnitude better
-than \texttt{stdiff}.
+than \texttt{stdiff}. We do see, however, that the \texttt{proper} context
+extraction is slightly slower than \texttt{nonest} or \texttt{patience}.
 
 \section{Synchronization}
 \label{sec:eval:merging}
