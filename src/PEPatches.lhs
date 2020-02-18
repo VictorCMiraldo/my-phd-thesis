@@ -1164,6 +1164,24 @@ on hdiff to reproduce}
 \section{Computing Changes}
 \label{sec:pepatches:diff}
 
+  Given two trees, |s| and |d|, we would like to compute a change |c| such
+that |applyChg c s == Just d|. One obvious option would be |Chg s d|, but that
+change contains no sharing whatsoever. Traditional edit-scripts based techniques
+optimize for a lower cost, which usually translates to more copies. Yet, this
+does not necessarily translate to high quality patches: especially when there
+is more than one lowest-cost patch.
+
+  Computing a change that transforms a source tree, |s|, into a destination
+tree, |d|, consists in two phases. First we compute a \emph{sharing map}, which
+contains information about which subtrees are common to both |s| and |d|. 
+With that information at hand, we proceed to extracting the deletion
+and insertion contexts. In general lines, the deletion context is extracted 
+from |s| by substituting the common subtrees by a metavariable, whereas the
+insertion context is extracted from |d|. 
+
+  
+
+
 \begin{figure}
 \centering
 \subfloat[|DM_NoNest| extraction]{%

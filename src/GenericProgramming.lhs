@@ -2090,13 +2090,15 @@ unify  :: ( Ord (Exists phi) , EqHO phi)
 
   Detailing the implementation og the unification algorithm itself is 
 out of the scope of this thesis. \victor{cite some tutorials} 
-We did implement a constraint-based \victor{ask alejandro if he knows of this}
-unifier which computes the most general unifier in two phases: first
-it collects all the necessary equivalences, then it tries to minimize
-the substitution. A substitution |[(x , Bin w z) , (w , Bin y y)]| 
+We did implement a constraint-based unifier which computes the most general 
+unifier in two phases: first it collects all the necessary equivalences, then it tries to
+produce an idempotent substitution from the gathered equivalences.
+A substitution |[(x , Bin w z) , (w , Bin y y)]| 
 can be minimized to |[(x , Bin (Bin y y) z) , (w , Bin y y)]|, where
 no metavariable in the image could be futher refined under the current
-substitution. \victor{I believe there is a name for this...}
+substitution. Whenever a cycle is found, we simply break it in an arbitrary
+point, for example, |[(x , y) , (y , z) , (z , x)]| could be minimized to
+|[(x,z) , (y,z)]|.
 
   Anti-unification~\cite{Plotkin1971} is dual to unification. It is the process of identifying the
 the longest prefixes that two terms agree. Given |x = Bin (Bin 1 2) Leaf| and |y = Bin (Bin 1 3) (Bin 4 5)|,
