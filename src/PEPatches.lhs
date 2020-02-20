@@ -1188,6 +1188,12 @@ and insertion contexts. In general lines, the deletion context is extracted
 from |s| by substituting the common subtrees by a metavariable, whereas the
 insertion context is extracted from |d|. 
 
+  Computing changes relies almost exclusively on being able to tell
+whether or not a given subtree could be shared. This is done querying
+the aforementioned \emph{sharing map}. It is conceptually easy to
+define and inefficient version of it -- a subtree |t| can be shared if
+and only if we can find |t| in |s| and in |d|.
+
   Assume the existence said \emph{sharing map}, which consists of a
 function |wcs s d| -- which reads as ``which common subtree'' -- with
 type |SFix kappa fam at -> Maybe (MetaVar kappa fam at)|, such that
@@ -1214,8 +1220,11 @@ This |chg| function however, does \emph{not} satisfy the
 criteria that |apply (chg s d) s == Just d| for all |s| and |d|,
 the problem can be easily spotted by fedding a source and
 a destination to |chg| such that a common subtree occurs
-by itself but also as a subtree of another common subtree, 
-as the subtree |t| in \Cref{fig:pepatches:extract-problem:res}.
+by itself but also as a subtree of another common subtree. 
+Such situation is illustrated in \Cref{fig:pepatches:extract-problem}.
+In particular, the patch shown in \Cref{fig:pepatches:extract-problem:res} 
+cannot be applied since the deletion context does not instantiate
+the metavariable |metavar y|, required by the insertion context.
 
 
 \begin{figure}
@@ -1254,39 +1263,103 @@ context.}
 \label{fig:pepatches:extract-problem-01}
 \end{figure}
 
-
 \begin{myhs}
 \begin{code}
 chg :: SFix kappa fam at -> SFix kappa fam at -> Chg kappa fam at
 chg s d = let f = wcs s d in Chg (extract f s) (extract f d)
 \end{code}
 \end{myhs}
+
+  There are two obvious ways to solve this problem. Either replace |metavar y|
+by |t| and ignore the sharing or replace |metavar x| by |Bin (metavar
+y) (metavar z)|, pushing the metavariables to the leaves maximizing
+sharing. These would give rise to the changes shown in 
+\Cref{fig:pepatches:extract-sol-01}. There is friction
+between wanting to maximize the spine but at the same time achieve maximal
+sharing without having a clear answer. On the one hand, copies closer
+to the root are easier to merge and less sharing means it is 
+easier to isolate changes to separate parts of the tree.
+On the other hand, sharing as much as possible might better capture
+the nature of the change being represented better.
+
+  Actually, if we stop and think about how else could we extract
+contexts from a source and a destination tree we might come up
+with a variety of different methods. Another option is to simulate
+the \unixdiff{} \texttt{--patience} option, which only copies uniquely
+ocurring lines -- in our case, we would only share uniquely occuring
+subtrees. In fact, to make this easy to experiment, we will parameterize
+our |extract| function with which method should we use.
+
+\begin{myhs}
+\begin{code}
+data ExtractionMode  =  NoNested
+                     |  ProperShare
+                     |  Patience
+\end{code}
+\end{myhs}
+
+  The |NoNested| mode will forget sharing in favor of copying larger subtrees.
+It would drop the sharing of |t| producing \Cref{fig:pepatches:extract-sol:nonest}.
+The |ProperShare| mode is the opposite. It would produce \Cref{fig:pepatches:extract-sol:proper}. Finally, |Patience| only share subtrees that occur only once
+in the source and once in the destination. For the inputs in \Cref{fig:pepatches:extract-problem-01}, extracting contexts under |Patience| mode would produce 
+the same result as |NoNested|, but they are not the same in general.
   
-
-
 \begin{figure}
 \centering
-\subfloat[|DM_NoNest| extraction]{%
+\subfloat[Do not share nested common subtrees.]{%
 \begin{myforest}
-[|Bin|, s sep=5mm 
-  [,change [x,metavar] [x,metavar]]
-  [,change [k] [t]]
+[,rootchange,
+  [|Bin| [x,metavar] [k]]
+  [|Bin| [x,metavar] [t]]
 ]
 \end{myforest}
-\label{fig:pepatches:extraction-01:nonest}}%
-\quad\quad
-\subfloat[|DM_Proper| extraction]{%
+\label{fig:pepatches:extract-sol-01:nonest}}%
+\qquad\qquad
+\subfloat[Expand metavariables pursuing all sharing oportunities]{%
 \begin{myforest}
-[,rootchange 
-  [|Bin| [|Bin| [x,metavar] [y,metavar]] [k]]
-  [|Bin| [|Bin| [x,metavar] [y,metavar]] [x,metavar]]
+[,rootchange,
+  [|Bin| [|Bin| [y,metavar] [z,metavar]] [k]]
+  [|Bin| [|Bin| [y,metavar] [z,metavar]] [y,metavar]]
 ]
 \end{myforest}
-\label{fig:pepatches:extraction-01:proper}}%
-\caption{Computing the |diff| between |Bin (Bin t u) k| and
-|Bin (Bin t u) t| using two different extraction methods}
-\label{fig:pepatches:extraction-01}
+\label{fig:pepatches:extract-sol-01:proper}}%
+\caption{Context extraction must care to produce
+well-formed changes. The nested occurence of |t| within |Bin t u|
+here yields a change with an undefined variable on its insertion
+context.}
+\label{fig:pepatches:extract-sol-01}
 \end{figure}
+
+  Next we look at how to define the |wcs| oracle efficiently and look 
+at algorithms for extracting context for each mode in |ExtractionMode|.
+
+\subsection{Defining 
+
+
+
+%% \begin{figure}
+%% \centering
+%% \subfloat[|DM_NoNest| extraction]{%
+%% \begin{myforest}
+%% [|Bin|, s sep=5mm 
+%%   [,change [x,metavar] [x,metavar]]
+%%   [,change [k] [t]]
+%% ]
+%% \end{myforest}
+%% \label{fig:pepatches:extraction-01:nonest}}%
+%% \quad\quad
+%% \subfloat[|DM_Proper| extraction]{%
+%% \begin{myforest}
+%% [,rootchange 
+%%   [|Bin| [|Bin| [x,metavar] [y,metavar]] [k]]
+%%   [|Bin| [|Bin| [x,metavar] [y,metavar]] [x,metavar]]
+%% ]
+%% \end{myforest}
+%% \label{fig:pepatches:extraction-01:proper}}%
+%% \caption{Computing the |diff| between |Bin (Bin t u) k| and
+%% |Bin (Bin t u) t| using two different extraction methods}
+%% \label{fig:pepatches:extraction-01}
+%% \end{figure}
 
 
 
