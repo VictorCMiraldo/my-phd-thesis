@@ -1116,7 +1116,7 @@ mergeAl p q = case runExcept (evalStateT (mrg p q) mrgSt0) of
 [|Bin| , s sep=4mm
   [,change [x,metavar] [x,metavar]]
   [,delctx , s sep=8mm
-    [|Bin| [|Leaf| [|42|]] [SQ]]
+    [|Bin| [|Leaf| [|42|]] [,sq]]
     [,rootchange  
        [y,metavar]
        [y,metavar]]]]
@@ -1125,13 +1125,13 @@ mergeAl p q = case runExcept (evalStateT (mrg p q) mrgSt0) of
 \quad\quad
 \subfloat[Aligned patch, |q|.]{%
 \begin{myforest}
-[|Bin|
+[|Bin| , s sep=4mm
   [|Bin|, s sep=4mm
     [,change [a,metavar] [b,metavar]]
     [,change [b,metavar] [a,metavar]]]
-  [|Bin| , insctx=1
-    [,change [c,metavar] [c,metavar]]
-    [|Leaf| [|84|]]]
+  [,insctx , s sep=8mm
+    [|Bin| [,sq] [|Leaf| [|84|]]]
+    [,rootchange [c,metavar] [c,metavar]]]
 ]
 \end{myforest}
 \label{fig:pepatches:merge-01:B}}%
@@ -1333,7 +1333,6 @@ context.}
   Next we look at how to define the |wcs| oracle efficiently and look 
 at algorithms for extracting context for each mode in |ExtractionMode|.
 
-\subsection{Defining 
 
 
 

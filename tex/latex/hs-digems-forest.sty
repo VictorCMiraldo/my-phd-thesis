@@ -49,6 +49,10 @@
       for tree={text=forest-digems-constr, 
                 edge=forest-digems-black},
     },
+  sq/.style={%
+    text=forest-digems-metavar,
+    delay={content=$\square$}
+   },
   metavar/.style={%
     text=forest-digems-metavar,
     %% delay is crucial here; otherwise the default content
@@ -200,24 +204,49 @@
           },
   },
 %%%%%%%%%%%% 
-  insctx/.style n args={1}{%
+  insctx/.style={%
     text=forest-digems-black,
-    edge=forest-digems-black,
+    s sep=4mm,
+    for children={no edge},
     before typesetting nodes={%
-      tikz+={\begin{scope}[on background layer]
-               \node (n) [ fill=insctx-bg
-                         , draw=insctx-border
-                         , rounded corners
-                         , fit=(!first)(!last)(!c)] {};
-             \end{scope}
-            },
+      no edge,
+      before computing xy={/pgf/inner ysep/.get=\savedinnerysep, 
+                           l'=\savedinnerysep,
+                           l=-1.8mm,
+                           for 1={l=2mm},
+                           for 2={l=2mm}
+                           },
+      replace by/.wrap pgfmath arg={%
+        [\phantom{##1} , append, no edge,
+          before drawing tree={%
+            if level=0{%
+              tikz+={%
+               \begin{scope}[on background layer]
+                 \node (n) [ %fill=forest-digems-change-bg, 
+                            inner sep=\savedinnerysep, 
+                            dashed, draw=insctx-border,
+                            rounded corners, fit=(!11) (!11F) (!11L)] {}; 
+               \end{scope}}
+            }{%else
+            tikz+={%
+               \begin{scope}[on background layer]
+                 \node (n) [ %fill=forest-digems-change-bg, 
+                            inner sep=\savedinnerysep, 
+                            dashed, draw=insctx-border,
+                            rounded corners, fit=(!11) (!11F) (!11L)] {}; 
+                 \path [draw=forest-digems-black, \forestoption{edge}] 
+                            (!u.parent anchor) -- (n.north -| !1.child anchor)
+                            \forestoption{edge label};
+               \end{scope}
+            }},
+          },
+        ]
+      }{content()}
     },
-    for #1={replace by={%
-      [$\square$ 
-        , text=forest-digems-black
-        , edge=forest-digems-black
-        , append
-      ]}},
+    tikz+={ \node [text=insctx-border,fill=white] (m1) at ($ (!1.north) + (-.35,0.1) $) {\texttt{Ins}}; 
+            \node (hmid) at ($ (!1)!0.5!(!2) $) {};
+            \node [text=forest-digems-black] at ($ (hmid) $) {$\square =$};
+          },
   },
 }
 
