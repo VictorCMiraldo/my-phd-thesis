@@ -1050,6 +1050,7 @@ The |PatchPE ki codes| forms either:
 }
 
 \section{Merging Aligned Patches}
+\label{sec:pepatches:merging}
 
 \victor{bridge!}
 
@@ -1164,6 +1165,14 @@ on hdiff to reproduce}
 \section{Computing Changes}
 \label{sec:pepatches:diff}
 
+\victor{loose paragraphs below}
+  We have seen how using unrestricted tree mappings, or |Chg|, makes for
+a reasonable formalism for representing patches. They support a merge
+operation (\Cref{sec:pepatches:merging}) and satisdy a number of algebraic properties
+(\Cref{sec:pepatches:meta-theory}). The only thing left for making |Chg|
+into a \emph{usable} formalism is an algorithm for efficiently computing
+these objects, which is te focus of this section.
+
   Given two trees, |s| and |d|, we would like to compute a change |c| such
 that |applyChg c s == Just d|. One obvious option would be |Chg s d|, but that
 change contains no sharing whatsoever. Traditional edit-scripts based techniques
@@ -1179,6 +1188,79 @@ and insertion contexts. In general lines, the deletion context is extracted
 from |s| by substituting the common subtrees by a metavariable, whereas the
 insertion context is extracted from |d|. 
 
+  Assume the existence said \emph{sharing map}, which consists of a
+function |wcs s d| -- which reads as ``which common subtree'' -- with
+type |SFix kappa fam at -> Maybe (MetaVar kappa fam at)|, such that
+|wcs s d x| returns |Just i| when |x| is a common subtree of |s| and
+|d| uniquely identified by |i|. A first, naive, attempt at writing an
+extraction function would simply traverse the source and destination
+trees substituting those subtrees that should be shared by a
+metavariable, like |extract| below.
+
+\begin{myhs}
+\begin{code}
+extract  :: (forall at' dot SFix kappa fam at' -> Maybe Int) 
+         -> SFix kappa fam at -> Holes kappa fam (MetaVar kappa fam) at
+extract wcs x = maybe (roll x) Hole (wcs x)
+  where
+    roll (Prim x) = Prim x
+    roll (SFix x) = Roll (repMap (extract wcs) x) 
+\end{code}
+\end{myhs}
+
+  With |extract| as above, we could already produce changes from 
+source |s| and destination |d| with the |chg| function below.
+This |chg| function however, does \emph{not} satisfy the
+criteria that |apply (chg s d) s == Just d| for all |s| and |d|,
+the problem can be easily spotted by fedding a source and
+a destination to |chg| such that a common subtree occurs
+by itself but also as a subtree of another common subtree, 
+as the subtree |t| in \Cref{fig:pepatches:extract-problem:res}.
+
+
+\begin{figure}
+\subfloat[|s|]{%
+\begin{myforest}
+[|Bin| [|Bin| [t] [u]] [k]]
+\end{myforest}%
+}\hfill%
+\subfloat[|d|]{%
+\begin{myforest}
+[|Bin| [|Bin| [t] [u]] [t]]
+\end{myforest}
+}\hfill%
+\subfloat[Illustration of |wcs s d|]{%
+\begin{myhs*}[.40\textwidth]%
+\begin{code}
+wcs s d (Bin t u)  = Just (metavar x)
+wcs s d t          = Just (metavar y)
+wcs s d u          = Just (metavar z)
+wcs _ _ _          = Nothing
+\end{code}
+\end{myhs*}
+}\hfill%
+\subfloat[Result of |chg s d|]{%
+\begin{myforest}
+[,rootchange,
+  [|Bin| [x,metavar] [k]]
+  [|Bin| [x,metavar] [y,metavar]]
+]
+\end{myforest}
+\label{fig:pepatches:extract-problem:res}}%
+\caption{Context extraction must care to produce
+well-formed changes. The nested occurence of |t| within |Bin t u|
+here yields a change with an undefined variable on its insertion
+context.}
+\label{fig:pepatches:extract-problem-01}
+\end{figure}
+
+
+\begin{myhs}
+\begin{code}
+chg :: SFix kappa fam at -> SFix kappa fam at -> Chg kappa fam at
+chg s d = let f = wcs s d in Chg (extract f s) (extract f d)
+\end{code}
+\end{myhs}
   
 
 

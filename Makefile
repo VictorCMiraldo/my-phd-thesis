@@ -42,10 +42,12 @@ BUILD_DEPENDS=$(addprefix src/,$(BUILD_DEPENDS_TEX)) \
 MAIN_FILE=dist/$(TGT).tex
 ## MAIN_FILE=src/$(TGT).tex
 
+LHSOPTS=--poly -v
+
 ## Build all necessary tex files with lhs2TeX
 dist/%.tex: src/%.lhs $(addprefix src/,$(LHS_DEPENDENCIES))
 	@mkdir -p dist
-	lhs2TeX -o $@ $<
+	lhs2TeX $(LHSOPTS) -o $@ $<
 
 ## Builds the target.
 default : $(BUILD_DEPENDS) tex/latex/uustthesis.cls images
@@ -63,12 +65,12 @@ dist/$(TGT).aux: default
 
 mock: $(BUILD_DEPENDS) tex/latex/uustthesis.cls images
 	./mock-chapter
-	lhs2TeX -o dist/mock-chapter.tex dist/mock-chapter.lhs
+	lhs2TeX $(LHSOPTS) -o dist/mock-chapter.tex dist/mock-chapter.lhs
 	export TEXMFHOME=".:$(TEXMFHOME)" && \
 	$(LATEX) dist/mock-chapter.tex
 	
 remock: $(BUILD_DEPENDS) tex/latex/uustthesis.cls images
-	lhs2TeX -o dist/mock-chapter.tex dist/mock-chapter.lhs
+	lhs2TeX $(LHSOPTS) -o dist/mock-chapter.tex dist/mock-chapter.lhs
 	export TEXMFHOME=".:$(TEXMFHOME)" && \
 	$(LATEX) dist/mock-chapter.tex
 	

@@ -26,7 +26,8 @@
 % Include my definitions
 % \input{src/my-tikz-defs}
 
-%include lhs2TeX.fmt
+%include polycode.fmt
+%include src/stylish.lhs
 %include src/definitions.lhs
 %include src/notation.lhs
 

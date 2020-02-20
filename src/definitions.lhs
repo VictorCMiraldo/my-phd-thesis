@@ -2,20 +2,6 @@
 
 \usepackage{supertabular}
 
-%include stylish.lhs
-
-% Easy to typeset Haskell types using the \HSCon
-% command from stylish.lhs (if it's defined!)
-\newcommand{\HT}[1]{\ifdefined\HSCon\HSCon{#1}\else#1\fi}
-\newcommand{\HS}[1]{\ifdefined\HSSym\HSSym{#1}\else#1\fi}
-\newcommand{\HV}[1]{\ifdefined\HSVar\HSVar{#1}\else#1\fi}
-
-% We need to use the \HVNI version to make sure we shall not
-% put \mathit around whatver we give to \HV. In case of single
-% greek characters, we don't have the font for it.
-\newcommand{\HVNI}[1]{\ifdefined\HSVarNI\HSVarNI{#1}\else#1\fi}
-\newcommand{\HTNI}[1]{\ifdefined\HSConNI\HSConNI{#1}\else#1\fi}
-
 \definecolor{C1}{RGB}{0,153,204}
 \definecolor{C2}{RGB}{89,0,179}
 
@@ -43,11 +29,17 @@
 
 %% LaTeX stuff
 
+\newenvironment{myhs*}[1][0.95\textwidth]{%
+\begin{minipage}{#1}\small%
+}{%
+\end{minipage}%
+}
+
 \newenvironment{myhs}[1][0.95\textwidth]{%
 \nopagebreak[3]%Denies latex to pagebreak on code blocks!
-\vspace{0.15em}\par\noindent\begin{minipage}{#1}\small%
+\begin{myhs*}[#1]  %\par\noindent\begin{minipage}{#1}\small%
 }{%
-\end{minipage}\vspace{0.15cm}%
+\end{myhs*}%
 }
 
 \newenvironment{myforest}{%

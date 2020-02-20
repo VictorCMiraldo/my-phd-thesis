@@ -47,6 +47,17 @@
 \newcommand{\HSConNI}[1]{\mathcolor{hsblue3}{\ensuremath{#1}}}
 \newcommand{\HSComment}[1]{\mathcolor{hsgold2}{\textit{#1}}}
 
+% Easy to typeset Haskell types using the \HSCon
+% command from stylish.lhs (if it's defined!)
+\newcommand{\HT}[1]{\ifdefined\HSCon\HSCon{#1}\else#1\fi}
+\newcommand{\HS}[1]{\ifdefined\HSSym\HSSym{#1}\else#1\fi}
+\newcommand{\HV}[1]{\ifdefined\HSVar\HSVar{#1}\else#1\fi}
+
+% We need to use the \HVNI version to make sure we shall not
+% put \mathit around whatver we give to \HV. In case of single
+% greek characters, we don't have the font for it.
+\newcommand{\HVNI}[1]{\ifdefined\HSVarNI\HSVarNI{#1}\else#1\fi}
+\newcommand{\HTNI}[1]{\ifdefined\HSConNI\HSConNI{#1}\else#1\fi}
 
 %subst keyword a = "\HSKeyword{" a "}"
 %subst conid a   = "\HSCon{" a "}"
