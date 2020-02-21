@@ -1139,8 +1139,6 @@ mergeAl p q = case runExcept (evalStateT (mrg p q) mrgSt0) of
 \label{fig:pepatches:merge-01}
 \end{figure}
 
-
-
 \victor{Check \cite{Saito2002}; place our algos in their taxonomy}
 
 \victor{Harmoy has a similar problem as we found with lists;
@@ -1504,31 +1502,194 @@ computing the arity map, but would cost precious time to compare
 trees before inserting them to ensure we have not witnessed
 a hash collision. 
 
+\subsection{Extracting the Contexts}
+
+  With an efficient ``which common subtree'' query in our toolbox,
+we move on to defining the different context extraction techniques.
+They are all very similar to the naive |extract| that was sketched before:
+traverse the tree and each time we reach a common subtree, substitute
+by its corresponding metavariable. 
+
+  To some extent, we could compare context extraction to the translation
+of tree mappings into edit-scripts: our tree mappings are given by |wcs|
+and instead of edit-scripts we have terms with metavariables.
+Classical algorithms are focused in computing the \emph{least cost}
+edit-script from a given tree mapping. In our case, the notion of
+\emph{least cost} hardly makes sense -- besides not having defined
+a cost semantics to our changes, we are interested in those that
+merge better which are not necessarily those that insert and delete
+the least amount of constructors. Consequently, there is a lot of
+freedom in defining our context extraction techniques. We have looked
+at three particular examples, but hint at other possibilities
+later on in \Cref{sec:pepatches:discussion}.
+
+\begin{figure}
+\victor{Find a better example... not sure this really illustrates
+the differences}
+\centering
+\subfloat[Source and Destination]{%
+\begin{myforest}
+[,phantom, for children={fit=band}
+  [|Tri|,name=r 
+    [|Bin| [a] [b]] 
+    [|Bin| [a] [b]]
+    [k]]
+  [|Tri|
+    [|Bin| [b] [a]] 
+    [|Bin| [a] [b]]
+    [k]]
+]
+\node at ($ (r) - (1.0,0) $) {|extract m|};
+\end{myforest}}%
+\quad
+\subfloat[|m = Patience|]{%
+\begin{myforest}
+[,rootchange 
+  [|Tri| [|Bin| [a] [b]]
+         [|Bin| [a] [b]]
+         [z,metavar]]
+  [|Tri| [|Bin| [b] [a]]
+         [|Bin| [a] [b]]
+         [z,metavar]]
+]
+\end{myforest}
+\label{fig:pepatches:extraction-01:patience}}%
+
+\subfloat[|m = NoNest|]{%
+\begin{myforest}
+[,rootchange 
+  [|Tri| [x,metavar]     [x,metavar] [y,metavar]]
+  [|Tri| [|Bin| [b] [a]] [x,metavar] [y,metavar]]
+]
+\end{myforest}
+\label{fig:pepatches:extraction-01:nonest}}%
+\quad
+\subfloat[|m = ProperShare|]{%
+\begin{myforest}
+[,rootchange 
+  [|Tri| [|Bin| [x,metavar] [y,metavar]]
+         [|Bin| [x,metavar] [y,metavar]]
+         [z,metavar]]
+  [|Tri| [|Bin| [y,metavar] [x,metavar]]
+         [|Bin| [x,metavar] [y,metavar]]
+         [z,metavar]]
+]
+\end{myforest}
+\label{fig:pepatches:extraction-01:proper}}
+\quad
+\caption{Different extraction methods for the same pair or trees.}
+\label{fig:pepatches:extraction-01}
+\end{figure}
+
+  \Cref{fig:pepatches:extraction-methods} illustrates the changes
+that would be extracted folowing each |ExtractionMode| for the 
+same |s| and |d|. We will soon define each context extraction method,
+but before we do so, we need a few auxiliary definitions.
+
+  Computing the set of common subrtees is straight forward
+and does not involve many design decisions. Deciding which
+of those subtrees are eligible to be shares is an entirely
+diffrent beast. We surely do not want to share all \texttt{int} 
+constants throughout a file, for example. Or, we would not like
+to share all variables with the same name as they might be
+different variables. As a matter of fact, a good definition
+of what can be shared might even be impossible without
+domain-specific knowledge. We will be abstracting this
+decision away by the means of the |CanShare| predicate
+and will discuss the pragmatic decisions we made at
+a later stage, in \Cref{sec:pepatches:discussion}.
+
+\begin{myhs}
+\begin{code}
+type CanShare kappa fam = forall ix dot PrepFix kappa fam ix -> Bool
+\end{code}
+\end{myhs}
+
+  The interface function receives an |ExtractionMode|, a sharing map
+and a |CanShare| predicate and two preprocessed fixpoints to extract
+contexts from. The reason we receive two trees and produce two
+contexts is because modes like |NoNested| perform some
+cleanup that depends no global information.
+
+\begin{myhs}
+\begin{code}
+extract  :: DiffMode
+         -> CanShare kappa fam
+         -> IsSharedMap
+         -> (PrepFix kappa fam :*: PrepFix kappa fam) at
+         -> (HolesMV kappa fam :*: HolesMV kappa fam) at
+\end{code}
+\end{myhs}
 
 
-%% \begin{figure}
-%% \centering
-%% \subfloat[|DM_NoNest| extraction]{%
-%% \begin{myforest}
-%% [|Bin|, s sep=5mm 
-%%   [,change [x,metavar] [x,metavar]]
-%%   [,change [k] [t]]
-%% ]
-%% \end{myforest}
-%% \label{fig:pepatches:extraction-01:nonest}}%
-%% \quad\quad
-%% \subfloat[|DM_Proper| extraction]{%
-%% \begin{myforest}
-%% [,rootchange 
-%%   [|Bin| [|Bin| [x,metavar] [y,metavar]] [k]]
-%%   [|Bin| [|Bin| [x,metavar] [y,metavar]] [x,metavar]]
-%% ]
-%% \end{myforest}
-%% \label{fig:pepatches:extraction-01:proper}}%
-%% \caption{Computing the |diff| between |Bin (Bin t u) k| and
-%% |Bin (Bin t u) t| using two different extraction methods}
-%% \label{fig:pepatches:extraction-01}
-%% \end{figure}
+\paragraph{Extracting with |NoNested|}
+
+  Extracting contexts with the |NoNested| mode is very simple.
+We first extract the contexts naively, then make a second pass
+removing the variables that appear exclusively in the insertion
+context by the trees they abstracted over. The trick in doing so
+efficiently is to \emph{not} forget which common subtrees
+have been substituted on the first pass: 
+
+\begin{myhs}
+\begin{code}
+noNested1  :: CanShare kappa fam
+           -> T.Trie MetavarAndArity
+           -> PrepFix a kappa fam at
+           -> Holes kappa fam (Const Int :*: PrepFix a kappa fam) at
+noNested1 h sm x@(PrimAnn ann xi)
+  = if h x  then maybe (Prim xi) (mkHole x) $$ lookup (getDigest ann) sm 
+            else Prim xi
+noNested1 h sm x@(SFixAnn ann xi)
+  =  if h x  then maybe recurse (mkHole x) $$ lookup (getDigest ann) sm 
+             else recurse
+ where
+    recurse     = Roll (repMap (noNexted1 h sm) xi)
+    mkHole x v  = Hole (Const (getMetavar v) :*: x)
+\end{code}
+\end{myhs}
+
+  The second pass will go over holes and decide whether to
+transform the |Const Int| into a |MetaVar kappa fam| or 
+whether to forget this was a potential shared tree and
+keep the tree in there instead.
+
+\paragraph{Extracting with |Patience|}
+
+  The |Patience| extraction method is very similar to |NoNested|,
+with the difference that instead of simply looking a hash up
+in the sharing map, it will further check that the given hash
+occurs with arity two -- indicating the tree in question
+occurs once in the source tree and once in the destination.
+This completely bypasses the issue with |NoNested| producing
+insertion contexts with undefined variables and requires
+no further processing. The reason for it is that the variables
+produced will appear with the same arity as the trees they abstract,
+and in this case, it will be two: once in the deletion context
+and once in the insertion context.
+
+\paragraph{Extracting with |ProperShares|}
+
+  It is arguable that we might want to prioritize sharing
+over spines, which is exactly what |ProperShares| does.
+We say that a tree |x| is a \emph{proper-share} between |s| and
+|d| whenever no subtree of |x| occurs in |s| and |d| with arity greater
+than that of |x|. In other words, |x| is a proper-share if
+and only if all of its subtrees only occur as subtrees of 
+other occurences of |x|.
+
+  Extracting contexts with under the |ProperShare| mode
+consists in annotating the source and destination trees with
+a boolean indicating whether or not they are a proper share,
+then proceeding just like |Patience|, but instead of checking
+that the arity must be two, we check that the tree is classified
+as a \emph{proper-share}.
+
+\section{Discussion}
+\label{sec:pepatches:discussion}
+
+
+
 
 
 
