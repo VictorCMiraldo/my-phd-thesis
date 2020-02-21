@@ -38,7 +38,7 @@
 \newcommand{\HSKeyword}[1]{\mathcolor{hsgold3}{\textbf{#1}}}
 \newcommand{\HSNumeral}[1]{\mathcolor{hsred3}{#1}}
 \newcommand{\HSChar}[1]{\mathcolor{hsred2}{#1}}
-\newcommand{\HSString}[1]{\mathcolor{hsred2}{#1}}
+\newcommand{\HSString}[1]{\mathcolor{hsred2}{\textit{#1}}}
 \newcommand{\HSSpecial}[1]{\mathcolor{hsblue4}{#1}}
 \newcommand{\HSSym}[1]{\mathcolor{hsblue4}{\textit{\ensuremath{#1}}}}
 \newcommand{\HSCon}[1]{\mathcolor{hsblue3}{\mathit{\ensuremath{#1}}}}

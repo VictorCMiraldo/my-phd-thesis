@@ -1113,7 +1113,7 @@ mergeAl p q = case runExcept (evalStateT (mrg p q) mrgSt0) of
 \centering
 \subfloat[Aligned patch, |p|.]{%
 \begin{myforest}
-[|Bin| , s sep=4mm
+[|Bin| 
   [,change [x,metavar] [x,metavar]]
   [,delctx , s sep=8mm
     [|Bin| [|Leaf| [|42|]] [,sq]]
@@ -1135,7 +1135,7 @@ mergeAl p q = case runExcept (evalStateT (mrg p q) mrgSt0) of
 ]
 \end{myforest}
 \label{fig:pepatches:merge-01:B}}%
-\caption{Properly aligned version of \Cref{fig:pepatches:misaligment}.}
+\caption{Properly aligned version of \Cref{fig:pepatches:misalignment}.}
 \label{fig:pepatches:merge-01}
 \end{figure}
 
@@ -1298,11 +1298,16 @@ data ExtractionMode  =  NoNested
 \end{code}
 \end{myhs}
 
-  The |NoNested| mode will forget sharing in favor of copying larger subtrees.
-It would drop the sharing of |t| producing \Cref{fig:pepatches:extract-sol:nonest}.
-The |ProperShare| mode is the opposite. It would produce \Cref{fig:pepatches:extract-sol:proper}. Finally, |Patience| only share subtrees that occur only once
-in the source and once in the destination. For the inputs in \Cref{fig:pepatches:extract-problem-01}, extracting contexts under |Patience| mode would produce 
-the same result as |NoNested|, but they are not the same in general.
+  The |NoNested| mode will forget sharing in favor of copying larger
+subtrees.  It would drop the sharing of |t| producing
+\Cref{fig:pepatches:extract-sol:nonest}.  The |ProperShare| mode is
+the opposite. It would produce
+\Cref{fig:pepatches:extract-sol:proper}. Finally, |Patience| only
+share subtrees that occur only once in the source and once in the
+destination. For the inputs in
+\Cref{fig:pepatches:extract-problem-01}, extracting contexts under
+|Patience| mode would produce the same result as |NoNested|, but they
+are not the same in general.
   
 \begin{figure}
 \centering
@@ -1331,8 +1336,173 @@ context.}
 \end{figure}
 
   Next we look at how to define the |wcs| oracle efficiently and look 
-at algorithms for extracting context for each mode in |ExtractionMode|.
+at the diffrent algorithms for extracting contexts according to
+each mode in |ExtractionMode|.
 
+\subsection{Which Common Subtree, Efficiently}
+
+  Next we look at defining |wcs s d| efficiently. This consists,
+firstly, in computing a set of trees, containing the trees which
+occur as subtrees of |s| and subtrees of |d|, and secondly, being
+able to efficiently process membership queries on this set.
+This is not a new challenge, in fact, Computer Algebra Systems, 
+Theorem Provers and many other symbolic-manipulation-heavy systems 
+use a technique known as \emph{hash-consing} to overcome similar problems.
+Hash-consing~\cite{Goto1974,Filliatre2006} is a canon of programming
+folklore and is most often used as a means of \emph{maximal sharing} of
+subtrees in memory and constant time comparisson -- two trees are
+equal if they are stored in the same memory location -- but it 
+is not limited to it. We will be using a variant of \emph{hash-consing}
+to compute |wcs s d|.
+
+  In our setup for computing |wcs s d| we start with transforming
+|s| and |d| into \emph{merkle-trees}~\cite{Merkle1988}, that is, 
+trees annotated with hashes. We then compute the intersection
+of set of hashes that appear in |s| and |d|: these are the
+hashes of the trees that appear as subtrees of |s| and |d|, or,
+\emph{common subtrees}. Finally, whenever we would like to query 
+whether |x| is a common subtree we check if its hash appear
+in the set we have just computed.
+
+  Note that we will only be checking whether |x| is a common
+subtree of |s| and |d| for the |x|'s that are already subtrees
+of |s| \emph{or} |d|. Recall the naive |chg| function:
+
+\begin{myhs}
+\begin{code}
+chg :: SFix kappa fam at -> SFix kappa fam at -> Chg kappa fam at
+chg s d = let f = wcs s d in Chg (extract f s) (extract f d)
+\end{code}
+\end{myhs}
+
+  This means that we would already have computed the hash of |x|,
+in order to have computed the hash of |s| and |d|. Recomputing this
+hash would be a waste of precious time. Instead, it is better to just
+annotate our trees with hashes at every point -- another situations where
+having support for generic annotated fixpoints is crucial.
+In fact, prior to doing any diff-related computation, we preprocess our
+trees with their hash and their height.
+
+\begin{myhs}
+\begin{code}
+data PrepData a = PrepData  {  getDigest  :: Digest
+                            ,  getHeight  :: Int
+                            }  
+
+type PrepFix kappa fam
+  = SFixAnn kappa fam PrepData
+
+preprocess  :: (All Digestible kappa) => SFix kappa fam at -> PrepFix kappa fam at
+preprocess = synthesize dots
+\end{code}
+\end{myhs}
+
+\begin{figure}  
+%{
+%format WD c ha he = "\begin{array}{c} \HS{hash}\HS{=}" ha " \\ \HS{height}\HS{=}" he " \\"  c " \end{array}"
+\centering
+\begin{myforest}
+[,phantom , s sep'+=60pt
+[|Bin| , name=A [|Bin| [|Leaf| [|42|]] [|Leaf| [|42|]]] [|Leaf| [|84|]]]
+[|WD Bin "0f42ab" 3|, tikz+={
+        \draw [forest-digems-black,->] (A.east) [out=25, in=165]to node[midway,above]{|preprocess|} (!c.west);
+      }
+  [|WD Bin "310dac" 2| , name=ex1
+    [|WD Leaf "0021ab" 1| [|WD 42 "004200" 0|]]
+    [|WD Leaf "0021ab" 1| [|WD 42 "004200" 0|]]
+  ]
+  [|WD Leaf "4a32bd" 1|
+    [|WD 84 "008400" 0|]
+  ]
+]
+]
+\end{myforest}
+%}
+\caption{Example of annotating a tree with hashes and heights, through the
+|preprocess| function.}
+\label{fig:pepatches:preprocess}
+\end{figure}
+
+ \Cref{fig:pepatches:preprocess} illustrates a call to |preprocess|. The hashes
+are computed from the a unique identifier per constructor and a concatenation
+of the hashes of the subtrees. The hash of the root in \Cref{fig:pepatches:preprocess},
+for example, is computed with a call to |hash (concat ["Main.Tree.Bin", "310dac", "4a32bd"])|.
+This ensures that hashes uniquely identify a subtree modulo hash collisions.
+
+  After preprocessing the input trees we want to traverse them and insert
+every hash we see in a hash map, associated with a a counter for how 
+many times we have seen a tree. We use a Patricia Tree~\cite{Okasaki1998} 
+as our data structure. 
+
+\begin{myhs}
+\begin{code}
+type Arity            = Int
+
+buildArityMap    :: PrepFix a kappa fam ix -> T.Trie Int
+\end{code}
+\end{myhs}
+  
+  A call to |buildArityMap| with the tree shown in 
+\Cref{fig:pepatches:preprocess}, for example, would
+yield the following map.
+
+\begin{myhs}
+\begin{code}
+T.fromList  [ ("0f42ab",  1),  ("310dac",  1),  ("0021ab",  2) 
+            , ("004200",  2),  ("4a32bd",  1),  ("008400",  1)
+            ]
+\end{code}
+\end{myhs}
+
+  After processing the \emph{arity} maps for both
+the source tree and destination tree, we construct the \emph{sharing}
+map. Which consists in the intersection of the arity maps and a final
+pass adding a unique identifier to every key. We also keep
+track of how many metavariables were assigned, so we can always 
+alloate fresh names without having to go inspect the whole map again.
+
+\begin{myhs}
+\begin{code}
+type MetavarAndArity = MAA {getMetavar :: Int , getArity :: Arity}
+
+buildSharingMap  :: PrepFix a kappa fam ix -> PrepFix a kappa fam ix
+                 -> (Int , T.Trie MetaVarAndArity)
+buildSharingMap x y
+  =   T.mapAccum (\i ar -> (i+1 , MAA i ar) ) 0
+  $$  T.zipWith (+) (buildArityMap x) (buildArityMap y)
+\end{code}
+\end{myhs}
+
+  With all these pieces available to us, defining an efficient |wcs s d|
+is straightforward: preprocess the trees, compute their sharing map and
+use it for lookups. Yet, the whole point of preprocessing the trees
+was to avoid the unecessary recomputation of their hashes. Consequently,
+we are better off carrying these preprocessed trees everywhere through
+the computation of changes. The final |wcs| function wil have its type
+slightly adjusted and is defined below.
+
+\begin{myhs}
+\begin{code}
+wcs  :: (All Digestible kappa) 
+     => PrepFix kappa fam at -> PrepFix kappa fam at
+     -> (PrepFix kappa fam at -> Maybe Int)
+wcs s d =  let m = buildSharingMap s d
+           in famp getMetavar . flip T.lookup m . getDigest . getAnnot
+\end{code}
+\end{myhs}
+
+  Let |f = wcs s d| for some |s| and |d|. Computing |f| itself
+is linear and takes $\mathcal{O}(n + m)$ time, where |n| and |m| 
+are the number of constructors in |s| and |d|. A call to |f x| for
+some |x|, however, is answered in $\mathcal{O}(1)$ due to the
+bounded depth of the patricia tree. 
+
+  We chose to use a cryptographic hash function~\cite{Menezes1997}
+and ignore the possiblity of hash collisions de to their negligible
+probability. Yet, it is not hard to detect these collisions whilst
+computing the arity map, but would cost precious time to compare
+trees before inserting them to ensure we have not witnessed
+a hash collision. 
 
 
 
