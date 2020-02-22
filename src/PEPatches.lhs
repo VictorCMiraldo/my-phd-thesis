@@ -1,4 +1,4 @@
-  The \texttt{stdiff} approach gave us a first representation
+  the \texttt{stdiff} approach gave us a first representation
 of tree-sructured patches over tree-structured data but was still flawed in
 many ways. These flaws were partly due to the hidden connection to edit
 scripts that still remained: subtrees could only be copied once and could not
@@ -747,10 +747,12 @@ at the destination of the change.
 [, delctx 
   [|Bin| [|Leaf| [|42|]] [SQ]]
   [|Bin|, s sep=-4mm 
-    [,change [x,metavar] [x,metavar]]
-    [|Bin|, s sep=4mm
-      [,change [y,metavar] [y,metavar]]
-      [,change [z,metavar] [z,metavar]]]
+      [Cpy]
+      [|Bin| [Cpy] [Cpy]]
+%     [,change [x,metavar] [x,metavar]]
+%     [|Bin|, s sep=4mm
+%       [,change [y,metavar] [y,metavar]]
+%       [,change [z,metavar] [z,metavar]]]
   ]
 ]
 \end{myforest}
@@ -932,7 +934,7 @@ alignChg (Chg d i) = al vars (annotRigidity d) (annotRigidity i)
 \begin{code}
 type Aligner kappa fam  = HolesAnn kappa fam IsStiff (MetaVar kappa fam) t
                         -> HolesAnn kappa fam IsStiff (MetaVar kappa fam) t
-                        -> Aligned kappa fam t 
+                        -> Al kappa fam t 
 
 
 al :: Map Int Arity -> Aligner kappa fam
@@ -1047,7 +1049,14 @@ The |PatchPE ki codes| forms either:
 \item Partial monoid, if we want |vars ins <= vars del|
 \item Grupoid, if we take |vars ins == vars del|
 \end{itemize}
+
+\begin{myhs}
+\begin{code}
+alDistr :: Holes kappa fam (Al kappa fam) at -> Al kappa fam at
+\end{code}
+\end{myhs}
 }
+
 
 \section{Merging Aligned Patches}
 \label{sec:pepatches:merging}
@@ -1056,6 +1065,21 @@ The |PatchPE ki codes| forms either:
 
 \victor{should I call it |merge| instead of |diff3|? Maybe...
 diff3 already exists and is the unix diff3.}
+
+\victor{I'm inclined in borrowing a \texttt{\\digress} env
+like in Mandelbrot's ``Fractal Geom. of Nature''; where I write
+in the first person about my experience doing things; could
+be a good way to add bits like the following:
+
+
+  \digress{Before going into the details of synchronization, a little
+prelude is due. In this section we will discuss the sketch
+of a merge algorithm, but this is by no means final. We believe
+a more elegant algorithm could be possible, if we have had more
+time to think this through better. Yet, unfortunately, at one
+point one has to stop and write their thesis. The sketch
+we present here was the last aspect we worked on.}
+}
 
   Synchronizing changes is done by the |diff3| function,
 which receives two aligned patches |p| and |q| with
@@ -1091,52 +1115,175 @@ data Conflict kappa fam at where
 \end{myhs}
 
   Since our patches are locally scopped, the |diff3| can safely
-map an auxiliary |mergeAl| over the anti-unification of the 
-spines of the patches being merged.
+map an auxiliary function, |mergeAl|, over the anti-unification of the 
+spines of the patches being merged. The |mergeAl| function will then
+receive one empty spine with an alignment inside and one non-empty
+spine with alignments in its leaves. It does not particularly
+matter whether the left or the right spine is empty, what matters
+is that at \emph{this} location the source tree was changed
+in two different ways. Our task is to reconcile them as best
+as we can. 
 
 \begin{myhs}
 \begin{code}
-   in holesMap (uncurry' mergeAl . delta alignDistr) $ lcp oa' ob'
- where
-   delta f (x :*: y) = (f x :*: f y)
-
-mergeAl :: Aligned kappa fam x -> Aligned kappa fam x
-        -> Sum (Conflict kappa fam) (Chg kappa fam) x
-mergeAl p q = case runExcept (evalStateT (mrg p q) mrgSt0) of
-                Left err -> InL $ Conflict err p q
-                Right r  -> InR (disalign r)
+diff3 oa ob = holesMap (uncurry' go) (lgg oa ab)
+  where
+    go  :: Holes kappa fam (Al kappa fam) at
+        -> Holes kappa fam (Al kappa fam) at
+        -> Sum (Conflict kappa fam) (Chg kappa fam) at
+    go ca cb = mergeAl (alDistr ca) (alDistr cb)
 \end{code}
 \end{myhs}
+
+  This approach reduces the size of the alignments that we have to
+synchronize and enable us to place conflicts that are better
+localized when synchronization fails, but does not simplify the 
+problem conceptually. We still have to synchronize alignments 
+in full generality, but let us warm up to before looking
+into the definition of |mergeAl|.
+
+  In broad strokes we can say synchronizing alignments is similar to
+synchronizing |PatchST|'s, \Cref{sec:stdiff:merging}: insertions
+are preserved as long as they do not happen simultaneously.
+Deletions must be \emph{applied} before continuing and
+copies are the identity of synchronization. The current setting,
+however, does not stop there. We also have permutations and
+arbitrary changes to look at. 
+
+\begin{figure}
+\centering
+\subfloat[Patch |p|]{%
+\begin{myforest}
+[|Bin|
+  [|Leaf| [,change [|42|] [|84|]]]
+  [Cpy]]
+\end{myforest}
+\label{fig:pepatches:merge-01:A}}%
+\qquad%
+\subfloat[Change |q|]{%
+\begin{myforest}
+[,rootchange
+  [|Bin| [x,metavar] [y,metavar]]
+  [|Bin| [y,metavar] [x,metavar]]
+]
+\end{myforest}
+\label{fig:pepatches:merge-01:B}}%
+\qquad%
+\subfloat[Synchronization of |p| and |q|]{%
+\begin{myforest}
+[,rootchange
+  [|Bin| [|Leaf| [|42|]] [y,metavar]]
+  [|Bin| [y,metavar] [|Leaf| [|84|]]]
+]
+\end{myforest}
+\label{fig:pepatches:merge-01:C}}
+\caption{Example of a simple synchronization.}
+\label{fig:pepatches:merge-01}
+\end{figure}
+
+  It helps to think about the metavariables in a change as
+a unique identifier for a subtree in the source. If one
+change changes the subtree |metavar x| into a different
+subtree |k|, but the other moves |metavar x| to a different
+location in the tree, the merge of these changes should be
+the transport of |k| into the new location. The new location
+is exactly where |metavar x| appears in the insertion context.
+The example in \Cref{fig:pepatches:merge-01} illustrates this very
+situation: the source tree identified by |metavar x| in
+the deletion context of \Cref{fig:pepatches:merge-01:B} was
+changed, by \Cref{fig:pepatches:merge-01:A}, from |Leaf 42| into
+|Leaf 84|. Since |p| altered the content of a subtree, but |q|
+altered its location, they are \emph{disjoint} -- they
+alter different aspects of the common ancestor. Hence, the
+synchronizatino is possible and results in \Cref{fig:pepatches:merge-01:C}.
+
+  The general conducting line of our synchronization algorithm
+is to record how each subtree was modified and then instantiating
+these modifications in the final result. Going back to \Cref{fig:pepatches:merge-01},
+we would need to merge a change |q| over a spine |p|, which means
+we must match |delCtx q| against |p|. This yeilds an instantiation
+of some of the variables in |delCtx q|, in this case, |metavar x| is
+instantiated to |Chg (Leaf 42) (Leaf 84)|. We then proceed to split this
+instantiation in two maps -- one which records what |x| \emph{was}, and
+another which records what |x| \emph{became}. Namelly, |was (metavar x) = Leaf 42|
+and |became (metavar x) = Leaf 84|. Finally, we instantiate |q| with
+this newly discovered information yielding \Cref{fig:pepatches:merge-01:C}.
+
+  There are some nuances to |mergeAl|, which we will be
+highlighting as they appear. The first nuance, however, is that this
+assignment of metavariables to how they have been changed is global
+and is better taken care of by a state monad. The state we will
+be carrying around consists in an instantiation of how subtrees
+have changed, |iota|, and a list of equivalences of subtrees, |eqs|. 
+\victor{how important is eqs, really? I feel like splitting iota
+in two: |iotaIns| and |iotaDel| then using the entries in the
+form |x = (Hole y)| in |iotaDel| to estabilish equivalences should work
+just fine.} 
+
+\begin{myhs}
+\begin{code}
+type Subst kappa fam phi = Map (Exists phi) 
+
+data MergeState kappa fam = MergeState
+  { iota :: Map (Exists (MetaVar kappa fam)) (Exists (Patch kappa fam))
+  , eqs  :: Map (Exists (MetaVar kappa fam)) (Exists (HolesMV kappa fam))
+  }
+\end{code}
+\end{myhs}
+
+  The failures of |mergeAl| will be caught by an |Except| monad, which will 
+return a simple description of the conflict. We then define |mergeAl| as
+a wrapper around |mergeAlM|, which is defined in terms of the |MergeM|
+monad for convenience.
+
+\begin{myhs}
+\begin{code}
+type MergeM kappa fam = StateT (MergeState kappa fam) (Except String)
+
+mergeAl  :: Aligned kappa fam x -> Aligned kappa fam x
+         -> Sum (Conflict kappa fam) (Chg kappa fam) x
+mergeAl x y = case runExcept (evalStateT (mergeAlM p q) mrgStEmpty) of
+                Left err  -> InL (Conflict err p q)
+                Right r   -> InR (disalign r)
+\end{code}
+\end{myhs}
+
+\victor{Go into |mrgAlM| but we should make sure we can't define it in any other way}. 
+
 
 
 \begin{figure}
 \centering
 \subfloat[Aligned patch, |p|.]{%
 \begin{myforest}
-[|Bin| 
-  [,change [x,metavar] [x,metavar]]
-  [,delctx , s sep=8mm
+[|Bin|   , s sep=15mm
+   [Cpy]
+%  [,change [x,metavar] [x,metavar]]
+   [,delctx , s sep=8mm
     [|Bin| [|Leaf| [|42|]] [,sq]]
-    [,rootchange  
-       [y,metavar]
-       [y,metavar]]]]
+    [Cpy]
+%    [,rootchange  
+%       [y,metavar]
+%       [y,metavar]]
+]]
 \end{myforest}
-\label{fig:pepatches:merge-01:A}}
-\quad\quad
+\label{fig:pepatches:merge-02:A}}
 \subfloat[Aligned patch, |q|.]{%
 \begin{myforest}
-[|Bin| , s sep=4mm
-  [|Bin|, s sep=4mm
+[|Bin|   % , s sep=4mm
+  [|Bin| % , s sep=2mm
     [,change [a,metavar] [b,metavar]]
     [,change [b,metavar] [a,metavar]]]
-  [,insctx , s sep=8mm
+  [,insctx % , s sep=8mm
     [|Bin| [,sq] [|Leaf| [|84|]]]
-    [,rootchange [c,metavar] [c,metavar]]]
+    [Cpy]
+    % [,rootchange [c,metavar] [c,metavar]]
+  ]
 ]
 \end{myforest}
-\label{fig:pepatches:merge-01:B}}%
+\label{fig:pepatches:merge-02:B}}%
 \caption{Properly aligned version of \Cref{fig:pepatches:misalignment}.}
-\label{fig:pepatches:merge-01}
+\label{fig:pepatches:merge-02}
 \end{figure}
 
 \victor{Check \cite{Saito2002}; place our algos in their taxonomy}

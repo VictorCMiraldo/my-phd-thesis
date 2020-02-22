@@ -50,6 +50,9 @@
 
 %% Typography
 
+\newcommand{\digress}[1]{$\lhd$ \textit{ #1 } $\rhd$}
+
+
 %% Parenthetical sentences; a command makes it easy
 %% to keep it homogeneous.
 \newcommand{\parens}[1]{ -- #1 -- }
