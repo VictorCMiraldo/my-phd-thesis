@@ -1142,7 +1142,7 @@ problem conceptually. We still have to synchronize alignments
 in full generality, but let us warm up to before looking
 into the definition of |mergeAl|.
 
-  In broad strokes we can say synchronizing alignments is similar to
+  In broad strokes, synchronizing alignments is similar to
 synchronizing |PatchST|'s, \Cref{sec:stdiff:merging}: insertions
 are preserved as long as they do not happen simultaneously.
 Deletions must be \emph{applied} before continuing and
@@ -1210,15 +1210,26 @@ and |became (metavar x) = Leaf 84|. Finally, we instantiate |q| with
 this newly discovered information yielding \Cref{fig:pepatches:merge-01:C}.
 
   There are some nuances to |mergeAl|, which we will be
-highlighting as they appear. The first nuance, however, is that this
-assignment of metavariables to how they have been changed is global
-and is better taken care of by a state monad. The state we will
+highlighting as they appear. For example, the
+assignment of metavariables to how they have been changed 
+must be global to a whole alignment, and is therefore better 
+taken care of by a state monad. The state we will
 be carrying around consists in an instantiation of how subtrees
 have changed, |iota|, and a list of equivalences of subtrees, |eqs|. 
-\victor{how important is eqs, really? I feel like splitting iota
-in two: |iotaIns| and |iotaDel| then using the entries in the
-form |x = (Hole y)| in |iotaDel| to estabilish equivalences should work
-just fine.} 
+
+  Equivalences in |eqs| are different from instantiations
+in |iota| in a significant way. The entries |(v , p)| in |iota|
+represent a decision made by the merging algorithm: the subtree
+located at |v| will be changed acording to patch |p|. By the end
+of the process, there will be no occurences of |v| left. 
+The equivalences, on the other hand, represent observations made
+by the merging algorithm, that is, an entry |(v , t)| represents
+an observation that the subtree at |v| is, in fact, equal to |t|.
+These facts may or may not be used later on. For example, if we
+already made a decision about how to instantiate |v|, whether or not
+it must be equal to |t| is irrelevant -- all occurences of |v| will
+disappear. \victor{is it really irrelevant? what if we decide that
+|v| was something incompatible with |t|?}
 
 \begin{myhs}
 \begin{code}
@@ -1231,10 +1242,10 @@ data MergeState kappa fam = MergeState
 \end{code}
 \end{myhs}
 
-  The failures of |mergeAl| will be caught by an |Except| monad, which will 
-return a simple description of the conflict. We then define |mergeAl| as
+  Next we prepare to catch the conflicts detected by |mergeAl| with the |Except| monad, 
+which will return a simple description of the conflict. We then define |mergeAl| as
 a wrapper around |mergeAlM|, which is defined in terms of the |MergeM|
-monad for convenience.
+monad for convenience. 
 
 \begin{myhs}
 \begin{code}
@@ -1248,7 +1259,95 @@ mergeAl x y = case runExcept (evalStateT (mergeAlM p q) mrgStEmpty) of
 \end{code}
 \end{myhs}
 
-\victor{Go into |mrgAlM| but we should make sure we can't define it in any other way}. 
+  Finally, the |mergeAlM| function maps over both alignments that
+we wish to merge and collects all the constraints and observations.
+It then attempts to splits these constraints and observations into 
+two maps: (A) a deletion map that contains information
+about what a subtree identified by a metariable \emph{was}; and
+(B) an insertion map that idenfities what said metavariable \emph{became}.
+If it is possible to produce these two idempotent substitutions,
+it then makes a second pass computing the final result. 
+
+\begin{myhs}
+\begin{code}
+mergeAlM  :: Al kappa fam at -> Al kappa fam at 
+          -> MergeM kappa fam (Al kappa fam at)
+mergeAlM p q = do
+  phase1  <- mrgPhase1 p q
+  info    <- get
+  case splitDelInsMap info of
+    Left   _   -> throwError "failed-contr"
+    Right  di  -> alignedMapM (phase2 di) phase1
+\end{code}
+\end{myhs}
+
+  The first pass is computed by the |mrgPhase1| function, which will
+populate the state with instantiations and equivalences and place
+values of type |Phase2| inplace. These values will instruct
+the second phase on how to proceed on that particular location.
+It can either instantiate some change or compare two changes for
+equality.
+
+\begin{myhs}
+\begin{code}
+data Phase2 kappa fam at where
+  P2Instantiate   :: Chg kappa fam at
+                  -> Phase2 kappa fam at
+  P2Instantiate'  :: Chg kappa fam at
+                  -> HolesMV kappa fam at
+                  -> Phase2 kappa fam at
+  P2TestEq        :: Chg kappa fam at
+                  -> Chg kappa fam at
+                  -> Phase2 kappa fam at
+\end{code}
+\end{myhs}
+
+\begin{myhs}
+\begin{code}
+mrgPhase1 :: Aligned kappa fam x -> Aligned kappa fam x
+    -> MergeM kappa fam (Aligned' kappa fam (Phase2 kappa fam) x)
+-- Copies are the easiest case
+mrgPhase1 (Cpy x) q = Mod <$> mrgPhase1Cpy x (disalign q)
+mrgPhase1 p (Cpy x) = Mod <$> mrgPhase1Cpy x (disalign p)
+
+-- Permutations are almost as simple as copies
+mrgPhase1 (Prm x y) (Prm x' y') = Mod <$> mrgPhase1PrmPrm x y x' y'
+mrgPhase1 (Prm x y) q = Mod <$> mrgPhase1Prm x y (disalign q)
+mrgPhase1 p (Prm x y) = Mod <$> mrgPhase1Prm x y (disalign p)
+
+-- Insertions are preserved as long as they are not
+-- simultaneous.
+mrgPhase1 (Ins (Zipper zip p)) (Ins (Zipper zip' q))
+  | zip == zip' = Ins . Zipper zip <$> mrgPhase1 p q
+  | otherwise   = throwError "ins-ins"
+
+mrgPhase1 (Ins (Zipper zip p)) q    = Ins . Zipper zip <$> mrgPhase1 p q
+mrgPhase1 p (Ins (Zipper zip q))    = Ins . Zipper zip <$> mrgPhase1 p q
+
+-- Deletions need to be checked for compatibility
+mrgPhase1 (Del p@(Zipper zip _)) q = compat p q
+                            >>= fmap (Del . Zipper zip) . uncurry mrgPhase1
+mrgPhase1 p (Del q@(Zipper zip _)) = compat q p
+                            >>= fmap (Del . Zipper zip) . uncurry mrgPhase1 . swap
+  where swap (x , y) = (y , x)
+
+-- Spines mean that on one hand a constructor was copied; but the mod
+-- indicates this constructor changed. Hence, we hace to try applying
+-- the change to the spine at hand.
+mrgPhase1 (Mod p) (Spn q) = Mod <$>  mrgPhase1ChgSpn p q
+mrgPhase1 (Spn p) (Mod q) = Mod <$>  mrgPhase1ChgSpn q p
+
+-- When we have two spines it is easy, just pointwise merge their
+-- recursive positions
+mrgPhase1 (Spn p) (Spn q) = case zipSRep p q of
+                        Nothing -> throwError "spn-spn"
+                        Just r  -> Spn <$> repMapM (uncurry' mrgPhase1) r
+
+-- Modifications sould be instantiated, if possible.
+mrgPhase1 (Mod p) (Mod q) = Mod <$> mrgPhase1ChgChg p q
+\end{code}
+\end{myhs}
+
 
 
 
