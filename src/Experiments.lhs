@@ -5,60 +5,55 @@ it taught us valuable lessons on representation and computation
 of patches -- which in turn, led to a more refined
 framework in \Cref{chap:pattern-expression-patches}, \texttt{hdiff}.
 On this section we would like to quantify how
-\texttt{hdiff} improved over \texttt{hdiff}. 
-Moreover, what is the relationship of between the
-multitude of parameters that \texttt{hdiff} can tweak: shall we
+\texttt{hdiff} improved over \texttt{hdiff}, and also
+understand the relationship of between the
+multitude of parameters that can be tweaked in \texttt{hdiff}: shall we
 share constants? If so, how? Should we prioritize small
 subtrees shared many times or bigger subtrees shared less often? etc.
+Finally, we would like to better understand
+the viability of structural differencing in source-code
+version control, and that can only be done by running algorithms 
+over real data.
 
-  The evaluation of our algorithms consists in running experiments
-over the numerous conflicts extracted from \texttt{GitHub}. There are
-two important factors we would like to compare: differencing
-performance and synchronization success rate.
+  The evaluation of our algorithms is divided in two separate
+experiments. First, we would like to look at performance -- how fast
+can patches be computed. Secondly, we would like to look at
+synchronization success rate -- how often can we solve conflicts that
+\texttt{git merge} failed. The data for this experiments have been
+taken from public \texttt{GitHub} repositories. Each datapoint
+consists in four files representing a merge conflict: \texttt{O.lang}
+is the common ancestor of a \texttt{git merge}, \texttt{A.lang} and
+\texttt{B.lang} are the diverging replicas, which \texttt{git merge}
+could not automatically reconcile, and \texttt{M.lang} being the file
+that was produced by a human and commited as the resolved merge.
 
-  Each extracted conflict from \texttt{GitHub} gives rise to
-four files, named \texttt{O.lang}, \texttt{A.lang}, 
-\texttt{B.lang} and \texttt{M.lang}. These represent the original file,
-two diverging verions and the merged result produced by a human.
-
-\victor{add them numbers over here!}
-  We have extracted a total of ??? conflicts from \texttt{GitHub}. They
+  We have extracted a total of 12687 conflicts from \texttt{GitHub}. They
 have been obtained from large public repositories in Java, JavaScript, Python,
-Lua, Clojure and Bash. We have used parsers readily available in Hackage
-to parse the source code with the exception of Clojure, where we
-borrowed the parser from Garufi~\cite{Garufi2018}. More detailed
-information about data collection is given in \Cref{sec:eval:collection}.
+Lua and Clojure. The choice of programming languages was motivated
+by the parsers that were readily available in Hackage,
+with the exception of Clojure, where we borrowed the parser from 
+Garufi~\cite{Garufi2018}. More detailed information about data 
+collection is given in \Cref{sec:eval:collection}.
 
-  In \Cref{sec:eval:performance} we look at plots of the time it took
-to compute patches with each approach. This strenghtens our analytical
-intution about the temporal complexity of each algorithm and provides
-empirical evidence for the scalability of \texttt{hdiff} and lack
-there of from \texttt{stdiff}. \Cref{sec:eval:merging} looks at how many
-conflicts could be correctly solved by each algorith. A correct solution
-is when we can automatically produce a merge that equals to what a human has 
-done to reconcile the conflict, modulo parsing.
+%   In \Cref{sec:eval:performance} we look at plots of the time it took
+% to compute patches with each approach. This strenghtens our analytical
+% intution about the temporal complexity of each algorithm and provides
+% empirical evidence for the scalability of \texttt{hdiff} and lack
+% there of from \texttt{stdiff}. \Cref{sec:eval:merging} looks at how many
+% conflicts could be correctly solved by each algorith. A correct solution
+% is when we can automatically produce a merge that equals to what a human has 
+% done to reconcile the conflict, modulo parsing.
 
   Unfortunately, the study for \texttt{stdiff} enjoys less datapoints than
 \texttt{hdiff}. The reason being that \texttt{stdiff} requires 
 the \texttt{generics-mrsop} library, which can trigger a memory leak
 on the compiler\footnote{\victor{get mem leak info}} when instantiated
 for large abstract syntax trees. For this reason, we have only evaluated
-\texttt{stdiff} on the Clojure, Lua and Bash subset of our dataset.
+\texttt{stdiff} on the Clojure and Lua subset of our dataset.
 
 
 \victor{Do we have ``research questions''? IF so, we should mention
 them in the intro.}
- 
-
-to gather real world data
-\victor{Prototype research questions:
-
-\begin{itemize}
-  \item Can struct. differencing tools improve the
-    quality of software synchronization?
-  \item Can these tools scale?
-\end{itemize}
-}
 
 \section{Performance}
 \label{sec:eval:performance}
@@ -77,32 +72,15 @@ Both axis are in a log-scale and the displayed lines are for reference]{%
 \label{fig:eval:perf}
 \end{figure}
 
-  The measurements displayed in \Cref{fig:eval:perf} were obtained from computing
-the differences between a number of files from our dataset, which come from real-world
-examples extracted from github. We timed the relevant differencing functions with
-the |time| auxiliary function, which is based on the \texttt{timeit} package but
-adapted to fully force the evaluation of the result of the action, with the |deepseq| method.
-
-\begin{myhs}
-\begin{code}
-time :: (NFData a) => IO a -> IO (Double, a)
-time act = do
-    t1 <- getCPUTime
-    result <- act
-    let !res = result `deepseq` result
-    t2 <- getCPUTime
-    return (fromIntegral (t2-t1) * 1e-12 , res)
-\end{code}
-\end{myhs}
-
-  For each conflict in our dataset, we attempted to compute:
-\texttt{diff O A}, \texttt{diff O B}, \texttt{diff O M} and
-\texttt{diff A B}, which produced four individual datapoints.  We also
-limited the memory usage to 8GB and overal time to 30s. If a call to
-|diff| used more than the enabled temporal and spacial resources it
-was automatically killed. Albeit we timed both \texttt{stdiff} and
-\texttt{hdiff} on the same computer, the absolute values are of little
-interest.  The real take away from the graphs in \Cref{fig:eval:perf}
+  In order to measure the performance we made a number of calls to the
+differencing algorihm per datapoint. Namelly, \texttt{diff O A},
+\texttt{diff O B}, \texttt{diff O M} and \texttt{diff A B}, which
+produced four individual datapoints.  We limited the memory usage
+to 8GB and overal time to 30s. If a call to |diff| used more than the
+enabled temporal and spacial resources it was automatically
+killed. We ran both \texttt{stdiff} and \texttt{hdiff} on the
+same machine, yet, we stress that the absolute values are of little 
+interest.  The real take away from this experiment, plotted in \Cref{fig:eval:perf}, 
 is the empirical validation of the complexity class of each algorithm.
 
   \Cref{fig:eval:perf:stdiff} illustrated the measured performance of
@@ -125,10 +103,58 @@ function as |diff fa fb|, hence it also excludes parsing. Nevertheless,
 the linear behavior is evident and in general, an order of magnitude better
 than \texttt{stdiff}. We do see, however, that the \texttt{proper} context
 extraction is slightly slower than \texttt{nonest} or \texttt{patience}.
+Moreover, only 14 calls timed-out and none used more than 8GB of memory.
+
+  Measuring performance of pure Haskell code is always nuanced
+and need some attention. We have used the |time| auxiliary function below, which is 
+based on the \texttt{timeit} package but adapted to fully force the 
+evaluation of the result of the action, with the |deepseq| method.
+
+\begin{myhs}
+\begin{code}
+time :: (NFData a) => IO a -> IO (Double, a)
+time act = do
+    t1 <- getCPUTime
+    result <- act
+    let !res = result `deepseq` result
+    t2 <- getCPUTime
+    return (fromIntegral (t2-t1) * 1e-12 , res)
+\end{code}
+\end{myhs}
+
 
 \section{Synchronization}
 \label{sec:eval:merging}
 
+\begin{table}
+\centering
+\begin{tabular}{@@{}llll@@{}} \toprule
+Language & Repositories & Parseable Conflicts & Non-parseable Conflicts \\ \midrule
+Clojure    & 31 & 1215 & 14  \\
+Java       & 19 & 2903 & 849 \\
+JavaScript & 28 & 3395 & 965 \\
+Lua        & 27 & 750 & 91 \\ 
+Python     & 27 & 4387 & 848 \\
+Bash       & 10 & 37 & 3 \\ \midrule
+\multicolumn{2}{r}{Totals:} & 12687 & 2770 \\
+\bottomrule
+\end{tabular}
+\caption{Summary of collected data}
+\label{tbl:eval:summary-data}
+\end{table}
+
+  The synchronization experiment consists in attempting to
+run \texttt{merge A.lang O.lang B.lang}, and, upon successful
+synchronization, comparing it against that which was
+produced by a human \texttt{M.lang}. It is important to distinguish
+three outomces: A \texttt{success} indicates the merge was
+succesful and was equal to that produced by a human;
+a \texttt{merge-differs} indicates that the merge was
+successful but produced a different result than the human;
+and finally \texttt{conflicting} means that the merge was
+unsuccessful.
+
+  
 
 
 \section{Data Collection}
