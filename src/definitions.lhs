@@ -29,14 +29,32 @@
 
 %% LaTeX stuff
 
+
+\renewcommand{\hscodestyle}{\small}
+
+%% Make lhs2TeX put my own env around code blocks.
+\makeatletter
+\newenvironment{myownhscode}%
+  {\hsnewpar\abovedisplayskip
+   %\advance\leftskip\mathindent
+   \hscodestyle
+   \let\hspre\(\let\hspost\)%
+   \pboxed}
+  {\endpboxed%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+\makeatother
+\sethscode{myownhscode}
+
+
 \newenvironment{myhs*}[1][0.95\textwidth]{%
-\begin{minipage}{#1}\small%
+\begin{minipage}{#1}%
 }{%
 \end{minipage}%
 }
 
 \newenvironment{myhs}[1][0.95\textwidth]{%
-\nopagebreak[3]%Denies latex to pagebreak on code blocks!
+\nopagebreak[3]%Denies latex to pagebreak before code blocks!
 \begin{myhs*}[#1]  %\par\noindent\begin{minipage}{#1}\small%
 }{%
 \end{myhs*}%

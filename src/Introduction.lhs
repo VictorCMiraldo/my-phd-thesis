@@ -107,7 +107,6 @@ require the size of \texttt{obj} to be 6, but another developer
 changed the function that makes the comparison, resulting
 in the two orthogonal versions below;
 
-
 \begin{minipage}[t]{.45\textwidth}
 \begin{alltt}\small
 public void test(obj) \{
@@ -137,6 +136,7 @@ of some type |a|, and represent these changes in some type, |Patch a|.
 The |diff| function \emph{computes} the differences
 between two values of type |a|, whereas |apply| attempts to transform a 
 value according to the information stored in the |Patch| provided to it.
+
 \begin{myhs}
 \begin{code}
 diff   :: a -> a -> Patch a
@@ -183,6 +183,7 @@ one, when they are compatible. Naturally not all patches can be merged,
 in fact, we can only merge those patches that alter \emph{disjoint} parts of the AST. 
 Hence, the merge function must be partial, returning a conflict whenever
 patches change the same part of the tree in different ways.
+
 \begin{myhs}
 \begin{code}
 merge :: Patch a -> Patch a -> Either Conflicts (Patch a)
@@ -241,130 +242,22 @@ efforts on generic programming for mutually recursive types
 better libraries, as we will discuss in \Cref{chap:generic-programming}.
 
 \victor{Is this enough intro? Should we have a section on the structure of the thesis?}
-  
-\section{Literature Review}
-\label{sec:intro:literature-review}
-  
-  Computing the tree edit distance -- classically -- is the
-problem of computing a minimum cost edit script that transforms a
-target into a source ordered tree.  This edit script can be seen as a
-sequence of edit operations. These operations often include, for
-example, \emph{insert node}, \emph{delete node} and \emph{relabel
-node}.  Zhang and Sasha~\cite{Zhang1989} provide a number of
-algorithms which were later improved on by Klein et
-al.~\cite{Klein1998} and Dulucq et al.~\cite{Dulucq2003}. Finally,
-Demaine et al.~\cite{Demaine2007} presents an algorithm of cubic
-complexity and proves this is the best possible worst case. Zhang and
-Sasha algorithm is still faster in many pratical scenarios,
-though. The more recent \emph{RTED}~\cite{Pawlik2012} algorithm
-maintains the cubic worst case complexity and compares or outruns any
-of the other algorithms, rendering it the standard choice for
-computing tree edit distance based on the classic edit operations.  In
-the case of unordered trees the best we can rely on are approximations
-\cite{Augsten2008,Augsten2010} since the problem is
-NP-hard~\cite{Zhang1992}.
-
-  Tree edit distance has seen multidisciplinary interest. From
-Computational Biology, where it is used to align phylogentic trees and
-compare RNA secondary structures
-\cite{Akutsu2010b,Henikoff1992,McKenna2010}, all the way to inteligent
-tutoring systems where we must provide good hints to student's
-solutions to exercises by understanding how far they are from the
-correct solutions \cite{Paassen2017,Rohan2016}.  In fact, from the
-\emph{tree edit distance} point of view, we are only concerned with a
-number, the \emph{distance} between objects, quantifying how similar
-they are. 
-
-  From the perspective of \emph{tree differencing}, on the other hand,
-we actually care about the edit operations and might want to perform
-computations such as composition and merging of
-differences. Naturally, however, the choice of edit operations heavily
-influence the complexity of the |diff| algorithm. Allowing a
-\emph{move} operation already renders string differencing
-NP-complete~\cite{Shapira2002}. Tree differencing algorithms,
-therefore, tend to run approximations of the best edit distance. Most
-of then still suffer from at least quadratic time complexity, which is
-prohibitive for most pratical applications or are defined for domain
-specific data, such as the \texttt{latexdiff}~\cite{LatexDiff} tool.
-A number of algorithms specific for XML and imposing different
-requirements on the schemas have been developped~\cite{Peters2005}.
-\texttt{LaDiff}~\cite{Chawathe1996}, for example, imposes restrictions on the
-hierarchy between labels, it is implemented into the
-\texttt{DiffXML}~\cite{Mouat2002} and
-\texttt{GumTree}~\cite{Falleri2014} tools and is responsible
-from deducing an edit script given tree matchings, the tree matching
-phase differs in each tool. A notable mention is the
-\texttt{XyDiff}~\cite{Marian2002}, which uses hashes to compute
-matchings and, therefore, supports \emph{move} operations maintaining
-almost linear complexity.  This is perhaps the closes to our approach
-in \Cref{chap:pattern-expression-patches}. The
-\texttt{RWS-Diff}~\cite{Finis2013} uses approximate matchings by
-finding trees that are not necessarily equal but \emph{similar}, this
-yeilds a robust algorithm, which is applicable in practice.
-Most of these techniques recycle list differencing and can be seen
-as some form of string differencing over the preorder (or postorder)
-traversal of trees, which has quadratic upper bound~\cite{Guha2002}.
-A careful encoding of the edit operations enables one to have edit scripts
-that are guarnateed to preserve the schema of the data under manipulation
-\cite{Lempsink2009}.
-
-  Besides computing differences, we are also interested in merging the
-computed differences, effectively synchronizing
-changes~\cite{Balasubramaniam1998}. Naturally, merging algorithms are
-heavily dependent on the representation of objects and edit scripts imposed 
-by the underlying differencing algorithm.
-The \texttt{diff3}~\cite{Smith1988}, developed by Randy Smith in 1988, is still the
-most widely used synchronizer. It has received a formal treatment
-and specification \cite{Khanna2007} posterior to its development, however.
-Algorithms for synchronizing changes over tree shaped data 
-include \texttt{3DM}~\cite{Lindholm2004} which merges
-changes over XML documents, \texttt{Harmony}~\cite{Foster2007},
-which works internally with unordered edge-labelled trees and is
-focused primarily in unordered containers and, finally,
-\texttt{FCDP}~\cite{Lanham2002}, which uses XML as its internal
-representation.
-
- Also worth mentioning is the generalization
-of \texttt{diff3} to tree structured data using well-typed approaches
-due to Vassena~\cite{Vassena2016}, which uncovered the demotivating flaw
-of failure due to schema violations, even in the presence of 
-type edit scripts.
-
-  Neighbouring source-code differencing we have patch inference and
-generation tools. Some infer patches from human created data
-\cite{Kim2013}, whereas other, such as
-\texttt{Coccinelle}~\cite{Andersen2008,Palix2011}, receive as input a
-number of diffs, $P_0, \cdots, P_n$, that come from differencing many
-source and target files, $P_i = \mathit{diff }s_i\;t_i$.  The
-objective then is to infer a common transformation that was applied
-everywhere. One can think of determining the \emph{common denominator}
-of $P_0, \cdots, P_n$. Refactoring and Rewritting Tools
-\cite{Medeiros2017,Maletic2015} must also be mentioned. Some of these
-tools define each supported language AST
-separately~\cite{Bravenboer2008,Klint2009}, whereas others
-\cite{Tonder2019} support a universal approach similar to
-\emph{S-expressions}. They identify only parenthesis, braces and
-brackets and hence, can be applied to a plethora of programming
-languages out-of-the-box.
-
-\victor{Should I also do some literature review of generic programming here?}
 
 \section{Contributions and Outline} 
 \label{sec:intro:contributions}
 
-  The main chapters of this thesis are based on peer-reviewed
-publications. Namellly,  
+  This thesis documents a number of peer-reviewed contributions,
+namelly:
 
 \begin{enumerate}
   \item \Cref{chap:generic-programming} discusses the 
-\texttt{generics-mrsop}~\cite{Miraldo2018} library, which improves
-the Haskell ecosystem with combinator-based generic programming for
-mutually recursive families. This work came out of close
+\texttt{generics-mrsop}~\cite{Miraldo2018} library, a combinator-based 
+generic programming for mutually recursive families. This work came out of close
 collaboration with Alejandro Serrano on a variety of
-generic programming topics.
+generic programming topics. 
 
-  \item \Cref{chap:structural-patches} is derived from a published
-joint collaboration \cite{Miraldo2017} with Pierre-\'{E}variste 
+  \item \Cref{chap:structural-patches} is derived from a paper published
+wth \cite{Miraldo2017} with Pierre-\'{E}variste 
 Dagand. We worked closely together to define a type-indexed datatype
 used to represent changes in a more structured way than edit-scripts.
 \Cref{chap:structural-patches} goes further onto developing
@@ -380,11 +273,15 @@ for patches altogether.
   \item \victor{Hopefully we will publish something on experiments?}
 \end{enumerate}
 
-\victor{I'd also like to write a bit about how things 
-took place: the GHC bug, which means we can't run our |PatchStruct| 
-in the same amount of data as |PatchPE|; developping two generic programming
-libraries; the time spent on Agda, etc... Is there a place for this in
-the introduction or not?}
+  Other contributions that have not been peer-reviewed include:
+
+\begin{enumerate}[resume]
+  \item \Cref{chap:generic-programming} also discusses the
+\texttt{generics-simplistic} library, a different approach to generic
+programming that overcame an important space leak in the Haskell compiler,
+which rendered \texttt{generics-mrsop} unusable in large, real-world, examples.
+\end{enumerate}
+
 
 %%% Local Variables:
 %%% mode: latex

@@ -64,8 +64,9 @@ background work on edit distance. We start by looking at the string
 edit distance, \Cref{sec:background:string-edit-distance} and then we
 generalize it to untyped trees, in
 \Cref{sec:background:tree-edit-distance}, as it is classically
-portrayed in the literature. Finally, we discuss some of the
-consequences of working with typed trees in
+portrayed in the literature.  Next, we review the relevant literature
+in \Cref{sec:background:literature-review}.  Finally, we discuss some
+of the consequences of working with typed trees in
 \Cref{sec:background:typed-tree-edit-distance}.
 
 \subsection{String Edit Distance and \unixdiff{}}
@@ -271,7 +272,7 @@ operation that only exists in the untyped world is node relabeling.
 This degree of variation is responsible for the high
 number of different approaches and techniques we see in
 practice~\cite{Farinier2015,Hashimoto2008,Falleri2014,Paassen2018,Finis2013},
-which have been briefly outlined in \Cref{sec:intro:literature-review}.
+\Cref{sec:background:literature-review}.
 
 \begin{figure}
 \centering
@@ -664,6 +665,112 @@ is difficult to define for an underlying list, tree shaped data has
 the advantage of possessing simpler such notions.
 
 \victor{more, less, ok?}
+
+\subsection{Literature Review}
+\label{sec:background:literature-review}
+  
+  Computing the tree edit distance -- classically -- is the
+problem of computing a minimum cost edit script that 
+can be used to transform a target into a source ordered tree.  
+This edit script is seen as a sequence of edit operations, 
+which often include, for
+example, \emph{insert node}, \emph{delete node} and \emph{relabel
+node}.  Zhang and Sasha~\cite{Zhang1989} provide a number of
+algorithms which were later improved on by Klein et
+al.~\cite{Klein1998} and Dulucq et al.~\cite{Dulucq2003}. Finally,
+Demaine et al.~\cite{Demaine2007} presents an algorithm of cubic
+complexity and proves this is the best possible worst case. Zhang and
+Sasha's algorithm is still preferred in many pratical scenarios,
+though. The more recent \emph{RTED}~\cite{Pawlik2012} algorithm
+maintains the cubic worst case complexity and compares or outruns any
+of the other algorithms, rendering it the standard choice for
+computing tree edit distance based on the classic edit operations.  In
+the case of unordered trees the best we can rely on are approximations
+\cite{Augsten2008,Augsten2010} since the problem is
+NP-hard~\cite{Zhang1992}.
+
+  Tree edit distance has seen multidisciplinary interest. From
+Computational Biology, where it is used to align phylogentic trees and
+compare RNA secondary structures
+\cite{Akutsu2010b,Henikoff1992,McKenna2010}, all the way to inteligent
+tutoring systems where we must provide good hints to student's
+solutions to exercises by understanding how far they are from the
+correct solutions \cite{Paassen2017,Rohan2016}.  In fact, from the
+\emph{tree edit distance} point of view, we are only concerned with a
+number, the \emph{distance} between objects, quantifying how similar
+they are. 
+
+  From the perspective of \emph{tree differencing}, on the other hand,
+we actually care about the edit operations and might want to perform
+computations such as composition and merging of
+differences. Naturally, however, the choice of edit operations heavily
+influence the complexity of the |diff| algorithm. Allowing a
+\emph{move} operation already renders string differencing
+NP-complete~\cite{Shapira2002}. Tree differencing algorithms,
+therefore, tend to run approximations of the best edit distance. Most
+of then still suffer from at least quadratic time complexity, which is
+prohibitive for most pratical applications or are defined for domain
+specific data, such as the \texttt{latexdiff}~\cite{LatexDiff} tool.
+A number of algorithms specific for XML and imposing different
+requirements on the schemas have been developped~\cite{Peters2005}.
+\texttt{LaDiff}~\cite{Chawathe1996}, for example, imposes restrictions on the
+hierarchy between labels, it is implemented into the
+\texttt{DiffXML}~\cite{Mouat2002} and
+\texttt{GumTree}~\cite{Falleri2014} tools and is responsible
+from deducing an edit script given tree matchings, the tree matching
+phase differs in each tool. A notable mention is the
+\texttt{XyDiff}~\cite{Marian2002}, which uses hashes to compute
+matchings and, therefore, supports \emph{move} operations maintaining
+almost linear complexity.  This is perhaps the closes to our approach
+in \Cref{chap:pattern-expression-patches}. The
+\texttt{RWS-Diff}~\cite{Finis2013} uses approximate matchings by
+finding trees that are not necessarily equal but \emph{similar}. This
+yeilds a robust algorithm, which is applicable in practice.
+Most of these techniques recycle list differencing and can be seen
+as some form of string differencing over the preorder (or postorder)
+traversal of trees, which has quadratic upper bound~\cite{Guha2002}.
+A careful encoding of the edit operations enables one to have edit scripts
+that are guaranteed to preserve the schema of the data under manipulation
+\cite{Lempsink2009}.
+
+  Besides computing differences, we are also interested in merging the
+computed differences, effectively synchronizing
+changes~\cite{Balasubramaniam1998}. Naturally, merging algorithms are
+heavily dependent on the representation of objects and edit scripts imposed 
+by the underlying differencing algorithm.
+The \texttt{diff3}~\cite{Smith1988} tool, developed by Randy Smith in 1988, is still the
+most widely used synchronizer. It has received a formal treatment
+and specification \cite{Khanna2007} posterior to its development.
+Algorithms for synchronizing changes over tree shaped data 
+include \texttt{3DM}~\cite{Lindholm2004} which merges
+changes over XML documents, \texttt{Harmony}~\cite{Foster2007},
+which works internally with unordered edge-labelled trees and is
+focused primarily in unordered containers and, finally,
+\texttt{FCDP}~\cite{Lanham2002}, which uses XML as its internal
+representation.
+
+   Also worth mentioning is the generalization of \texttt{diff3} to 
+tree structured data using well-typed approaches due to 
+Vassena~\cite{Vassena2016}, which shows that typed edit-scripts might 
+not be the best underlying framework for this, as one needs to
+manually type-check the resulting edit-scripts.
+
+  Besides source-code differencing we have patch inference and
+generation tools. Some infer patches from human created data
+\cite{Kim2013}, whereas other, such as
+\texttt{Coccinelle}~\cite{Andersen2008,Palix2011}, receive as input a
+number of diffs, $P_0, \cdots, P_n$, that come from differencing many
+source and target files, $P_i = \mathit{diff }s_i\;t_i$.  The
+objective then is to infer a common transformation that was applied
+everywhere. One can think of determining the \emph{common denominator}
+of $P_0, \cdots, P_n$. Refactoring and Rewritting Tools
+\cite{Medeiros2017,Maletic2015} must also be mentioned. Some of these
+tools define each supported language AST
+separately~\cite{Bravenboer2008,Klint2009}, whereas others
+\cite{Tonder2019} support a universal approach similar to
+\emph{S-expressions}. They identify only parenthesis, braces and
+brackets and hence, can be applied to a plethora of programming
+languages out-of-the-box.
 
 \section{Generic Programming}
 \label{sec:background:generic-programming}

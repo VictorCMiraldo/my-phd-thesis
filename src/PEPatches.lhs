@@ -456,14 +456,23 @@ chgDistr p  = Chg  (holesJoin (holesMap chgDel  p))
 \end{code}
 \end{myhs}
 
-
   We have to be careful with |chgDistr|, as defined above,
 not to capture variables. It will only work properly
 if all metavariables have already been properly $\alpha$-converted
-to avoid capturing. We cannot enforce this invariant for performance reasons.
-We will, however, continuously ensure that even though we
+to avoid capturing. We cannot enforce this invariant directly
+in the |chgDistr| function for performance reasons.
+Throughout the implementation, however, we continuously ensure that even though we
 produce and work with \emph{locally scoped} patches, all scopes
 contains disjoint sets of names and therefore can be safely distributed.
+In the context of metatheoretical definitions and proofs
+we will abide by Barendregts Convention~\cite{Barendregt1984} where
+no two bound variables are identified with the same name.
+\digress{I wonder how an implementation using De Bruijn indexes would
+look like. I'm not immediatly sure it would be easier
+to enforce correct indexes. Through the bowels of the code
+we ensure two changes have disjoint sets of names by
+adding the successor of the maximum variable of one
+over the other.}
 
   The application semantics of |Patch| is best defined in terms
 of |applyChg|. Assume all metavariable scopes are disjoint, the
@@ -696,7 +705,7 @@ separate old information from new information. Flagging |Bin 42| as a
 deletion in \Cref{fig:pepatches:misaligment:A} means we still must
 produce an \emph{aligment} of the minimal changes produced by |close|.
 
-\subsection{Aligning Closed Changes}
+\subsection{Aligning Patches}
 \label{sec:pepatches:alignments}
 
   An \emph{aligment} for a change |c| consists in 
@@ -837,8 +846,6 @@ or contracted.
   Prm  :: MetaVar kappa fam at -> MetaVar kappa fam at  -> Al kappa fam f at
 \end{code}
 \end{myhs}
-
-\victor{Show how to convert back to |Chg|?}
 
   Equipped with a definition for aligments, let us
 look at how to actually define |alignChg|.
@@ -986,10 +993,64 @@ al vars d i = alD (alS vars (al vars)) d i
 \label{fig:pepatches:align-fulldef}
 \end{figure}
 
+  An alignment and a change are, in fact, isomorphic.
+We have seen the |alignChg| function, which computes the alignment
+for a given change. It is equally feasible to define
+a |disalign| function, that computes a change back from
+an alignment. The only potentially confusing
+case is plugging deletion and insertion zippers, where
+we need to cast a zipper over |SFix| into a zipper
+over |Holes|, as shown below.
+
+\begin{myhs}
+\begin{code}
+disalign :: Al kappa fam at -> Chg kappa fam at
+disalign (Del (Zipper del rest)) =
+  let Chg d i = disalign rest
+   in Chg (Roll (plug (cast del) d) i)
+disalign dots
+\end{code}
+\end{myhs}
+  
+  A spine with alignments in its leaves is denoted
+as an aligned patch, and, just like changes,
+alignments also easily distribute over spines:
+
+\begin{myhs}
+\begin{code}
+type AlPatch kappa fam = Holes kappa fam (Al kappa fam)
+
+alDistr :: AlPatch kappa fam at -> Al kappa fam at
+alDistr (Hole al)  = al
+alDistr (Prim k)   = Spn (Prim k)
+alDistr (Roll r)   = Spn (Roll (repMap alDistr r))
+\end{code}
+\end{myhs}
+
+  Computing aligned patches from locally-scoped
+patches is fairly simple, all we have to do
+is map over the spine and align the changes individually.
+
+\begin{myhs}
+\begin{code}
+align :: Patch kappa fam at -> AlPatch kappa fam at
+align = holesMap alignChg
+\end{code}
+\end{myhs}
+
+  The computation of alignments showcase an interesting 
+application of our well-typed approach. Because we have
+access to type-level information, we can safely compute
+zippers and understand deletions and insertions of a single
+layer in a homogeneous fashion -- the type that results from
+the insertion or deletion is the same type that is expected
+by the insertion or deletion. And, as it turns out, defining
+a synchronization algorithm \emph{without} alignments
+proved a significantly more difficult, if not impossible.
+
 \victor{
 Still mention:
 \begin{itemize} 
-  \item This is an important use of type-level information!
   \item Conjecture: arbitrarily deep zippers will give edit-script like complexity!
 that's where the log n is hidden.
 \end{itemize}
@@ -998,7 +1059,20 @@ that's where the log n is hidden.
 \subsection{Meta Theory}
 \label{sec:pepatches:meta-theory}
 
-\victor{UNFINISHED SUBSECTION}
+%% POTENTIAL NOTATION:
+%{
+
+%format (app (p) x) = "\mathopen{\HT{\llbracket}}" p "\mathclose{\HT{\rrbracket}}\>" x
+%format after q p   = q "\mathbin{\HT{\bullet}}" p
+%format iff         = "\HS{\iff}"
+%format alpha       = "\HVNI{\alpha}"
+%format beta        = "\HVNI{\beta}"
+%format gamma       = "\HVNI{\gamma}"
+%format sigma       = "\HVNI{\sigma}"
+%format zeta        = "\HVNI{\zeta}"
+
+\victor{maybe move the notation to the topleve;
+I quite like semantic brackets for application}
 
   The |Chg| datatype represents a complete detachment from
 edit-scripts. We can represent arbitrary structural transformations
@@ -1035,13 +1109,152 @@ change that witnesses the composition is given by
 \begin{myhs}
 \begin{code}
 after :: Chg kappa fam at -> Chg kappa fam at -> Maybe (Chg kappa fam at)
-q `after` p =
-  case unify (chgDel q) (chgIns p) of
+after p q =
+  case unify (chgDel p) (chgIns q) of
     Left   _      -> Nothing
-    Right  sigma  -> Just (Chg  (substApply sigma (chgDel p))
-                                (substApply sigma (chgIns q)))
+    Right  sigma  -> Just (Chg  (substApply sigma (chgDel q))
+                                (substApply sigma (chgIns p)))
 \end{code}
 \end{myhs}
+
+  We say that |after p q| is defined if there exists a change
+|k| such that |after p q == Just k|, or, equivalently, if
+|chgDel p| is unifiable with |chgIns q|.
+
+  Note that it is inherent that purely structural composition of two changes
+|p| after |q| yields a change, |pq|, that potentially misses sharing 
+oportunities. Imagine that |p| inserts a subtree |t| that was
+deleted by |q|. Our composition algorithm posses no information
+that this |t| is to be treated as a copy. This also occurs in
+the edit-script universe: composing patches yields worse patches
+than recomputing differences. We can imagine that a more complicated
+composition algorithm could work around and recognize the copies
+in those situations. 
+
+  Regardless of whether the composition produces \emph{the best}
+patches possible or not, it is vital that it is correct. That
+is, the composition of two patches is indistinguishable from
+the composition of their application function. For the remainder
+of this sextion we will abuse notation and write |sigma x|
+instead of |substApply sigma x|. Finally, is
+is crucial to recall we will abide by the Barendregt convention~\cite{Barendregt1984}
+in our proofs and metatheory -- that is, all changes that appear
+in in some mathematical context have their bound variable names
+independent of each other, or, no two changes share
+a variable name.
+
+\victor{Is this style of proof ok? Can you follow it?}
+
+\begin{lemma}[Composition Correct] \label{lemma:pepatches:comp-correct}
+For any changes |p| and |q| and trees |x| and |y| aptly typed;
+|app (after p q) x == Just y| if and only if
+there exists |z| such that |app q x == Just z| and |app p z == Just y|.
+\end{lemma}
+\begin{proof}
+\begin{description}
+\item[if.]
+Assuming |app (after p q) x == Just y|, we want to prove there exists
+|z| such that |app q x == Just z| and |app p z == Just y|. Let |sigma|
+be the result of |unify (chgDel p) (chgIns q)|, witnessing |after p q|;
+let |gamma| be the result of |unify (sigma (chgDel q)) x|, witnessing the
+application.
+\begin{enumerate}
+\item First, we observe that |chgDel q| unifies with |x|
+through |gamma . sigma|. Moreover, |(gamma . sigma) q == x|.
+Hence, |app q x == Just z|, for |z = (gamma . sigma) (ctxIns q)|.
+
+\item Now, we must prove that there exists a substitution
+|zeta| such that |zeta (ctxDel p) == zeta z|
+Taking |zeta = gamma . sigma| and observing that |(gamma . sigma) (ctxIns q)|
+has no variables enables us to conclude that we can 
+apply |p| to |z|.
+
+\item Finally, we must prove that the result of
+applying |p| to |z| coincides with |y|, that is, |zeta (ctxIns p) == y|.
+Which is trivial given |zeta == gamma . sigma| and our hypothesis.
+\end{enumerate}
+\item[only if.]
+Assuming there exists |z| such that |app q x == Just z| and
+|app p x == Just y|, we want to prove that |app (after p q) x == Just y|.
+Let |alpha| be such that |alpha (ctxDel q) == x|, hence, |z == alpha (ctxIns q)|;
+Let |beta| be such that |beta (ctxDel p) == z|, hence |y == beta (ctxIns p)|.
+\begin{enumerate}
+\item First we prove that |after p q| is defined, that is,
+there exists |sigma'| such that |sigma' (ctxIns q) == sigma' (ctxDel p)|.
+Take |sigma' = alpha ++ beta|, and recall |alpha| and |beta|
+have disjoint supports.
+
+\begin{myhs}
+\begin{code}
+     sigma'  (ctxIns q)  ==  sigma'  (ctxDel p) 
+iff  alpha   (ctxIns q)  ==  beta    (ctxDel p)   -- disjoint supports
+iff  z                   ==  beta    (ctxDel p)   -- def z
+iff  beta z              ==  beta    (ctxDel p)   -- z has no variables
+\end{code}
+\end{myhs}
+
+\item Since |sigma'| unifies |ctxIns q| and |ctxDel p|, let
+|sigma| be their \emph{most general unifier}, that is,
+|sigma = unify (ctxIns q) (ctxDel p)|. This yields
+that |sigma' = gamma . sigma| for some |gamma| and
+that |p after q == Chg (sigma (ctxDel q)) (sigma (ctxIns p))|.
+
+\item Next we prove |sigma (ctxDel q)| can be
+applied to |x|. Well, we know |x == beta (ctxDel q)|
+and |beta (ctxDel q) == sigma' (ctxDel q)|, hence,
+|x == (gamma . sigma) (ctxDel q)|. 
+Becase |x| has no variables, |gamma x == x|.
+Hence, |gamma| witnesses the unification of |sigma (ctxDel q)|
+and |x|. Hence, |app (after p q) x == gamma (sigma (ctxIns p))|
+Finally, a straightforward calculation yeilds that
+|gamma (sigma (ctxIns p)) == y|.
+\end{enumerate}
+\end{description}
+\end{proof}
+
+  Once we have estabilished that composition is correct
+with respect to application, we would like to ensure
+composition is associative. But first, it is handy to
+consider an extensional equality over changes. Two
+changes are sait to be equal if and only if they are 
+undistinguishable through their application semantics:
+
+\[
+|p ~ q iff forall x dot (app p x) == (app q x)|
+\]
+
+\begin{lemma}[Definability of Composition]
+Let |p|, |q| and |r| be aptly typed changes;
+|after (after p q) r| is defined if and only if |after p (after q r)|
+is defined. 
+\end{lemma}
+\begin{proof}
+If the proof above is fine; I'll transcribe what I have.
+\end{proof}
+
+\begin{lemma}[Associativity of Composition] \label{lemma:pepatches:comp-assoc}
+Let |p|, |q| and |r| be aptly typed changes such
+that |after (after p q) r| is defined, then
+|after (after p q) r ~ after p (after q r)|.
+\end{lemma}
+\begin{proof}
+If the proof above is fine; I'll transcribe what I have.
+\end{proof}
+
+\begin{lemma}[Identity of Composition] \label{lemma:pepatches:comp-id}
+Let |p| be a change, then |cpy = Chg (metavar x) (metavar x)| is
+the identity of composition. That is, |after p cpy == p == after cpy p|.
+\end{lemma}
+\begin{proof}
+Trivial; |cpy| unifies with anything.
+\end{proof}
+
+  \Cref{lemma:pepatches:comp-assoc,lemma:pepatches:comp-id} estabilish
+a partial monoid structure for |Chg| and |after| under extensional
+change equality, |~|. This further strenghtens the applicability
+of |Chg| as a sound replacement for edit-script.
+
+\victor{discuss inverses?}
 
 \victor{
 The |PatchPE ki codes| forms either:
@@ -1049,14 +1262,11 @@ The |PatchPE ki codes| forms either:
 \item Partial monoid, if we want |vars ins <= vars del|
 \item Grupoid, if we take |vars ins == vars del|
 \end{itemize}
-
-\begin{myhs}
-\begin{code}
-alDistr :: Holes kappa fam (Al kappa fam) at -> Al kappa fam at
-\end{code}
-\end{myhs}
 }
 
+
+%}
+%%% END OF TEMPORARY NOTATION
 
 \section{Merging Aligned Patches}
 \label{sec:pepatches:merging}
@@ -1883,10 +2093,8 @@ noNested1  :: CanShare kappa fam
            -> T.Trie MetavarAndArity
            -> PrepFix a kappa fam at
            -> Holes kappa fam (Const Int :*: PrepFix a kappa fam) at
-noNested1 h sm x@(PrimAnn ann xi)
-  = if h x  then maybe (Prim xi) (mkHole x) $$ lookup (getDigest ann) sm 
-            else Prim xi
-noNested1 h sm x@(SFixAnn ann xi)
+noNested1 h sm x@(PrimAnn _    xi) = Prim xi
+noNested1 h sm x@(SFixAnn ann  xi)
   =  if h x  then maybe recurse (mkHole x) $$ lookup (getDigest ann) sm 
              else recurse
  where

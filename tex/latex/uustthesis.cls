@@ -501,6 +501,11 @@ project \@NWOproject{} (\@NWOgrantnumber).
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
 
+\theoremstyle{plain}
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{theorem}{Theorem}[section]
+
+
 %% Paragraph formatting
 
 \setlength{\parskip}{0.5em}
@@ -510,6 +515,8 @@ project \@NWOproject{} (\@NWOgrantnumber).
 
 \usepackage[numbers,square]{natbib}
 
+\usepackage[shortlabels]{enumitem}
+\setlist[enumerate]{label=\alph*)}
 
 \ifPHD@isdraft
 \usepackage[displaymath,mathlines]{lineno}
