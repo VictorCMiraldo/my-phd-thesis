@@ -200,15 +200,18 @@ can be applied to |chgIns c|. Note that since |x| has no holes,
 a successful unification means |sigma| has a term for each metavariable 
 in |chgDel c|. When we apply |sigma| to |chgIns c| we are
 guaranteed to substitute every metavariable in |chgIns c|
-because changes are well-scoped.
+because changes are well-scoped. If we attempt to pass
+a non-well-scoped change to |chgApply| we are breaking the
+invariant on |Chg|. We \texttt{error} out on that situation to
+distinguish it from a change not being able to be applied to |x|
+because |x| is not on the changes domain.
 
 \begin{myhs}
 \begin{code}
-applyChg  :: (All Eq kappa)
-          => Chg kappa fam at -> SFix kappa fam at -> Maybe (SFix kappa fam at)
-applyChg (Chg d i) x = 
-  either  (const Nothing) (Just . holesUncast . flip substApply i) 
-          (unify d (holesCast x))
+chgApply  :: (All Eq kappa) => Chg kappa fam at -> SFix kappa fam at -> Maybe (SFix kappa fam at)
+chgApply (Chg d i) x = either  (const Nothing) (holesMapM uninstHole . flip substApply i) 
+                               (unify d (sfixToHoles x))
+  where uninstHole _ = error "uninstantiated hole: (Chg d i) not well-scoped!"
 \end{code}
 \end{myhs}
 
@@ -475,23 +478,25 @@ adding the successor of the maximum variable of one
 over the other.}
 
   The application semantics of |Patch| is best defined in terms
-of |applyChg|. Assume all metavariable scopes are disjoint, the
+of |chgApply|. Assume all metavariable scopes are disjoint, the
 application of a patch is defined as:
 
 \begin{myhs}
 \begin{code}
-apply  :: (All Eq kappa)
-       => Patch kappa fam at -> SFix kappa fam at -> SFix kappa fam at
-apply  = applyChg . chgDistr
+apply  :: (All Eq kappa) => Patch kappa fam at -> SFix kappa fam at -> SFix kappa fam at
+apply  = chgApply . chgDistr
 \end{code}
 \end{myhs}
 
   In \Cref{sec:pepatches:meta-theory} we will look at how
 this simple application semantics for patches already gives rise to 
 familiar structures -- a partial grupoid or monoid depending on whether we
-allow metavariables to be left unused. Finally, we discuss how to
-optimize our patches for synchronization in \Cref{sec:pepatches:closures}
-and \Cref{sec:pepatches:alignment}.
+allow metavariables to be left unused. Nevertheless, this representation
+is still very crude and hard to understand what actually happened, that
+is, which constructors were in fact copied? Which trees were duplicated? etc.
+Our next task, then, is to optimize the representation for synchronization,
+\Cref{sec:pepatches:closures} and \Cref{sec:pepatches:alignment}.
+
 \subsection{Computing Closures}
 \label{sec:pepatches:closures}
 
@@ -579,7 +584,7 @@ variables |g :: Map Int Arity| for the global scope, we can encode
 \begin{myhs}
 \begin{code}
 isClosed :: Map Int Arity -> Map Int Arity -> Map Int Arity -> Bool
-isClosed global ds us = M.unionWith (+) ds us `isSubmapOf` global
+isClosed global ds us = unionWith (+) ds us `isSubmapOf` global
 
 isClosedChg :: Map Int Arity -> Chg kappa fam at -> Bool
 isClosedChg global (Chg d i) = isClosed global (vars d) (vars i)
@@ -587,7 +592,7 @@ isClosedChg global (Chg d i) = isClosed global (vars d) (vars i)
 \end{myhs}
 
   Given a well-scoped change |c|, we minimize it
-by computing the least general generalization |s = lcp (chgDel c) (chdIns c)|, 
+by computing the least general generalization |s = lgg (chgDel c) (chdIns c)|, 
 which might contain \emph{locally ill-scoped} changes, then pushing
 constructors that are in the spine into the changes until they are
 all closed. \Cref{fig:pepatches:example-03} provides a good
@@ -610,7 +615,7 @@ to produce a patch.
 \begin{code}
 close :: Chg kappa fam at -> Holes kappa fam (Chg kappa fam) at
 close c =  let  global  = vars h
-                aux     = holesMap annWithVars (lgg (chgDel d) (chgIns d))
+                aux     = holesMap withVars (lgg (chgDel d) (chgIns d))
             in case close' global aux of
                  InL _  -> error "invariant failure: c was not well-scoped."
                  InR b  -> Just (holesMap body b)
@@ -632,39 +637,27 @@ close'  :: M.Map Int Arity
 -- Primitive values are trivially closed;
 close' _  (Prim x)  = InR (Prim x)
 -- Changes might be closed, or they require no more work;
-close' gl (Hole cv)
-  | isClosed gl (decls cv) (uses cv)  = InR (Hole cv)
-  | otherwise                         = InL cv
--- Recursive calls need to understand whether /all/ recursive components
--- are closed.
+close' gl (Hole cv) = if isClosed gl cv then InR (Hole cv) else InL cv
+-- Recursive call: are /all/ recursive components closed?
 close' gl (Roll x) =
   let aux = repMap (close' gl) x
    in case repMapM fromInR aux of
-        -- When all recursive components are closed, /Roll/ goes in the spine.
+        -- Yes; /Roll/ is part of the spine.
         Just res -> InR (Roll res)
-        -- If at least one component is not closed, we need to distribute /Roll/
-        -- through the deletion and insertion contexts and decide whether that
-        -- closed the change or not.
-        Nothing  -> let  chgs  = repMap (either' id (chgDistr . body)) aux
-                         -- Compute unions of the /decls/ and /uses/ multisets
-                         dels  = foldr (\c -> unionWith (+) (getDecls c)) empty 
-                                       $$ repLeaves chgs
-                         inss  = foldr (\c -> unionWith (+) (getUses c)) empty 
-                                       $$ repLeaves chgs
-                         -- Compute the final deletion and insertion contexts
-                         cD    = Roll (repMap (chgDel . body)) chgs
-                         cI    = Roll (repMap (chgIns . body)) chgs
-                     in if isClosed gl dels inss
-                        then InR (Hole  (ChgVars dels inss (Chg cD cI)))
-                        else InL        (ChgVars dels inss (Chg cD cI))
+        -- No; distribute this roll and checks whether the union of the
+        -- scopes closes the change.
+        Nothing  -> let res = chgVarsDistr (Roll (repMap (either' Hole id) aux))
+                     in if isClosed gl res then InR (Hole res) else InL res
   where
-    getDecls  :: Exists (WithVars (Chg kappa fam)) -> Map Int Arity
-    getUses   :: Exists (WithVars (Chg kappa fam)) -> Map Int Arity
     fromInR   :: Sum f g x -> Maybe (g x)
 \end{code}
 \end{myhs}
 \caption{The |close'| auxiliar function}
 \label{fig:pepatches:close-aux}
+
+\victor{I'm thinking of moving all these large functions to a separate 
+section or chapter somewhere. Does that make sense?}
+
 \end{figure}
 
 \begin{myhs}
@@ -674,21 +667,34 @@ data WithVars x at = WithVars  { decls  :: Map Int Arity
                                , body   :: x at
                                }
 
-annWithVars :: (Holes kappa fam :*: Holes kappa fam) at -> WithVars (Chg kappa fam) at
-annWithVars (d :*: i) = WithVars (vars d) (vars i) (Chg d i)
+withVars :: (HolesMV kappa fam :*: HolesMV kappa fam) at -> WithVars (Chg kappa fam) at
+withVars (d :*: i) = WithVars (vars d) (vars i) (Chg d i)
+\end{code}
+\end{myhs}
+
+  The |close'| function receveies a spine |s|, with leaves of 
+type |WithVars (Chg dots)|, and attemps to ``enlarge'' those leaves if necessary. 
+When it is not possible to close 
+the current spine, it returns a |InL (WithVars (Chg dots))| equivalent to pusing all the
+constructors of |s| down the deletion and insertion contexts.
+The implementation of |close'| is shown in its entirety in \Cref{dif:pepatches:close-aux},
+but its main component is |chgVarsDistr|, which distributes
+a |WithVars| over a spine whilst computing the union of the declared 
+and used multisets, as shown below.
+
+\begin{myhs}
+\begin{code}
+chgVarsDistr :: Holes kappa fam (WithVars (Chg kappa fam)) at
+             -> WithVars (Chg kappa fam) at
+chgVarsDistr rs = 
+  let  ls  = getHoles rs
+       us  = map (exElim uses)   ls
+       ds  = map (exElim decls)  ls
+   in WithVars  (unionsWith (+) ds) (unionsWith (+) us) 
+                (chgDistr (repMap body rs))
 \end{code}
 \end{myhs}
   
-  The |close'| function albeit having a somewhat intimidating
-implementation, is conceptually simple.
-It receveies a spine |s|, with leaves of type |WithVars (Chg dots)|, and attemps
-to ``enlarge'' those leaves if necessary. When it is not possible to close 
-the current spine, it returns a |WithVars (Chg dots)| equivalent to pusing all the
-constructors of |s| down the deletion and insertion contexts.
-The implementation of |close'| is shown in its entirety in \Cref{dif:pepatches:close-aux}.
-\victor{I'm thinking of moving all these large functions to a separate 
-section or chapter somewhere. Does that make sense?}
-
   It is worth noting that computing a \emph{locally scoped} patch
 from a large monolithic change only helps in preventing situations
 such the bad alignment presented in \Cref{fig:pepatches:misalignment:A}.
@@ -1099,8 +1105,8 @@ the synchronization algorithm.
 all been $\alpha$-converted to never capture names.
 
   Composing two changes |c0 = Chg d0 i0| with |c1 = Chg d1 i1| is
-possible if and only if the image of |applyChg c0| has elements in common
-with the domain of |applyChg c1|. This can be easily witnessed
+possible if and only if the image of |chgApply c0| has elements in common
+with the domain of |chgApply c1|. This can be easily witnessed
 by trying to unify |i0| with |d1|. If they are unifiable, the changes
 are composable. In fact, let |sigma = unify i0 d1|, the
 change that witnesses the composition is given by 
@@ -1628,7 +1634,7 @@ into a \emph{usable} formalism is an algorithm for efficiently computing
 these objects, which is te focus of this section.
 
   Given two trees, |s| and |d|, we would like to compute a change |c| such
-that |applyChg c s == Just d|. One obvious option would be |Chg s d|, but that
+that |chgApply c s == Just d|. One obvious option would be |Chg s d|, but that
 change contains no sharing whatsoever. Traditional edit-scripts based techniques
 optimize for a lower cost, which usually translates to more copies. Yet, this
 does not necessarily translate to high quality patches: especially when there
