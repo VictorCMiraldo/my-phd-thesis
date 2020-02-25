@@ -1,11 +1,68 @@
+  The most popular tool for computing the differences
+between two files is the \unixdiff{}~\cite{McIlroy1974}, 
+it works by comparing files in a \emph{line-by-line} basis and
+attemps to match lines from the source file to lines
+in the destination file. For example, consider the
+two files below:
 
-  Computing and representing differences in a finer granularity than
-\emph{lines-of-code} can be readily achieved with the existing
-technology by parsing the data into a tree and later flattening said
-tree into a list of nodes, where we can then reuse existing
-techniques for computing differences over lists.  
-This is how most of the classic work on tree edit distance work.
--- \Cref{sec:background:tree-edit-distance}. 
+\begin{minipage}{.45\textwidth}
+\begin{alltt}\small
+1    res := 0;
+2    for (i in is) \{
+3      res += i;
+4    \}
+\end{alltt}
+\end{minipage}\qquad%
+\begin{minipage}{.45\textwidth}
+\begin{alltt}\small
+1    // Computes a sum
+2    sum := 0;
+3    for (i in is) \{
+4      sum += i;
+5    \}
+\end{alltt}
+\end{minipage}
+
+  Lines 2 and 4 in the source file, on the left, match
+lines 3 and 5 in the destination. These are identified 
+as copies. The lines that appear solely in the source
+or the destination are marked as deletions and insertions
+respectively. In this example, lines 1 and 3 in the
+source are deleted and lines 1,2 and 4 in the destination
+are inserted. 
+
+  This information about which lines have been \emph{copied},
+\emph{deleted} or \emph{inserted} is then packaged into
+an \emph{edit-script}: a list of operations that transforms
+the source file into the destination file. For the example above,
+the edit script would read something like: delete the first line;
+insert two new lines; copy a line; delete a line; insert a line
+and finally copy the last line. The output we would see from
+the \unixdiff{} would show deletions prefixed with a minus sign
+and insertions prefixed with a plus sign. Copies have no prefix.
+In our case, it would look something like:
+
+\begin{alltt}\small
+-    res := 0;
++    // Computes a sum
++    sum := 0;
+     for (i in is) \{
+-      res += i;
++      sum += i;
+     \}
+\end{alltt}
+
+  The edit-scripts produced by the \unixdiff{} contain information
+about transforming the source into the destination file by operating
+exclusively at the \emph{lines-of-code} level.
+Computing and representing differences 
+in a finer granularity than \emph{lines-of-code} is usually done
+by parsing the data into a tree and later flattening said
+tree into a list of nodes, where one then reuses existing
+techniques for computing differences over lists, \ie{}, think
+of printing each constructor of the tree into its own line.
+This is precisely how most of the classic work on tree edit distance
+computes tree differences (\Cref{sec:background:tree-edit-distance}).
 
   Recycling linear edit distance into tree edit distance, however,
 also comes with its drawbacks. Linear differencing uses \emph{
