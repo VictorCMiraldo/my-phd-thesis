@@ -1,4 +1,4 @@
-  The most popular tool for computing the differences
+  The most popular tool for computing differences
 between two files is the \unixdiff{}~\cite{McIlroy1974}, 
 it works by comparing files in a \emph{line-by-line} basis and
 attemps to match lines from the source file to lines
@@ -25,11 +25,10 @@ two files below:
 
   Lines 2 and 4 in the source file, on the left, match
 lines 3 and 5 in the destination. These are identified 
-as copies. The lines that appear solely in the source
-or the destination are marked as deletions and insertions
-respectively. In this example, lines 1 and 3 in the
-source are deleted and lines 1,2 and 4 in the destination
-are inserted. 
+as copies. The rest of the lines, with no matches,
+are marked as deletions or insertions. In this example, 
+lines 1 and 3 in the source are deleted and lines 
+1,2 and 4 in the destination are inserted. 
 
   This information about which lines have been \emph{copied},
 \emph{deleted} or \emph{inserted} is then packaged into
@@ -99,14 +98,16 @@ our own solutions later, in \Cref{chap:generic-programming}.
 \label{sec:background:tree-edit-dist}
 
   The \emph{edit distance} between to objects is
-defined as the cost of the least cost edit script that transforms
-the source object into the target object. The edit-script
-computation is often called \emph{differencing} of objects.
-Where \emph{edit distance} is only concerned with how
-\emph{similar} one object is to another, \emph{differencing}
-is actually concerned with which manner makes objects
-similar. Although very closely related, these do make up
-different problems. In the biology domain \cite{Akutsu2010b,Henikoff1992,McKenna2010},
+defined as the cost of the least-cost edit-script that transforms
+the source object into the target object -- that is,
+the edit-script with the least insertions and deletions.
+Computing edit-scripts is often refered to as \emph{differencing} objects.
+Where edit distance computation is only concerned with how
+\emph{similar} one object is to another, \emph{differencing},
+on the other hand, is actually concerned with how to transform 
+one objects into another. Although very closely related, these do make up
+different problems. 
+In the biology domain \cite{Akutsu2010b,Henikoff1992,McKenna2010},
 for example, one is concerned solely in finding similar
 structures in a large set of structures, whereas
 in software version control systems we actually want to store,
@@ -118,22 +119,17 @@ operations and algorithms for computing them~\cite{Bille2005,Bergroth2000,Paasse
 
   On this section we will review some of the important notions and
 background work on edit distance. We start by looking at the string
-edit distance, \Cref{sec:background:string-edit-distance} and then we
-generalize it to untyped trees, in
-\Cref{sec:background:tree-edit-distance}, as it is classically
-portrayed in the literature.  Next, we review the relevant literature
-in \Cref{sec:background:literature-review}.  Finally, we discuss some
-of the consequences of working with typed trees in
-\Cref{sec:background:typed-tree-edit-distance}.
+edit distance (\Cref{sec:background:string-edit-distance}) and then we
+generalize this to untyped trees (\Cref{sec:background:tree-edit-distance}), 
+as it is classically portrayed in the literature, which
+is reviewed in \Cref{sec:background:literature-review}.  
+Finally, we discuss some of the consequences of working with 
+typed trees in \Cref{sec:background:typed-tree-edit-distance}.
 
 \subsection{String Edit Distance and \unixdiff{}}
 \label{sec:background:string-edit-distance}
 
-  The distance between two strings, |s| and |d|, is defined by the
-(minimal) cost of transforming |s| into |d| by the means of some edit
-operations with associated \emph{cost} metric. Many different such
-combinations can be achieved by tweaking these parameters.  In this
-section we look at two widespread notions for edit distance.  The
+   In this section we look at two popular notions of edit distance.  The
 \emph{Levenshtein Distance}~\cite{Levenshtein1966,Bergroth2000}, for
 example, works well for detecting spelling mistakes\cite{Navarro2001}
 or measuring how similar two languages are \cite{Thije2007}. 
@@ -141,8 +137,7 @@ It considers insertions, deletions and substitutions of
 characters as its edit operations. The \emph{Longest Common
 Subsequence (LCS)}~\cite{Bergroth2000}, on the other hand considers
 insertions, deletions and copies as edit operations and is better
-suited for identifying long identical sequences, as sugested by its
-name.
+suited for identifying shared sequences between strings. 
 
 \subsubsection*{Levenshtein Distance}
 
@@ -156,8 +151,8 @@ data EditOp = Ins Char | Del Char | Subst Char Char
 \end{myhs}
 
   The semantics of these edit operations are straightforward. The |apply|
-function, shown below, witnesses the denotational semantics of |[EditOp]|
-into the set of partial functions over |String|s. 
+function, shown below, gives a denotational semantics of |[EditOp]|
+by maping edit scripts to partial functions over |String|s. 
 
 \begin{myhs}
 \begin{code}
@@ -186,8 +181,8 @@ cost (Subst c d)  = if c == d then 0 else 1
 
   We can compute the \emph{edit script}\index{Edit Script}, i.e. a
 list of edit operations, with the minimum cost quite easily with a
-naive, inefficient, recursive
-implementation. \Cref{fig:background:string-leveshtein} shows the
+brute-force and inefficient implementation. 
+\Cref{fig:background:string-leveshtein} shows the
 implementation of the edit script with the minimum Levenshtein
 distance.
 
@@ -234,15 +229,17 @@ lev "ab" "ba" =?  [ Del 'a' , Subst 'b' 'b' , Ins 'a']
 distance between |"ab"| and |"ba"| is 2, regardless of the edit
 script chosen. But from an operational point of view,
 , \ie, transforming one string into another, this ambiguity
-poses a problem. The lack of creiteria to prefer one edit script over another
+poses a problem. The lack of criteria to favor one edit script over another
 means that the result of the differencing algorithm is hard to predict.
-Consequently, developing a satsifactory merging algorithm becomes a difficult task.
-
-  In practice, we are interested on the \emph{Longest Common Subsequence (LCS)},
-which is a restriction of the Levenshtein distance. The LCS problem provides
-the specification to the \unixdiff{}~\cite{McIlroy1976} utility.
+Consequently, developing a predictable diff and merging algorithm 
+becomes a difficult task.
 
 \subsubsection*{Longest Common Subsequence}
+
+  Given our context of case of source-code version-control,  
+we are rather interested in the \emph{Longest Common Subsequence (LCS)},
+which is a restriction of the Levenshtein distance and forms
+the specification of the \unixdiff{}~\cite{McIlroy1976} utility.
 
   If we take the |lev| function and modify it in such a way to only
 considers identity substitutons, that is, |Subst x y| with |x == y|,
@@ -269,7 +266,7 @@ cost Cpy      = 0
   The application function is analogous to the |apply| for the Levenshtein
 distance. The computation of the minimum cost edit script, however,
 is not. We must ensure to issue a |Cpy| only when both elements
-are the same, as illustrated in \Cref{fig:background-string-lcs}.
+are the same, as illustrated in \Cref{fig:background:string-lcs}.
 
 \begin{figure}
 \begin{myhs}
@@ -291,36 +288,36 @@ lcs (x:xs)  (y:ys)  =
 \label{fig:background:string-lcs}
 \end{figure}
 
-Running the |lcs x y| function, \Cref{fig:background:string-lcs}, will yield an
-\emph{edit script} that enables us to read out one longest common subsequence of |x| and
-|y|. Note that the ambituity problem is still present. We do have
-less ambituigy than with the Levenshtein distance.
-In this case, there are only two edit scripts with minimum cost
-on |lcs ["a", "b"] ["b" , "a"]|. The ambiguity is not gone, however.
-In fact, this is a general problem with any \emph{edit-script} based approaches.
+Running the |lcs x y| function, \Cref{fig:background:string-lcs}, will
+yield an \emph{edit script} that enables us to read out one longest
+common subsequence of |x| and |y|. Note that the ambituity problem is
+still present, albeit we have less ambiguous edit-scripts than with 
+the Levenshtein distance. For example, there are only two edit-scripts 
+with minimum cost on |lcs ["a", "b"] ["b" , "a"]|. This, in fact, 
+is a general problem with any \emph{edit-script} based approaches.
 
   A practical implementation of the \unixdiff{} will use a number of
 algorithmic techniques that make it performant. For starter, it is
 essential to use a memoized |lcs| function to avoid recomputing
 subproblems. It is also common to hash the data being compared to have
-amortized constant time comparisson. More intricate, however, is the
-usage of a number of heuristics that tend to perform well in certain
-situations.  One example is the \texttt{diff --patience} algorithm~\cite{patienceDiff},
+amortized constant time comparisson. More complicated, however, is the
+adoption of a number of heuristics that tend to perform well in practice.  
+One example is the \texttt{diff --patience} algorithm~\cite{patienceDiff},
 that will emphasize the matching of lines that appear only once in the
 source and destintion files.
 
 \subsection{Classic Tree Edit Distance}
 \label{sec:background:tree-edit-distance}
 
-  The \unixdiff{} conceptually generalizes the notion of string edit
-distance to a notion of edit distance between lists containing data of
-arbitrary types. The only requirement being that we must be able to
-compare this data for equality. Generalizing on the shape of the data
-gives rise to the notion of (untyped) tree edit
+  The \unixdiff{} can be generalized to compute an edit-script
+between lists containing data of arbitrary types. 
+The only requirement being that we must be able to
+compare this data for equality. Generalizing over the shape of the data
+-- trees instead of lists -- gives rise to the notion of (untyped) tree edit
 distance~\cite{Akutsu2010,Demaine2007,Klein1998,%
 Bille2005,Autexier2015,Chawathe1997}.
 It considers \emph{arbitrary} trees as the objects under
-scrutiny. This added degree of freedom carries over to the design of
+scrutiny. This added degree of freedom carries over to the choice of
 edit operations. Suddenly, there are more edit operations one
 could use to create edit scripts. To name a few, we can have
 flattening insertions and deletions, where the children of the deleted
@@ -369,7 +366,7 @@ on a forest}
 node insertions, deletions and copies. The cost function is borrowed
 entirely from string edit distance together with the longest common
 subsequence function, that instead of working with |[a]| will now work
-with |[Tree]|. \Cref{fig:background:tree-es-operations} illsutrates
+with |[Tree]|. \Cref{fig:background:tree-es-operations} illustrates
 insertions and deletions of (untyped) labels on a forest. 
 The interpretation of these edit operations as actions
 on forests is shown in \Cref{fig:background:apply-tree-edit}. 
@@ -408,7 +405,8 @@ particularly important when one wants the ability to manipulate
 patches independently of the objects they have been created from.
 Imagine a merge function that needs to construct a patch
 based on two other patches. A wrong implementation of said merge function
-can yield programs that are unparseable.
+can yield invalid trees for some given schema. In the context of
+abstract-syntax, this could be unparseable programs.
 
   It is possible to use the Haskell type system to our advantage and
 write |EOp| in a way that it is guaranteed to return well typed
@@ -422,7 +420,8 @@ Lempsink and L\"{o}h~\cite{Lempsink2009} at adapting this untyped framework
 to be type-safe by construction.
 
   Although edit scripts provide a very intuitive notion of local
-transformations over a tree, they are very redundant. Making it hard to 
+transformations over a tree, they are very redundant: the order of
+insertions and deletions do no matter. This makes it hard to 
 develop algorithms based solely on edit scripts. It is often the case
 that the notion of \emph{tree mapping} comes in handy. It works as
 a \emph{normal form} version of edit scripts and represents only the
@@ -436,9 +435,9 @@ Let |t| and |u| be two trees, a tree mapping
 between |t| and |u| is an order preserving partial bijection between the
 nodes of a flattened representation of |t| and |u| according
 to their preorder traversal. Moreover, it must preserve the 
-ancenstral order of nodes. That is, take two subtrees in the domain
-of the mapping, one is an ancestor of the other iff their corresponding images
-are preserve the ancestry.
+ancenstral order of nodes. That is, given two subtrees |x| and |y| in 
+the domain of the mapping |m|, then |x| is an ancestor of |y| if and only if
+|m x| is an ancestor of |m y|.
 \end{definition}
 
 \begin{figure}
@@ -506,13 +505,13 @@ example.}
 must be performed. Everything else must be deleted or inserted and the
 order of deletions and insertions is irrelevant, which removes the redundancy
 of edit scripts. Nevertheless, the definition of tree mapping is still very restrictive:
-(i) the ``bijective mapping'' does not enable trees to be shared or contracted;
-(ii) the ``order preserving'' does not enbale trees to be permuted or moved
+(i) the ``bijective mapping'' does not enable trees to be duplicated or contracted;
+(ii) the ``order preserving'' does not enable trees to be permuted or moved
 accross ancestor boundaries. These restrictions are there to ensure that
 one can always compute an edit script from a tree mapping.
 
   Most tree differencing algorithms start by producing a tree mapping and
-then extracting an edit script from it. There are a plethora of design
+then extracting an edit script from this. There are a plethora of design
 decisions on how to produce a mapping and often the domain of application
 of the tool will enable one to impose extra restrictions to attempt to squeeze
 maximum performance out of the algorithm. The \texttt{LaDiff}~\cite{Chawathe1996} tool, 
@@ -522,12 +521,13 @@ appearing in the same order, starting at the leaves of the document.
 Tools such as \texttt{XyDiff}~\cite{Marian2002}, used to identify changes in XML documents,
 use hashes to produce matchings efficiently.
 
-\subsection{Shortcommings of Edit Script Based Approaches}
+\subsection{Shortcomings of Edit Script Based Approaches}
 
   Regardless of the process by which an edit script is obtained,
-we argue that edit scripts have inherent shortcommings when they
+we argue that edit scripts have inherent shortcomings when they
 are used to compare tree structured data. The first and most striking 
 is that the use of heuristics to compute optimal solutions is unavoidable.
+Consider the tree-edit-scripts between the following two trees:
 
 \begin{center}
 \begin{forest}
@@ -544,7 +544,7 @@ U]| transform the target into the destination correctly. Yet, from
 a \emph{differencing} point of view, these two edit scripts are fairly different.
 Do we care more about |U| or |T|? What if |U| and |T| are also
 trees, but happen to have the same size (so that inserting one or the
-oter yields edit-scripts with equal costs)? Ultimately, 
+other yields edit-scripts with equal costs)? Ultimately, 
 differencing algorithms that support no \emph{swap} operation
 must choose to copy |T| or |U| arbitrarily. This decision is often
 guided by heuristics, which makes the result of different algorithms
@@ -552,16 +552,15 @@ hard to predict. Moreover, the existence of this type of choice point inherently
 slows algotihms down since the algorithm \emph{must decide} which
 tree to copy. 
 
-  Another worrysome issue when dealing with edit script is
+  Another issue when dealing with edit script is
 that they are type unsafe. It is quite easy to write an edit
 script that produce an \emph{ill-formed} tree, according to some
 arbitrary schema. Even when writing the edit operations in a
 type safe way~\cite{Lempsink2009} the synchronization of said changes
 is not guarnateed to be type safe~\cite{Vassena2016}.
   
-  Finally, we cannot oversee the lack of expressivity
-that comes from edit scripts, from the \emph{differencing} point of fiew.
-Consider the trees below,
+  Finally, we must mention the lack of expressivity that comes from edit scripts, 
+from the \emph{differencing} point of fiew. Consider the trees below,
 
 \begin{center}
 \begin{forest}
@@ -576,11 +575,12 @@ as the left or the right subtree, there is no possibility to represent
 duplications, permutations or contractions of subtrees. This means
 that a number of common changes, such as refactorings, yield
 edit scripts with a very high cost even though a good part of the information
-being moved (which must be done by deletions and insertions) should essentially
-be copied.
+being deleted or inserted should really have been copied.
 
 \section{Synchronizing Changes}
 \label{sec:background:synchronizing-changes}
+
+\victor{I'm here with feedback on chap 2}
 
   When aplplying differencing algorithms to help in managing local
 copies of replicated data, such as in software version control
