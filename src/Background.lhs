@@ -580,59 +580,56 @@ being deleted or inserted should really have been copied.
 \section{Synchronizing Changes}
 \label{sec:background:synchronizing-changes}
 
-\victor{I'm here with feedback on chap 2}
-
-  When aplplying differencing algorithms to help in managing local
-copies of replicated data, such as in software version control
-systems, one is inevitably faced with the problem of
+  When managing local copies of replicated data such as in software
+version control systems, one is inevitably faced with the problem of
 \emph{synchronizing}~\cite{Balasubramaniam1998} or \emph{merging}
 changes --- when an offline machine goes online with new versions,
 when two changes happened simultaneously, etc. The \emph{synchronizer}
-is responsible to recognize changes and reconcile them in the most
-automatic way possible.  Most modern synchronizers are denoted
-\emph{state-based}, that is, they see only the current version of the
-replicas to be synchronized and the last common version between the
-diverging histories; as opposed to \emph{operaton-based} synchronizers,
-which have access to the whole history of modifications of the objects
-under synchronization. 
+is responsible to identify what has changed and reconcile these
+changes when possible.  Most modern synchronizers operate over the
+diverging replicas and last common version, without knowledge of the
+history of the last common version -- these are often denoted
+\emph{state-based} synchronizers, as opposed to \emph{operation-based}
+synchronizers, which access the whole history of modifications.
 
-   The \texttt{diff3}~\cite{Smith1988} tool, for example, still is the
-best known tool for textual (\emph{state-based}) synchronization.  The
-algorithm itself has received some formal treatment~\cite{Khanna2007}
-and some generalizations to tree shaped data~\cite{Lindholm2004,Vassena2016}.
+   The \texttt{diff3}~\cite{Smith1988} tool, for example, is the
+most widely used synchronizer for textual data. 
+It is a \emph{state-based} that calls the \unixdiff{} to compute
+the differences between the common ancestor and each diverging replica,
+then tries to produce an edit-script that when applied to the common
+ancestor produces a new file, containing the union of changes introduced
+in each individual replica. The algorithm itself has been studied
+formally~\cite{Khanna2007} and there are proposals to extend
+it to tree-shaped data~\cite{Lindholm2004,Vassena2016}.
 
 \begin{figure}
 \centering
-\subfloat[Residual based merge operation]{%
-\qquad $$
-\xymatrix{ & o \ar[dl]_{p} \ar[dr]^{q} & \\
-          a \ar[dr]_{|merge q p|} & & b \ar[dl]^{|merge p q|} \\
-            & c &}
-$$ \qquad
-\label{fig:background:mergesquare-resid}}%
-\qquad%
 \subfloat[Three-way based merge operation]{%
 \qquad $$
-\xymatrix{ & o \ar[dl]_{p} \ar[dr]^{q} \ar[dd]^(0.8){|merge p q|} & \\
-          a & & b \\
-            & c &}
+\xymatrix{ & O \ar[dl]_{p} \ar[dr]^{q} \ar[dd]^(0.8){|merge p q|} & \\
+          A & & B \\
+            & M &}
 $$ \qquad
 \label{fig:background:mergesquare-threeway}}
+\qquad%
+\subfloat[Residual based merge operation]{%
+\qquad $$
+\xymatrix{ & O \ar[dl]_{p} \ar[dr]^{q} & \\
+          A \ar[dr]_{|merge q p|} & & B \ar[dl]^{|merge p q|} \\
+            & M &}
+$$ \qquad
+\label{fig:background:mergesquare-resid}}%
 \caption{Two different ways to look at the merge problem.}
 \label{fig:background:mergesquare}
 \end{figure}
 
   Generally speaking, synchronization of changes $p$ and $q$ can be
 modelled in one of two ways. Either we produce one change that works
-on the common ancestor of $p$ and $q$,
+on the common ancestor of $p$ and $q$, as in
 \Cref{fig:background:mergesquare-threeway}, or we produce two changes
 that act directly on the images of $p$ and $q$,
 \Cref{fig:background:mergesquare-resid}.  We often call the the former
 a \emph{three-way merge} and the later a \emph{residual} merge.
-
-\Cref{fig:background:mergesquare-resid} shows a residual system~\cite{Terese2003}
-approach whereas \Cref{fig:background:mergesquare-threeway} illustrates
-a direct approach, such as used by the \texttt{diff3} utility.
 
   Residual merges, specially if based on actual residual
 systems~\cite{Terese2003} pose a few technical challenges --- proving
@@ -640,16 +637,83 @@ the that the laws required for estabilishing an actual residual system
 is non trivial. Moreover, they tend to be harder to generalize
 to $n$-ary inputs. They do have the advantage of enabling one to
 model merges as pushouts~\cite{Mimram2013}, which could provide a desirable
-metatheoretical layer. 
+metatheoretical foundation. 
 
-  Regardless of choosing a \emph{three-way} or \emph{residual} based approach,
-any state-based synchronizer will invariably have to deal with the problem of 
-\emph{aligning} the changes. That is, deciding which parts of the replicas are
-copied from the same part of the common denominator, \ie{}, which parts of the replicas
-are ``the same''. Most of the time, this is solved by the differencing algorithm
-that underlies the synchronizer -- \texttt{diff3}, for example, calls \texttt{diff} to
-decide the aligment to use. 
+\begin{figure}
+\footnotesize \centering
+\subfloat[Replica \texttt{A}]{%
+\begin{minipage}[t]{\textwidth}
+\begin{verbatim}
+  sum := 0;
+  for (i in is) {
+    sum := sum + i; 
+  }
+\end{verbatim}
+\end{minipage}}
+\qquad%
+\subfloat[Common ancestor, \texttt{O}]{%
+\begin{minipage}[t]{\textwidth}
+\begin{verbatim}
+  res := 0;
+  for (i in is) {
+    res := res + i; 
+  }
+\end{verbatim}
+\end{minipage}}
+\qquad%
+\subfloat[Replica \texttt{B}]{%
+\begin{minipage}[t]{\textwidth}
+\begin{verbatim}
+  res := 0;
+  sum := 0;
+  for (i in is) {
+    res := res + i; 
+    sum := sum + i; 
+  }
+\end{verbatim}
+\end{minipage}}
+\qquad%
 
+\subfloat[\texttt{diff O A}]{%
+\begin{minipage}{\textwidth}
+\begin{verbatim}
+- res := 0;
++ sum := 0;
+  for (i in is) {
+-   res := res + i; 
++   sum := sum + i; 
+  }
+\end{verbatim}
+\end{minipage}}
+\qquad\qquad\qquad%
+\subfloat[\texttt{diff O B}]{%
+\begin{minipage}{\textwidth}
+\begin{verbatim}
+  res := 0;
++ prod := 1;
+  for (i in is) {
+    res := res + i; 
++   prod := prod * i; 
+  }
+\end{verbatim}
+\end{minipage}}
+\caption{Two \unixdiff{} patches that diverge from a common ancestor.}
+\label{fig:background:diff3-example}
+\end{figure}
+ 
+  Regardless of choosing a \emph{three-way} or \emph{residual} based
+approach, any state-based synchronizer will invariably have to deal
+with the problem of \emph{aligning} the changes. That is, deciding
+which parts of the replicas are copies from the same piece of
+information in the common ancestor. For example, successfully 
+synchronizing the replicas in \Cref{fig:background:diff3-example} 
+depends in recognizing that the insertion of {\small \verb!prod := 1;!} 
+comes after changeing {\small \verb!res := 0;!} 
+to {\small \verb!sum := 0;!}. This fact only becomes evident after
+we look at the result of calling the \unixdiff{} on each diverging
+replica -- the copies in each patch identify which parts of the
+replicas are ``the same''.
+  
 \begin{figure}
 \subfloat[][inputs]{%
 \begin{myhs}[.45\textwidth]
@@ -707,34 +771,28 @@ changes are a conflict. In our case, the $4,5$ was only changed in one replica,
 so it is safe to propagate (\Cref{fig:background:example-diff3:propagate}).
 
   Different synchronization algorithms algorithms will naturally offer
-slightly different properties, yet, one that seems to be central
-to synchronization is locality~\cite{Khanna2007} -- which 
-is enjoyed by \texttt{diff3}~\cite{Khanna2007}. 
-Locality states that changes two ``well separated'' parts of a given
-object can always be synchronized without conflicts. In fact, we argue
-this is the only property we can expect out of a general-purpose generic
-synchronizer.  The reason being that said synchronize can
-only blindly rely on propositional equality of trees and structural disjointness as
-the criteria to estabilish changes as synchronizable.  Other criteria
-will invariantly require knowledge of the semantics of the data under
-synchronization. It is worth noting that although ``well separated''
+slightly different properties, yet, one that seems to be central to
+synchronization is locality~\cite{Khanna2007} -- which is enjoyed by
+\texttt{diff3}~\cite{Khanna2007}.  Locality states that changes to two
+distinct locations of a given object can always be synchronized
+without conflicts. In fact, we argue this is the only property we can
+expect out of a general-purpose generic synchronizer.  The reason
+being that said synchronizer can rely solely on propositional
+equality of trees and structural disjointness as the criteria to
+estabilish changes as synchronizable.  Other criteria will invariantly
+require knowledge of the semantics of the data under
+synchronization. It is worth noting that although ``distinct locations''
 is difficult to define for an underlying list, tree shaped data has
 the advantage of possessing simpler such notions.
 
-\victor{more, less, ok?}
-
 \subsection{Literature Review}
 \label{sec:background:literature-review}
-  
-  Computing the tree edit distance -- classically -- is the
-problem of computing a minimum cost edit script that 
-can be used to transform a target into a source ordered tree.  
-This edit script is seen as a sequence of edit operations, 
-which often include, for
-example, \emph{insert node}, \emph{delete node} and \emph{relabel
-node}.  Zhang and Sasha~\cite{Zhang1989} provide a number of
-algorithms which were later improved on by Klein et
-al.~\cite{Klein1998} and Dulucq et al.~\cite{Dulucq2003}. Finally,
+
+  With some basic knowledge of differencing and edit-distances under
+our belt, we briefly look over some of the relevant literature on the
+topic. Zhang and Sasha~\cite{Zhang1989} where perhaps the first to
+provide a number of algorithms which were later improved on by Klein
+et al.~\cite{Klein1998} and Dulucq et al.~\cite{Dulucq2003}. Finally,
 Demaine et al.~\cite{Demaine2007} presents an algorithm of cubic
 complexity and proves this is the best possible worst case. Zhang and
 Sasha's algorithm is still preferred in many pratical scenarios,
@@ -832,11 +890,14 @@ languages out-of-the-box.
 \section{Generic Programming}
 \label{sec:background:generic-programming}
 
-  \emph{(Datatype-)generic programming}\index{Generic Programming}
-provides a mechanism to write functions by induction on the structure
-of algebraic datatypes~\cite{Gibbons2006}.  A well-known example is
-the |deriving| mechanism in Haskell, which frees the programmer from
-writing repetitive functions such as equality~\cite{haskell2010}. A
+  We would like to consider richer datatypes than \emph{lines-of-text},
+without having to define separate |diff| functions for each of them.
+\emph{(Datatype-)generic programming}\index{Generic Programming}
+provides exactly this mechanism of writing functions by induction on 
+the \emph{structure} of algebraic datatypes~\cite{Gibbons2006}.  
+A widely used example is the |deriving| mechanism in Haskell, which 
+frees the programmer from writing repetitive functions such as 
+equality~\cite{haskell2010}. A
 vast range of approaches were available as preprocessors, language
 extensions, or libraries for Haskell~\cite{Rodriguez2008,Magalhaes2012}.  
 
@@ -844,7 +905,17 @@ extensions, or libraries for Haskell~\cite{Rodriguez2008,Magalhaes2012}.
 of datatypes can be described in a uniform fashion.  Hence, if a
 programmer were to write programs that work over this uniform
 representation, these programs would immediately work over a variety
-of datatypes. Consider the following datatype representing binary trees
+of datatypes. In this section we look into two modern approaches
+to generic programming which are widely used, then discus their
+design space and drawbacks.
+
+\subsection{GHC Generics}
+\label{sec:background:patternfunctors}
+
+  The \texttt{GHC.Generics}~\cite{Magalhaes2010} library, which
+comes bundled with GHC since version $7.2$ and
+defines the representation of datatypes in terms of uniform
+\emph{pattern functors}. Consider the following datatype of binary trees
 with data stored in their leaves:
 
 \begin{myhs}
@@ -858,10 +929,8 @@ constructors.  For the first choice, it also contains a value of type
 |a| whereas for the second it contains two subtrees as children. This
 means that the |Bin a| type is isomorphic to |Either a (Bin a , Bin
 a)|. Different libraries differ on how they define their underlying
-generic descriptions.  For example,
-\texttt{GHC.Generics}~\cite{Magalhaes2010}, which
-comes bundled with GHC, defines the representation of |Bin| as the
-following datatype:
+representations. The representation of |Bin a| in 
+terms of \emph{pattern functors} is writen as: 
 
 \begin{myhs}
 \begin{code}
@@ -869,12 +938,13 @@ Rep (Bin a) = K1 R a :+: (K1 R (Bin a) :*: K1 R (Bin a))
 \end{code}
 \end{myhs}
 
-which is a direct translation of |Either a (Bin a , Bin a)|, but using
+  The |Rep (Bin a)| above is a direct translation 
+of |Either a (Bin a , Bin a)|, but using
 the combinators provided by \texttt{GHC.Generics}, namely |:+:| and
-|:*:|. In addition, we require two conversion functions |from :: a ->
+|:*:|. In addition, we also have two conversion functions |from :: a ->
 Rep a| and |to :: Rep a -> a| which form an isomorphism between |Bin
-a| and |Rep (Bin a)|.  Finaly, all is tied to the original datatype
-using a type class:
+a| and |Rep (Bin a)|.  The interface ties everything unser
+a typeclass:
 
 \begin{myhs}
 \begin{code}
@@ -884,140 +954,6 @@ class Generic a where
   to    :: Rep a  -> a
 \end{code}
 \end{myhs}
-
-  Most generic programming libraries follow a similar pattern of
-defining the \emph{description} of a datatype in the provided uniform
-language by some type level information, and two functions witnessing
-an isomorphism. The most important feature of such library is how this
-description is encoded and which are the primitive operations for
-constructing such encodings. Some libraries,
-mainly deriving from the \texttt{SYB}
-approach~\cite{Lammel2003,Mitchell2007}, use the |Data| and |Typeable|
-type classes instead of static type level information to provide
-generic functionality.  These are a completely different strand of
-work from what we seek. The other approach relies on type level
-representations of datatypes. \Cref{fig:background:gplibraries} shows the main
-existing libraries relying on the typed approach. These can be compared in their
-treatment of recursion and on their choice of type level combinators
-used to represent generic values.
-
-\begin{figure}\centering
-\begin{tabular}{@@{}lll@@{}}\toprule
-                        & Pattern Functors       & Codes                 \\ \midrule
-  No Explicit Recursion & \texttt{GHC.Generics}  & \texttt{generics-sop} \\
-  Simple Recursion      &  \texttt{regular}      &  \\
-  Mutual Recursion      &  \texttt{multirec}     &   \\
-\bottomrule
-\end{tabular}
-\caption{Spectrum of static generic programming libraries}
-\label{fig:background:gplibraries}
-\end{figure}
-
-\paragraph{Recursion Style.}
-
-  There are two ways to define the representation of values. Those
-that have information about which fields of the constructors of 
-the datatype in question are recursive versus those that do not. 
-
-If we do not mark recursion explicitly, \emph{shallow}\index{Generic
-Programming!Shallow} encodings are our sole option, where only one
-layer of the value is turned into a generic form by a call to |from|.
-This is the kind of representation we get from \texttt{GHC.Generics}.
-The other side of the spectrum would be the \emph{deep}\index{Generic
-Programming!Deep} representation, in which the entire value is turned
-into the representation that the generic library provides in one go.
-
-Marking the recursion explicitly, like in
-\texttt{regular}~\cite{Noort2008}, allows one to choose between
-\emph{shallow} and \emph{deep} encodings at will. These
-representations are usually more involved as they need an extra
-mechanism to represent recursion.  In the |Bin| example, the
-description of the |Bin| constructor changes from ``this constructor
-has two fields of the |Bin a| type'' to ``this constructor has two
-fields in which you recurse''. Therefore, a \emph{deep} encoding
-requires some explicit \emph{least fixpoint} combinator -- usually
-called |Fix| in Haskell.
-
-Depending on the use case, a shallow representation might be more
-efficient if only part of the value needs to be inspected. On the
-other hand, deep representations are sometimes easier to use, since
-the conversion is performed in one go, and afterwards one only has to
-work with the constructs from the generic library. 
-
-The fact that we mark explicitly when recursion takes place in a
-datatype gives some additional insight into the description.
-Some functions really need the information
-about which fields of a constructor are recursive and which are not,
-like the generic |map| and the generic |Zipper|. 
-This additional power has also been used to define regular
-expressions over Haskell datatypes~\cite{Serrano2016}, for example.
-
-\paragraph{Pattern Functors versus Codes.}
-
-Most generic programming libraries build their type level descriptions
-out of three basic combinators: (1) \emph{constants}, which indicate a
-type is atomic and should not be expanded further; (2) \emph{products}
-(usually written as |:*:|) which are used to build tuples; and (3)
-\emph{sums} (usually written as |:+:|) which encode the choice between
-constructors. The |Rep (Bin a)| shown before is expressed in this
-form. Note, however, that there is no restriction on \emph{how} these
-can be combined. These combinators are usually refered to as
-\emph{pattern functors}\index{Pattern Functor} The \emph{pattern
-functor}-based libraries are too permissive though, for instance, |K1
-R Int :*: Maybe| is a perfectly valid \texttt{GHC.Generics}
-\emph{pattern functor} but will break generic functions, i.e., |Maybe|
-is not a combinator.
-
- In practice, one can always use a sum of products to represent a
-datatype -- a sum to express the choice of constructor, and within
-each constructor a product to declare which fields you have. The
-\texttt{generic-sop} library~\cite{deVries2014} explicitly uses a list
-of lists of types, the outer one representing the sum and each inner
-one thought of as products. The $\HS{'}$ sign in the code below marks the list
-as operating at the type level, as opposed to term-level lists which
-exist at run-time. This is an example of Haskell's \emph{datatype}
-promotion~\cite{Yorgey2012}.
-
-
-\begin{myhs}
-\begin{code}
-CodeSOP (Bin a) = P [ P [a], P [Bin a, Bin a] ]
-\end{code}
-\end{myhs}
-
-  The shape of this description follows more closely the shape of
-Haskell datatypes, and make it easier to implement generic
-functionality.
-
-  Note how the \emph{codes} are different than the
-\emph{representation}.  The latter being defined by induction on the
-former.  This is quite a subtle point and it is common to see both
-terms being used interchangeably.  Here, the \emph{representation} is
-mapping the \emph{codes}, of kind |P [ P [ Star ] ]|, into |Star|. The
-\emph{code} can be seen as the format that the \emph{representation}
-must adhere to. Previously, in the pattern functor approach, the
-\emph{representation} was not guaranteed to have a certain
-structure. The expressivity of the language of \emph{codes} is
-proportional to the expressivity of the combinators the library can
-provide.
-
-\subsection{GHC Generics}
-\label{sec:background:patternfunctors}
-
-  Since version $7.2$, GHC supports the
-\texttt{GHC.Generics}~\cite{Magalhaes2010} library, which exposes the
-\emph{pattern functor} of a datatype. This allows one to define a
-function for a datatype by induction on the structure of its (shallow)
-representation using \emph{pattern functors}\index{Pattern Functor}.
-
-  These \emph{pattern functors} are parametrized versions of tuples,
-sum types (|Either| in Haskell lingo), and unit, empty and constant
-functors. These provide a unified view over data: the generic
-\emph{representation} of values.  The values of a suitable type |a|
-are translated to this representation by means of the function
-|fromGen :: a -> RepGen a|. Note that the subscripts are there 
-solely to disambiguate names that appear in many libraries. Hence,
-|fromGen| is, in fact, the |from| in module |GHC.Generics|.
 
   Defining a generic function is done in two
 steps. First, we define a class that exposes the function
@@ -1090,11 +1026,9 @@ specific to the \texttt{GHC.Generics} flavor of generic programming.
 \Cref{fig:background:sizederiv} illustrates how the compiler goes about choosing
 instances for computing |size (Bin (Leaf 1) (Leaf 2))|.  In the end,
 we just need an instance for |Size Int| to compute the final
-result. Literals of type |Int| illustrate what we call \emph{opaque
-types}\index{Generic Programming!Opaque Types}: those types that
-constitute the base of the universe and are \emph{opaque} to the
-representation language.
-
+result. Literals of type |Int| illustrate what we often call \emph{opaque
+types}: those types that constitute the base of the universe 
+and are \emph{opaque} to the representation language.
 
 \subsection{Explicit Sums of Products}
 \label{sec:background:explicitsop}
@@ -1143,6 +1077,10 @@ the fields of the constructor, returning something akin to a
 list represents the constructors of a type, and will be interpreted as
 a sum, whereas the inner lists are interpreted as the fields of the
 respective constructors, interpreted as products.
+The $\HS{'}$ sign in the code below marks the list
+as operating at the type level, as opposed to term-level lists which
+exist at run-time. This is an example of Haskell's \emph{datatype}
+promotion~\cite{Yorgey2012}.
 
 \begin{myhs}
 \begin{code}
@@ -1265,6 +1203,120 @@ recording, explicitly, which fields of a constructor are recursive or
 not, which is exactly how we start to shape \texttt{generics-mrsop}
 in \Cref{chap:generic-programming}.
 
+\subsection{Discussion}
+
+  Most other generic programming libraries follow a similar pattern of
+defining the \emph{description} of a datatype in the provided uniform
+language by some type level information, and two functions witnessing
+an isomorphism. The most important feature of such library is how this
+description is encoded and which are the primitive operations for
+constructing such encodings. Some libraries,
+mainly deriving from the \texttt{SYB}
+approach~\cite{Lammel2003,Mitchell2007}, use the |Data| and |Typeable|
+type classes instead of static type level information to provide
+generic functionality -- these are a completely different strand of
+work from what we seek. The main approaches that rely on type level
+representations of datatypes are shown in 
+\Cref{fig:background:gplibraries}.
+These can be compared in their
+treatment of recursion and on their choice of type level combinators
+used to represent generic values.
+
+\begin{figure}\centering
+\begin{tabular}{@@{}lll@@{}}\toprule
+                        & Pattern Functors       & Codes                 \\ \midrule
+  No Explicit Recursion & \texttt{GHC.Generics}  & \texttt{generics-sop} \\
+  Simple Recursion      &  \texttt{regular}      &  \\
+  Mutual Recursion      &  \texttt{multirec}     &   \\
+\bottomrule
+\end{tabular}
+\caption{Spectrum of static generic programming libraries}
+\label{fig:background:gplibraries}
+\end{figure}
+
+\paragraph{Recursion Style.}
+
+  There are two ways to define the representation of values. Those
+that have information about which fields of the constructors of 
+the datatype in question are recursive versus those that do not. 
+
+If we do not mark recursion explicitly, \emph{shallow}
+encodings are the easier option, where only one
+layer of the value is turned into a generic form by a call to |from|.
+This is the kind of representation we get from \texttt{GHC.Generics}.
+The other side of the spectrum would be the \emph{deep}
+representation, in which the entire value is turned
+into the representation that the generic library provides in one go.
+
+Marking the recursion explicitly, like in
+\texttt{regular}~\cite{Noort2008}, allows one to choose between
+\emph{shallow} and \emph{deep} encodings at will. These
+representations are usually more involved as they need an extra
+mechanism to represent recursion.  In the |Bin| example, the
+description of the |Bin| constructor changes from ``this constructor
+has two fields of the |Bin a| type'' to ``this constructor has two
+fields in which you recurse''. Therefore, a \emph{deep} encoding
+requires some explicit \emph{least fixpoint} combinator -- usually
+called |Fix| in Haskell.
+
+Depending on the use case, a shallow representation might be more
+efficient if only part of the value needs to be inspected. On the
+other hand, deep representations are sometimes easier to use, since
+the conversion is performed in one go, and afterwards one only has to
+work with the constructs from the generic library. 
+
+The fact that we mark explicitly when recursion takes place in a
+datatype gives some additional insight into the description.
+Some functions really need the information
+about which fields of a constructor are recursive and which are not,
+like the generic |map| and the generic |Zipper|. 
+This additional power has also been used to define regular
+expressions over Haskell datatypes~\cite{Serrano2016}, for example.
+
+\paragraph{Pattern Functors versus Codes.}
+
+Most generic programming libraries build their type level descriptions
+out of three basic combinators: (1) \emph{constants}, which indicate a
+type is atomic and should not be expanded further; (2) \emph{products}
+(usually written as |:*:|) which are used to build tuples; and (3)
+\emph{sums} (usually written as |:+:|) which encode the choice between
+constructors. The |Rep (Bin a)| shown before is expressed in this
+form. Note, however, that there is no restriction on \emph{how} these
+can be combined. These combinators are usually refered to as
+\emph{pattern functors} The \emph{pattern
+functor}-based libraries are too permissive though, for instance, |K1
+R Int :*: Maybe| is a perfectly valid \texttt{GHC.Generics}
+\emph{pattern functor} but will break generic functions, i.e., |Maybe|
+is not a combinator.
+
+ In practice, one can always use a sum of products to represent a
+datatype -- a sum to express the choice of constructor, and within
+each constructor a product to declare which fields you have. The
+\texttt{generic-sop} library~\cite{deVries2014} explicitly uses a list
+of lists of types, the outer one representing the sum and each inner
+one thought of as products. 
+
+\begin{myhs}
+\begin{code}
+CodeSOP (Bin a) = P [ P [a], P [Bin a, Bin a] ]
+\end{code}
+\end{myhs}
+
+  The shape of this description follows more closely the shape of
+Haskell datatypes, and make it easier to implement generic
+functionality.
+
+  Note how the \emph{codes} are different than the
+\emph{representation}.  The latter being defined by induction on the
+former.  This is quite a subtle point and it is common to see both
+terms being used interchangeably.  Here, the \emph{representation} is
+mapping the \emph{codes}, of kind |P [ P [ Star ] ]|, into |Star|. The
+\emph{code} can be seen as the format that the \emph{representation}
+must adhere to. Previously, in the pattern functor approach, the
+\emph{representation} was not guaranteed to have a certain
+structure. The expressivity of the language of \emph{codes} is
+proportional to the expressivity of the combinators the library can
+provide.
 
 %%% Local Variables:
 %%% mode: latex
