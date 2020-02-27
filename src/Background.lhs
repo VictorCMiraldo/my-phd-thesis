@@ -5,8 +5,10 @@ attemps to match lines from the source file to lines
 in the destination file. For example, consider the
 two files below:
 
+{
+\footnotesize
 \begin{minipage}{.45\textwidth}
-\begin{alltt}\small
+\begin{alltt}
 1    res := 0;
 2    for (i in is) \{
 3      res += i;
@@ -14,14 +16,15 @@ two files below:
 \end{alltt}
 \end{minipage}\qquad%
 \begin{minipage}{.45\textwidth}
-\begin{alltt}\small
-1    // Computes a sum
+\begin{alltt}
+1    print("summing up");
 2    sum := 0;
 3    for (i in is) \{
 4      sum += i;
 5    \}
 \end{alltt}
 \end{minipage}
+}
 
   Lines 2 and 4 in the source file, on the left, match
 lines 3 and 5 in the destination. These are identified 
@@ -39,11 +42,10 @@ insert two new lines; copy a line; delete a line; insert a line
 and finally copy the last line. The output we would see from
 the \unixdiff{} would show deletions prefixed with a minus sign
 and insertions prefixed with a plus sign. Copies have no prefix.
-In our case, it would look something like:
-
-\begin{alltt}\small
+In our case, it would look something like:%
+\begin{alltt}\footnotesize
 -    res := 0;
-+    // Computes a sum
++    print("summing up");
 +    sum := 0;
      for (i in is) \{
 -      res += i;
@@ -94,7 +96,7 @@ the \texttt{GHC.Generics} and \texttt{generics-sop}
 libraries, which introduce all the necessary parts for us to build
 our own solutions later, in \Cref{chap:generic-programming}.
 
-\section{Edit Distances}
+\section{Differencing and Edit Distance}
 \label{sec:background:tree-edit-dist}
 
   The \emph{edit distance} between to objects is
@@ -577,7 +579,7 @@ that a number of common changes, such as refactorings, yield
 edit scripts with a very high cost even though a good part of the information
 being deleted or inserted should really have been copied.
 
-\section{Synchronizing Changes}
+\subsection{Synchronizing Changes}
 \label{sec:background:synchronizing-changes}
 
   When managing local copies of replicated data such as in software
