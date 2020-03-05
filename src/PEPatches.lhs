@@ -614,11 +614,11 @@ to produce a patch.
 \begin{myhs}
 \begin{code}
 close :: Chg kappa fam at -> Holes kappa fam (Chg kappa fam) at
-close c =  let  global  = vars h
+close c =  let  global  = chgVars h
                 aux     = holesMap withVars (lgg (chgDel d) (chgIns d))
             in case close' global aux of
                  InL _  -> error "invariant failure: c was not well-scoped."
-                 InR b  -> Just (holesMap body b)
+                 InR b  -> holesMap body b
 \end{code}
 \end{myhs}
   
@@ -631,8 +631,7 @@ variables that occur in two contexts and annotates a change with them:
 \begin{figure}
 \begin{myhs}[0.99\textwidth]
 \begin{code}
-close'  :: M.Map Int Arity
-        -> Holes kappa fam (WithVars (Chg kappa fam)) at
+close'  :: M.Map Int Arity -> Holes kappa fam (WithVars (Chg kappa fam)) at
         -> Sum (WithVars (Chg kappa fam)) (Holes kappa fam (WithVars (Chg kappa fam))) at 
 -- Primitive values are trivially closed;
 close' _  (Prim x)  = InR (Prim x)
@@ -643,11 +642,11 @@ close' gl (Roll x) =
   let aux = repMap (close' gl) x
    in case repMapM fromInR aux of
         -- Yes; /Roll/ is part of the spine.
-        Just res -> InR (Roll res)
+        Just res  -> InR (Roll res)
         -- No; distribute this roll and checks whether the union of the
         -- scopes closes the change.
-        Nothing  -> let res = chgVarsDistr (Roll (repMap (either' Hole id) aux))
-                     in if isClosed gl res then InR (Hole res) else InL res
+        Nothing   ->  let res = chgVarsDistr (Roll (repMap (either' Hole id) aux))
+                      in if isClosed gl res then InR (Hole res) else InL res
   where
     fromInR   :: Sum f g x -> Maybe (g x)
 \end{code}
@@ -1891,12 +1890,15 @@ This ensures that hashes uniquely identify a subtree modulo hash collisions.
 
   After preprocessing the input trees we want to traverse them and insert
 every hash we see in a hash map, associated with a a counter for how 
-many times we have seen a tree. We use a Patricia Tree~\cite{Okasaki1998} 
-as our data structure. 
+many times we have seen a tree. We use a simple |Int64|-indexed trie~\cite{Brass2008}
+as our datastructure. \digress{I would like to also
+implemented this algorithm with a big-endian Patricia Tree~\cite{Okasaki1998} 
+and compare the results. I think the difference would be
+small, but worth considering when producing a production implementation}.
 
 \begin{myhs}
 \begin{code}
-type Arity            = Int
+type Arity = Int
 
 buildArityMap    :: PrepFix a kappa fam ix -> T.Trie Int
 \end{code}
@@ -1958,11 +1960,18 @@ some |x|, however, is answered in $\mathcal{O}(1)$ due to the
 bounded depth of the patricia tree. 
 
   We chose to use a cryptographic hash function~\cite{Menezes1997}
-and ignore the possiblity of hash collisions de to their negligible
-probability. Yet, it is not hard to detect these collisions whilst
-computing the arity map, but would cost precious time to compare
-trees before inserting them to ensure we have not witnessed
-a hash collision. 
+and ignore the remote possiblity of hash collisions.
+Yet, it would not be hard to detect these collisions whilst
+computing the arity map. To do so, we should store the tree with its associated
+hash instead of just the hash, then, on every insertion we could check
+that the inserted tree matches with the tree already in the map. 
+This process would cost us precious time and hence, we chose
+to ignore hash collisions. \digress{Cryptographic hashes have
+negligible collision probability but can be much more expensive to compute,
+could be interesting to implement this algorithm with a non-cryptographic hash
+and employ this collision checking to better understand what is the best option.
+I believe this collision checking will be much slower for it brings the complexity
+of the algorithm up}
 
 \subsection{Extracting the Contexts}
 
@@ -2144,6 +2153,68 @@ a boolean indicating whether or not they are a proper share,
 then proceeding just like |Patience|, but instead of checking
 that the arity must be two, we check that the tree is classified
 as a \emph{proper-share}.
+
+\subsection{The \texttt{diff} Function}
+\label{sec:pepatches:diff-func}
+
+\victor{I don't think I have justified the height parameter
+effectively yet}
+
+  The |diff| function receives a source and
+destination trees, |s| and |d|, and computes a patch
+that encodes the information necessary to transform 
+the source into the destination. It starts by preprocessing
+|s| and |d| with |preprocess|, producing trees annotated with
+their hash and their height. Next, it constructs the sharing
+map for both trees and uses this map to extract the
+insertion and deletion contexts, according to some context extraction mode.
+Finally, it computes the spine by pushing changes into small, locally-scopped,
+portions. 
+
+
+\begin{myhs}
+\begin{code}
+diff  :: (All Digestible kappa) => SFix kappa fam at -> SFix kappa fam at
+      -> Patch kappa fam at
+diff x y =  let  dx             = preprocess x
+                 dy             = preprocess y
+                 (i, sh)        = buildSharingTrie opts dx dy
+                 (del :*: ins)  = extractHoles canShare (dx :*: dy)
+            in cpyPrimsOnSpine i (close (Chg del ins))
+ where
+   canShare t = 1 < treeHeight (getConst (getAnn t))
+\end{code}
+\end{myhs}
+
+\victor{Only share trees higher than 1}
+
+  The |cpyPrimsOnSpine| function will issue copies for the opaque
+values that appear on the spine, as illustrated in \Cref{fig:pepatches:cpyonspine},
+where the |42| does not get shared for its height is smaller than 1 but
+since it occurs in the same location in the deletion and insertion context,
+we flag it as a copy.
+
+\begin{figure}
+\centering
+\subfloat[Globally-scoped change]{%
+\begin{myforest}
+[,rootchange
+ [|BinLbl| [|42|] [|Bin| [x, metavar] [y, metavar]] [z,metavar]]
+ [|BinLbl| [|42|] [|Bin| [y, metavar] [x, metavar]] [z,metavar]]
+]
+\end{myforest}}\qquad%
+\subfloat[Locally-scoped change with copies in its spine]{%
+\begin{myforest}
+[|BinLbl|, s sep=4mm
+  [,change [k,metavar] [k,metavar]]
+  [,change [|Bin| [x, metavar] [y,metavar]]
+           [|Bin| [y, metavar] [x,metavar]]]
+  [,change [z, metavar] [z, metavar]]]
+\end{myforest}}
+\caption{A Globally-scoped change and the result of applying it to |cpyPrimsOnSpine . close|,
+producing a patch with locally scoped changes and copies in its spine.}
+\label{fig:pepatches:cpyonspine}
+\end{figure}
 
 \section{Discussion}
 \label{sec:pepatches:discussion}
