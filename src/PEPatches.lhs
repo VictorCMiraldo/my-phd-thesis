@@ -1,22 +1,32 @@
-  the \texttt{stdiff} approach gave us a first representation
-of tree-sructured patches over tree-structured data but was still flawed in
-many ways. These flaws were partly due to the hidden connection to edit
-scripts that still remained: subtrees could only be copied once and could not
-be permuted. This meant we still suffered the ambuiguity problem,
-which was reflected on the coputationally expensive algorithm.
-Overcoming these drawbacks required a significant shift in perspective and
-represents, finally, a more thorough decoupling from edit-script based 
-differencing algorithms.
 
-  Classically, tree differencing algorithms are divided in a matching
-phase, which identifies which subtrees should be copied, and later
-extrapolates one edit-script from said tree matching
-(\Cref{sec:background:tree-edit-distnace}). This separation of
-concerns means that we do not have to deal with the ambiguities of
-edit scripts, but the desire to obtain said edit script still means
-that the matchings produced by these algorithms are very restrictive
--- order preserving partial bijections between the flattened nodes of
-the trees in question, \Cref{fig:background:tree-mapping}.
+\victor{I'm inclined in borrowing a \texttt{\\digress} env
+like in Mandelbrot's ``Fractal Geom. of Nature''; where I write
+in the first person about my experience doing things; could
+be a good way to add bits like the following:
+\digress{This hdiff approach as born from ...}}
+
+
+  The \texttt{stdiff} approach gave us a first representation
+of tree-sructured patches over tree-structured data but was still 
+very much connected to edit scripts: subtrees could only be copied 
+once and could not be permuted. This meant we still suffered from
+ambiguous patches, which was reflected on the coputationally expensive algorithm.
+Overcoming these drawbacks requires a shift in perspective and
+is possible through a thorough decoupling from edit-script based 
+differencing algorithms. In this section we will explore the algorithms
+behind the \texttt{hdiff} approach, which enables trees to be arbitrarily
+permuted, duplicated or contracted -- which is dual to duplication.
+The \texttt{hdiff} utility uses tree matchings as \emph{the} patch,
+instead of translating them \emph{into the} patch. Consequently, we do not
+need any of the classical restrictions imposed on tree matchings.
+
+  Classical tree differencing algorithms start by computing
+a tree matchings (\Cref{sec:background:tree-edit-distnace}),
+which identify which subtrees should be copied. These tree matchings,
+however, must be restricted to order-preserving partial injections
+in order to be efficiently translated to edit-scripts later on.
+The \texttt{hdiff} approach never translates to edit-scripts, which
+means the tree matchings we compute are subject to \emph{no} restrictions.
 
   Suppose we want to write a change that modifies the left element
 of a binary tree. If we had the full Haskell programming language available
@@ -47,7 +57,7 @@ is that the graphical notation makes it evident which
 constructors were copied until we reach the point where a change
 must be made. The notation $\digemFormatMetavar{\square}$ is
 used to indicate $\square$ is a metavariable, that is, given a successful
-matching of the deletion context against an element $\digemFormatMetavar{\square}$
+matching of the deletion context against an element, $\digemFormatMetavar{\square}$
 will be given a value.
 
 \begin{figure}
@@ -63,14 +73,6 @@ children of a binary node}
 \label{fig:pepatches:example-01}
 \end{figure}
 
-  In fact, the core idea behind \texttt{hdiff} is to forget about
-translating matchings back to edit scripts, using instead the tree
-matching \emph{as the patch}.  Consequently, we can also drop the
-restrictions on tree matchings and use any matching that we can
-compute. On this chapter we shall study how the |PatchPE x| will
-encode (relaxed) tree matchings, how to write a synchronizer for these
-patches and finally how to compute these patches efficiently.
-
   With this added expressivity we can represent more transformations
 than before. Take the patch that swaps two subtrees, which cannot
 even be written using an edit-script based approach, here it is
@@ -83,18 +85,17 @@ that witnesses this would be |patch (Bin x x) x|. This optimization
 enables us to write linear |diff| algorithms even in the presence
 of permutations and duplications. 
 
-
   This chapter arises as a refinement from our ICFP'19
 publication~\cite{Miraldo2019}, where we explore the representation
 and computation aspects of \texttt{hdiff}.  The big shift in paradigm
 of \texttt{hdiff} also requires a more careful look into the
 metatheory and nuances of the algorithm, which were not present in
-said contribution.  Moreover, we first wrote our
+said paper. \digress{We first wrote our
 algorithm~\cite{Miraldo2019} using the \texttt{generics-mrsop} library
 even though \texttt{hdiff} does not require an explicit sums of
 products. This means we can port it to \genericssimpl{} and gather
 real world data fort his approach. We present our code in this section
-on the \genericssimpl{} library.
+on the \genericssimpl{} library.}
 
 \victor{Maybe we write a paper with pierre about it?}
 
@@ -107,9 +108,9 @@ There are many design choices in this domain that I have studied;
 the point being: no right answer here}
 
   The type |PatchPE x| encapsulates the transformations we wish to support
-over elements of type |x|. In general lines, it consists in (A) a \emph{pattern}, or
+over elements of type |x|. In general lines, it consists in a \emph{pattern}, or
 deletion context, which instantiates a number of metavariables when matched against
-an actual value; and (B) a \emph{expression}, or insertion context, which uses
+an actual value; and a \emph{expression}, or insertion context, which uses
 the instantiation provided by the deletion context to substitute its variables,
 yielding the final result. Both insertion and deletion contexts are simply inhabitants
 of the type |x| augmented with \emph{metavariables}.
@@ -136,13 +137,13 @@ data Holes kappa fam h a where
 
   At first, one would think of simply passing |Const Int| in place of |h|,
 as in |Holes ki codes (Const Int)|. This gives a functor mapping an
-element of the family into its representation, augmented with integers,
-representing metavariables. Which is almost good enough, if not for
-not being able to infer whether a metavariable matches over
+element of the family into its representation, augmented with integers
+used to represent metavariables. Yet this does not enable us
+to infer whether a metavariable matches over
 an opaque type or a recursive position, which is crucial if we
 are to produce good alignments later on \Cref{sec:pepatches:alignment}.
-Consequently, we must keep the opaque values around in order to be 
-able to compare their type-level indicies.
+Consequently, we will keep the information about whether
+the metavariable matches over an opaque value or not:
 
 \begin{myhs}
 \begin{code}
@@ -165,8 +166,8 @@ type HolesMV kappa fam = Holes kappa fam (MetaVar kappa fam)
 \end{code}
 \end{myhs}
 
-  A \emph{changes}, then, is defined as a pair of a deletion context and an
-insertion context for the same type.  As expected, these contexts are
+  A \emph{change}, then, is defined as a pair of a deletion context and an
+insertion context for the same type.  These contexts are
 values of the mutually recursive family in question augmented with
 metavariables:
 
@@ -215,7 +216,6 @@ chgApply (Chg d i) x = either  (const Nothing) (holesMapM uninstHole . flip subs
 \end{code}
 \end{myhs}
 
-
 \begin{figure}
 \centering
 \subfloat{%
@@ -239,6 +239,21 @@ chgApply (Chg d i) x = either  (const Nothing) (holesMapM uninstHole . flip subs
 \label{fig:pepatches:example-04}
 \end{figure}
 
+  \digress{There are many ways of representing a |Chg|,
+in fact, a good part of my research was in understaning
+the trade-offs between different representations for changes. 
+I have settled for extracting the constructors that appear 
+repeated in the deletion and insertion context into a \emph{spine} and 
+minimizing changes, which later on will be \emph{aligned} to uncover
+insertions and deletions within the recursive structure.
+The design decisions I made have been driven by the synchronizatino algorithm.
+The \emph{spines} help us understand which constructors have been
+copied even though they might lead to a change further down the tree,
+whereas the \emph{alignments} enable us to understand which parts
+of the tree consist entirely of \emph{new information} and can
+be skipped by the synchronizer. Next we look into these
+options in more detail.}
+
 \paragraph{Patch versus Changes.} Our current definition of change is
 akin to what is known as a \emph{tree-matching} in the literature of
 classical tree differencing, \Cref{sec:background:tree-edit-distance},
@@ -247,24 +262,27 @@ obtain an edit-script we do not need to enforce any of the
 restrictions.  In fact, the engine of our differencing algorithm,
 \Cref{sec:pepatches:diff}, will only be concerned with producing a
 single |Chg| that transforms the source into the
-destination. In fact, \emph{changes} and their application
-semantics already gives rise to a satisfactory structure,
-which we shall see shortly in \Cref{rec:pepatches:meta-theory}.
-Yet, we are interested in more than just applying changes, we would
+destination. 
+
+  Albeit \emph{changes} and their application semantics already gives rise 
+to a satisfactory algebraic structure (\Cref{rec:pepatches:meta-theory}),
+we are interested in more than just applying changes, we would
 like to synchronize them, which will require a more refined approach.
 
-  In order to synchronize changes effectively we must
-understand which constructors in the deletion context are, in fact, just being 
-copied over in the insertion context. Take \Cref{fig:pepatches:example-04}, where 
-one change operates exclusively on the right child of a binary tree whereas the other 
-alters the left child and duplicates the right child in-place. 
-These changes are disjoint and should be possible to be automatically synchronizable. 
-Recognizing them as such will require more expressivity than what is provided by |Chg|.
-Let there be |PatchPE|.
+  In order to synchronize changes effectively we must understand which
+constructors in the deletion context are, in fact, just being copied
+over in the insertion context. Take \Cref{fig:pepatches:example-04},
+where one change operates exclusively on the right child of a binary
+tree whereas the other alters the left child and duplicates the right
+child in-place.  These changes are disjoint and should be possible to
+be automatically synchronizable.  Recognizing them as such will
+require more expressivity than what is provided by |Chg|.  Let there
+be |PatchPE|.
 
   In the following we distinguish \emph{changes} from \emph{patches}
-and discuss the design space. \Cref{sec:pepatches:closures,sec:pepatches:alignments} 
-go more in depth about computing a \emph{patch} from a \emph{change} in a way
+and discuss the design
+space. \Cref{sec:pepatches:closures,sec:pepatches:alignments} go more
+in depth about computing a \emph{patch} from a \emph{change} in a way
 that makes synchronization easier.
 
 \begin{figure}
@@ -514,7 +532,7 @@ Our next task, then, is to optimize the representation for synchronization,
 \quad
 \label{fig:pepatches:example-minimal:A}}%
 \quad\quad
-\subfloat[Not minimal; root constructors differ.]{%
+\subfloat[Minimal; root constructors differ.]{%
 \quad
 \begin{myforest}
 [,rootchange 
@@ -536,7 +554,7 @@ Our next task, then, is to optimize the representation for synchronization,
 \quad
 \label{fig:pepatches:example-minimal:C}}%
 \quad\quad
-\subfloat[Minimal change equivalent to \ref{fig:pepatches:example-minimal:A}]{%
+\subfloat[Minimal changes resulting extracting the spine from \ref{fig:pepatches:example-minimal:A}]{%
 \quad
 \begin{myforest}
 [|Bin|, s sep=5mm
@@ -671,15 +689,16 @@ withVars (d :*: i) = WithVars (vars d) (vars i) (Chg d i)
 \end{code}
 \end{myhs}
 
-  The |close'| function receveies a spine |s|, with leaves of 
-type |WithVars (Chg dots)|, and attemps to ``enlarge'' those leaves if necessary. 
-When it is not possible to close 
-the current spine, it returns a |InL (WithVars (Chg dots))| equivalent to pusing all the
-constructors of |s| down the deletion and insertion contexts.
-The implementation of |close'| is shown in its entirety in \Cref{dif:pepatches:close-aux},
-but its main component is |chgVarsDistr|, which distributes
-a |WithVars| over a spine whilst computing the union of the declared 
-and used multisets, as shown below.
+  The |close'| function receveies a spine |s|, with leaves of type
+|WithVars (Chg dots)|, and attemps to ``enlarge'' those leaves if
+necessary.  When it is not possible to close the current spine, it
+returns a |InL (WithVars (Chg dots))| equivalent to pusing all the
+constructors of |s| down the deletion and insertion contexts.  The
+implementation of |close'| is shown in its entirety in
+\Cref{dif:pepatches:close-aux}, but its main component is
+|chgVarsDistr|, which distributes a |WithVars| over a spine whilst
+computing the union of the declared and used multisets, as shown
+below.
 
 \begin{myhs}
 \begin{code}
@@ -809,8 +828,8 @@ aligning a type that belongs to the mutually recursive family and therefore has
 a generic representation -- just a Haskell technicality.
 
   Naturally, if no insertion or deletion can be made but both 
-insertion and deletion contexts have the same constructor, we want to
-recognize this constructor as part of the spine and continue aligning
+insertion and deletion contexts have the same constructor at their root, 
+we want to recognize this constructor as part of the spine and continue aligning
 its fields pairwise.
 
 \begin{myhs}
@@ -822,8 +841,10 @@ its fields pairwise.
 \end{myhs}
 
   When no |Ins|, |Del| or |Spn| can be used,
-we must be fallback to recording a modification, which here
-is of type |f at|.
+we must be fallback to recording a modification, 
+of type |f at|. Most of the times, |f| will be |Chg kappa fam|,
+but we might need to add some extra information in the leaves
+of an alignment.
   
 \begin{myhs}
 \begin{code}
@@ -852,28 +873,27 @@ or contracted.
 \end{code}
 \end{myhs}
 
-  Equipped with a definition for aligments, let us
-look at how to actually define |alignChg|.
-Given a change |c|, the first step of |alignChg c| is to check whether the 
-root of |chgDel c| (resp. |chgIns c|) can
-be deleted (resp. inserted) -- that is, all of its fields are \emph{rigid}
-trees with the exception of a single recursive field. If
-we can delete the root, we flag it as a deletion and continue through
-the recursive \emph{non-rigid} field. If we cannot perform a
-deletion at the root of |chgDel c| nor an insertion at
-the root of |chgIns c| but they are constructed with the
-same constructor, we recurse on trying on the children.
-If |chgDel c| and |chgIns c| do not even have the same constructor
-at the root, we fallback and flag an arbitrary modification. 
+  Equipped with a definition for aligments, we move on to defining
+|alignChg|.  Given a change |c|, the first step of |alignChg c| is to
+check whether the root of |chgDel c| (resp. |chgIns c|) can be deleted
+(resp. inserted) -- that is, all of its fields are \emph{rigid} trees
+with the exception of a single recursive field. If we can delete the
+root, we flag it as a deletion and continue through the recursive
+\emph{non-rigid} field. If we cannot perform a deletion at the root of
+|chgDel c| nor an insertion at the root of |chgIns c| but they are
+constructed with the same constructor, we recurse on trying on the
+children.  If |chgDel c| and |chgIns c| do not even have the same
+constructor at the root, we fallback and flag an arbitrary
+modification.
 
-  Checking for rigid subtrees must be carefully translated into an algorithm if
-we ever want to squeeze any performance out of it: we must compute
-whether each tree in our input is rigid and annotate this at their root,
-otherwise we will be looking into an exponential time alignment algorithm.  
-Luckily, our generic programming library has great support for
-all variations over fixpoints. Annotating a tree augmented with
-holes with information about whether or not any |Hole| constructor
-occurs can be done as in \Cref{fig:pepatches:rigidity}.
+  Checking for rigid subtrees must be carefully translated into an
+algorithm to ensure we remain performant: we must annotate each tree
+with whether they are rigid or not, otherwise we will be looking into
+an exponential time alignment algorithm.  Luckily, our generic
+programming library supports this out-of-the-box.  Annotating a tree
+augmented with holes with information about whether or not any |Hole|
+constructor occurs is done with |annotRigidity|, shown in 
+\Cref{fig:pepatches:rigidity}.
   
 \begin{figure}
 \begin{myhs}
@@ -898,7 +918,9 @@ about whether or not it actually contains a hole.}
 \label{fig:pepatches:rigidity}
 \end{figure}
 
-  The extraction of a zipper flagging an insertion or deletion
+  Once our trees have been annotated with rigidity information,
+we proceed to the extraction of a zippers to witness
+potential insertions or deletions. This
 is done by the |hasRigidZipper| function, which first extracts
 \emph{all} possible zippers from the root and checks whether there
 is a single on that satisfy the criteria. If there is, we return it
@@ -913,17 +935,18 @@ hasRigidZipper  :: HolesAnn kappa fam IsRigid (MetaVar kappa fam) t
 \end{code}
 \end{myhs}
 
-  The return type is almost what the |Del| and |Ins|
+\victor{I feel I need more info on the paras below}
+  The return type is close to almost what the |Del| and |Ins|
 constructors expect: a value of type |t| where all but one
 recursive positions are populated by the |SFix kappa fam| datatype, \ie{},
-trees with \emph{no holes} or \emph{rigid}. The identified
-recursive position is of type |HolesAnn kappa fam IsRigid dots|,
-which is what we will use to continue aligning against.
-We ommit the implementation of |hasRigidZipper| but invite the interested
-reader to check the source code.\victor{where?}
+trees with \emph{no holes}; \emph{rigid}. The one position,
+of type |HolesAnn kappa fam IsRigid dots| identifies the subtree which
+we should continue to align against. 
+We ommit the full implementation of |hasRigidZipper| here but invite 
+the interested reader to check the source code.\victor{where?}
 
-  Assembling all these pieces will yield the definition of |alignChg|,
-which will compute the multiset of variables used througout a change,
+  Finally, we are ready to define |alignChg| in its entirety.
+We start computing the multiset of variables used througout a patch,
 annotate the deletion and insertion context with |IsRigid| and proceed
 to actually align them with the |al| function, whose full
 definition can be found in \Cref{fig:pepatches:align-fulldef}, and,
@@ -936,8 +959,7 @@ of the |Spn|. Ultimately it falls back to |Cpy|, |Prm| or |Mod|.
 \begin{myhs}
 \begin{code}
 alignChg  :: Chg kappa fam at -> Al kappa fam (Chg kappa fam) at
-alignChg (Chg d i) = al vars (annotRigidity d) (annotRigidity i)
-  where vars = chgVars (Chg d i)
+alignChg c@(Chg d i) = al (chgVargs c) (annotRigidity d) (annotRigidity i)
 \end{code}
 \end{myhs}
 
@@ -977,18 +999,16 @@ al vars d i = alD (alS vars (al vars)) d i
    alS :: Map Int Arity -> Aligner kappa fam -> Aligned kappa fam
    alS vars f d@(Roll' _ sd) i@(Roll' _ si) =
      case zipSRep sd si of
-       Nothing -> alD (alMod vars) d i
+       Nothing -> alMod vars d i
        Just r  -> Spn (repMap (uncurry' f) r)
-   syncSpine vars _ d i = alD (alMod vars) d i
+   syncSpine vars _ d i = alMod vars d i
 
    -- Records a modification, copy or permutation.
    alMod :: Map Int Arity -> Aligned kappa fam
    alMod vars (Hole' _ vd) (Hole' _ vi) =
      -- are both vd and vi with arity 2?
      | all (== Just 2 . flip lookup vars) [metavarGet vd , metavarGet vi]
-        =  if vd == vi 
-           then Cpy vd 
-           else Prm vd vi
+        = if vd == vi then Cpy vd else Prm vd vi
      | otherwise 
         = Mod (Chg (Hole vd) (Hole vi))
    alMod _ d i = Mod (Chg d i)
@@ -998,14 +1018,12 @@ al vars d i = alD (alS vars (al vars)) d i
 \label{fig:pepatches:align-fulldef}
 \end{figure}
 
-  An alignment and a change are, in fact, isomorphic.
-We have seen the |alignChg| function, which computes the alignment
-for a given change. It is equally feasible to define
-a |disalign| function, that computes a change back from
-an alignment. The only potentially confusing
-case is plugging deletion and insertion zippers, where
-we need to cast a zipper over |SFix| into a zipper
-over |Holes|, as shown below.
+  Alignments and changes are interchangeable to an extent. In fact,
+the |disalign| function, which computes a change from an alignment,
+form an isomorphism with |alignChg|.  The |disalign| function is
+skethed below. It plugs deletion and insertion zippers, where casting
+a zipper over |SFix| into a zipper over |Holes|; the rest of the cases
+is straightforward.
 
 \begin{myhs}
 \begin{code}
@@ -1032,14 +1050,41 @@ alDistr (Roll r)   = Spn (Roll (repMap alDistr r))
 \end{code}
 \end{myhs}
 
-  Computing aligned patches from locally-scoped
-patches is fairly simple, all we have to do
-is map over the spine and align the changes individually.
+  Computing aligned patches from locally-scoped patches is fairly
+simple, all we have to do is map over the spine and align the changes
+individually, then we make a pass over the result and issue copies for
+opaque values that appear on the alignment's spine. The auxiliar
+function |align'| returns the sucessor of the last issued name to
+ensure we can easily produce fresh names later on, if need be.
+Note that |align| introduces information, namelly, new metavariables
+that represent copies over opaque values that appear on the alignment's
+spine. This means that mapping |disalign| to the result of |align|
+will \emph{not} produce the same result. We have \emph{no} isomorphis here.
 
 \begin{myhs}
 \begin{code}
-align :: Patch kappa fam at -> AlPatch kappa fam at
-align = holesMap alignChg
+align :: Patch kappa fam at -> PatchAl kappa fam at
+align = fst . align'
+
+align' :: Patch kappa fam at -> (PatchAl kappa fam at , Int)
+align' p = flip runState maxv
+         $$ holesMapM (alRefineM cpyPrims . alignChg vars) p
+  where
+    vars = patchVars p
+    maxv = maybe 0 id (lookupMax vars)
+\end{code}
+\end{myhs}
+
+  The |cpyPrims| above issues a |Cpy i|, for a fresh name |i| whenever
+it sees a modification with the form |Chg (Prim x) (Prim y)| and |x == y|.
+The |alRefineM f| applies a function in the leaves of the |Al| and
+has type.
+
+\begin{myhs}
+\begin{code}
+alRefineM  :: (Monad m) => (forall x . f x -> m (Al' kappa fam g x))
+           -> Al' kappa fam f ty
+           -> m (Al' kappa fam g ty)
 \end{code}
 \end{myhs}
 
@@ -1281,12 +1326,6 @@ The |PatchPE ki codes| forms either:
 \victor{should I call it |merge| instead of |diff3|? Maybe...
 diff3 already exists and is the unix diff3.}
 
-\victor{I'm inclined in borrowing a \texttt{\\digress} env
-like in Mandelbrot's ``Fractal Geom. of Nature''; where I write
-in the first person about my experience doing things; could
-be a good way to add bits like the following:
-
-
   \digress{Before going into the details of synchronization, a little
 prelude is due. In this section we will discuss the sketch
 of a merge algorithm, but this is by no means final. We believe
@@ -1294,7 +1333,6 @@ a more elegant algorithm could be possible, if we have had more
 time to think this through better. Yet, unfortunately, at one
 point one has to stop and write their thesis. The sketch
 we present here was the last aspect we worked on.}
-}
 
   Synchronizing changes is done by the |diff3| function,
 which receives two aligned patches |p| and |q| with
@@ -1412,17 +1450,64 @@ altered its location, they are \emph{disjoint} -- they
 alter different aspects of the common ancestor. Hence, the
 synchronizatino is possible and results in \Cref{fig:pepatches:merge-01:C}.
 
-  The general conducting line of our synchronization algorithm
-is to record how each subtree was modified and then instantiating
-these modifications in the final result. Going back to \Cref{fig:pepatches:merge-01},
-we would need to merge a change |q| over a spine |p|, which means
-we must match |delCtx q| against |p|. This yeilds an instantiation
-of some of the variables in |delCtx q|, in this case, |metavar x| is
-instantiated to |Chg (Leaf 42) (Leaf 84)|. We then proceed to split this
-instantiation in two maps -- one which records what |x| \emph{was}, and
-another which records what |x| \emph{became}. Namelly, |was (metavar x) = Leaf 42|
-and |became (metavar x) = Leaf 84|. Finally, we instantiate |q| with
-this newly discovered information yielding \Cref{fig:pepatches:merge-01:C}.
+  The general conducting line of our synchronization algorithm is to
+first record how each subtree was modified and then instante these
+modifications in a later phase. Going back to
+\Cref{fig:pepatches:merge-01}, we would need to merge a change |q|
+over a spine |p|, which means we must match |delCtx q| against
+|p|. This yeilds an instantiation of some of the variables in |delCtx
+q|, in this case, |metavar x| is instantiated to |Chg (Leaf 42) (Leaf
+84)|. We then proceed to split this instantiation in two maps -- one
+which records what |x| \emph{was}, and another which records what |x|
+\emph{became}. Namelly, |was (metavar x) = Leaf 42| and |became
+(metavar x) = Leaf 84|. Finally, we instantiate |q| with this newly
+discovered information yielding \Cref{fig:pepatches:merge-01:C}.
+
+  Let us look at another simple example, illustrated in
+\Cref{fig:pepatches:merge-02}: we start identifying we are in a
+situation where both |diff o a| and |diff o b| are spines, that is,
+they copy the same constructor at their root. Recursing pairwise
+through their children, we see a permutation versus a copy, since a
+copy is the identity element, we return the permutation.  On the right
+we see another spine versus an insertion, but since the insertion
+represents new information, it must be preserved.  Finally, inside the
+insertion we see another copy, which means that the spine should be
+preserved as is.  The resulting patch can be seen in
+\Cref{fig:pepatches:merge-02:res}.
+
+\begin{figure}
+\centering
+\subfloat[|align (diff o a)|]{%
+\begin{myforest}
+[|(:)| 
+  [|Prm (metavar x) (metavar y)|] 
+    [|(:)| [|Prm (metavar y) (metavar x)|] 
+      [|[]|]
+    ]
+]
+\end{myforest}}
+\qquad\qquad%
+\subfloat[|align (diff o b)|]{%
+\begin{myforest}
+[|(:)| , s sep=14mm
+  [Cpy]
+  [,insctx
+    [|(:)| [|42|] [SQ]]
+    [Cpy]]]
+\end{myforest}}
+
+\subfloat[Result of merge |diff3 oa ob|]{%
+\begin{myforest}
+[,rootchange
+  [|(:)| [a,metavar] [|(:)| [b,metavar] [|[]|]]]
+  [|(:)| [b,metavar] [|(:)| [|42|] [|(:)| [a,metavar] [|[]|]]]]
+]
+\end{myforest}
+\label{fig:pepatches:merge-02:res}}
+\caption{Example merge of two simple patches.}
+\label{fig:pepatches:merge-02}
+\end{figure}
+
 
   There are some nuances to |mergeAl|, which we will be
 highlighting as they appear. For example, the
@@ -1451,16 +1536,16 @@ disappear. \victor{is it really irrelevant? what if we decide that
 type Subst kappa fam phi = Map (Exists phi) 
 
 data MergeState kappa fam = MergeState
-  { iota :: Map (Exists (MetaVar kappa fam)) (Exists (Patch kappa fam))
-  , eqs  :: Map (Exists (MetaVar kappa fam)) (Exists (HolesMV kappa fam))
+  { iota :: Map (Exists (MetaVar kappa fam)) (Exists (Chg      kappa fam))
+  , eqs  :: Map (Exists (MetaVar kappa fam)) (Exists (HolesMV  kappa fam))
   }
 \end{code}
 \end{myhs}
 
-  Next we prepare to catch the conflicts detected by |mergeAl| with the |Except| monad, 
-which will return a simple description of the conflict. We then define |mergeAl| as
-a wrapper around |mergeAlM|, which is defined in terms of the |MergeM|
-monad for convenience. 
+  Next we prepare to catch the conflicts detected by |mergeAl| with
+the |Except| monad, which will return a simple description of the
+conflict. We then define |mergeAl| as a wrapper around |mergeAlM|,
+which is defined in terms of the |MergeM| monad for convenience.
 
 \begin{myhs}
 \begin{code}
@@ -1488,7 +1573,7 @@ it then makes a second pass computing the final result.
 mergeAlM  :: Al kappa fam at -> Al kappa fam at 
           -> MergeM kappa fam (Al kappa fam at)
 mergeAlM p q = do
-  phase1  <- mrgPhase1 p q
+  phase1  <- mergePhase1 p q
   info    <- get
   case splitDelInsMap info of
     Left   _   -> throwError "failed-contr"
@@ -1498,18 +1583,35 @@ mergeAlM p q = do
 
   The first pass is computed by the |mrgPhase1| function, which will
 populate the state with instantiations and equivalences and place
-values of type |Phase2| inplace. These values will instruct
+values of type |Phase2| inplace in the alignment. These values will instruct
 the second phase on how to proceed on that particular location.
-It can either instantiate some change or compare two changes for
-equality.
+Before proceeding, though, we must process the information
+we gathered into a deletion and an insertion map, with
+the |splitDelInsMap|. But first, let us look at how to decide what 
+is supposed to be instantiated or not, in |mrgPhase1|.
+
+  The |mergePhase1| function receives two alignments and
+produces a third alignment with instructions for the \emph{second phase}.
+Its type is given below.
+
+\begin{myhs}
+\begin{code}
+mergePhase1  :: Al kappa fam x -> Al kappa fam x
+             -> MergeM kappa fam (Al' kappa fam (Phase2 kappa fam) x)
+\end{code}
+\end{myhs}
+
+  These instructions can be instantiating a change, with
+|P2Instantiate|, which might include a context we need to check
+that the result of the instantiation has disjoint variables
+from that provided context. Or checking that two changes are
+$\alpha$-equivalent after they have been instantiated. 
 
 \begin{myhs}
 \begin{code}
 data Phase2 kappa fam at where
   P2Instantiate   :: Chg kappa fam at
-                  -> Phase2 kappa fam at
-  P2Instantiate'  :: Chg kappa fam at
-                  -> HolesMV kappa fam at
+                  -> Maybe (HolesMV kappa fam at)
                   -> Phase2 kappa fam at
   P2TestEq        :: Chg kappa fam at
                   -> Chg kappa fam at
@@ -1517,53 +1619,100 @@ data Phase2 kappa fam at where
 \end{code}
 \end{myhs}
 
+  Deciding which instruction should be perfored
+depends on the structure of the alignments under synchronization.
+Copies are the identity element. The full |mergePhase1| is given
+in \Cref{fig:pepatches:mergePhase1} and the reasoning is similar
+to how we wrote the merge algorithm for \texttt{stdiff} (\Cref{sec:stdiff:merge}).
+Let us look at a few select cases, nevertheless.
+
+\victor{Choose a few cases to show}
+
+\begin{figure}
+\begin{myhs}[.99\textwidth]
+\begin{code}
+mrgPhase1 p q = case (p , q) of
+   (Cpy _ , _)  -> return (Mod (P2Instantiate (disalign q)))
+   (_ , Cpy _)  -> return (Mod (P2Instantiate (disalign p)))
+
+   (Prm x y, Prm x' y')  -> Mod <$$> mrgPrmPrm x y x' y'
+   (Prm x y, _)          -> Mod <$$> mrgPrm x y (disalign q)
+   (_, Prm x y)          -> Mod <$$> mrgPrm x y (disalign p)
+
+   -- Insertions are preserved as long as they are not simultaneous.
+   (Ins (Zipper z p'), Ins (Zipper z' q'))
+     | z == z'   -> Ins . Zipper z <$$> mergePhase1 p' q'
+     | otherwise -> throwError "ins-ins"
+   (Ins (Zipper z p'), _) -> Ins . Zipper z <$$> mrgPhase1 p' q
+   (_ ,Ins (Zipper z q')) -> Ins . Zipper z <$$> mrgPhase1 p q'
+
+   -- Deletions need to be checked for compatibility: we try
+   -- and "apply" the deletion to the other alignment
+   (Del zp@(Zipper z _), _) -> Del . Zipper z <$$> (tryDel zp q >>= uncurry mrgPhase1)
+   (_, Del zq@(Zipper z _)) -> Del . Zipper z <$$> (tryDel zq p >>= uncurry mrgPhase1 . swap)
+
+   -- Spines mean that on one hand a constructor was copied; but the mod
+   -- indicates this constructor changed.
+   (Mod p', Spn q') -> Mod <$$> mrgChgSpn p' q'
+   (Spn p', Mod q') -> Mod <$$> mrgChgSpn q' p'
+
+   -- Two spines it is easy, just pointwise merge their recursive positions
+   (Spn p', Spn q') -> case zipSRep p' q' of
+       Nothing -> throwError "spn-spn"
+       Just r  -> Spn <$$> repMapM (uncurry' mrgPhase1) r
+
+   -- Finally, modifications sould be instantiated, if possible.
+   (Mod p', Mod q') -> Mod <$$> mrgChgChg p' q'
+\end{code}
+\end{myhs}
+\caption{Full implementation of |mergePhase1|.}
+\label{fig:pepatches:mergePhase1}
+\end{figure}
+
+  Once |mrgPhase1| returns, we have an alignment with instructions
+at its leaves. Before processing these instructions into a final result,
+we must split the |iota| and |eqvs| maps into two: one which informs
+us about what each location in the tree \emph{was} and another
+which inform us what each of those locations \emph{became}.
+
 \begin{myhs}
 \begin{code}
-mrgPhase1 :: Aligned kappa fam x -> Aligned kappa fam x
-    -> MergeM kappa fam (Aligned' kappa fam (Phase2 kappa fam) x)
--- Copies are the easiest case
-mrgPhase1 (Cpy x) q = Mod <$> mrgPhase1Cpy x (disalign q)
-mrgPhase1 p (Cpy x) = Mod <$> mrgPhase1Cpy x (disalign p)
-
--- Permutations are almost as simple as copies
-mrgPhase1 (Prm x y) (Prm x' y') = Mod <$> mrgPhase1PrmPrm x y x' y'
-mrgPhase1 (Prm x y) q = Mod <$> mrgPhase1Prm x y (disalign q)
-mrgPhase1 p (Prm x y) = Mod <$> mrgPhase1Prm x y (disalign p)
-
--- Insertions are preserved as long as they are not
--- simultaneous.
-mrgPhase1 (Ins (Zipper zip p)) (Ins (Zipper zip' q))
-  | zip == zip' = Ins . Zipper zip <$> mrgPhase1 p q
-  | otherwise   = throwError "ins-ins"
-
-mrgPhase1 (Ins (Zipper zip p)) q    = Ins . Zipper zip <$> mrgPhase1 p q
-mrgPhase1 p (Ins (Zipper zip q))    = Ins . Zipper zip <$> mrgPhase1 p q
-
--- Deletions need to be checked for compatibility
-mrgPhase1 (Del p@(Zipper zip _)) q = compat p q
-                            >>= fmap (Del . Zipper zip) . uncurry mrgPhase1
-mrgPhase1 p (Del q@(Zipper zip _)) = compat q p
-                            >>= fmap (Del . Zipper zip) . uncurry mrgPhase1 . swap
-  where swap (x , y) = (y , x)
-
--- Spines mean that on one hand a constructor was copied; but the mod
--- indicates this constructor changed. Hence, we hace to try applying
--- the change to the spine at hand.
-mrgPhase1 (Mod p) (Spn q) = Mod <$>  mrgPhase1ChgSpn p q
-mrgPhase1 (Spn p) (Mod q) = Mod <$>  mrgPhase1ChgSpn q p
-
--- When we have two spines it is easy, just pointwise merge their
--- recursive positions
-mrgPhase1 (Spn p) (Spn q) = case zipSRep p q of
-                        Nothing -> throwError "spn-spn"
-                        Just r  -> Spn <$> repMapM (uncurry' mrgPhase1) r
-
--- Modifications sould be instantiated, if possible.
-mrgPhase1 (Mod p) (Mod q) = Mod <$> mrgPhase1ChgChg p q
+splitDelInsMaps  :: MergeState kappa fam
+                 -> Either [Exists (MetaVar kappa fam)]
+                           (  Subst kappa fam (MetaVar kappa fam)
+                           ,  Subst kappa fam (MetaVar kappa fam))
+splitDelInsMaps (MergeState iot eqvs) =
+  let e' = splitEqvs eqvs
+   in do
+    d <- addEqvsAndSimpl (map (exMap chgDel) iot) e'
+    i <- addEqvsAndSimpl (map (exMap chgIns) iot) e'
+    return (d , i)
 \end{code}
 \end{myhs}
 
+  Refining changes according to the inferred information about what each tree
+was and became is straightforward, all we must do is apply the deletion map to
+the deletion context and the insertion map to the insertion context.
 
+\begin{myhs}
+\begin{code}
+refineChg :: Subst2 kappa fam -> Chg kappa fam at -> Chg kappa fam at
+refineChg (d , i) (Chg del ins) = Chg (substApply d del) (substApply i ins)
+\end{code}
+\end{myhs}
+
+  When deciding whether two changes are equal, its also important
+we refine them first, as this might uncover important information about them.
+
+\begin{myhs}
+\begin{code}
+isEqChg  :: Subst2 kappa fam -> Chg kappa fam at -> Chg kappa fam at
+         -> Maybe (Chg kappa fam at)
+isEqChg di ca cb =  let ca' = chgrefine di ca
+                        cb' = chgrefine di cb
+                    in if ca' == cb' then Just ca' else Nothing
+\end{code}
+\end{myhs}
 
 
 \begin{figure}
