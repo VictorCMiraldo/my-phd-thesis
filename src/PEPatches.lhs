@@ -1654,6 +1654,76 @@ in \Cref{fig:pepatches:mergePhase1} and the reasoning is similar
 to how we wrote the merge algorithm for \texttt{stdiff} (\Cref{sec:stdiff:merge}).
 Let us look at a few select cases, nevertheless.
 
+  Lets start with the novel cases. If we are to merge
+two permutations, |Prm (metavar x) (metavar y)| against 
+|Prm (metavar x') (metavar y')|, for example, we know that
+|metavar x| and |metavar x'| must refer to the same subtree,
+hence we register their equivalence. But since the two changes
+permuted the same tree, we can only synchronize them if they were
+permuted to the \emph{same place}, in other words, if both 
+permutations turn out to be equal.
+
+\begin{myhs}
+\begin{code}
+mrgPrmPrm  :: MetaVar kappa fam x -> MetaVar kappa fam x 
+           -> MetaVar kappa fam x -> MetaVar kappa fam x
+           -> MergeM kappa fam (Phase2 kappa fam x)
+mrgPrmPrm x y x' y'  =   onEqvs (\eqs' -> substInsert eqs' x (Hole x'))
+                     >>  return (P2TestEq (Chg (Hole x) (Hole y)) (Chg (Hole x') (Hole y')))
+\end{code}
+\end{myhs}
+
+  If we are merging one permutation with something else that is
+not a permutation, though, we know one change modified the location
+of a tree, whereas another potentially modified its contents -- which
+should be fine as long as no subtree that appears in the insertion
+context of |c| is also changed by |y|, this would mean
+a subtree could be moved into two different locations, as
+shown in \victor{make figure: \Cref{fig:pepatches:merge-03}}.
+
+\begin{myhs}
+\begin{code}
+mrgPrm  :: MetaVar kappa fam x -> MetaVar kappa fam x
+        -> Chg kappa fam x
+        -> MergeM kappa fam (Phase2 kappa fam x)
+mrgPrm x y c  =   addToIota "prm-chg" x c
+              >>  return (P2Instantiate (Chg (Hole x) (Hole y)) (Just (chgIns c)))
+\end{code}
+\end{myhs}
+
+  The |addToIota| function inserts the |(x, c)| entry in |iota| if |x|
+is not yet a member. It throws an error with the supplied label
+if |x| is already in |iota| with a value that is different than |c|.
+
+  Another interesting case happens with deletions. If one patch
+deletes a constructor but the other modifies the fields the
+constructor, we must ensure that none of the deleted fields
+have been modified by the other patch. This is done by the |tryDel|
+function, which attempts to delete a zipper from an alignment, and,
+if successful, returns the pair of alignments we should continue
+to merge.  
+
+\begin{myhs}
+\begin{code}
+tryDel  :: Zipper (CompoundCnstr kappa fam x) (SFix kappa fam) (Al kappa fam) x
+        -> Al kappa fam x
+        -> MergeM kappa fam (Al kappa fam x , Al kappa fam x)
+tryDel (Zipper z h) (Del (Zipper z' h'))
+  | z == z'    = return (h , h')
+  | otherwise  = throwError "del-del"
+tryDel (Zipper z h) (Spn rep) = case zipperRepZip z rep of
+    Nothing  -> throwError "del-spn"
+    Just r   -> let hs = repLeavesList r
+                 in case partition (exElim isInR1) hs of
+                      ([Exists (InL Refl :*: x)] , xs)
+                        | all isCpyL1 xs  -> return (h , x)
+                        | otherwise       -> throwError "del-spn"
+                      _                   -> throwError "del-spn"
+tryDel (Zipper _ _) _ = throwError "del-mod"
+
+\end{code}
+\end{myhs}
+
 \victor{Choose a few cases to show}
 
 \begin{figure}
