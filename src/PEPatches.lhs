@@ -11,6 +11,7 @@ of tree-sructured patches over tree-structured data but was still
 very much connected to edit scripts: subtrees could only be copied 
 once and could not be permuted. This meant we still suffered from
 ambiguous patches, which was reflected on the coputationally expensive algorithm.
+
 Overcoming these drawbacks requires a shift in perspective and
 is possible through a thorough decoupling from edit-script based 
 differencing algorithms. In this section we will explore the algorithms
@@ -1321,7 +1322,78 @@ The |PatchPE ki codes| forms either:
 \section{Merging Aligned Patches}
 \label{sec:pepatches:merging}
 
-\victor{bridge!}
+  In the previous sections we have seen how |Chg|
+can be used \emph{the} representation of a transformation
+between two trees. We have also seen how we can
+extract a \emph{spine}, which indicates a prefix of constructors
+copied from the source to the destination and leads
+to changes, which in turn are \emph{aligned} to reveal
+entire insertions and deletions, true copies and permutations.
+In this section we will see how all of this extra information
+is useful in defining a synchronization algorithm for aligned
+changes, |Al|.
+
+  Recall our patches consist in a spine, which leads to
+locally-scoped alignments. These alignments in turn also
+have a spine which ultimately leads to modifications. The distinction
+between the \emph{outer} spine and the spine inside the
+alignments is the scope. Consequently, we can map over
+the outer spine without needing to remember information
+accross calls but we \emph{must} remember information 
+inside the scope of an aligment. Take the example in
+\Cref{fig:pepatches:merge-00}, while synchronizing 
+the left child of the root, we discover that the tree
+located at (or, identified by) |metavar x| was |Leaf 42|.
+We must remember this information since we will encounter
+|metavar x| again and must see that it matches with
+its previous value in order to perform the contraction.
+When we finish synchronizing the left child of the root, though,
+we can forget about |metavar x| since well-scopedness of
+alignments guarantees |metavar x| will not show up anywhere else.
+ 
+
+\begin{figure}
+\centering
+\subfloat[Patch |p|]{%
+\begin{myforest}
+[|Bin|
+  [,change
+    [|Bin| [x,metavar] [x,metavar]]
+    [x,metavar]]
+  [|Bin| %, bscope % make a begin-scope style 
+    [|Prm (metavar y) (metavar z)|]
+    [|Prm (metavar z) (metavar y)|]]
+]
+\end{myforest}}\qquad%
+\subfloat[Patch |q|]{%
+\begin{myforest}
+[|Bin| , s sep=7mm
+  [|Bin| [|Leaf| [|42|]] [|Leaf| [|42|]]]
+  [,insctx
+    [|Bin| [|Leaf| [|84|]] [SQ]]
+    [Cpy]]]
+\end{myforest}}
+
+\subfloat[Result of |diff3 p q|]{%
+\begin{myforest}
+[|Bin| , s sep=10mm
+  [,change
+    [|Bin| [|Leaf| [|42|]] [|Leaf| [|42|]]]
+    [|Leaf| [|42|]]]
+  [,insctx
+    [|Bin| [|Leaf| [|84|]] [SQ]]
+    [|Bin| %, bscope % make a begin-scope style 
+      [|Prm (metavar y) (metavar z)|]
+      [|Prm (metavar z) (metavar y)|]]]
+]
+\end{myforest}}
+\caption{Example of a synchronization}
+\label{fig:pepatches:merge-00}
+\end{figure}
+
+Consequently, the |diff3| function
+will map over the overlapped outer spine of its arguments 
+and produce results l
 
 \victor{should I call it |merge| instead of |diff3|? Maybe...
 diff3 already exists and is the unix diff3.}
@@ -1349,17 +1421,13 @@ type PatchC kappa fam at
 \end{myhs}
 
   A conflict is issued whenever we were not able to reconcile
-the alignments in question. This can happen for two reaons: either
-we could not detect that two edits to the same region are safe
-or we could not infer that a given metavariable was equal to 
-some other, when we are replicating edits through duplications and
-contractions. 
+the alignments in question. This happens when
+we cannot detect that two edits to the same location are non-interfering
+or when two edits to the same location interfere with one another.
 
 \begin{myhs}
 \begin{code}
 data Conflict kappa fam at where
-  FailedContr  :: [Exists (MetaVar kappa fam)]
-               -> Conflict kappa fam at
   Conflict     :: String
                -> Aligned kappa fam at
                -> Aligned kappa fam at
@@ -1367,7 +1435,7 @@ data Conflict kappa fam at where
 \end{code}
 \end{myhs}
 
-  Since our patches are locally scopped, the |diff3| can safely
+  Since our patches are locally scopped, the |diff3| function can safely
 map an auxiliary function, |mergeAl|, over the anti-unification of the 
 spines of the patches being merged. The |mergeAl| function will then
 receive one empty spine with an alignment inside and one non-empty
