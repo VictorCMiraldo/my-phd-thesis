@@ -1816,12 +1816,12 @@ function, which attempts to delete a zipper from an alignment, and,
 if successful, returns the pair of alignments we should continue
 to merge.  
 
-\victor{I'm testing without the swap below; might work!}
+\victor{Mention we dont need to swap; this is symmetruic! :)}
 
 \begin{myhs}
 \begin{code}
    (Del zp@(Zipper z _), _)  -> Del . Zipper z <$$> (tryDel zp q >>= uncurry mrgPhase1)
-   (_, Del zq@(Zipper z _))  -> Del . Zipper z <$$> (tryDel zq p >>= uncurry mrgPhase1 . swap)
+   (_, Del zq@(Zipper z _))  -> Del . Zipper z <$$> (tryDel zq p >>= uncurry mrgPhase1)
 \end{code}
 \end{myhs}
 
