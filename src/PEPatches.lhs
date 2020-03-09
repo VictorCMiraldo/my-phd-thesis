@@ -1679,16 +1679,7 @@ instantiates metavariables and registers equivalences.
 
   The |mergePhase1| function receives two alignments and
 produces a third alignment with instructions for the \emph{second phase}.
-Its type is given below.
-
-\begin{myhs}
-\begin{code}
-mergePhase1  :: Al kappa fam x -> Al kappa fam x
-             -> MergeM kappa fam (Al' kappa fam (Phase2 kappa fam) x)
-\end{code}
-\end{myhs}
-
-  These instructions can be instantiating a change, with
+These instructions can be instantiating a change, with
 |P2Instantiate|, which might include a context we need to check
 that the result of the instantiation has disjoint variables
 from that provided context. Or checking that two changes are
@@ -1706,39 +1697,84 @@ data Phase2 kappa fam at where
 \end{code}
 \end{myhs}
 
-  Deciding which instruction should be perfored
-depends on the structure of the alignments under synchronization.
-Copies are the identity element. The full |mergePhase1| is given
-in \Cref{fig:pepatches:mergePhase1} and the reasoning is similar
-to how we wrote the merge algorithm for \texttt{stdiff} (\Cref{sec:stdiff:merge}).
-Let us look at a few select cases, nevertheless.
+  Deciding which instruction should be perfored depends on the
+structure of the alignments under synchronization.  Copies are the
+identity element. The |mergePhase1| function is shown in its entirety
+in \Cref{fig:pepathes:mergePhase1} but discussed in detail below.
+It follows similar reasoning from the merge algorithm for \texttt{stdiff} 
+(\Cref{sec:stdiff:merge}). In fact, the |Al| datatype resembles the
+|Almu| -- both have insertions, deletinos and spines but the former
+The |mergePhase1| function proceeds by induction on its arguments.
 
-  Lets start with the novel cases. If we are to merge
-two permutations, |Prm (metavar x) (metavar y)| against 
-|Prm (metavar x') (metavar y')|, for example, we know that
-|metavar x| and |metavar x'| must refer to the same subtree,
-hence we register their equivalence. But since the two changes
-permuted the same tree, we can only synchronize them if they were
-permuted to the \emph{same place}, in other words, if both 
-permutations turn out to be equal.
+\begin{myhs}
+\begin{code}
+mergePhase1  :: Al kappa fam x -> Al kappa fam x
+             -> MergeM kappa fam (Al' kappa fam (Phase2 kappa fam) x)
+mergePhase1 p q = case (p , q) of dots
+\end{code}
+\end{myhs}
+
+  The first cases we have to handle are copies, which should de 
+the identity of synchronization. That is, if |p| is a copy, 
+all we need to do is modify the tree according to |q| at the
+current location. We might need to refine |q| according to
+other constraints we discovered in other parts of the alignment
+in question, so the final instructon is to \emph{instantiate}
+the |Chg| that comes from forgetting the alignment |q|.
+
+\begin{myhs}
+\begin{code}
+   (Cpy _ , _)  -> return (Mod (P2Instantiate (disalign q)))
+   (_ , Cpy _)  -> return (Mod (P2Instantiate (disalign p)))
+\end{code}
+\end{myhs}
+
+  Next we look at permutations, which are almost copies 
+in the sense that they do not modify the \emph{content}
+of the tree, but they modify the \emph{location}.
+We distinguish the case where both patches permute the same
+tree versus the case wher one patch permutes the tree but
+the other changes its contents.
+
+\begin{myhs}
+\begin{code}
+   (Prm x y, Prm x' y')  -> Mod <$$> mrgPrmPrm x y x' y'
+   (Prm x y, _)          -> Mod <$$> mrgPrm x y (disalign q)
+   (_, Prm x y)          -> Mod <$$> mrgPrm x y (disalign p)
+\end{code}
+\end{myhs}
+
+  If we are to merge two permutations, |Prm (metavar x) (metavar y)|
+against |Prm (metavar x') (metavar y')|, for example, we know that
+|metavar x| and |metavar x'| must refer to the same subtree, hence we
+register their equivalence. But since the two changes permuted the
+same tree, we can only synchronize them if they were permuted to the
+\emph{same place}, in other words, if both permutations turn out to be
+equal at the end of the process. 
 
 \begin{myhs}
 \begin{code}
 mrgPrmPrm  :: MetaVar kappa fam x -> MetaVar kappa fam x 
            -> MetaVar kappa fam x -> MetaVar kappa fam x
            -> MergeM kappa fam (Phase2 kappa fam x)
-mrgPrmPrm x y x' y'  =   onEqvs (\eqs' -> substInsert eqs' x (Hole x'))
+mrgPrmPrm x y x' y'  =   onEqvs (\eqs -> substInsert eqs x (Hole x'))
                      >>  return (P2TestEq (Chg (Hole x) (Hole y)) (Chg (Hole x') (Hole y')))
 \end{code}
 \end{myhs}
 
-  If we are merging one permutation with something else that is
-not a permutation, though, we know one change modified the location
-of a tree, whereas another potentially modified its contents -- which
-should be fine as long as no subtree that appears in the insertion
-context of |c| is also changed by |y|, this would mean
-a subtree could be moved into two different locations, as
-shown in \victor{make figure: \Cref{fig:pepatches:merge-03}}.
+  If we are merging one permutation with something other
+than a permutation, however, we know one change modified the location
+of a tree, whereas another potentially modified its contents. 
+All we must do is record that the tree identified
+by |metavar x| was modified according to |c|. After we have made one
+entire pass over the alignments being merged, we must instantiate
+the permutation with the information we discovered -- the |metavar x|
+occurence in the deletion context of the permutation will be |chgDel c|,
+potentially simplified or refined. The |metavar y| appearing in
+the insertion context of the permutation will be instantiated
+with whatever we come to discover about it later. We know there \emph{must}
+be a single occurence of |metavar y| in a deletion context because
+the alignment flagged it as a permutation.
 
 \begin{myhs}
 \begin{code}
@@ -1746,21 +1782,53 @@ mrgPrm  :: MetaVar kappa fam x -> MetaVar kappa fam x
         -> Chg kappa fam x
         -> MergeM kappa fam (Phase2 kappa fam x)
 mrgPrm x y c  =   addToIota "prm-chg" x c
-              >>  return (P2Instantiate (Chg (Hole x) (Hole y)) (Just (chgIns c)))
+              >>  return (P2Instantiate (Chg (Hole x) (Hole y)) Nothing)
 \end{code}
 \end{myhs}
 
   The |addToIota| function inserts the |(x, c)| entry in |iota| if |x|
 is not yet a member. It throws an error with the supplied label
 if |x| is already in |iota| with a value that is different than |c|.
+\digress{I believe that we could develop a better algorithm if instead
+of forbidding values different than |c| we check to see whether the
+two different values can also be merged. I ran into many difficulties
+tracking how subtrees were moved and opted for the easy and pragmatic
+option of not doing anything difficult here.}
 
-  Another interesting case happens with deletions. If one patch
+  Insertions must be preserved as long as they do not attempt to
+insert different information in the same location.
+
+\begin{myhs}
+\begin{code}
+   (Ins (Zipper z p'), Ins (Zipper z' q'))
+     | z == z'             -> Ins . Zipper z <$$> mergePhase1 p' q'
+     | otherwise           -> throwError "ins-ins"
+   (Ins (Zipper z p'), _)  -> Ins . Zipper z <$$> mrgPhase1 p' q
+   (_ ,Ins (Zipper z q'))  -> Ins . Zipper z <$$> mrgPhase1 p q'
+\end{code}
+\end{myhs}
+
+  Next we look at deletions. If one patch
 deletes a constructor but the other modifies the fields the
 constructor, we must ensure that none of the deleted fields
 have been modified by the other patch. This is done by the |tryDel|
 function, which attempts to delete a zipper from an alignment, and,
 if successful, returns the pair of alignments we should continue
 to merge.  
+
+\victor{I'm testing without the swap below; might work!}
+
+\begin{myhs}
+\begin{code}
+   (Del zp@(Zipper z _), _)  -> Del . Zipper z <$$> (tryDel zp q >>= uncurry mrgPhase1)
+   (_, Del zq@(Zipper z _))  -> Del . Zipper z <$$> (tryDel zq p >>= uncurry mrgPhase1 . swap)
+\end{code}
+\end{myhs}
+
+  The |tryDel| function matches on the possible cases for |q| (resp. |p|)
+and checks whether there are any modifications to the locations the
+zipper wants to delete. If there are, we throw a conflict, otherwise
+we can continue.
 
 \begin{myhs}
 \begin{code}
@@ -1779,11 +1847,106 @@ tryDel (Zipper z h) (Spn rep) = case zipperRepZip z rep of
                         | otherwise       -> throwError "del-spn"
                       _                   -> throwError "del-spn"
 tryDel (Zipper _ _) _ = throwError "del-mod"
-
 \end{code}
 \end{myhs}
 
-\victor{Choose a few cases to show}
+  Spines and modifications are one of the trickiest cases we
+have to manage. Intuitively, we want to match the deletion
+context of the change against the spine and, when successful,
+return the result of instantiating the insertion context of
+the change. Yet, we must later check that we did \emph{not}
+introduce duplications by doing so, as illustrated
+in \Cref{fig:pepatches:merge-03}.
+
+\begin{myhs}
+\begin{code}
+   (Mod p', Spn q')  -> Mod <$$> mrgChgSpn p' q'
+   (Spn p', Mod q')  -> Mod <$$> mrgChgSpn q' p'
+\end{code}
+\end{myhs}
+
+  The |mrgChgSpn| function, below, matches the deletion
+context of the |Chg| against the spine and and returns
+a |P2Instantiate| instruction for change, being careful that
+the variables that show up in the result, after the second phase is done,
+do not mention any variable mentioned by the insertion contexts
+in the spine.
+
+\begin{myhs}
+\begin{code}
+   mrgChgSpn  :: (CompoundCnstr kappa fam x) => Chg kappa fam x -> SRep (Al kappa fam) (Rep x)
+              -> MergeM kappa fam (Phase2 kappa fam x)
+   mrgChgSpn p@(Chg dp _) spn = do
+     instM dp (Spn spn) 
+     return (P2Instantiate p (Just (chgIns (disalign (Spn spn)))))
+\end{code}
+\end{myhs}
+
+  \Cref{fig:pepatches:merge-03} illustrates a case where failing to check
+this would result in an erroneous duplication of the value |2|. 
+
+  Matching the deletion context of |chg = Chg (metavar c) (: (metavar
+a) (metavar c))| against the spine |spn = Spn (: Cpy (Chg (metavar z)
+(: (metavar x) (metavar z))))| will yield |c| equal to |spn|, which
+means the subtree identified by |c| was modified according to |spn|,
+which is correct. The observation, however, is that the insertion
+context of |chg| mentions |metavar a|, which is a subtree that comes
+from somwhere else other than the deletion context of |chg|. If we
+naively substitute |metavar c| in |ctxDel chg| by |ctxDel (disalign spn)|
+and in |ctxIns chg| by |ctxIns (disalign spn)|, we would get:
+
+\begin{minipage}{.8\textwidth}
+\centering
+\begin{myforest}
+[,rootchange
+  [|(:)| [l,metavar] [z,metavar]]
+  [|(:)| [a,metavar]
+    [|(:)| [l,metavar] [|(:)| [x,metavar] [z,metavar]]]]]
+\end{myforest}
+\end{minipage}
+
+  Since we know |metavar x == metavar a|, which was registered when
+merging the left hand side of |(,)|, in
+\Cref{fig:pepatches:merge-03:A,fig:pepatches:merge-03:B}, we have
+that |metavar a| was duplicated. Our implementation will reject this
+since it performs the check that the subtrees that appear in the
+result of instantiating |chg| are separate from those
+that were moved around by |spn|. \digress{I dislike this aspect of
+my algorithm quite a lot, it feels unecessarily complex and with
+no good justification. There must be a more disciplined way of
+disallowing duplications to be introduced without this but I could
+not figure it out.}
+  
+
+\begin{figure}
+\begin{minipage}{.65\textwidth}
+\centering
+\subfloat[Aligned Patch |p|]{%
+\begin{myforest}
+[|(,)| , s sep=4mm 
+  [|(:)| [|Cpy|] [,change [|(:)| [a,metavar] [b,metavar]] [b,metavar]]]
+  [,change [c,metavar] [|(:)| [a,metavar] [c,metavar]]]]
+\end{myforest}\label{fig:pepatches:merge-03:A}}\qquad
+\subfloat[Aligned Patch |q|]{%
+\begin{myforest}
+[|(,)| , s sep=4mm 
+  [|(:)| [|Cpy|] [,change [|(:)| [x,metavar] [y,metavar]] [y,metavar]]]
+  [|(:)| [|Cpy|] [,change [z,metavar] [|(:)| [x,metavar] [z,metavar]]]]]
+\end{myforest}\label{fig:pepatches:merge-03:B}}
+\end{minipage}%
+\begin{minipage}{.3\textwidth}
+\begin{displaymath}
+\xymatrix{ |([1,dots] , [2 , 3 , dots])| \\
+           |([1,2,dots] , [3 , dots])| \ar[u]^{|p|} \ar[d]_{|q|} \\
+           |([1,dots] , [3 , 2 , dots])|
+}
+\end{displaymath}
+\end{minipage}
+\caption{Example of two conflicting patches for moving
+the same subtree into two different locations. The patches
+here are operating over pairs of lists.}
+\label{fig:pepatches:merge-03}
+\end{figure}
 
 \begin{figure}
 \begin{myhs}[.99\textwidth]
@@ -1865,8 +2028,8 @@ we refine them first, as this might uncover important information about them.
 \begin{code}
 isEqChg  :: Subst2 kappa fam -> Chg kappa fam at -> Chg kappa fam at
          -> Maybe (Chg kappa fam at)
-isEqChg di ca cb =  let ca' = chgrefine di ca
-                        cb' = chgrefine di cb
+isEqChg di ca cb =  let ca' = refineChg di ca
+                        cb' = refineChg di cb
                     in if ca' == cb' then Just ca' else Nothing
 \end{code}
 \end{myhs}
@@ -1959,19 +2122,22 @@ but will come back to this point in the Discussion (\Cref{sec:pepatches:discussi
   This section explores the definition of the \emph{sharing map} and
 how to compute a |Chg| given such sharing map.
 For now, lets just assume the existence of said sharing map,
-noting that it is trivial to define a inefficient such map 
+noting that it is trivial to define an inefficient variant of such map 
  -- a subtree |t| can be shared if and only if we can 
 find |t| in the source, |s|, and in the destination, |d|, trees.
 
-  Given two trees, |s| and |d|, we would like to compute a change |c| such
-that |chgApply c s == Just d|. One obvious option would be |Chg s d|, but that
-change contains no sharing whatsoever. Traditional edit-scripts based techniques
+  Given two trees, |s| and |d|, we want to produce a change |c| such
+that |chgApply c s == Just d|. The obvious option is |Chg s d|, but that
+change contains no sharing whatsoever and will synchronize badly. 
+Traditional edit-scripts based techniques
 optimize for a lower cost, which usually translates to more copies. Yet, this
 does not necessarily translate to high quality patches: especially when there
-is more than one lowest-cost patch.
+is more than one lowest-cost patch. \digress{In fact, I have not
+came up with a satisfactory definition of ``best'' patch in this \texttt{hdiff}
+setting.}
 
-  Assuming the existence of said \emph{sharing map}, in the form of a
-function |wcs s d| -- which reads as ``which common subtree'' -- with
+  Assuming the existence of said \emph{sharing map}, let its query 
+function be |wcs s d| -- which reads as ``which common subtree'' -- with
 type |SFix kappa fam at -> Maybe (MetaVar kappa fam at)|, such that
 |wcs s d x| returns |Just i| when |x| is a common subtree of |s| and
 |d| uniquely identified by |i|. A first, naive, attempt at writing an
@@ -2081,7 +2247,7 @@ share subtrees that occur only once in the source and once in the
 destination. For the inputs in
 \Cref{fig:pepatches:extract-problem-01}, extracting contexts under
 |Patience| mode would produce the same result as |NoNested|, but they
-are not the same in general.
+are not the same in general. 
   
 \begin{figure}
 \centering
@@ -2107,6 +2273,58 @@ well-formed changes. The nested occurence of |t| within |Bin t u|
 here yields a change with an undefined variable on its insertion
 context.}
 \label{fig:pepatches:extract-sol-01}
+\end{figure}
+
+  Finally, the |diff| function receives a source and destination
+trees, |s| and |d|, and computes a patch that encodes the information
+necessary to transform the source into the destination. In practice,
+to achieve an efficient ``which common subtree'' query we need to
+preprocess the inputs (\Cref{sec:pepatches:preprocess}) and build the
+sharing map from these preprocessed trees.  We then extract the
+contexts (\Cref{sec:pepatches:extract}), which yields a |Chg|, and finally translate that |Chg| into
+a |Patch| by pulling the largest possible spine, with |close|.
+
+\begin{myhs}
+\begin{code}
+diff  :: (All Digestible kappa) => SFix kappa fam at -> SFix kappa fam at
+      -> Patch kappa fam at
+diff x y =  let  dx             = preprocess x
+                 dy             = preprocess y
+                 (i, sh)        = buildSharingMap opts dx dy
+                 (del :*: ins)  = extract canShare (dx :*: dy)
+            in cpyPrimsOnSpine i (close (Chg del ins))
+ where
+   canShare t = 1 < treeHeight (getConst (getAnn t))
+\end{code}
+\end{myhs}
+
+  The |cpyPrimsOnSpine| function will issue copies for the opaque
+values that appear on the spine, as illustrated in \Cref{fig:pepatches:cpyonspine},
+where the |42| does not get shared for its height is smaller than 1 but
+since it occurs in the same location in the deletion and insertion context,
+we flag it as a copy -- which involes issuing a fresh metavariable, hence
+the parameter |i| in the code above.
+
+\begin{figure}
+\centering
+\subfloat[Globally-scoped change]{%
+\begin{myforest}
+[,rootchange
+ [|BinLbl| [|42|] [|Bin| [x, metavar] [y, metavar]] [z,metavar]]
+ [|BinLbl| [|42|] [|Bin| [y, metavar] [x, metavar]] [z,metavar]]
+]
+\end{myforest}}\qquad%
+\subfloat[Locally-scoped change with copies in its spine]{%
+\begin{myforest}
+[|BinLbl|, s sep=4mm
+  [,change [k,metavar] [k,metavar]]
+  [,change [|Bin| [x, metavar] [y,metavar]]
+           [|Bin| [y, metavar] [x,metavar]]]
+  [,change [z, metavar] [z, metavar]]]
+\end{myforest}}
+\caption{A Globally-scoped change and the result of applying it to |cpyPrimsOnSpine . close|,
+producing a patch with locally scoped changes and copies in its spine.}
+\label{fig:pepatches:cpyonspine}
 \end{figure}
 
   Next we look at how to define the |wcs| oracle efficiently and look 
@@ -2289,6 +2507,7 @@ I believe this collision checking will be much slower for it brings the complexi
 of the algorithm up}
 
 \subsection{Extracting the Contexts}
+\label{sec:pepatches:extract}
 
   Having an efficient ``which common subtree'' oracle in our toolbox,
 we move on to defining the different context extraction techniques,
@@ -2385,11 +2604,9 @@ shared might even be impossible without domain-specific knowledge.
 parameter. Our choise is very pragmatic in the sense that we have
 the height of the trees available from |preprocess| and it does not
 involve any domain specific knowledge. \digress{In the code, I abstracted this
-away by the means of a predicate, encoded in |CanShare| below, in case
-I ever came back to implement more refined sharing strategies.
-I never had time for that, unfortunately.
-In \Cref{sec:pepatches:discussion} I will discuss other possibilities
-that did not work very well.}
+away by the means of a predicate |CanShare| below. I hoped
+to come back here and implement more refined sharing strategies.
+I never had time for that, unfortunately.}
 
 \begin{myhs}
 \begin{code}
@@ -2405,9 +2622,7 @@ cleanup that depends no global information.
 
 \begin{myhs}
 \begin{code}
-extract  :: DiffMode
-         -> CanShare kappa fam
-         -> IsSharedMap
+extract  :: DiffMode -> CanShare kappa fam -> IsSharedMap
          -> (PrepFix kappa fam :*: PrepFix kappa fam) at
          -> (HolesMV kappa fam :*: HolesMV kappa fam) at
 \end{code}
@@ -2425,14 +2640,12 @@ have been substituted on the first pass:
 
 \begin{myhs}
 \begin{code}
-noNested1  :: CanShare kappa fam
-           -> T.Trie MetavarAndArity
-           -> PrepFix a kappa fam at
+noNested1  :: CanShare kappa fam -> T.Trie MetavarAndArity -> PrepFix a kappa fam at
            -> Holes kappa fam (Const Int :*: PrepFix a kappa fam) at
 noNested1 h sm x@(PrimAnn _    xi) = Prim xi
 noNested1 h sm x@(SFixAnn ann  xi)
-  =  if h x  then maybe recurse (mkHole x) $$ lookup (getDigest ann) sm 
-             else recurse
+  =  if h x  then  maybe recurse (mkHole x) $$ lookup (getDigest ann) sm 
+             else  recurse
  where
     recurse     = Roll (repMap (noNexted1 h sm) xi)
     mkHole x v  = Hole (Const (getMetavar v) :*: x)
@@ -2475,71 +2688,26 @@ then proceeding just like |Patience|, but instead of checking
 that the arity must be two, we check that the tree is classified
 as a \emph{proper-share}.
 
-\subsection{The \texttt{diff} Function}
-\label{sec:pepatches:diff-func}
-
-\victor{I don't think I have justified the height parameter
-effectively yet}
-
-  The |diff| function receives a source and
-destination trees, |s| and |d|, and computes a patch
-that encodes the information necessary to transform 
-the source into the destination. It starts by preprocessing
-|s| and |d| with |preprocess|, producing trees annotated with
-their hash and their height. Next, it constructs the sharing
-map for both trees and uses this map to extract the
-insertion and deletion contexts, according to some context extraction mode.
-Finally, it computes the spine by pushing changes into small, locally-scopped,
-portions. 
-
-
-\begin{myhs}
-\begin{code}
-diff  :: (All Digestible kappa) => SFix kappa fam at -> SFix kappa fam at
-      -> Patch kappa fam at
-diff x y =  let  dx             = preprocess x
-                 dy             = preprocess y
-                 (i, sh)        = buildSharingMap opts dx dy
-                 (del :*: ins)  = extract canShare (dx :*: dy)
-            in cpyPrimsOnSpine i (close (Chg del ins))
- where
-   canShare t = 1 < treeHeight (getConst (getAnn t))
-\end{code}
-\end{myhs}
-
-  The |cpyPrimsOnSpine| function will issue copies for the opaque
-values that appear on the spine, as illustrated in \Cref{fig:pepatches:cpyonspine},
-where the |42| does not get shared for its height is smaller than 1 but
-since it occurs in the same location in the deletion and insertion context,
-we flag it as a copy -- which involes issuing a fresh metavariable, hence
-the parameter |i| in the code above.
-
-\begin{figure}
-\centering
-\subfloat[Globally-scoped change]{%
-\begin{myforest}
-[,rootchange
- [|BinLbl| [|42|] [|Bin| [x, metavar] [y, metavar]] [z,metavar]]
- [|BinLbl| [|42|] [|Bin| [y, metavar] [x, metavar]] [z,metavar]]
-]
-\end{myforest}}\qquad%
-\subfloat[Locally-scoped change with copies in its spine]{%
-\begin{myforest}
-[|BinLbl|, s sep=4mm
-  [,change [k,metavar] [k,metavar]]
-  [,change [|Bin| [x, metavar] [y,metavar]]
-           [|Bin| [y, metavar] [x,metavar]]]
-  [,change [z, metavar] [z, metavar]]]
-\end{myforest}}
-\caption{A Globally-scoped change and the result of applying it to |cpyPrimsOnSpine . close|,
-producing a patch with locally scoped changes and copies in its spine.}
-\label{fig:pepatches:cpyonspine}
-\end{figure}
-
 \section{Discussion}
 \label{sec:pepatches:discussion}
 
+\victor{Frst person or third person?}
 
+  With \texttt{hdiff} we have seen that detachnig from edit-scripts
+might have paid off. We were able to define a computatonally efficient
+differencing algorithm and seen how our patches can still be merged
+and posses a sensible algebraic structure. In \Cref{chap:experiments} we 
+will be discussing the empirical evaluation in detail, but in summary, 
+\texttt{hdiff} has shown a very strong potential for practical use. 
+
+\victor{Things I'd like to talk about:
+\begin{itemize}
+  \item sharing
+  \item lack of cost semantics
+  \item complexity hypothesis and relation to edit-scripts
+\end{itemize}
+
+Yet, some of those might be better off in our Discussion \textbf{chapter}... no?}
 
 
 
