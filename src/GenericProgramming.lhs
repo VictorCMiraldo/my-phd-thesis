@@ -72,7 +72,7 @@ to look at real world sofware version control conflict data.
 structure of \texttt{generics-mrsop} -- significantly decreasing
 the reliance of type families -- but maintain a combinator-based
 approach, which still enables us to write the algorithms underlying 
-the \texttt{hdiff} tool (\Cref{chap:pattern-expression-patches).
+the \texttt{hdiff} tool (\Cref{chap:pattern-expression-patches}).
 This lead us to develop the \genericssimpl{} library, \Cref{sec:gp:simplistic},
 which still maintains a list of the types that belong in the family,
 but does not record their internal sum-of-products structure.
