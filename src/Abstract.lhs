@@ -7,25 +7,28 @@ lead to unnecessary conflicts when unrelated changes occur on the same line.
 Consequently, it is difficult to merge such changes automatically.
 
   In this thesis we discuss two novel approaches to structural
-differencing, generically. The first approach defines a type-indexed 
-representation of patches and provides a clear merging algorithm -- 
-but it is computationally expensive to produce patches. The second 
-approach addresses the efficiency problem by choosing an extensional 
-representation for patches.  This
-enables us to represent insertions, deletions, duplication,
-contractions and permutations and is computable in linear time. With
-the added expressivity, however, comes added complexity. Consequently,
-the merging algorithm is more intricate and the patches can be harder
-to reason about.
+differencing, generically -- which work over a large class of
+datatypes. The first approach defines a type-indexed representation of
+patches and provides a clear merging algorithm, but it is
+computationally expensive to produce patches with this approach. The
+second approach addresses the efficiency problem by choosing an
+extensional representation for patches.  This enables us to represent
+transformations involving insertions, deletions, duplication,
+contractions and permutations which are computable in linear time.
+With the added expressivity, however, comes added
+complexity. Consequently, the merging algorithm is more intricate and
+the patches can be harder to reason about.
 
-  Both of our approaches can be instantiated to mutually recursive families and, 
-consequently, can be used to compare elements of most programming languages.
-Writing the software that does so, however, comes with additional challenges.
-To adress this we have developed two new libraries for generic programming
-in Haskell. 
+  Both of our approaches can be instantiated to mutually recursive
+families of datatypes and, consequently, can be used to compare
+elements of most programming languages.  Writing the software that
+does so, however, comes with additional challenges.  To adress this we
+have developed two new libraries for generic programming in Haskell.
 
-  Finally, we empirically evaluate our algorithms by a number of experiments
-over real conflicts gathered from \texttt{GitHub}. Our evaluation reveals
-that at least \TODOsuccessrate{} of the conflicts that developers face on an everyday
-basis could have been automatically merged. This suggests there is a benefit
-in using structural differencing tools as the basis for software version control.
+  Finally, we empirically evaluate our algorithms by a number of
+experiments over real conflicts gathered from \texttt{GitHub}. Our
+evaluation reveals that at least \TODOsuccessrate{} of the conflicts
+that developers face on an everyday basis could have been
+automatically merged. This suggests there is a benefit in using
+structural differencing tools as the basis for software version
+control.

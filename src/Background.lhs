@@ -78,7 +78,7 @@ often context dependent. One major drawback, for example, is the least
 cost edit-script is chosen arbitrarily in some situations, namelly,
 when it is not unique. This makes the results computed by these
 algorithms hard to predict. Another issue, perhaps even more central,
-is the inherently slow algorithms that arise from this ambiguity.
+are the algorithms that arise from this ambiguity which are inherently slow.
 
   The algorithms computing edit-scripts must either
 return an approximation of the least cost edit-script or check
@@ -90,8 +90,8 @@ around this last issue by writing edit scripts in a typed
 form~\cite{Lempsink2009}, but this requires some non trivial generic
 programming techniques to scale.
 
-  The second half of important background is the state-of-the-ast
-of the generic programming ecosystem in Haskell. This includes
+  The second half of this chapter is the state-of-the-ast
+of the generic programming ecosystem in Haskell. Including
 the \texttt{GHC.Generics} and \texttt{generics-sop}
 libraries, which introduce all the necessary parts for us to build
 our own solutions later, in \Cref{chap:generic-programming}.
@@ -99,7 +99,7 @@ our own solutions later, in \Cref{chap:generic-programming}.
 \section{Differencing and Edit Distance}
 \label{sec:background:tree-edit-dist}
 
-  The \emph{edit distance} between to objects is
+  The \emph{edit distance} between two objects is
 defined as the cost of the least-cost edit-script that transforms
 the source object into the target object -- that is,
 the edit-script with the least insertions and deletions.
@@ -115,13 +115,13 @@ structures in a large set of structures, whereas
 in software version control systems we actually want to store,
 manipulate and combine the differences between objects.
 
-  The large applicability of differencing and edit distances
-lead to a large degree of variation of cost notions, edit-script
+  The wide applicability of differencing and edit distances
+leads to a variety of cost notions, edit-script
 operations and algorithms for computing them~\cite{Bille2005,Bergroth2000,Paassen2018}.
 
-  On this section we will review some of the important notions and
+  In this section we will review some of the important notions and
 background work on edit distance. We start by looking at the string
-edit distance (\Cref{sec:background:string-edit-distance}) and then we
+edit distance (\Cref{sec:background:string-edit-distance}) and then 
 generalize this to untyped trees (\Cref{sec:background:tree-edit-distance}), 
 as it is classically portrayed in the literature, which
 is reviewed in \Cref{sec:background:literature-review}.  
@@ -137,14 +137,15 @@ example, works well for detecting spelling mistakes\cite{Navarro2001}
 or measuring how similar two languages are \cite{Thije2007}. 
 It considers insertions, deletions and substitutions of
 characters as its edit operations. The \emph{Longest Common
-Subsequence (LCS)}~\cite{Bergroth2000}, on the other hand considers
+Subsequence (LCS)}~\cite{Bergroth2000}, on the other hand, considers
 insertions, deletions and copies as edit operations and is better
 suited for identifying shared sequences between strings. 
 
 \subsubsection*{Levenshtein Distance}
 
   The Levenshtein distance considers insertions, deletions and
-substitutions of characters as edit operations.
+substitutions of characters as edit operations, which can
+be modelled in Haskell by the |EditOp| datatype below.
 
 \begin{myhs}
 \begin{code}
@@ -167,7 +168,7 @@ apply (Subst c d  : ops)  (s :  ss)  = guard (c == s) >> (d :) <$$> apply ops ss
 \end{myhs}
 
   The cost metric associated with these edit operations is defined
-in a way to ensure that substitutions cost less than insertions and deletions.
+to force substitutions to cost less than insertions and deletions.
 This ensures that the algorithm looking for the list of edit operations
 with the minimum cost will prefer substitutions over deletions
 and insertions. 
@@ -238,18 +239,18 @@ becomes a difficult task.
 
 \subsubsection*{Longest Common Subsequence}
 
-  Given our context of case of source-code version-control,  
+  Given our context of source-code version-control,  
 we are rather interested in the \emph{Longest Common Subsequence (LCS)},
 which is a restriction of the Levenshtein distance and forms
 the specification of the \unixdiff{}~\cite{McIlroy1976} utility.
 
-  If we take the |lev| function and modify it in such a way to only
+  If we take the |lev| function and modify it in such a way that it only
 considers identity substitutons, that is, |Subst x y| with |x == y|,
 we end up with a function that computes the classic longest common
 subsequence. Note that this is different from the longest common
-substring problem for subsequences need not be contiguous.
+substring problem, as subsequences need not be contiguous.
 
-  The \unixdiff{}~\cite{McIlroy1976} performs a slight generalization
+  \unixdiff{}~\cite{McIlroy1976} performs a slight generalization
 of the LCS problem by considering the distance between two
 \emph{files}, seen as a list of \emph{strings}, opposed to a list of
 \emph{characters}. Hence, the edit operations become:
@@ -265,7 +266,7 @@ cost Cpy      = 0
 \end{code}
 \end{myhs}
 
-  The application function is analogous to the |apply| for the Levenshtein
+  The application function is analoguous to the |apply| for the Levenshtein
 distance. The computation of the minimum cost edit script, however,
 is not. We must ensure to issue a |Cpy| only when both elements
 are the same, as illustrated in \Cref{fig:background:string-lcs}.
@@ -290,16 +291,16 @@ lcs (x:xs)  (y:ys)  =
 \label{fig:background:string-lcs}
 \end{figure}
 
-Running the |lcs x y| function, \Cref{fig:background:string-lcs}, will
+  Running the |lcs x y| function, \Cref{fig:background:string-lcs}, will
 yield an \emph{edit script} that enables us to read out one longest
-common subsequence of |x| and |y|. Note that the ambituity problem is
-still present, albeit we have less ambiguous edit-scripts than with 
+common subsequence of |x| and |y|. Note that the ambiguity problem is
+still present, however to a lesser degree than with 
 the Levenshtein distance. For example, there are only two edit-scripts 
 with minimum cost on |lcs ["a", "b"] ["b" , "a"]|. This, in fact, 
 is a general problem with any \emph{edit-script} based approaches.
 
-  A practical implementation of the \unixdiff{} will use a number of
-algorithmic techniques that make it performant. For starter, it is
+  A practical implementation of \unixdiff{} uses a number of
+algorithmic techniques that make it performant. First, it is
 essential to use a memoized |lcs| function to avoid recomputing
 subproblems. It is also common to hash the data being compared to have
 amortized constant time comparisson. More complicated, however, is the
@@ -311,7 +312,7 @@ source and destintion files.
 \subsection{Classic Tree Edit Distance}
 \label{sec:background:tree-edit-distance}
 
-  The \unixdiff{} can be generalized to compute an edit-script
+  \unixdiff{} can be generalized to compute an edit-script
 between lists containing data of arbitrary types. 
 The only requirement being that we must be able to
 compare this data for equality. Generalizing over the shape of the data
@@ -396,7 +397,7 @@ apply (Ins l : ops) ts
 \label{fig:background:apply-tree-edit}
 \end{figure}
 
-  We label these approaches as ``untyped'' because there exists edit
+  We label these approaches as \emph{untyped} because there exists edit
 scripts that yield non-well formed trees. For example, imagine |l| is
 a label with arity 2 -- supposed to receive two
 arguments. Now consider the edit script |Ins l : []|, which will yield
@@ -422,13 +423,14 @@ Lempsink and L\"{o}h~\cite{Lempsink2009} at adapting this untyped framework
 to be type-safe by construction.
 
   Although edit scripts provide a very intuitive notion of local
-transformations over a tree, they are very redundant: the order of
+transformations over a tree, there are many different edit-scripts
+that perform the same transoformation: the order of
 insertions and deletions do no matter. This makes it hard to 
-develop algorithms based solely on edit scripts. It is often the case
-that the notion of \emph{tree mapping} comes in handy. It works as
+develop algorithms based solely on edit scripts. 
+The notion of \emph{tree mapping} often comes in handy. It works as
 a \emph{normal form} version of edit scripts and represents only the
 nodes that are either relabeled or copied. We must impose a series of
-restrictions on these mappings in order to maintain the ability to
+restrictions on these mappings to maintain the ability to
 produce edit scripts out of it. \Cref{fig:brackground:tree-mapping} 
 illustrates four invalid and one valid such mappings.
 
@@ -436,7 +438,7 @@ illustrates four invalid and one valid such mappings.
 Let |t| and |u| be two trees, a tree mapping 
 between |t| and |u| is an order preserving partial bijection between the
 nodes of a flattened representation of |t| and |u| according
-to their preorder traversal. Moreover, it must preserve the 
+to their preorder traversal. Moreover, it preserves the 
 ancenstral order of nodes. That is, given two subtrees |x| and |y| in 
 the domain of the mapping |m|, then |x| is an ancestor of |y| if and only if
 |m x| is an ancestor of |m y|.
@@ -517,16 +519,16 @@ then extracting an edit script from this. There are a plethora of design
 decisions on how to produce a mapping and often the domain of application
 of the tool will enable one to impose extra restrictions to attempt to squeeze
 maximum performance out of the algorithm. The \texttt{LaDiff}~\cite{Chawathe1996} tool, 
-for example, works for hierarchicaly structured trees -- used primarily for 
-\LaTeX source files -- and use a variant of the LCS to compute matchings of elements
+for example, works for hierarchically structured trees -- used primarily for 
+\LaTeX source files -- and uses a variant of the LCS to compute matchings of elements
 appearing in the same order, starting at the leaves of the document.
 Tools such as \texttt{XyDiff}~\cite{Marian2002}, used to identify changes in XML documents,
 use hashes to produce matchings efficiently.
 
 \subsection{Shortcomings of Edit Script Based Approaches}
 
-  Regardless of the process by which an edit script is obtained,
-we argue that edit scripts have inherent shortcomings when they
+  We argue that regardless of the process by which an edit script is obtained,
+edit scripts have inherent shortcomings when they
 are used to compare tree structured data. The first and most striking 
 is that the use of heuristics to compute optimal solutions is unavoidable.
 Consider the tree-edit-scripts between the following two trees:
@@ -551,15 +553,15 @@ differencing algorithms that support no \emph{swap} operation
 must choose to copy |T| or |U| arbitrarily. This decision is often
 guided by heuristics, which makes the result of different algorithms
 hard to predict. Moreover, the existence of this type of choice point inherently
-slows algotihms down since the algorithm \emph{must decide} which
+slows algorithms down since the algorithm \emph{must decide} which
 tree to copy. 
 
   Another issue when dealing with edit script is
 that they are type unsafe. It is quite easy to write an edit
-script that produce an \emph{ill-formed} tree, according to some
+script that produces an \emph{ill-formed} tree, according to some
 arbitrary schema. Even when writing the edit operations in a
 type safe way~\cite{Lempsink2009} the synchronization of said changes
-is not guarnateed to be type safe~\cite{Vassena2016}.
+is not guarnteed to be type safe~\cite{Vassena2016}.
   
   Finally, we must mention the lack of expressivity that comes from edit scripts, 
 from the \emph{differencing} point of fiew. Consider the trees below,
@@ -572,8 +574,8 @@ from the \emph{differencing} point of fiew. Consider the trees below,
 \end{forest}
 \end{center}
 
-  Optimal edit scripts obliges us to chose between copying |A| 
-as the left or the right subtree, there is no possibility to represent
+  Optimal edit scripts oblige us to chose between copying |A| 
+as the left or the right subtree. There is no possibility to represent
 duplications, permutations or contractions of subtrees. This means
 that a number of common changes, such as refactorings, yield
 edit scripts with a very high cost even though a good part of the information
@@ -630,7 +632,7 @@ modelled in one of two ways. Either we produce one change that works
 on the common ancestor of $p$ and $q$, as in
 \Cref{fig:background:mergesquare-threeway}, or we produce two changes
 that act directly on the images of $p$ and $q$,
-\Cref{fig:background:mergesquare-resid}.  We often call the the former
+\Cref{fig:background:mergesquare-resid}.  We often call the former
 a \emph{three-way merge} and the later a \emph{residual} merge.
 
   Residual merges, specially if based on actual residual
@@ -703,7 +705,7 @@ metatheoretical foundation.
 \label{fig:background:diff3-example}
 \end{figure}
  
-  Regardless of choosing a \emph{three-way} or \emph{residual} based
+  Regardless of whether we choose a \emph{three-way} or \emph{residual} based
 approach, any state-based synchronizer will invariably have to deal
 with the problem of \emph{aligning} the changes. That is, deciding
 which parts of the replicas are copies from the same piece of
@@ -714,7 +716,7 @@ comes after changeing {\small \verb!res := 0;!}
 to {\small \verb!sum := 0;!}. This fact only becomes evident after
 we look at the result of calling the \unixdiff{} on each diverging
 replica -- the copies in each patch identify which parts of the
-replicas are ``the same''.
+replicas are 'the same'.
   
 \begin{figure}
 \subfloat[][inputs]{%
@@ -772,10 +774,10 @@ Finally, \texttt{diff3} can decide which changes to propagate and which
 changes are a conflict. In our case, the $4,5$ was only changed in one replica,
 so it is safe to propagate (\Cref{fig:background:example-diff3:propagate}).
 
-  Different synchronization algorithms algorithms will naturally offer
+  Different synchronization algorithms will naturally offer
 slightly different properties, yet, one that seems to be central to
 synchronization is locality~\cite{Khanna2007} -- which is enjoyed by
-\texttt{diff3}~\cite{Khanna2007}.  Locality states that changes to two
+\texttt{diff3}~\cite{Khanna2007}.  Locality states that changes to 
 distinct locations of a given object can always be synchronized
 without conflicts. In fact, we argue this is the only property we can
 expect out of a general-purpose generic synchronizer.  The reason
@@ -809,8 +811,8 @@ NP-hard~\cite{Zhang1992}.
   Tree edit distance has seen multidisciplinary interest. From
 Computational Biology, where it is used to align phylogentic trees and
 compare RNA secondary structures
-\cite{Akutsu2010b,Henikoff1992,McKenna2010}, all the way to inteligent
-tutoring systems where we must provide good hints to student's
+\cite{Akutsu2010b,Henikoff1992,McKenna2010}, all the way to intelligent
+tutoring systems where we must provide good hints to students'
 solutions to exercises by understanding how far they are from the
 correct solutions \cite{Paassen2017,Rohan2016}.  In fact, from the
 \emph{tree edit distance} point of view, we are only concerned with a
@@ -821,7 +823,7 @@ they are.
 we actually care about the edit operations and might want to perform
 computations such as composition and merging of
 differences. Naturally, however, the choice of edit operations heavily
-influence the complexity of the |diff| algorithm. Allowing a
+influences the complexity of the |diff| algorithm. Allowing a
 \emph{move} operation already renders string differencing
 NP-complete~\cite{Shapira2002}. Tree differencing algorithms,
 therefore, tend to run approximations of the best edit distance. Most
@@ -838,11 +840,11 @@ from deducing an edit script given tree matchings, the tree matching
 phase differs in each tool. A notable mention is the
 \texttt{XyDiff}~\cite{Marian2002}, which uses hashes to compute
 matchings and, therefore, supports \emph{move} operations maintaining
-almost linear complexity.  This is perhaps the closes to our approach
+almost linear complexity.  This is perhaps the closest to our approach
 in \Cref{chap:pattern-expression-patches}. The
 \texttt{RWS-Diff}~\cite{Finis2013} uses approximate matchings by
 finding trees that are not necessarily equal but \emph{similar}. This
-yeilds a robust algorithm, which is applicable in practice.
+yields a robust algorithm, which is applicable in practice.
 Most of these techniques recycle list differencing and can be seen
 as some form of string differencing over the preorder (or postorder)
 traversal of trees, which has quadratic upper bound~\cite{Guha2002}.
@@ -850,9 +852,8 @@ A careful encoding of the edit operations enables one to have edit scripts
 that are guaranteed to preserve the schema of the data under manipulation
 \cite{Lempsink2009}.
 
-  Besides computing differences, we are also interested in merging the
-computed differences, effectively synchronizing
-changes~\cite{Balasubramaniam1998}. Naturally, merging algorithms are
+  When it comes to synchronization of changes~\cite{Balasubramaniam1998},
+the algorithms are
 heavily dependent on the representation of objects and edit scripts imposed 
 by the underlying differencing algorithm.
 The \texttt{diff3}~\cite{Smith1988} tool, developed by Randy Smith in 1988, is still the
@@ -862,7 +863,7 @@ Algorithms for synchronizing changes over tree shaped data
 include \texttt{3DM}~\cite{Lindholm2004} which merges
 changes over XML documents, \texttt{Harmony}~\cite{Foster2007},
 which works internally with unordered edge-labelled trees and is
-focused primarily in unordered containers and, finally,
+focused primarily on unordered containers and, finally,
 \texttt{FCDP}~\cite{Lanham2002}, which uses XML as its internal
 representation.
 
@@ -900,7 +901,7 @@ the \emph{structure} of algebraic datatypes~\cite{Gibbons2006}.
 A widely used example is the |deriving| mechanism in Haskell, which 
 frees the programmer from writing repetitive functions such as 
 equality~\cite{haskell2010}. A
-vast range of approaches were available as preprocessors, language
+vast range of approaches are available as preprocessors, language
 extensions, or libraries for Haskell~\cite{Rodriguez2008,Magalhaes2012}.  
 
   The core idea behind generic programming is the fact that a number
@@ -1035,14 +1036,12 @@ and are \emph{opaque} to the representation language.
 \subsection{Explicit Sums of Products}
 \label{sec:background:explicitsop}
 
-  The other side of the coin to pattern functors is restricting
-the shape of the generic values to \emph{sums-of-products}.
+  The other side of the coin is restricting
+the shape of the generic values to follow a \emph{sums-of-products} format.
 This was first done by L\"{o}h and de Vries\cite{deVries2014}
-in the \texttt{generics-sop} library.
-
-  The main difference is in the introduction of
-\emph{Codes}\index{Generic Programming!Codes}, that limit the
-structure of representations. Had we had access to a representation of
+in the \texttt{generics-sop} library. The main difference is in the 
+introduction of \emph{Codes}, that limit the
+structure of representations. If we had access to a representation of
 the \emph{sum-of-products} structure of |Bin|, we could have defined
 our |gsize| function following an informal description: sum up the
 sizes of the fields inside a value, ignoring the constructor.
@@ -1054,7 +1053,7 @@ semantics is consonant to a formula in disjunctive normal form.  The
 outer list is interpreted as a sum and each of the inner lists as a
 product.  This section provides an overview of \texttt{generic-sop} as
 required to understand the techniques we use in
-\Cref{chap:generic-programming}, we refer the reader to the original
+\Cref{chap:generic-programming}. We refer the reader to the original
 paper~\cite{deVries2014} for a more comprehensive explanation.
 
   Using a \emph{sum-of-products} approach one could write the same |gsize|
@@ -1106,8 +1105,8 @@ through the lens of the following type isomorphisms:
 \vspace{-0.4cm}
 
   If we define |RepSOP| to be |NS (NP (K1 R))|, where |data K1 R a = K1 a| is borrowed from
-\texttt{GHC.Generics} we get exaclty the representation that \texttt{GHC.Generics}
-would issue for |Bin a|. Nevertheless, note how we already need the parameter |f| to
+\texttt{GHC.Generics}, we get exactly the representation that \texttt{GHC.Generics}
+issues for |Bin a|. Nevertheless, note how we already need the parameter |f| to
 pass |NP| to |NS| here. 
 
 \vspace{-0.4cm}
@@ -1170,7 +1169,7 @@ map f  (x :* xs)  = f x : map f xs
 \end{code}
 \end{myhs}
 
-  Reflecting on the current definition of |size|, 
+  Reflecting on the current definition of |size| and 
 comparing it to the \texttt{GHC.Generics} implementation of |size|, we
 see two improvements: (A) we need one fewer type class, |GSize|,
 and, (B) the definition is combinator-based. Considering that the
@@ -1238,9 +1237,9 @@ used to represent generic values.
 
 \paragraph{Recursion Style.}
 
-  There are two ways to define the representation of values. Those
-that have information about which fields of the constructors of 
-the datatype in question are recursive versus those that do not. 
+  There are two ways to define the representation of values. Either
+we place explicit information about which fields of the constructors of 
+the datatype in question are recursive or we do not.
 
 If we do not mark recursion explicitly, \emph{shallow}
 encodings are the easier option, where only one

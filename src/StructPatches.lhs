@@ -1,6 +1,6 @@
-  The \texttt{gdiff}~\cite{Lempsink2009} approach -- which flattens a
+  The \texttt{gdiff}~\cite{Lempsink2009} approach, which flattens a
 tree into a list, following classical tree edit distance algorithms
-encoded through using type-safe edit scripts -- borrows the problems of
+encoded through using type-safe edit scripts, borrows the problems of
 edit-script based approaches. These include ambiguity on the
 representation of patches, non-uniqueness of optimal solutions and
 difficulty of merging. The \texttt{stdiff} approach, discussed
@@ -8,7 +8,7 @@ through this chapter, arose from our study of the difficulties
 about merging \texttt{gdiff} patches~\cite{Vassena2016}. 
 
   The heterogeneity of |PatchGDiff| makes it inevitable to stumble upon
-a difficult issue when dealing with the merge problem -- recall that a
+a difficult issue when dealing with the merge problem. Recall that a
 value of type |PatchGDiff xs ys| transforms a list of trees |xs| into
 a list of trees |ys|.  If we are given two patches |PatchGDfiff xs ys|
 and |PatchGDiff xs zs|, we would like to produce two patches
@@ -26,9 +26,9 @@ have fully homogeneous patches, but we were able to identiy homogeneous
 parts of our patches which we can use to synchronize changes when
 defining our merge operation, but let us not get ahead of ourselves.
 
-  \emph{Structural Patches}, then, detach rom edit-scripts by using
-tree-shaped, homogeneous -- a patch transforms two values of the same
-type -- patches.  The edit operations themselves are analogous to edit
+  \emph{Structural Patches}, then, detach from edit-scripts by using
+tree-shaped, homogeneous patch -- a patch transforms two values of the same
+type.  The edit operations themselves are analoguous to edit
 scripts, we support insertions, deletions and copies, but these are
 structured to follow the sums-of-products of datatypes: there is one
 way of changing sums, one way of changing products and one way of
@@ -51,7 +51,7 @@ different: the first field changes from a |Bin| to a |Tri|, which
 requires us to reconcile the list of fields |[a, b, c]| into |[a' , b]|.
 Which can be done by the means of an edit script. The second field, however,
 witnesses a change in the recursive structure of the type. We see that
-we have inserted new information, namelly |(Bin SQ e)|. After inserting
+we have inserted new information, namely |(Bin SQ e)|. After inserting
 this \emph{context}, we simply copy |d| from the source to the destination.
 And in this example we see all the necessary pieces to write a general
 encoding of transformations between objects that support insertions, deletions
@@ -76,7 +76,7 @@ and copies.
 \label{fig:stdiff:patch0}
 \end{figure}
 
-  In order to write the \texttt{stdiff} algorithms in
+  To write the \texttt{stdiff} algorithms in
 Haskell, we must rely on the \texttt{generics-mrsop} library (\Cref{sec:gp:mrsop}) as our
 generic programming workhorse for two reasons. First, we do
 require the concept of explicit sums of products in the very 
@@ -87,14 +87,14 @@ datatypes, hence is easily written with \texttt{generics-mrsop},
 as seen in \Cref{sec:gp:well-typed-tree-diff}.
 
 \victor{Is this attribution of provenance enough?}
-  The contributions in this chapter arises from joint published work
+  The contributions in this chapter arise from joint published work
 with Pierre-Evariste Dagand~\cite{Miraldo2017} which later evolved
 into an \href{https://github.com/VictorCMiraldo/stdiff}{Agda
 repository}% 
 \footnote{https://github.com/VictorCMiraldo/stdiff}.
 Later, we collaborated closely with Arian van Putten in translating
 the Agda code to Haskell, extending its scope to mutually recursive
-datatypes. The code presented here however is loosely based on van
+datatypes. The code presented here, however, is loosely based on van
 Putten's translation of our Agda repository to Haskell as part of his
 Master thesis work~\cite{Putten2019}.  We chose to present all of our
 work in a single programming language to keep the thesis consistent
@@ -112,7 +112,7 @@ its computational complexity.
 \section{The Type of Patches}
 \label{sec:stdiff:patches}
 
-  The |PatchST| type is but an intensional model for
+  The |PatchST| type is an intensional model for
 patches over mutually recursive families. 
 We start by considering a single layer of datatype,
 \ie, a single application of the datatypes pattern functor. 
@@ -123,7 +123,7 @@ will be used throughout the exposition.
 
   Recall that a datatype, when seen through its initial
 algebra~\cite{initial-algebra} semantics, can be seen as an infinite
-sucession of applications of its pattern functor, call it $F$, to
+succession of applications of its pattern functor, call it $F$, to
 itself: $\mu F = F (\mu F)$. The |PatchST| type will describe the differences 
 between values of $\mu F$ by successively applying the description of differences between
 values of type $F$, closely following the initial algebra semantics of
@@ -136,7 +136,7 @@ a rainy sunday though}
 \subsection*{Functorial Patches}
 \label{sec:stdiff:diff:functor}
 
-  Handling \emph{one layer} or recursion is done by addressing the possible
+  Handling \emph{one layer} of recursion is done by addressing the possible
 changes at the sum level, followed by some reconciliation at the product
 level when needed. 
 
@@ -162,13 +162,13 @@ common coproduct structure. We distinguish three possible cases:
 
   The datatype |Spine|, defined below, formalizes this 
 description. The three cases we describe above correspond to the three
-constructors of |Spine|. When the two values are not equal, we need to
+constructors of |Spine|. When two values are not equal, we need to
 represent the differences somehow. If the values have the same 
 constructor we need to reconcile the fields of 
 that constructor whereas if the values have different constructors 
 we need to reconcile the products that make the fields of the constructors.
-We index the data type |Spine| by the sum codes it operates over.
-That is because we need to lookup the fields of the constructors
+We index the data type |Spine| by the sum codes it operates over
+because we need to lookup the fields of the constructors
 that have changed, and \emph{align} them in the case of |SChg|.
 Intuitively, Spines act on sums and capture the ``largest shared coproduct structure'':
 
@@ -184,13 +184,13 @@ data Spine  (kappa :: kon -> Star) (codes :: [[[Atom kon]]])
 \end{code}
 \end{myhs}
 
-  It is worth noting that our Agda model~\cite{Miraldo2017} handles
+  Our Agda model~\cite{Miraldo2017} handles
 only regular types, or, mutually recursive families consisting of
 a single datatype.  Hence, the |Spine| type would arise naturally as a homogeneous
 type. While extending the Agda model to a full fledged Haskell
 implementation, together with van Putten~\cite{Putten2019}, we noted
 how this would severely limit the number of potential copy
-opportunities throghout patches. For example, imagine we want to
+opportunities throughout patches. For example, imagine we want to
 patch the following values:
 
 \begin{myhs}
@@ -202,16 +202,16 @@ diff (TA x1 y1 z1) (TB x2 y2 z2) =? SChg TA TB ...
 \end{code}
 \end{myhs}
 
-  With a fully homogeneous |Spine| type, our only option would
-be the delete |TA|, then insert |TB| at the \emph{recursion} layer,
-which we will get to shortly, in \ref{sec:stdiff:diff:fixpoint}. 
-This would be unsatisfactory as it would only allow copying of one of the fields,
+  With a fully homogeneous |Spine| type, our only option is
+to delete |TA|, then insert |TB| at the \emph{recursion} layer
+ (\ref{sec:stdiff:diff:fixpoint})
+This would be unsatisfactory as it only allows copying of one of the fields,
 where \texttt{gdiff} would be able to copy more fields for it does not
 care about the recursive structure.
 
   The semantics of |Spine| are straightforward, but before continuing
-with |applySpine|, a small technical interlude is necessary. The
-|testEquality|\index{testEquality}, below, is used to compare the type
+with |applySpine|, a short technical interlude is necessary. The
+|testEquality|, below, is used to compare the type
 indices for porpositional equality. It comes from |Data.Type.Equality|
 and has type |f a -> f b -> Maybe (a :~: b)|. Also note that we must
 pass two |SNat| arguments to disambiguate the |ix| and |iy| type
@@ -229,9 +229,9 @@ data SNat :: Nat -> Star where
 \end{code}
 \end{myhs}
 
-  The |applySpine| function is given by pattern matching on the
-provided value and checking it is made up with the required
-construtor. In the |SCns| case we we must ensure that type indices
+  The |applySpine| function is given by 
+checking the provided value is made up with the required
+constructor. In the |SCns| case we we must ensure that type indices
 match -- for Haskell type families may not be injective -- then simply
 map over the fields with the |applyAt| function, which applies changes
 to atoms.  Otherwise, we reconcile the fields with the |applyAl|
@@ -240,6 +240,7 @@ function.
 \victor{Should we show compiling code or simplify the proxies away?}
 \victor{Maybe find a syntax-coloring that shades out the unintersting part?
 we are dvidied in this opinion}
+
 \begin{myhs}
 \begin{code}
 applySpine  :: (EqHO kappa)
@@ -258,8 +259,8 @@ applySpine _ _ (SChg c1 c2 al) (sop -> Tag c3 xs) = do
 \end{code}
 \end{myhs}
 
-  Whereas the |Spine| datatype and |applySpine| are responsible for matching the
-\emph{constructors} of two trees, we still need to determine how to
+  The |Spine| datatype and |applySpine| are responsible for matching the
+\emph{constructors} of two trees, but we still need to determine how to
 continue representing the difference in the products of data stored therein. 
 At this stage in our construction, we are given two heterogeneous lists, corresponding
 to the fields associated with two distinct constructors. As a result,
@@ -275,9 +276,6 @@ fields to destination fields. The |Al| data type below describes such
 edit scripts for a heterogeneously typed list of atoms. These scripts
 may insert fields in the destination (|Ains|), delete fields from the
 source (|Adel|), or associate two fields from both lists (|AX|).
-Depending on whether the alignment associates the heads, deletes from
-the source list or inserts into the destination, the smaller recursive
-alignment has shorter lists of constructor fields at its disposal.
 
 \begin{myhs}
 \begin{code}
@@ -294,16 +292,14 @@ data Al  (kappa :: kon -> Star) (codes :: [[[Atom kon]]])
 \end{myhs}
 
   We require alignments to preserve the order of the arguments of each
-constructors, thus forbidding permutations of arguments. In effect,
+constructor, thus forbidding permutations of arguments. In effect,
 the datatype of alignments can be viewed as an intensional
 representation of (partial) \emph{order and type preserving maps},
 along the lines of McBride's order preserving
 embeddings~\cite{McBride2005}, mapping source fields to destination
 fields. This makes sure that our patches also give rise to tree 
-mappings~\Cref{sec:background:tree-edit-distance} in the classical
-tree-edit distance sense. Enabling us to see our patches as
-some sort of homogeneous type-safe edit scripts. The advantages will
-become clear when we look into the merge function.
+mappings (\Cref{sec:background:tree-edit-distance}) in the classical
+tree-edit distance sense.
 
   Provided a partial embedding for atoms, we can therefore interpret
 alignments into a function transporting the source fields over to the
