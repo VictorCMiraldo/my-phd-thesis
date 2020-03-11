@@ -1912,11 +1912,10 @@ that |metavar a| was duplicated. Our implementation will reject this
 since it performs the check that the subtrees that appear in the
 result of instantiating |chg| are separate from those
 that were moved around by |spn|. \digress{I dislike this aspect of
-my algorithm quite a lot, it feels unecessarily complex and with
+this synchronization algorithm quite a lot, it feels unecessarily complex and with
 no good justification. There must be a more disciplined way of
 disallowing duplications to be introduced without this but I could
 not figure it out.}
-  
 
 \begin{figure}
 \begin{minipage}{.65\textwidth}
@@ -1947,6 +1946,78 @@ the same subtree into two different locations. The patches
 here are operating over pairs of lists.}
 \label{fig:pepatches:merge-03}
 \end{figure}
+
+  
+\victor{Obviously they must be spines over the same constructor; unless
+the patchs don't make a span.}
+
+  Merging two spines is simple. We must ensure they are spines over
+the same constructor and recurse on the fields of the spine pointwise:
+
+\begin{myhs}
+\begin{code}
+   (Spn p', Spn q') -> case zipSRep p' q' of
+       Nothing -> throwError "spn-spn"
+       Just r  -> Spn <$$> repMapM (uncurry' mrgPhase1) r
+\end{code}
+\end{myhs} %
+
+  Lastly, when the alignments in question are arbitrary modifications,
+we must try our best to reconcile these. We handle duplications differently
+than arbitrary modifications, they are easier to handle.
+
+\begin{myhs}
+\begin{code}
+   (Mod p', Mod q') -> Mod <$$> mrgChgChg p' q'
+\end{code}
+\end{myhs}
+
+  Merging duplications is straightforward, if |p'| or |q'|
+above are a duplication, that is, of the form |Chg (metavar x) (metavar y)|
+where |metavar x| or |metavar y| appears three or more times globally,
+we attempt to instantiate them with according to the 
+how this subtree was changed and move on. 
+
+\begin{myhs}
+\begin{code}
+mrgChgDup  :: Chg kappa fam x -> Chg kappa fam x
+           -> MergeM kappa fam (Phase2 kappa fam x)
+mrgChgDup dup@(Chg (Hole v) _) q' = do
+  addToIota "chg-dup" v q' 
+  return (P2Instantiate dup Nothing)
+\end{code}
+\end{myhs}
+
+  If they are not duplications, nor none of the cases prevously
+handled by |mergePhase1|, then the best we can do is register 
+equivalence of their domains -- recall both patches being merged must
+form a span -- and synchronize successfully when both changes are
+equal.
+
+\begin{myhs}
+\begin{code}
+mrgChgChg :: Chg kappa fam x -> Chg kappa fam x
+          -> MergeM kappa fam (Phase2 kappa fam x)
+-- Changes must have unifiable domains
+mrgChgChg p' q'
+  | isDup p'   = mrgChgDup p' q'
+  | isDup q'   = mrgChgDup q' p'
+  | otherwise  = case unify (chgDel p') (chgDel q') of
+       Left  _   -> throwError "chg-unif"
+       Right r   -> onEqvs (M.union r)
+                 >> return (P2TestEq p' q')
+\end{code}
+\end{myhs}
+
+  \Cref{fig:pepatches:mergePhase1} collects all the cases discussed
+above and illustrates the full definition of |mergePhase1|.
+Once the first pass is done, however, we have collected information
+about how each subtree has been changed and potential subtree
+equivalences we might have discovered. The next step is to synthesize
+this information into two maps: a deletion map that informs us
+what a subtree \emph{was} and a insertion map that informs us
+what a subtree \emph{became}, so we can perform the |P2Instante|
+instructions.
 
 \begin{figure}
 \begin{myhs}[.99\textwidth]
@@ -1989,26 +2060,74 @@ mrgPhase1 p q = case (p , q) of
 \label{fig:pepatches:mergePhase1}
 \end{figure}
 
-  Once |mrgPhase1| returns, we have an alignment with instructions
-at its leaves. Before processing these instructions into a final result,
-we must split the |iota| and |eqvs| maps into two: one which informs
-us about what each location in the tree \emph{was} and another
-which inform us what each of those locations \emph{became}.
+  Splitting |iota| and |eqvs| require some attention. For example,
+imagine there exists an entry in |iota| that assigns |metavar 0|
+to |Chg (Hole (metavar 1)) (: 42 (Hole (metavar 1)))|, this tells us that
+the tree identified by |metavar 0| is the same as the tree identified
+by |metavar 1|, and it became |(: 42 (metavar 1))|. Now suppose that
+|metavar 0| was duplicated somwhere else, and we come accross
+an equivalence that says |metavar 1 == metavar 0|. We cannot simply insert
+this into |iota| because the merge algorithm made the decision to
+remove all occurences of |metavar 0|, not of |metavar 1|, even
+though they identify the same subtree. This is important to ensure
+we produce patches that can be applied. 
+
+  The |splitDelInsMaps| function is responsible for synthesizing the
+information gathered in the first pass of the synchronization
+algorithm. Splitting |iota| is easy, we just use the deletion and
+insertion context of the changes that overlaped a given
+metavariable. Next, we partitioning the equivalences into rigid
+equivalences, of the form |(metavar v , t)| where |t| has no holes, or
+non-rigid equivalences. The rigid equivalences are added to both
+deletion and insertion maps, but the non-rigid ones, |(metavar v ,
+t)|, are are only added when there is no information about the
+|metavar v| in the map and, if |t == metavar u|, we also check
+that there is no information about |metavar u| in the map.
+Finally, after these have been added to the map, we all |minimize|
+to produce an idempotent substitution we can use for phase two.
+If an occurs-check error is raised, this is forwarded as a conflict.
 
 \begin{myhs}
 \begin{code}
 splitDelInsMaps  :: MergeState kappa fam
                  -> Either [Exists (MetaVar kappa fam)]
-                           (  Subst kappa fam (MetaVar kappa fam)
-                           ,  Subst kappa fam (MetaVar kappa fam))
-splitDelInsMaps (MergeState iot eqvs) =
-  let e' = splitEqvs eqvs
-   in do
+                           (  Subst kappa fam (MetaVar kappa fam) ,  Subst kappa fam (MetaVar kappa fam))
+splitDelInsMaps (MergeState iot eqvs) = do
+    let e' = splitEqvs eqvs
     d <- addEqvsAndSimpl (map (exMap chgDel) iot) e'
     i <- addEqvsAndSimpl (map (exMap chgIns) iot) e'
     return (d , i)
 \end{code}
 \end{myhs}
+
+  Finally, after computing the insertion and deletion maps that
+inform us how each identified subtree was modified, we make
+a second pass over the partial result executing the necessary instructions.
+The instructions include checking two changes for equality, returning
+their refinement upon success, simply refining a change or 
+refining and ensuring it has no common variables with some
+term.
+
+\begin{myhs}
+\begin{code}
+phase2  :: (Subst kappa fam , Subst kappa fam) -> Phase2 kappa fam at
+        -> MergeM kappa fam (Chg kappa fam at)
+phase2 di (P2TestEq ca cb)              = isEqChg di ca cb
+phase2 di (P2Instantiate chg Nothing)   = return (refineChg di chg)
+phase2 di (P2Instantiate chg (Just i))  = do 
+   es <- gets eqs
+   case getCommonVars (substApply es (chgIns chg)) (substApply es i) of
+           []  -> return (refineChg di chg)
+           xs  -> throwError ("mov-mov " ++ show xs)
+\end{code}
+\end{myhs}
+  
+  The |getCommonVars| simply computes the intersection of the variables
+in two |Holes kappa fam at|.
+
+  \victor{I would love to give better reasons for this to be the
+way it is. But the truth is it is like this because this is
+what worked... Can I just write something like that?}
 
   Refining changes according to the inferred information about what each tree
 was and became is straightforward, all we must do is apply the deletion map to
@@ -2022,52 +2141,52 @@ refineChg (d , i) (Chg del ins) = Chg (substApply d del) (substApply i ins)
 \end{myhs}
 
   When deciding whether two changes are equal, its also important
-we refine them first, as this might uncover important information about them.
+to refine them first, since they might be $\alpha$-equal.
 
 \begin{myhs}
 \begin{code}
 isEqChg  :: Subst2 kappa fam -> Chg kappa fam at -> Chg kappa fam at
          -> Maybe (Chg kappa fam at)
-isEqChg di ca cb =  let ca' = refineChg di ca
-                        cb' = refineChg di cb
+isEqChg di ca cb =  let  ca' = refineChg di ca
+                         cb' = refineChg di cb
                     in if ca' == cb' then Just ca' else Nothing
 \end{code}
 \end{myhs}
 
 
-\begin{figure}
-\centering
-\subfloat[Aligned patch, |p|.]{%
-\begin{myforest}
-[|Bin|   , s sep=15mm
-   [Cpy]
-%  [,change [x,metavar] [x,metavar]]
-   [,delctx , s sep=8mm
-    [|Bin| [|Leaf| [|42|]] [,sq]]
-    [Cpy]
-%    [,rootchange  
-%       [y,metavar]
-%       [y,metavar]]
-]]
-\end{myforest}
-\label{fig:pepatches:merge-02:A}}
-\subfloat[Aligned patch, |q|.]{%
-\begin{myforest}
-[|Bin|   % , s sep=4mm
-  [|Bin| % , s sep=2mm
-    [,change [a,metavar] [b,metavar]]
-    [,change [b,metavar] [a,metavar]]]
-  [,insctx % , s sep=8mm
-    [|Bin| [,sq] [|Leaf| [|84|]]]
-    [Cpy]
-    % [,rootchange [c,metavar] [c,metavar]]
-  ]
-]
-\end{myforest}
-\label{fig:pepatches:merge-02:B}}%
-\caption{Properly aligned version of \Cref{fig:pepatches:misalignment}.}
-\label{fig:pepatches:merge-02}
-\end{figure}
+%% \begin{figure}
+%% \centering
+%% \subfloat[Aligned patch, |p|.]{%
+%% \begin{myforest}
+%% [|Bin|   , s sep=15mm
+%%    [Cpy]
+%% %  [,change [x,metavar] [x,metavar]]
+%%    [,delctx , s sep=8mm
+%%     [|Bin| [|Leaf| [|42|]] [,sq]]
+%%     [Cpy]
+%% %    [,rootchange  
+%% %       [y,metavar]
+%% %       [y,metavar]]
+%% ]]
+%% \end{myforest}
+%% \label{fig:pepatches:merge-02:A}}
+%% \subfloat[Aligned patch, |q|.]{%
+%% \begin{myforest}
+%% [|Bin|   % , s sep=4mm
+%%   [|Bin| % , s sep=2mm
+%%     [,change [a,metavar] [b,metavar]]
+%%     [,change [b,metavar] [a,metavar]]]
+%%   [,insctx % , s sep=8mm
+%%     [|Bin| [,sq] [|Leaf| [|84|]]]
+%%     [Cpy]
+%%     % [,rootchange [c,metavar] [c,metavar]]
+%%   ]
+%% ]
+%% \end{myforest}
+%% \label{fig:pepatches:merge-02:B}}%
+%% \caption{Properly aligned version of \Cref{fig:pepatches:misalignment}.}
+%% \label{fig:pepatches:merge-02}
+%% \end{figure}
 
 \victor{Check \cite{Saito2002}; place our algos in their taxonomy}
 
