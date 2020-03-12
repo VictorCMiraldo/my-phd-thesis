@@ -5,33 +5,33 @@ in the first person about my experience doing things; could
 be a good way to add bits like the following:
 \digress{This hdiff approach as born from ...}}
 
+  The \texttt{stdiff} approach gave us a first representation of
+tree-sructured patches over tree-structured data but was still ddeply
+connected to edit scripts: subtrees could only be copied once and
+could not be permuted. This means we still suffered from ambiguous
+patches, and, consequently, a coputationally expensive |diff|
+algorithm. Overcoming the drawback of ambiguity requires a shift in
+perspective and a thorough decoupling from edit-script based
+differencing algorithms. In this section we will explore the the
+\texttt{hdiff} approach, where patches allow for trees to be
+arbitrarily permuted, duplicated or contracted -- contractions are
+dual to duplications.
 
-  The \texttt{stdiff} approach gave us a first representation
-of tree-sructured patches over tree-structured data but was still 
-very much connected to edit scripts: subtrees could only be copied 
-once and could not be permuted. This meant we still suffered from
-ambiguous patches, which was reflected on the coputationally expensive algorithm.
-
-Overcoming these drawbacks requires a shift in perspective and
-is possible through a thorough decoupling from edit-script based 
-differencing algorithms. In this section we will explore the algorithms
-behind the \texttt{hdiff} approach, which enables trees to be arbitrarily
-permuted, duplicated or contracted -- which is dual to duplication.
-The \texttt{hdiff} utility uses tree matchings as \emph{the} patch,
-instead of translating them \emph{into the} patch. Consequently, we do not
-need any of the classical restrictions imposed on tree matchings.
-
-  Classical tree differencing algorithms start by computing
-a tree matchings (\Cref{sec:background:tree-edit-distnace}),
-which identify which subtrees should be copied. These tree matchings,
-however, must be restricted to order-preserving partial injections
-in order to be efficiently translated to edit-scripts later on.
-The \texttt{hdiff} approach never translates to edit-scripts, which
-means the tree matchings we compute are subject to \emph{no} restrictions.
+  Classical tree differencing algorithms start by computing a tree
+matchings (\Cref{sec:background:tree-edit-distnace}), which identify
+which subtrees should be copied. These tree matchings, however, must
+be restricted to order-preserving partial injections in order to be
+efficiently translated to edit-scripts later on.  The \texttt{hdiff}
+approach never translates to edit-scripts, which means the tree
+matchings we compute are subject to \emph{no} restrictions.  In fact,
+\texttt{hdiff} uses these unrestricted tree matchings as \emph{the}
+patch, instead of translating them \emph{into the}
+patch. Consequently, we do not need any of the classical restrictions
+imposed on tree matchings.
 
   Suppose we want to write a change that modifies the left element
 of a binary tree. If we had the full Haskell programming language available
-as the patch language, we would probably write something in the lines of:
+as the patch language, we could write something in the lines of:
 
 \begin{myhs}
 \begin{code}
@@ -43,23 +43,24 @@ p _            = Nothing
 \end{code}
 \end{myhs}
 
-  Looking at the |p| function above, we see it has a clear domain --
-a set of |Tree|s that when applied to |p| yields a |Just| -- which is specified
-by the pattern and guards, and we see it has a clear transformation
-for each tree in the domain: it replaces the |10| by |42| inplace.
-Taking a magnifying glass at that definition, we can interpret
-the matching of the pattern as a \emph{deletion} phase and the construction
-of the resulting tree as a \emph{insertion} phase. 
-The \texttt{hdiff} approach represents the change in |p| exactly as
-that: a pattern and a expression. Essentially, we could write |p|
-as |patch (Bin (Leaf 10) y) (Bin (Leaf 42) y)| -- represented graphically
-as in \Cref{fig:pepatches:example-01}. An important aspect here
-is that the graphical notation makes it evident which
-constructors were copied until we reach the point where a change
-must be made. The notation $\digemFormatMetavar{\square}$ is
-used to indicate $\square$ is a metavariable, that is, given a successful
-matching of the deletion context against an element, $\digemFormatMetavar{\square}$
-will be given a value.
+  Observing the function |p|, above, we see it has a clear domain -- a
+set of |Tree|s that when applied to |p| yields a |Just| -- which is
+specified by the pattern and guards. Then, for each tree in the doman
+we assign a different tree in the codomain.  The new tree is obtained
+from the old tree by replacing the |10| by |42| inplace.  Taking a
+magnifying glass at that definition, we can interpret the matching of
+the pattern as a \emph{deletion} phase and the construction of the
+resulting tree as a \emph{insertion} phase.  The \texttt{hdiff}
+approach represents the change in |p| exactly as that: a pattern and a
+expression. Essentially, we write |p| as |patch (Bin (Leaf 10) y) (Bin
+(Leaf 42) y)| -- represented graphically as in
+\Cref{fig:pepatches:example-01}. An important aspect here is that the
+graphical notation makes it evident which constructors were copied
+until we reach the point where a change must be made. The notation
+$\digemFormatMetavar{\square}$ is used to indicate $\square$ is a
+metavariable, that is, given a successful matching of the deletion
+context against an element, $\digemFormatMetavar{\square}$ will be
+given a value.
 
 \begin{figure}
 \centering
@@ -74,56 +75,48 @@ children of a binary node}
 \label{fig:pepatches:example-01}
 \end{figure}
 
-  With this added expressivity we can represent more transformations
-than before. Take the patch that swaps two subtrees, which cannot
+  With the added expressivity of refering to subtrees
+with metavariables we can represent more transformations
+than before. Take, for example, the patch that swaps two subtrees, which cannot
 even be written using an edit-script based approach, here it is
 given by |patch (Bin x y) (Bin y x)|. Another helpful consequence of
-our design is that we bypass the \emph{choice} phase of the
+our design is that we effectively bypass the \emph{choice} phase of the
 algorithm. When computing the differences between |Bin Leaf Leaf|
 and |Leaf|, for example, we do not have to chose one |Leaf| to copy
-because we can copy both with the help of a contraction operation. The patch
-that witnesses this would be |patch (Bin x x) x|. This optimization
-enables us to write linear |diff| algorithms even in the presence
-of permutations and duplications. 
+because we can copy both with the help of a contraction operation,  
+with a patch such as: |patch (Bin x x) x|. This aspect is crucial
+and enables us to write a linear |diff| algorithm.
 
-  This chapter arises as a refinement from our ICFP'19
-publication~\cite{Miraldo2019}, where we explore the representation
-and computation aspects of \texttt{hdiff}.  The big shift in paradigm
-of \texttt{hdiff} also requires a more careful look into the
-metatheory and nuances of the algorithm, which were not present in
-said paper. \digress{We first wrote our
-algorithm~\cite{Miraldo2019} using the \texttt{generics-mrsop} library
-even though \texttt{hdiff} does not require an explicit sums of
-products. This means we can port it to \genericssimpl{} and gather
-real world data fort his approach. We present our code in this section
-on the \genericssimpl{} library.}
+  In this chapter we explore the representation and computation
+aspects of \texttt{hdiff}.  The big shift in paradigm of
+\texttt{hdiff} also requires a more careful look into the metatheory
+and nuances of the algorithm, which were not present in said
+paper. \digress{We first wrote our algorithm~\cite{Miraldo2019} using
+the \texttt{generics-mrsop} library even though \texttt{hdiff} does
+not require an explicit sums of products. This means we can port it to
+\genericssimpl{} and gather real world data fort his approach. We
+present our code in this section on the \genericssimpl{} library.}
+The mateiral in this chapter is a refinement from our ICFP'19
+publication~\cite{Miraldo2019}.
 
-\victor{Maybe we write a paper with pierre about it?}
+\victor{Maybe we write another paper with Pierre about it?}
 
 \section{The Type of Patches}
 
-\victor{Actually, my thesis is about understanding the tradeoffs; do we
-want alignments? Well, inly if we are interested in merging. Do we
-want to identify duplications: different extraction strategies; etc...
-There are many design choices in this domain that I have studied;
-the point being: no right answer here}
-
   The type |PatchPE x| encapsulates the transformations we wish to
-support over elements of type |x|. In general lines, it consists in a
+support over elements of type |x|. A value of type |PatchPE| consists in a
 \emph{pattern}, or deletion context, which instantiates a number of
 metavariables when matched against an actual value; and a
 \emph{expression}, or insertion context, which uses the instantiation
 provided by the deletion context to substitute its variables, yielding
-the final result. Both insertion and deletion contexts are simply
+the final result. Both insertion and deletion contexts are 
 inhabitants of the type |x| augmented with \emph{metavariables}.
 
   Augmenting the set of elements of a type with an additional constructor
-is a well known technique and is usually done through something in
-the lines of a \emph{free monad}. The \genericssimpl{} library provides
-exactly what we need: the |HolesAnn kappa fam phi h| datatype 
-from \Cref{sec:gp:simplistic:holes}, which is a free monad in |h|. 
-Recall its definition below, presented without annotations, that is, |phi = V1|, 
-fostering readability here:
+is usually done with a \emph{free monad}, which is provided by the
+\genericssimpl{} library. The |HolesAnn kappa fam phi h| datatype 
+(\Cref{sec:gp:simplistic:holes}) is a free monad in |h|. 
+We recall its definition ignoring annotatios below.
 
 \begin{myhs}
 \begin{code}
@@ -137,15 +130,16 @@ data Holes kappa fam h a where
 \end{code}
 \end{myhs}
 
-  At first, one would think of simply passing |Const Int| in place of |h|,
-as in |Holes ki codes (Const Int)|. This gives a functor mapping an
-element of the family into its representation, augmented with integers
-used to represent metavariables. Yet this does not enable us
-to infer whether a metavariable matches over
-an opaque type or a recursive position, which is crucial if we
-are to produce good alignments later on \Cref{sec:pepatches:alignment}.
-Consequently, we will keep the information about whether
-the metavariable matches over an opaque value or not:
+  In a first iteration, we could think of passing |Const Int| in
+place of |h|, as in |Holes ki codes (Const Int)|.  This gives a
+functor mapping an element of the family into its representation
+augmented with integers, used to represent metavariables. This does
+not yet enable us to infer whether a metavariable matches over an
+opaque type or a recursive position, which will come to be important
+soon enough (when producing alignments,
+\Cref{sec:pepatches:alignment}). Consequently, we will keep the
+information about whether the metavariable matches over an opaque
+value or not:
 
 \begin{myhs}
 \begin{code}
@@ -157,10 +151,10 @@ data MetaVar kappa fam at where
 \end{code}
 \end{myhs}
 
-  With |MetaVar| as defined above, we can always fetch the |Int| identifying
-the metavar but we posses all the type-level information that we will need
-to inspect at run-time later. In fact, it is handy to define the |HolesMV| synonym
-for values augmented with metavariables, below.
+  With |MetaVar| above, we can always fetch the |Int| identifying
+the metavar but we maintain all the type-level information we need
+to inspect at run-time. We define the |HolesMV| synonym
+for values augmented with metavariables for convenience.
 
 \begin{myhs}
 \begin{code}
@@ -168,7 +162,9 @@ type HolesMV kappa fam = Holes kappa fam (MetaVar kappa fam)
 \end{code}
 \end{myhs}
 
-  A \emph{change}, then, is defined as a pair of a deletion context and an
+  A \emph{change} is our \emph{unit of transformation}. Patches
+will later be defined in terms of changes. A change, then,
+consists in a pair of a deletion context and an
 insertion context for the same type.  These contexts are
 values of the mutually recursive family in question augmented with
 metavariables:
@@ -182,9 +178,28 @@ data Chg kappa fam at = Chg
 \end{code}
 \end{myhs}
 
-  Naturally, we expect a change to be well-scoped, that is,
-all the variables that are present in the insertion context
-must also occur on the deletion context, or, in Haskell:
+  Applying a change |c| to an element |x| consists in unifying |x|
+with |chgDel c|, yielding a substitution |sigma| which
+can be applied to |chgIns c|. This provides the usual denotational semantics
+of changes as partial functions.
+
+\begin{myhs}
+\begin{code}
+chgApply  :: (All Eq kappa) => Chg kappa fam at -> SFix kappa fam at -> Maybe (SFix kappa fam at)
+chgApply (Chg d i) x = either  (const Nothing) (holesMapM uninstHole . flip substApply i) 
+                               (unify d (sfixToHoles x))
+  where uninstHole _ = error "uninstantiated hole: (Chg d i) not well-scoped!"
+\end{code}
+\end{myhs}
+
+  In a call to |chgApply c x|, since |x| has no holes a successful
+unification means |sigma| assigns a term (no holes) for each
+metavariable in |chgDel c|. In turn, when applying |sigma| to |chgIns
+c| we would like to guarantee that every metavariabl in |chgIns c|
+gets substituted, yielding a term with no holes as a result.
+Consequently we expect a value of type |Chg| to be well-scoped, that
+is, all the variables that are present in the insertion context must
+also occur on the deletion context, or, in Haskell:
 
 \begin{myhs}
 \begin{code}
@@ -196,27 +211,10 @@ wellscoped (Chg d i) = keys (vars i) == keys (vars d)
 \victor{decide... is |vars del == vars ins| or |vars ins < vars del|}?
 \end{myhs}
 
-  The semantics of |Chg| through its application function is simple.
-Applying a change |c| to an element |x| consists in unifying |x|
-with |chgDel c|, yielding a substitution |sigma| which
-can be applied to |chgIns c|. Note that since |x| has no holes,
-a successful unification means |sigma| has a term for each metavariable 
-in |chgDel c|. When we apply |sigma| to |chgIns c| we are
-guaranteed to substitute every metavariable in |chgIns c|
-because changes are well-scoped. If we attempt to pass
-a non-well-scoped change to |chgApply| we are breaking the
-invariant on |Chg|. We \texttt{error} out on that situation to
-distinguish it from a change not being able to be applied to |x|
-because |x| is not on the changes domain.
-
-\begin{myhs}
-\begin{code}
-chgApply  :: (All Eq kappa) => Chg kappa fam at -> SFix kappa fam at -> Maybe (SFix kappa fam at)
-chgApply (Chg d i) x = either  (const Nothing) (holesMapM uninstHole . flip substApply i) 
-                               (unify d (sfixToHoles x))
-  where uninstHole _ = error "uninstantiated hole: (Chg d i) not well-scoped!"
-\end{code}
-\end{myhs}
+  Attempting to apply a non-well-scoped change is a violation of
+the contract of |applyChg|. We \texttt{error} out on that situation
+and distinguish it from a change |c| not being able to be applied to |x|
+because |x| is not an element of the domain of |c|.
 
 \begin{figure}
 \centering
@@ -241,51 +239,57 @@ chgApply (Chg d i) x = either  (const Nothing) (holesMapM uninstHole . flip subs
 \label{fig:pepatches:example-04}
 \end{figure}
 
-  \digress{There are many ways of representing a |Chg|,
-in fact, a good part of my research was in understaning
-the trade-offs between different representations for changes. 
-I have settled for extracting the constructors that appear 
-repeated in the deletion and insertion context into a \emph{spine} and 
-minimizing changes, which later on will be \emph{aligned} to uncover
-insertions and deletions within the recursive structure.
-The design decisions I made have been driven by the synchronizatino algorithm.
-The \emph{spines} help us understand which constructors have been
-copied even though they might lead to a change further down the tree,
-whereas the \emph{alignments} enable us to understand which parts
-of the tree consist entirely of \emph{new information} and can
-be skipped by the synchronizer. Next we look into these
-options in more detail.}
+%%   \digress{There are many ways of representing a |Chg|,
+%% in fact, a good part of my research was in understaning
+%% the trade-offs between different representations for changes. 
+%% I have settled for extracting the constructors that appear 
+%% repeated in the deletion and insertion context into a \emph{spine} and 
+%% minimizing changes, which later on will be \emph{aligned} to uncover
+%% insertions and deletions within the recursive structure.
+%% The design decisions I made have been driven by the synchronizatino algorithm.
+%% The \emph{spines} help us understand which constructors have been
+%% copied even though they might lead to a change further down the tree,
+%% whereas the \emph{alignments} enable us to understand which parts
+%% of the tree consist entirely of \emph{new information} and can
+%% be skipped by the synchronizer. Next we look into these
+%% options in more detail.}
 
-\paragraph{Patch versus Changes.} Our current definition of change is
-akin to what is known as a \emph{tree-matching} in the literature of
-classical tree differencing, \Cref{sec:background:tree-edit-distance},
-albeit our changes are more permissive. Since we do not want to
-obtain an edit-script we do not need to enforce any of the
-restrictions.  In fact, the engine of our differencing algorithm,
-\Cref{sec:pepatches:diff}, will only be concerned with producing a
-single |Chg| that transforms the source into the
-destination. 
+  A change, |Chg|, is very similar to a \emph{tree matching} 
+(\Cref{sec:background:tree-edit-distance}) with less restrictions.
+In other words, it arbitrarily maps subtrees from the source
+to the destination. From an algebraic point of view, this already
+gives us a desirable structure, as we will explore in \Cref{sec:pepatches:meta-theory}. From a synchronization point of view, however, we do not yet
+posses enough information to synchronize these \emph{changes}
+effectively. 
 
-  Albeit \emph{changes} and their application semantics already gives rise 
-to a satisfactory algebraic structure (\Cref{rec:pepatches:meta-theory}),
-we are interested in more than just applying changes, we would
-like to synchronize them, which will require a more refined approach.
-
-  In order to synchronize changes effectively we must understand which
+  Synchronizing changes requires us to understand which
 constructors in the deletion context are, in fact, just being copied
 over in the insertion context. Take \Cref{fig:pepatches:example-04},
 where one change operates exclusively on the right child of a binary
 tree whereas the other alters the left child and duplicates the right
-child in-place.  These changes are disjoint and should be possible to
-be automatically synchronizable.  Recognizing them as such will
-require more expressivity than what is provided by |Chg|.  Let there
-be |PatchPE|.
+child in-place.  These changes are \emph{disjoint} and should be possible to
+be automatically synchronized.  To recognize them as \emph{disjoint}
+will require more information than what is provided by |Chg|.  
+Nevertheless, the notion of \emph{change} is still the backbone of
+the implementation.  In fact, our |diff| algorithm (\Cref{sec:pepatches:diff})
+will produce a \emph{change}, which will then be translated to more expressive
+representations.
 
-  In the following we distinguish \emph{changes} from \emph{patches}
-and discuss the design
-space. \Cref{sec:pepatches:closures,sec:pepatches:alignments} go more
-in depth about computing a \emph{patch} from a \emph{change} in a way
-that makes synchronization easier.
+\paragraph{Introducing Patches.}  
+Observing the definition of |Chg| reveals that the
+deletion context might \emph{delete} many constructors that the insertion
+context later insert, as in \Cref{fig:pepatches:example-04}.  
+This conceals the fact that the
+|Bin| at the root of the tree was in fact being copied. Following
+the \texttt{stdiff} nomenclature, the |Bin| at the root of both
+changes in \Cref{fig:pepatches:example-04} should be places
+in the \emph{spine} of the patch.  That is, it is copied over
+from source to destination but it leads to changes further down the
+tree.
+
+\victor{I'm unsure with this justification of pushing
+changes down; I mean... we could just have written a ``better''
+merge algorithm}
 
 \begin{figure}
 \centering
@@ -312,39 +316,33 @@ evident \emph{spine}.}
 \label{fig:pepatches:example-02}
 \end{figure}
 
-\victor{I'm unsure with this justification of pushing
-changes down; I mean... we could just have written a ``better''
-merge algorithm}
-
-  A first observation of the definition of |Chg| reveals that the
-deletion context might ``delete'' many constructors that the insertion
-context later insert. As is the case with both changes in
-\Cref{fig:pepatches:example-04}.  This hides away the fact that the
-|Bin| at the root of the tree was, in fact, being copied. Following
-the \texttt{stdiff} nomenclature, the |Bin| at the root of both
-changes in \Cref{fig:pepatches:example-04} should be flagged as
-belonging to a \emph{spine} of the patch.  That is, it is copied over
-from source to destination but it leads to changes further down the
-tree.
-
-  Another example can be found in \Cref{fig:pepatches:example-02:chg},
-where |Bin 42| is repeated in both contexts -- whereas in
+  A \emph{patch} consists in a spine that contains changes
+in its leaves and is defined by the type |Patch| below.
+\Cref{fig:pepatches:example-02} illustrates the difference
+between patches and changes graphically.
+In \Cref{fig:pepatches:example-02:chg} we see |Bin (Leaf 42)| 
+being repeated in both contexts -- whereas in
 \Cref{fig:pepatches:example-02:patch} it has been placed in the spine
-and consequently, has become easier to identify as a copy.
-In fact, we would like to distinguish a \emph{patch} from a \emph{change}
-precisely by the presence of a \emph{spine} which leads
-to smaller changes, encoded by the type |PatchPE|:
+and consequently, is clearly identified as a copy.
 
 \begin{myhs}
 \begin{code}
-type PatchPE kappa fam = Holes kappa fam (Chg kappa fam)
+type Patch kappa fam = Holes kappa fam (Chg kappa fam)
 \end{code}
 \end{myhs}
 
-  Converting a change to a patch is intuitively done by trying to extract as many
-redundant constructors from the change's contexts into the spine as
-possible. Another way of looking into it is pushing the changes to the
-leaves of the tree. 
+  A patch will be computed from a conservatively large change by
+attempting to extract all topmost common constructors from the
+insertion and deletion context into the spine. In other words, we
+would like to push the changes down towards the leaves of the
+tree. There are two different ways for doing so, illustrated by
+\Cref{fig:pepatches:example-03}.  On one hand we can consider the
+patch metavariables to be \emph{globally-scoped}, yielding
+structurally minimal changes, \Cref{fig:pepatches:example-03:B}.  On
+the other hand, we could strive for \emph{locally-scoped}, where each
+change might still contain repeated constructors as long as they are
+necessary to ensure the change is \emph{closed}, as in
+\Cref{fig:pepatches:example-03:C}.
 
 % Two changes that operate on disjoint
 % subtrees -- have different paths from the root -- are trivially
@@ -393,14 +391,6 @@ patch with minimal changes.}
 \label{fig:pepatches:example-03}
 \end{figure}
 
-  Now, there are two different ways to push changes down to the leaves
-of the tree, as illustrated by \Cref{fig:pepatches:example-03}.  We
-can consider the patch metavariables to be \emph{globally-scoped},
-yielding structurally minimal changes, as in
-\Cref{fig:pepatches:example-03:B}.  Or, we could strive for
-\emph{locally-scoped}, where each change might still contain repeated
-constructors as long as they are necessary to ensure the change is
-\emph{closed}, as in \Cref{fig:pepatches:example-03:C}.
 
   The first option, of \emph{globally-scoped} patches, is
 very easy to compute. All we have to do is to compute the
@@ -413,29 +403,30 @@ globallyScopedPatch (Chg d i) = holesMap (uncurry' Chg) (lgg d i)
 \end{code}
 \end{myhs}
 
-  From a synchronization point of view, however,
-\emph{globally-scoped} patches are a dangerous road. They do minimize
-changes, but since variables can be referenced anywhere in the patch,
-the synchronization algorithm can hardly recognize a local copy. The
-only real benefit or \emph{globally-scoped} patches is that they will
-require up to half the storage space, in the worst case. We argue this
-is not enough benefit to outweight the representational difficulties
-caused by it. For example, \Cref{fig:pepatches:misaligned} shows a
-globally scoped patch produced from a change that makes it difficult
-to understand that the |Bin 42| is has actualy been deleted.  This is
-because the first |Bin| constructor is considered to be in the spine
+  Albeit easy to compute, however, \emph{globally-scoped} patches
+improve little besides the space required to store a patch. 
+From a synchronizaton point of view, it can be disastruous to
+ignore the scope of metavariables. 
+\Cref{fig:pepatches:misaligned} illustrates a
+globally scoped patch produced from a change and arguably,
+it is harder to understand that the |(:) 42| is being deleted
+by looking at the globally-scoped patch than by looking at the change.
+This is because the first |(:)| constructor is considered to be in the spine
 since anti-unification proceeds top-down.  A bottom-up approach would
-be even harder and would suffer similar issues for insertions
-anyway. \victor{This is a problem Harmony also had!}
+would suffer similar issues for insertions anyway. 
+\victor{This is a problem Harmony also had!}
+The real solution to this problem is the notion of \emph{alignment}
+which will be discussed shortly (\Cref{sec:pepatches:alignment}), for 
+the time being we will continue discussing scoping options.
 
-  Our option of \emph{locally-scoped} changes implies that
+  \emph{Locally-scoped} changes implies that
 changes might still contain repeated constructors in the root
 of their deletion and insertion contexts -- hence they will not be
 structurally minimal. On the other hand, copies are easy to
 identify and reconciliation will happen \emph{in place}. This later
-reason being particularly important for a industrial synchronizer --
-when synchronization fails, \emph{conflicts} can be issued for
-small parts of the tree instead of the whole patch.
+reason being particularly important for a industrial synchronizer since
+it enables the \emph{conflicts} to be put in place and refer
+to small parts of the patch instead of the whole.
 
 \begin{figure}
 \centering
@@ -461,6 +452,8 @@ small parts of the tree instead of the whole patch.
 in the head of linearly-structured data. This is hard to reconcile.}
 \label{fig:pepatches:misalignment}
 \end{figure}
+
+\victor{\huge I'm here}
 
   Regardless of global versus local scope changes, 
 forgetting the information about the spine yields a forgetful
