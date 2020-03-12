@@ -1,7 +1,7 @@
-
-  The syntax of many programming languages, for which we want to
-produce differencing algorithms, must be expressed through a mutually 
-recursive family. Consider Haskell itself, a |do| block construts
+  The syntax of many programming languages is expressed through a mutually 
+recursive family of datatypes. Before writing a generic differencing
+algorithm we need to be able to program generically over mutually
+recursive families of datatypes. Consider Haskell itself, a |do| block constructs
 an expression, even though the |do| block itself is
 composed by a list of statements which may include expressions.
 
@@ -13,8 +13,9 @@ data Stmt  = Assign Var Expr | Let Var Expr
 \end{myhs}
 
   Another example is found in HTML and XML documents. 
-Which are easily described by a Rose tree, encoded
-in the following family of datatypes:
+Which are easily described by a Rose tree, which albeit
+being a nested type, is naturally encoded
+in the mutually recursive family of datatypes below. 
 
 \begin{myhs}
 \begin{code}
@@ -34,12 +35,12 @@ data ListI  =  Nil | RoseI : ListI
 \end{myhs}
 
   Working with generic mutually recursive families in Haskell, however, is a
-non trivial task.  The best solution at the time of writing is the
+non-trivial task.  The best solution at the time of writing is the
 \texttt{multirec}~\cite{Yakushev2009} library, which is unfortunately
-unfit for our use case -- the lack of a combinator-based approach
-to generic programming made it hard to port our algorithms and the pattern functor
-(\Cref{sec:background:patternfunctors}) approach makes writing the
-algorithms a difficult task.
+unfit for writing complex programs -- the lack of a combinator-based approach
+to generic programming and the pattern functor
+(\Cref{sec:background:patternfunctors}) approach makes it hard
+to write involved algorithms.
 
   This meant we had to engineer new generic programming libraries to
 tackle the added complexity of mutual recursion. We have devised two
@@ -53,7 +54,7 @@ worth noting that neither of the aforementioned libraries
 \emph{compete} with our work. We extend both in orthogonal directions,
 resulting in a new design altogether, that takes advantage of some
 modern Haskell extensions which the authors of the previous work could
-not enjoy.
+not employ.
 
   The \texttt{generics-mrsop} library, \Cref{sec:gp:mrsop}, was a
 conceptual success. It enabled us to prototype and tweak the
@@ -91,11 +92,12 @@ works on the pattern functor spectrum of generic programming.
 \section{The \texttt{generics-mrsop} library}
 \label{sec:gp:mrsop}
 
-  The \texttt{generics-mrsop} library is an intersection of \texttt{multirec}
-and \texttt{generics-sop}. It uses explicit codes in the sums of products style
-to guide the representation of datatypes. This enables a simple explicit fixpoint
-construction and a variety of recursion schemes, which makes the development
-of generic programs fairly straightforward.
+  The \texttt{generics-mrsop} library is an intersection of
+\texttt{multirec} and \texttt{generics-sop} libraries. It uses
+explicit codes in the sums of products style to guide the
+representation of datatypes. This enables a simple explicit fixpoint
+construction and a variety of recursion schemes, which makes the
+development of generic programs fairly straightforward.
   
 \subsection{Explicit Fixpoints with Codes}
 \label{sec:gp:explicitfix}
@@ -141,25 +143,6 @@ instance, |gsize| at the end of \Cref{sec:background:explicitsop}.
 The main benefit is in the simplicity of combinators we will
 define in \Cref{sec:gp:combinators}.
 
-  The |GenericFix| typeclass, below, witnesses the isomorphism
-between regular datatypes and their deep sums-of-products representation.
-Similarly to the other generic typeclasses out there, it contains just the familiar 
-|toFix| and |fromFix| components. We illustrate part of the instance that witnesses 
-that |Bin Int| has a generic representation below. 
-We ommit the |toFix| function as it is the opposite of |fromFix|.
-
-\begin{myhs}
-\begin{code}
-class GenericFix a where
-  fromFix  :: a -> RepFix a a
-  toFix    :: RepFix a a -> a
-
-instance GenericFix (Bin Int) where
-  fromFix (Leaf x)   = Rep (         Here  (NA_K x  :* NP0))
-  fromFix (Bin l r)  = Rep (There (  Here  (NA_I l  :* NA_I r :* NP0)))
-\end{code}
-\end{myhs}
-
   The |RepFix| datatype is similar to the |RepSOP|, but uses an additional
 layer that maps an |Atom| into |Star|, denoted |NA|.
 Since an atom can be either an opaque type, known statically, or some 
@@ -176,10 +159,30 @@ newtype  RepFix a x = Rep { unRep :: NS (NP (NA x)) (CodeFix a) }
 \end{code}
 \end{myhs}
 
+  The |GenericFix| typeclass, below, witnesses the isomorphism between
+regular datatypes and their deep sums-of-products representation.
+Similarly to the other generic typeclasses out there, it contains just
+the familiar |toFix| and |fromFix| components. We illustrate part of
+the instance that witnesses that |Bin Int| has a generic
+representation below.  We ommit the |toFix| function as it is the
+opposite of |fromFix|.
+
+\begin{myhs}
+\begin{code}
+class GenericFix a where
+  fromFix  :: a -> RepFix a a
+  toFix    :: RepFix a a -> a
+
+instance GenericFix (Bin Int) where
+  fromFix (Leaf x)   = Rep (         Here  (NA_K x  :* NP0))
+  fromFix (Bin l r)  = Rep (There (  Here  (NA_I l  :* NA_I r :* NP0)))
+\end{code}
+\end{myhs}
+
   It is an interesting exercise to implement the |Functor| instance
 for |(RepFix a)| -- where it can be seen that we were only able to
 lift it to a functor by recording the information about the recursive
-positions. Otherwise, there would be no way to know where to apply |f|
+positions. Otherwise, there would be no easy way of knowing where to apply |f|
 when defining |fmap f|.
 
   Nevertheless, working directly with |RepFix| is hard -- we need to
@@ -297,7 +300,7 @@ deepFrom = Fix . fmap deepFrom . fromFix
 \end{myhs}
 
   So far, we handle the same class of types as the
-\texttt{regular}~\cite{Noort2008} library, but we are imposing the
+\texttt{regular}~\cite{Noort2008} library, but we require the
 representation to follow a sums of products structure by the
 means of |CodeFix|. Those types are guaranteed to have an initial
 algebra, and indeed, the generic catamorphism is defined as expected:
@@ -326,7 +329,7 @@ crush k cat = crushFix . deepFrom
 \label{fig:gp:crush}
 \end{figure}
 
-  Sometimes we actually want to consume a value and produce
+  Some functions may consume a value and produce
 a single value, but do not need the full expressivity of |fold|. 
 Instead, if we know how to consume the opaque types and combine
 those results, we can consume any |GenericFix| type using |crush|,
@@ -365,8 +368,8 @@ handling real life applications is the limited form of recursion.
 to mutually recursive families is simple. We just need to
 reference not only one type variable, but one for each element in the
 family.  This is usually~\cite{Loh2011,Altenkirch2015} done by adding
-an index to the recursive positions that represents which member of
-the family we are recursing over.  As a running example, we use the
+an index to the recursive positions to represents each member of
+the family.  As a running example, we use the
 familiar \emph{rose tree} family.
 
 \begin{myhs}
@@ -506,8 +509,9 @@ in many different families, and in that case it makes sense to speak
 about a relation instead of a function. 
 
 Since now |fromMRec| and |toMRec| operate on families, we have to
-specify how to translate \emph{each} of the members of the family back
-and forth the generic representation. This translation needs to know
+specify how to translate \emph{each} of the members of the family 
+\emph{to} and \emph{from} their generic representation. 
+This translation needs to know
 which is the index of the datatype we are converting between in each
 case, hence the additional |SNat ix| parameter. Pattern matching on
 this singleton~\cite{Eisenberg2012} type informs the compiler about
@@ -540,7 +544,7 @@ The limitations of the Haskell type system lead us to introduce |El|
 as an intermediate datatype. Our |fromMRec| function does not take a
 member of the family directly, but an |El|-wrapped one. However, to
 construct that value, |El| needs to know its parameters, which amounts
-to the family we are embedding our type into and the index in that
+to knowing the family we are embedding our type into and the index in that
 family. Those values are not immediately obvious, but we can use
 Haskell's visible type application~\cite{EisenbergWA16} to work around
 it. The |into| function injects a value into the corresponding |El|:
@@ -549,18 +553,20 @@ it. The |into| function injects a value into the corresponding |El|:
 \begin{code}
 into  :: forall fam ty ix dot (ix ~ Idx ty fam , Lkup fam ix ~ ty) => ty -> El fam ix
 into  = El
+
+intoRose :: Rose Int -> El RoseFam 'Z
+intoRose = into (TApp FamRose)
 \end{code}
 \end{myhs}
 
 
-where |Idx| is a closed type family
-implementing the inverse of |Lkup|, that is, obtaining the index of
-the type |ty| in the list |fam|. Using this function we can turn a
-|[Rose Int]| into its generic representation by writing |fromMRec
-. into (TApp FamRose)|. The type application |(TApp FamRose)| is
-responsible for fixing the mutually recursive family we are working
-with, which allows the type checker to reduce all the constraints and
-happily inject the element into |El|.
+  |Idx|, here, is a closed type family implementing the inverse of
+|Lkup|, that is, obtaining the index of the type |ty| in the list
+|fam|. Using this function we can turn a |[Rose Int]| into its generic
+representation by writing |fromMRec . into (TApp FamRose)|. The type
+application |(TApp FamRose)| is responsible for fixing the mutually
+recursive family we are working with, which allows the type checker to
+reduce all the constraints and happily inject the element into |El|.
   
 \paragraph{Deep representation.} In \Cref{sec:gp:explicitfix} we have
 described a technique to derive deep representations from shallow
@@ -581,7 +587,7 @@ to keep track of the representations for all those positions in the
 type. This is the job of the |codes| argument. Furthermore, our |Fix|
 does not represent a single datatype, but rather the \emph{whole}
 family. Thus, we need each value to have an additional index to
-declare on which element of the family it is working on.
+declare on which element of the family it operates.
 
 As in the previous section, we can obtain the deep representation by
 iteratively applying the shallow representation. Earlier we used
@@ -630,15 +636,15 @@ data Atom (n :: Nat) = I (Fin n) | KInt | dots
 
 The lack of dependent types makes this approach very hard, in Haskell.
 We would need to carry around the inhabitants |Fin n| and define functionality
-to manipulate them, which is more complex than what meets the eye. 
-This could greatly hinder the usability of the library.
+to manipulate them, which would greatly hinder the usability of the library.
 
 By looking a bit more closely, we find that we are not losing any type-safety
 by allowing codes which reference an arbitrary number of recursive positions.
 Users of our library are allowed to write the previous ill-defined code, but
 when trying to write \emph{values} of the representation of that code, the
 |Lkup| function detects the out-of-bounds index, raising a type error and
-preventing the program from compiling.
+preventing the program from compiling in the first place, instead of
+crashing at run-time.
 
 \subsubsection{Parametrized Opaque Types}
 \label{sec:gp:konparameter}
@@ -707,7 +713,6 @@ datatype interpreting |NumericK| into ground types:
 \begin{code}
 data NumericI :: NumericK -> Star where
   IInt      :: Int      -> NumericI KInt
-  IInteger  :: Integer  -> NumericI KInteger
   IFloat    :: Float    -> NumericI KFloat
 \end{code}
 \end{myhs}
@@ -812,7 +817,7 @@ and inform the compiler of that fact by matching on |Refl|.
 
   Finally, we can start assembling these basic building blocks into
 more practical functionality. For example, \Cref{fig:gp:genericeq} shows
-the definition generic propositional equality using \texttt{generics-mrsop}.
+the definition of generic equality using \texttt{generics-mrsop}.
   
 \begin{figure}
 \begin{myhs}
@@ -855,112 +860,110 @@ case was very simple, not extracting any of the advantages of
 quantified constraints. Eventually we decided to rollback to the lifted
 |EqHO| presented above in \texttt{generics-mrsop-2.3.0}.
 
-
-  As presented so far, we have all the necessary tools to
-encode our first differencing attempt, in \Cref{chap:structural-patches}.
-The next sections discusses some aspects that, albeit not
+  As presented so far, we have all the necessary tools to encode our
+first differencing attempt, shown in \Cref{chap:structural-patches} of
+this thesis. The next sections discusses some aspects that, albeit not
 directly required for understanding the remainder of this thesis, are
-interesting in their own right and round off the presentation 
-of \texttt{generics-mrsop} as a library.
-\victor{Is the paragraph above ok?}
+interesting in their own right and round off the presentation of
+\texttt{generics-mrsop} as a library.
 
-\subsection{The (Co)Free (Co)Monad}
-\label{sec:gp:mrsop:holes}
-
-  The |SFix| datatype provides a deep representation of an element of
-a mutually recursive family, which is useful in its own right, but
-fairly inflexible. Imagine we want to perform some sort of generic unification
-over terms of a given language -- this will require us to augment our
-generic representation with unification variables. Another example is the
-caching of the value of some catamorphism to avoid recomputation -- here
-we would need to annotate ever layer of the |SFix| with some additional data.
-Both scenarios can easily be solved with the help of the \emph{free monad}
-and \emph{cofree comonad}~\cite{Ghani2001}, respectively. \victor{what to cite
-for free monad?}
-
-  In fact, we can combine both the \emph{free monad} and the
-\emph{cofree comonad} in the same datatype, with different parameters.
-We can write a fixpoint combinator that receives two additional
-functors, |phi| and |h| -- one for the comonadic structure and
-another for the monadic structure.
-
-\begin{myhs}
-\begin{code}
-data HolesAnn kappa codes phi h at where
-  Hole'  :: phi at 
-         -> h at 
-         -> HolesAnn kappa codes phi h at
-  Prim'  :: phi ((P K) k) 
-         -> kappa k
-         -> HolesAnn kappa codes phi h a
-  Roll'  :: (IsNat n , IsNat i)
-         => phi ((P I) i) 
-         -> Constr (Lkup i codes) n
-         -> NP (HolesAnn kappa codes phi h) (Lkup n (Lkup i codes))
-         -> HolesAnn kappa codes phi h ((P I) i)
-\end{code}
-\end{myhs}
-
-  Note how the |SFix kappa fam x| combinator from before can be easily 
-represented through |HolesAnn kappa fam U1 V1 x|, that is, it carries
-the superfluous (unit type) annotations and has no holes, as expressed
-by the empty functor |V1|. Moreover, we already expose the sums of products
-view over the |Roll'| constructor, bypassing the need to translate a |RepMRec|
-into a |View| every time.
-
-  The design advantage of having the free monad and cofree comonad
-on the same datatype is that we can represent all four variations
-with the same datatype, writing manipulation functions only once.
-We now have plain fixpoints, annotated fixpoints (cofree comonad), 
-fixpoints augmented with holes (free monad) and annotated fixpoints
-augmented with holes: 
-
-\begin{myhs}
-\begin{code}
-type Fix     kappa codes      = HolesAnn kappa codes U1 V1
-type FixAnn  kappa codes phi  = HolesAnn kappa codes phi V1
-type Holes   kappa codes      = HolesAnn kappa codes U1
-\end{code}
-\end{myhs}
-
-  Note that the |Hole| constructor allows for a hole to be placed on a recursive position
-or on an opaque type, by not restricting its type index. We can disallow holes on opaque
-values, for example, by passing a custom datatype to |phi| that does so.
-
-  Finally, to make these type synonyms useful to a user of the library, we provide sets of
-pattern synonyms~\cite{Pickering2016} and declare tham as 
-{\small \verb!{-# COMPLETE ... #-}!} -- which
-stops \texttt{GHC} from issuing \texttt{-Wincomplete-patterns} warnings.
-This effectively hides this overloading from the user while providing 
-maximum flexibility.
- 
-\begin{myhs}
-\begin{code}
-pattern Fix  :: () => (IsNat i , IsNat n)
-             => Constr ((P I) i)
-             -> NP (SFix kappa codes) (Lkup n (Lkup i codes))
-             -> Fix kappa codes ((P I) i)
-pattern Fix c xs = Roll' U1 c xs
-
-pattern Prim  :: prim k -> Fix kappa codes ((P k) k)
-pattern Prim x = Prim' U1 x
-{-# COMPLETE SFix , Prim #-}
-\end{code}
-\end{myhs}
-
-  In \Cref{sec:gp:simplistic:holes} we will come back to the |HolesAnn|
-datatype in a slightly different flavour. Since we actually only
-require this new flavour -- in the majority of \Cref{chap:pattern-expression-patches} --
-we defer further exploration of |HolesAnn| until then.
-
-\victor{I have not yet implemented this |HolesAnn| in this very form in the actual library; 
-it is similar. How important is it that its exactly the same? I think its pretty important, no?}
+%% \subsection{The (Co)Free (Co)Monad}
+%% \label{sec:gp:mrsop:holes}
+%% 
+%%   The |SFix| datatype provides a deep representation of an element of
+%% a mutually recursive family, which is useful in its own right, but
+%% fairly inflexible. Imagine we want to perform some sort of generic unification
+%% over terms of a given language -- this will require us to augment our
+%% generic representation with unification variables. Another example is the
+%% caching of the value of some catamorphism to avoid recomputation -- here
+%% we would need to annotate ever layer of the |SFix| with some additional data.
+%% Both scenarios can easily be solved with the help of the \emph{free monad}
+%% and \emph{cofree comonad}~\cite{Ghani2001}, respectively. \victor{what to cite
+%% for free monad?}
+%% 
+%%   In fact, we can combine both the \emph{free monad} and the
+%% \emph{cofree comonad} in the same datatype, with different parameters.
+%% We can write a fixpoint combinator that receives two additional
+%% functors, |phi| and |h| -- one for the comonadic structure and
+%% another for the monadic structure.
+%% 
+%% \begin{myhs}
+%% \begin{code}
+%% data HolesAnn kappa codes phi h at where
+%%   Hole'  :: phi at 
+%%          -> h at 
+%%          -> HolesAnn kappa codes phi h at
+%%   Prim'  :: phi ((P K) k) 
+%%          -> kappa k
+%%          -> HolesAnn kappa codes phi h a
+%%   Roll'  :: (IsNat n , IsNat i)
+%%          => phi ((P I) i) 
+%%          -> Constr (Lkup i codes) n
+%%          -> NP (HolesAnn kappa codes phi h) (Lkup n (Lkup i codes))
+%%          -> HolesAnn kappa codes phi h ((P I) i)
+%% \end{code}
+%% \end{myhs}
+%% 
+%%   Note how the |SFix kappa fam x| combinator from before can be easily 
+%% represented through |HolesAnn kappa fam U1 V1 x|, that is, it carries
+%% the superfluous (unit type) annotations and has no holes, as expressed
+%% by the empty functor |V1|. Moreover, we already expose the sums of products
+%% view over the |Roll'| constructor, bypassing the need to translate a |RepMRec|
+%% into a |View| every time.
+%% 
+%%   The design advantage of having the free monad and cofree comonad
+%% on the same datatype is that we can represent all four variations
+%% with the same datatype, writing manipulation functions only once.
+%% We now have plain fixpoints, annotated fixpoints (cofree comonad), 
+%% fixpoints augmented with holes (free monad) and annotated fixpoints
+%% augmented with holes: 
+%% 
+%% \begin{myhs}
+%% \begin{code}
+%% type Fix     kappa codes      = HolesAnn kappa codes U1 V1
+%% type FixAnn  kappa codes phi  = HolesAnn kappa codes phi V1
+%% type Holes   kappa codes      = HolesAnn kappa codes U1
+%% \end{code}
+%% \end{myhs}
+%% 
+%%   Note that the |Hole| constructor allows for a hole to be placed on a recursive position
+%% or on an opaque type, by not restricting its type index. We can disallow holes on opaque
+%% values, for example, by passing a custom datatype to |phi| that does so.
+%% 
+%%   Finally, to make these type synonyms useful to a user of the library, we provide sets of
+%% pattern synonyms~\cite{Pickering2016} and declare tham as 
+%% {\small \verb!{-# COMPLETE ... #-}!} -- which
+%% stops \texttt{GHC} from issuing \texttt{-Wincomplete-patterns} warnings.
+%% This effectively hides this overloading from the user while providing 
+%% maximum flexibility.
+%%  
+%% \begin{myhs}
+%% \begin{code}
+%% pattern Fix  :: () => (IsNat i , IsNat n)
+%%              => Constr ((P I) i)
+%%              -> NP (SFix kappa codes) (Lkup n (Lkup i codes))
+%%              -> Fix kappa codes ((P I) i)
+%% pattern Fix c xs = Roll' U1 c xs
+%% 
+%% pattern Prim  :: prim k -> Fix kappa codes ((P k) k)
+%% pattern Prim x = Prim' U1 x
+%% {-# COMPLETE SFix , Prim #-}
+%% \end{code}
+%% \end{myhs}
+%% 
+%%   In \Cref{sec:gp:simplistic:holes} we will come back to the |HolesAnn|
+%% datatype in a slightly different flavour. Since we actually only
+%% require this new flavour -- in the majority of \Cref{chap:pattern-expression-patches} --
+%% we defer further exploration of |HolesAnn| until then.
+%% 
+%% \victor{I have not yet implemented this |HolesAnn| in this very form in the actual library; 
+%% it is similar. How important is it that its exactly the same? I think its pretty important, no?}
 
 \subsection{Practical Features}
 \label{sec:gp:advancedfeatures}
 
   The development of the \texttt{generics-mrsop} library started
-primarily in order to enable us to write
+primarily to enable us to write
 \texttt{hdiff}~\Cref{chap:pattern-expression-patches} possible.  This
 was a great expressivity test for our generic programming library and
 led us to develop overall useful features that, although not novel,
@@ -1007,13 +1010,14 @@ selection of Haskell built-in types as opaque types.
 
   The process of deriving a whole mutually recursive family from a
 single member is conceptually divided into two disjoint
-processes. First we unfold all definitions and follow all the
+processes. First we repeatedly unfold all definitions and follow all the
 recursive paths until we reach a fixpoint. At that moment we know that
 we have discovered all the types in the family. Second, we translate
 the definition of those types to the format our library expects.
 During the unfolding process we keep a key-value map in a |State|
-monad, keeping track of the types we have seen, the types we have seen
-\emph{and} processed and the indices of those within the family.
+monad, keeping track of three things: the types we have seen; 
+the types we have seen \emph{and} processed; and the indices of 
+those within the family.
 
   Let us illustrate this process in a bit more detail using our
 running example of a mutually recursive family and consider what
@@ -1122,7 +1126,7 @@ simplified version of their handling of metadata, and then outline the
 differences to our approach.
 
   The general idea is to store the meta information following the
-structure of the datatype itself. So, instead of data, we keep track
+structure of the datatype itself. Instead of data, we keep track
 of the names of the different parts and other meta information that
 can be useful. It is advantageous to keep metadata separate from the
 generic representation as it would only clutter the definition of
@@ -1130,7 +1134,8 @@ generic functionality.  This information is tied to a datatype by
 means of an additional type class |HasDatatypeInfo|.  Generic
 functions may now query the metadata by means of functions like
 |datatypeName|, which reflect the type information into the term
-level.  The definitions are given in \Cref{fig:gp:sopmeta}.
+level.  The definitions are given in \Cref{fig:gp:sopmeta} and follow
+closely how \texttt{generics-sop} handles metadata.
 
 \begin{figure}
 \begin{myhs}
@@ -1241,7 +1246,7 @@ difference an $n$-ary product, |NP|, indexed by the type of each tree.
 it is the only \emph{typed} approach to differencing. The original
 implementation, from \citet{Lempsink2009}, can be found on the
 \texttt{gdiff} library. The presentation provided here is adapted from
-van Putten's~\cite{Putten2019} master thesis and is available as the
+Van Putten's~\cite{Putten2019} master thesis and is available as the
 \texttt{generics-mrsop-gdiff} library, also on Hackage.
 
 \begin{myhs}
@@ -1255,13 +1260,18 @@ diff  :: (TestEquality kappa, EqHO kappa)
 \end{code}
 \end{myhs}
 
-  The edit operations works over constructors of the mutually
-recursive family |codes| or opaque values from |kappa|. To make our
-operations more uniform, we create a type |Cof| to represent the
-\emph{unit of modification} of each edit operation. A value of type
+  One confusing complication is that our edit operations operate over
+both constructors of the family and opaque values, unlike the untyped
+version of tree differencing
+(\Cref{sec:background:tree-edit-distance}), where everything is a
+label. Consequently, writing the edit operations requires a uniform
+treatment of recursive constructors and opaque values, which is done
+by the |Cof| type, read as \emph{constructor-of}, and represents the
+\emph{unit of modification} of each edit operation.  A value of type
 |Cof kappa codes at tys| represents a constructor of atom |at|, which
 expects arguments whose type is |NP I tys|, for the family |codes|
-with opaque types interpreted by |kappa|.  Its definition is given below.
+with opaque types interpreted by |kappa|.  Its definition is given
+below.
 
 \begin{myhs}
 \begin{code}
@@ -1288,7 +1298,7 @@ type of each individual tree through the index to |NP|.
 \begin{code}
 data ES (kappa :: kon -> Star) (codes :: [[[Atom kon]]]) 
     :: [Atom kon] -> [Atom kon] -> Star where
-  ES0  :: ES kappa codes Pnil Pnil
+  ES0  :: ES kappa codes (P nil) (P nil)
   Ins  :: Cof kappa codes a t  -> ES kappa codes i            (t :++: j)  
                                -> ES kappa codes i            (a Pcons j)
   Del  :: Cof kappa codes a t  -> ES kappa codes (t :++: i)   j           
@@ -1360,7 +1370,7 @@ computing edit scripts, with memoization, still takes $\mathcal{O}(n
 \times m)$ time, where $n$ and $m$ are the number of constructors in
 the source and destination trees. This means this is at least
 quadratic in the size of the smaller input, which is not practical for
-a tool that is supposed to be run multiple times per commit, on large
+a tool that is supposed to be run multiple times per commit on large
 inputs. This downside is not soecific to this approach, but
 rather quite common for tree differencing algorithms. They often belong
 to complexity classes that make them impractical.
@@ -1379,45 +1389,43 @@ inability to find a suitable |ks|.
 by \citet{Vassena2016} was of great inspiration for this thesis in
 showing that there definitely is a place for type-safe approaches
 to differencing.
-\victor{I'm a bit unsatisfied with this discussion... any tips?}
 
 \section{The \genericssimpl{} Library}
 \label{sec:gp:simplistic}
 
   Unfortunately, the \texttt{generics-mrsop} uncovered a memory
-leak in the Haskell compiler itself, which renders the library unusable
-for large recursive families. The bugs have been reported
-in the trac\footnote{
+leak in the Haskell compiler itself when used for large
+mutually recursive families. The bugs have been reported
+in the GHC bug tracker\footnote{
 \url{https://gitlab.haskell.org/ghc/ghc/issues/17223} and 
 \url{https://gitlab.haskell.org/ghc/ghc/issues/14987}}
 but at the time of writing of this thesis, have not been resolved.
-This means that if we were to collect large scale real data
+This means that if we wish to collect large scale real data
 for our experiments, we must develop and alternative approach.
 
-  \digress{After realizing that the algorithms in
+  \digress{After realizing that the differencing algorithms presented in
 \Cref{chap:pattern-expression-patches} did not explicitely require
 sums of products to work, I was able to implement a workaround
 using \texttt{GHC.Generics} to encode mutually recursive families. The
 main idea is to take the dual approach from
-\texttt{generics-mrsop}. Instead of defining which types belong in the
-family, we define which types \emph{do not} belong, and consider all
-other types to belong in the family. Corresponding with A. Serrano
-about it, he mentioned this approach could be seen as an extension of
-his \genericssimpl{} (private communication) library, which
-lead me into writing the layer that handles deep representations with
-support for mutual recursion on top of the preliminary his library, giving rise to
-\genericssimpl{} as it is now.}
+\texttt{generics-mrsop}: instead of defining which types belong in the
+family, we define which types \emph{do not} belong to the family.
+Corresponding with A. Serrano we discussed how this approach could 
+be seen as an extension of his \genericssimpl{} 
+library, which lead me to write the layer that handles deep representations with
+support for mutual recursion on top a the preliminary version of this library, 
+giving rise to the \genericssimpl{} library in its current form.}
 
 \subsection{The Simplistic View}
 
-  The \genericssimpl{} library (A. Serrano, private communication)
+  The \genericssimpl{} library 
 can be seen as a layer on top of \texttt{GHC.Generics} to ease out the 
 definition of new generic functionality. The pattern functor approach 
 used by \texttt{GHC.Generics}, shown in \Cref{sec:background:pattern-functor},
-requires the user to write a number of typeclass instances to define
+requires the user to write a large number of typeclass instances to define
 even basic generic functions. Yet, the pattern functors generated by GHC
 are restricted to sums, products, unit, constants and metadata information.
-This means we can write a representation in a single GADT, |SRep|
+This means we can model representations as a single GADT, |SRep|
 defined below, indexed by the pattern functor it inhabits. 
 
 \begin{myhs}
@@ -1436,10 +1444,9 @@ data SRep (phi :: Star -> Star) :: (Star -> Star) -> Star where
 \end{code}
 \end{myhs}
 
-  Handling of metadata is borrowed entirely from \texttt{GHC.Generics}
-and captured by the |SMeta| datatype, which remembers which kind of
-metainformation is stored at the type level and exposes the necessary
-typeclasses when pattern matched.
+  The handling of metadata is borrowed entirely from \texttt{GHC.Generics}
+and captured by the |SMeta| datatype, which records the kind of
+metainformation is stored at the type level.
 
 \begin{myhs}
 \begin{code}
@@ -1472,18 +1479,18 @@ gsize r (x :**: y)   = gsize r x + gsize r y
 
   Naturally, we still need to convert values of |GHC.Generics.Rep f x|
 into |SRep phi (GHC.Generics.Rep f)| for some choice of |phi|. The
-\genericssimpl{} library originally can use |K1 R| as |phi|, essentially
+\genericssimpl{} library originally uses |K1 R| as |phi|, essentially
 translating only the first layer into a generic representation,
 but as we shall see in \Cref{sec:gp:simplistic-deep}, we can also
 translate the entire value and uses a fixpoint combinator in |phi|.
 
-  Even though |SRep| lacks a \emph{codes-based} approach, it is worth
+  Even though |SRep| lacks a \emph{codes-based} approach, that is,
+it can be defined for arbitrary types like \texttt{GHC.Generics}, it is worth
 noting that is still admits some combinators that greatly assist a
-programmer when writing their generic code. The most useful being
-|repMap|, |repZip| and |repLeaves|, which lay in the base of virtually
-all other combinators. Their simple types are shown below, but it is
-worth noting that these simple types are just the cannonical
-instantiation of the combinator's respective monadic versions.
+programmer when writing their generic code, unlike \texttt{GHC.Generics}. 
+The most useful being |repMap|, |repZip| and |repLeaves|, that map, zip
+and collect the leaves of a |SRep| respectively. These can easily
+be generalized to a monadic version.
 
 \begin{myhs}
 \begin{code}
@@ -1504,7 +1511,7 @@ to say its our library and just publish a paper on it?}
 
   The |SRep phi f| datatype enables us to write generic functions
 without resorting to typeclasses and also provides a simple
-way to interact with potentially recursive bits through the
+way to interact with potentially recursive subtrees through the
 |phi| functor. In order to write a deep representation,
 all we have to do is define a mutually recursive family to be
 any type that is \emph{not} a primitive type, where
