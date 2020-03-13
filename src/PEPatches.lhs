@@ -258,7 +258,8 @@ because |x| is not an element of the domain of |c|.
 (\Cref{sec:background:tree-edit-distance}) with less restrictions.
 In other words, it arbitrarily maps subtrees from the source
 to the destination. From an algebraic point of view, this already
-gives us a desirable structure, as we will explore in \Cref{sec:pepatches:meta-theory}. From a synchronization point of view, however, we do not yet
+gives us a desirable structure, as we will explore, in \Cref{sec:pepatches:meta-theory}. 
+From a synchronization point of view, however, we do not yet
 posses enough information to synchronize these \emph{changes}
 effectively. 
 
@@ -274,22 +275,6 @@ Nevertheless, the notion of \emph{change} is still the backbone of
 the implementation.  In fact, our |diff| algorithm (\Cref{sec:pepatches:diff})
 will produce a \emph{change}, which will then be translated to more expressive
 representations.
-
-\paragraph{Introducing Patches.}  
-Observing the definition of |Chg| reveals that the
-deletion context might \emph{delete} many constructors that the insertion
-context later insert, as in \Cref{fig:pepatches:example-04}.  
-This conceals the fact that the
-|Bin| at the root of the tree was in fact being copied. Following
-the \texttt{stdiff} nomenclature, the |Bin| at the root of both
-changes in \Cref{fig:pepatches:example-04} should be places
-in the \emph{spine} of the patch.  That is, it is copied over
-from source to destination but it leads to changes further down the
-tree.
-
-\victor{I'm unsure with this justification of pushing
-changes down; I mean... we could just have written a ``better''
-merge algorithm}
 
 \begin{figure}
 \centering
@@ -316,6 +301,23 @@ evident \emph{spine}.}
 \label{fig:pepatches:example-02}
 \end{figure}
 
+\paragraph{Introducing Patches.}  
+Observing the definition of |Chg| reveals that the
+deletion context might \emph{delete} many constructors that the insertion
+context later insert, as in \Cref{fig:pepatches:example-04}.  
+This conceals the fact that the
+|Bin| at the root of the tree was in fact being copied. Following
+the \texttt{stdiff} nomenclature, the |Bin| at the root of both
+changes in \Cref{fig:pepatches:example-04} should be places
+in the \emph{spine} of the patch.  That is, it is copied over
+from source to destination but it leads to changes further down the
+tree.
+
+\victor{I'm unsure with this justification of pushing
+changes down; I mean... we could just have written a ``better''
+merge algorithm}
+
+
   A \emph{patch} consists in a spine that contains changes
 in its leaves and is defined by the type |Patch| below.
 \Cref{fig:pepatches:example-02} illustrates the difference
@@ -331,9 +333,9 @@ type Patch kappa fam = Holes kappa fam (Chg kappa fam)
 \end{code}
 \end{myhs}
 
-  A patch will be computed from a conservatively large change by
-attempting to extract all topmost common constructors from the
-insertion and deletion context into the spine. In other words, we
+  Patches are computed from changes by
+extracting topmost common constructors from the
+deletion and insertion contexts into the spine. In other words, we
 would like to push the changes down towards the leaves of the
 tree. There are two different ways for doing so, illustrated by
 \Cref{fig:pepatches:example-03}.  On one hand we can consider the
@@ -391,7 +393,6 @@ patch with minimal changes.}
 \label{fig:pepatches:example-03}
 \end{figure}
 
-
   The first option, of \emph{globally-scoped} patches, is
 very easy to compute. All we have to do is to compute the
 anti-unification of the insertion and deletion context.
@@ -404,20 +405,20 @@ globallyScopedPatch (Chg d i) = holesMap (uncurry' Chg) (lgg d i)
 \end{myhs}
 
   Albeit easy to compute, however, \emph{globally-scoped} patches
-improve little besides the space required to store a patch. 
-From a synchronizaton point of view, it can be disastruous to
-ignore the scope of metavariables. 
-\Cref{fig:pepatches:misaligned} illustrates a
-globally scoped patch produced from a change and arguably,
-it is harder to understand that the |(:) 42| is being deleted
+contribute little information from a synchronization point of view.
+In fact, it can make merging even harder as shown in
+\Cref{fig:pepatches:misaligned}, where a
+globally scoped patch is produced from a change.
+It is harder to understand that the |(:) 42| is being deleted
 by looking at the globally-scoped patch than by looking at the change.
 This is because the first |(:)| constructor is considered to be in the spine
-since anti-unification proceeds top-down.  A bottom-up approach would
+by the naive anti-unification, which proceeds top-down.  
+Note that a bottom-up approach would
 would suffer similar issues for insertions anyway. 
 \victor{This is a problem Harmony also had!}
 The real solution to this problem is the notion of \emph{alignment}
 which will be discussed shortly (\Cref{sec:pepatches:alignment}), for 
-the time being we will continue discussing scoping options.
+the time being we will maintain our focus on scoping.
 
   \emph{Locally-scoped} changes implies that
 changes might still contain repeated constructors in the root
@@ -453,10 +454,8 @@ in the head of linearly-structured data. This is hard to reconcile.}
 \label{fig:pepatches:misalignment}
 \end{figure}
 
-\victor{\huge I'm here}
-
-  Regardless of global versus local scope changes, 
-forgetting the information about the spine yields a forgetful
+  Independently of global or local scoppning,
+ignoring the information about the spine yields a forgetful
 functor from patches back into changes. It is simple to define thanks
 to the free monad structure of |Holes|, which gives us the
 necessary monadic multiplication. 
@@ -474,7 +473,7 @@ chgDistr p  = Chg  (holesJoin (holesMap chgDel  p))
 \end{code}
 \end{myhs}
 
-  We have to be careful with |chgDistr|, as defined above, not to
+  It is worth noting that we must care that |chgDistr| wont
 capture variables. It will only work properly if all metavariables
 have already been properly $\alpha$-converted to avoid capturing. We
 cannot enforce this invariant directly in the |chgDistr| function for
@@ -491,8 +490,8 @@ the bowels of the code we ensure two changes have disjoint sets of
 names by adding the successor of the maximum variable of one over the
 other.}
 
-  The application semantics of |Patch| is best defined in terms
-of |chgApply|. Assume all metavariable scopes are disjoint, the
+  The application semantics of |Patch| is easily defined in terms
+of |chgApply|. As usual, assume all metavariable scopes are disjoint, the
 application of a patch is defined as:
 
 \begin{myhs}
@@ -502,22 +501,24 @@ apply  = chgApply . chgDistr
 \end{code}
 \end{myhs}
 
-  In \Cref{sec:pepatches:meta-theory} we will look at how
-this simple application semantics for patches already gives rise to 
-familiar structures -- a partial grupoid or monoid depending on whether we
-allow metavariables to be left unused. Nevertheless, this representation
-is still very crude and hard to understand what actually happened, that
-is, which constructors were in fact copied? Which trees were duplicated? etc.
-Our next task, then, is to optimize the representation for synchronization,
-\Cref{sec:pepatches:closures} and \Cref{sec:pepatches:alignment}.
+  From our empirical experience, discussed in \Cref{sec:pepatches:experiments},
+it does seem like \emph{locally-scoped} patches outperform \emph{globally-scoped}
+enabling us to solve more conflicts successfully. Besides this empirical
+validation, opting for \emph{locally-scoped} patches also enable us to place
+conflicts in-place, which is better than issuing a single conflict for
+the whole patch. For these reasons, we will move on with \emph{locally-scoped}
+patches. Next, \Cref{sec:pepatches:closures} introduces an algorithm for translating
+a single |Chg| into a patch with locally-scoped changes and \Cref{sec:pepatches:alignment}
+looks into further refining the changes into \emph{alignments}, providing 
+even more information to the synchronization engine.
 
 \subsection{Computing Closures}
 \label{sec:pepatches:closures}
 
-
 \begin{figure}
 \centering
-\subfloat[Not minimal; |Bin| is repeated.]{%
+\subfloat[Not minimal; |Bin| is repeated and not necessary
+to maintain scope.]{%
 \quad
 \begin{myforest}
 [,rootchange 
@@ -528,7 +529,7 @@ Our next task, then, is to optimize the representation for synchronization,
 \quad
 \label{fig:pepatches:example-minimal:A}}%
 \quad\quad
-\subfloat[Minimal; root constructors differ.]{%
+\subfloat[Minimal; root constructor modified.]{%
 \quad
 \begin{myforest}
 [,rootchange 
@@ -539,18 +540,18 @@ Our next task, then, is to optimize the representation for synchronization,
 \quad
 \label{fig:pepatches:example-minimal:B}}%
 
-\subfloat[Not minimal; change is ill-scoped.]{%
+\subfloat[Minimal; |Bin| is necessary to maintain scope.]{%
 \quad
 \begin{myforest}
-[|Bin|, s sep=5mm
-  [|Leaf| [,change [|42|] [|84|]]]
-  [,change [x,metavar] [y,metavar]]
+[,rootchange
+  [|Bin| [x,metavar] [y,metavar]]
+  [|Bin| [y,metavar] [x,metavar]]
 ]
 \end{myforest}
 \quad
 \label{fig:pepatches:example-minimal:C}}%
 \quad\quad
-\subfloat[Minimal changes resulting extracting the spine from \ref{fig:pepatches:example-minimal:A}]{%
+\subfloat[Patch with minimal changes computed with |close| applied to \ref{fig:pepatches:example-minimal:A}]{%
 \quad
 \begin{myforest}
 [|Bin|, s sep=5mm
@@ -570,32 +571,28 @@ Our next task, then, is to optimize the representation for synchronization,
 %format dj = "\HSVar{d_j}"
 %format ij = "\HSVar{i_j}"
 
-  A change |c :: Chg kappa fam at| is said to be in \emph{minimal}
-form if and only if is closed with respect to some global scope and,
-either |chgDel c| and |chgIns c| have different constructors at their
-root or, they contain the same constructor and said constructor is
-necessary to maintain well-scopedness. That is, when |chgDel c| and
-|chgIns c| contain the same constructor, say, |inj|, we have that
+  We say a change |c :: Chg kappa fam at| is in \emph{minimal}
+form if and only if it is closed with respect to some global scope and,
+either: (A) |chgDel c| and |chgIns c| have different constructors at their
+root or (B) they contain the same constructor and said constructor is
+necessary to maintain well-scopedness. In other words, when |chgDel c| and
+|chgIns c| contain the same constructor, take
 |chgDel c = inj d0 dots dn| and |chgIns c = inj i0 dots in|.  If there
 exists a variable |v| that occurs in |ij| but is not defined in |dj|
-then we cannot pull |inj| into a spine and whilst maintaining all
-changes well scoped, as is the case in
-\Cref{fig:pepatches:example-03:C}, for
-example. \Cref{fig:pepatches:example-minimal} illustrates some cases
-of non minimal changes and one minimal change.
+then we cannot put |inj| into a spine whilst maintaining all
+changes well scoped. \Cref{fig:pepatches:example-minimal} illustrates 
+some cases. 
 %}
 
-  Given a well-scoped change |c :: Chg kappa fam at| we would like to
-compute the largest spine |p| such that all changes in the leaves of
-|p| are closed. Defining whether a change is closed or not has its
-nuances. Firstly, we can only know that a change is in fact closed if
-we know, at least, how many times each variable is used.  Say a
-variable |x| is used |n + m| times in total, and it has |n| and |m|
-occurences in the deletion and insertion contexts of |c|, then |x| is
-not used anythwere else but in |c|. If all variables of |c| are
-\emph{local} to |c|, we say |c| is closed. Given a multiset of
-variables |g :: Map Int Arity| for the global scope, we can encode
-|isClosedChg| in Haskell as:
+  Defining whether a change is closed or not has its nuances. Firstly,
+we can only know that a change is in fact closed if we know, at least,
+how many times each variable is used globally.  Say a variable |x| is
+used |n + m| times in total, and it has |n| and |m| occurences in the
+deletion and insertion contexts of |c|, then |x| is not used anythwere
+else but in |c|, in other words, |x| is \emph{local} to |c|. If all
+variables of |c| are \emph{local} to |c|, we say |c| is closed.  Given
+a multiset of variables |g :: Map Int Arity| for the global scope, we
+can define |isClosedChg| in Haskell as:
 
 \begin{myhs}
 \begin{code}
@@ -607,18 +604,19 @@ isClosedChg global (Chg d i) = isClosed global (vars d) (vars i)
 \end{code}
 \end{myhs}
 
-  Given a well-scoped change |c|, we minimize it
-by computing the least general generalization |s = lgg (chgDel c) (chdIns c)|, 
-which might contain \emph{locally ill-scoped} changes, then pushing
+  Given a well-scoped change |c|, we would like 
+to compute a spine with minimal changes in its leaves.
+We start by computing the least general generalization |s = lgg (chgDel c) (chdIns c)| 
+which might contain \emph{locally ill-scoped} changes, then we push
 constructors that are in the spine into the changes until they are
-all closed. \Cref{fig:pepatches:example-03} provides a good
-illustration of this process. Computing the closure of
+all closed. Recall \Cref{fig:pepatches:example-03}, which
+illustrates this process well. Computing the closure of
 \Cref{fig:pepatches:example-03:A} is done by computing
 \Cref{fig:pepatches:example-03:B}, then \emph{pushing} the the |Bin|
 constructor down the changes, fixing their scope, resulting in
 \Cref{fig:pepatches:example-03:C}.
 
-  The |close| function, below, is responsible for pushing
+  The |close| function, \Cref{fig:pepatches:close}, is responsible for pushing
 constructors through the least general generalization until they
 represent minimal changes. It calls an auxiliary version that receives 
 the global scope and keeps track of the variables it seen so far.
@@ -627,94 +625,72 @@ of the spine to close the change, in which case, |close c = Hole c|;
 yet, if we pass a well-scoped change change to |close|, we must be able 
 to produce a patch.
   
-\begin{myhs}
-\begin{code}
-close :: Chg kappa fam at -> Holes kappa fam (Chg kappa fam) at
-close c =  let  global  = chgVars h
-                aux     = holesMap withVars (lgg (chgDel d) (chgIns d))
-            in case close' global aux of
-                 InL _  -> error "invariant failure: c was not well-scoped."
-                 InR b  -> holesMap body b
-\end{code}
-\end{myhs}
-  
   Deciding whether a given change is closed or not requires us to keep
 track of the variables we have seen being declared and used in a change.
 Recomputing this multisets would be a waste of resources and would yield
 a much slower algorithm. The |annWithVars| function below computes the 
 variables that occur in two contexts and annotates a change with them:
   
-\begin{figure}
-\begin{myhs}[0.99\textwidth]
-\begin{code}
-close'  :: M.Map Int Arity -> Holes kappa fam (WithVars (Chg kappa fam)) at
-        -> Sum (WithVars (Chg kappa fam)) (Holes kappa fam (WithVars (Chg kappa fam))) at 
--- Primitive values are trivially closed;
-close' _  (Prim x)  = InR (Prim x)
--- Changes might be closed, or they require no more work;
-close' gl (Hole cv) = if isClosed gl cv then InR (Hole cv) else InL cv
--- Recursive call: are /all/ recursive components closed?
-close' gl (Roll x) =
-  let aux = repMap (close' gl) x
-   in case repMapM fromInR aux of
-        -- Yes; /Roll/ is part of the spine.
-        Just res  -> InR (Roll res)
-        -- No; distribute this roll and checks whether the union of the
-        -- scopes closes the change.
-        Nothing   ->  let res = chgVarsDistr (Roll (repMap (either' Hole id) aux))
-                      in if isClosed gl res then InR (Hole res) else InL res
-  where
-    fromInR   :: Sum f g x -> Maybe (g x)
-\end{code}
-\end{myhs}
-\caption{The |close'| auxiliar function}
-\label{fig:pepatches:close-aux}
-
-\victor{I'm thinking of moving all these large functions to a separate 
-section or chapter somewhere. Does that make sense?}
-
-\end{figure}
-
 \begin{myhs}
 \begin{code}
-data WithVars x at = WithVars  { decls  :: Map Int Arity
-                               , uses   :: Map Int Arity
-                               , body   :: x at
-                               }
+data WithVars x at = WithVars  { decls , uses  :: Map Int Arity , body :: x at }
 
 withVars :: (HolesMV kappa fam :*: HolesMV kappa fam) at -> WithVars (Chg kappa fam) at
 withVars (d :*: i) = WithVars (vars d) (vars i) (Chg d i)
 \end{code}
 \end{myhs}
 
-  The |close'| function receveies a spine |s|, with leaves of type
-|WithVars (Chg dots)|, and attemps to ``enlarge'' those leaves if
-necessary.  When it is not possible to close the current spine, it
-returns a |InL (WithVars (Chg dots))| equivalent to pusing all the
-constructors of |s| down the deletion and insertion contexts.  The
-implementation of |close'| is shown in its entirety in
-\Cref{dif:pepatches:close-aux}, but its main component is
-|chgVarsDistr|, which distributes a |WithVars| over a spine whilst
-computing the union of the declared and used multisets, as shown
-below.
+
+\begin{figure}
+\begin{myhs}[0.99\textwidth]
+\begin{code}
+close :: Chg kappa fam at -> Holes kappa fam (Chg kappa fam) at
+close c@(Chg d i) = case closeAux (chgVars c) (holesMap withVars (lgg d i)) of
+                 InL _  -> error "invariant failure: c was not well-scoped."
+                 InR b  -> holesMap body b
+
+closeAux  :: M.Map Int Arity -> Holes kappa fam (WithVars (Chg kappa fam)) at
+        -> Sum (WithVars (Chg kappa fam)) (Holes kappa fam (WithVars (Chg kappa fam))) at 
+closeAux _  (Prim x)  = InR (Prim x)
+closeAux gl (Hole cv) = if isClosed gl cv then InR (Hole cv) else InL cv
+closeAux gl (Roll x) =
+  let aux = repMap (closeAux gl) x
+   in case repMapM fromInR aux of
+        Just res  -> InR (Roll res)
+        Nothing   ->  let res = chgVarsDistr (Roll (repMap (either' Hole id) aux))
+                      in if isClosed gl res then InR (Hole res) else InL res
+  where
+    fromInR   :: Sum f g x -> Maybe (g x)
+\end{code}
+\end{myhs}
+\caption{The |close| and |closeAux| functions.}
+\label{fig:pepatches:close}
+\end{figure}
+
+  The |closeAux| function, \Cref{fig:pepatches:close}, 
+receveies a spine with leaves of type |WithVars dots|
+and attemps to \emph{enlarge} them as necessary.  
+If it is not possible to close the current spine, we
+return a |InL dots| equivalent to pusing all the
+constructors of the spine down the deletion and insertion contexts.  
+The main component behing |closeAux| is |chgVarsDistr|, which distributes 
+|WithVars| over a spine and computes the union of the 
+declared and used multisets.
 
 \begin{myhs}
 \begin{code}
-chgVarsDistr :: Holes kappa fam (WithVars (Chg kappa fam)) at
-             -> WithVars (Chg kappa fam) at
-chgVarsDistr rs = 
-  let  ls  = getHoles rs
-       us  = map (exElim uses)   ls
-       ds  = map (exElim decls)  ls
-   in WithVars  (unionsWith (+) ds) (unionsWith (+) us) 
-                (chgDistr (repMap body rs))
+chgVarsDistr :: Holes kappa fam (WithVars (Chg kappa fam)) at -> WithVars (Chg kappa fam) at
+chgVarsDistr rs =  let  us  = map (exElim uses)   (getHoles rs)
+                        ds  = map (exElim decls)  (getHoles rs)
+                   in WithVars  (unionsWith (+) ds) (unionsWith (+) us) 
+                                (chgDistr (repMap body rs))
 \end{code}
 \end{myhs}
   
   It is worth noting that computing a \emph{locally scoped} patch
 from a large monolithic change only helps in preventing situations
 such the bad alignment presented in \Cref{fig:pepatches:misalignment:A}.
-In fact, let |c| be as in \Cref{fig:pepatches:misaligment:A},
+In fact, let |c| be as in \Cref{fig:pepatches:misalignment:A},
 a call to |close c| would return |Hole c| -- meaning |c| is already
 in minimal closed form and cannot have a larger spine whilst maintaining
 well-scopedness. Another way of putting it is that we at least
@@ -724,11 +700,59 @@ the deletion of |Bin 42| effectively either.
   Recognizing deletions and insertions is crucial for us: no
 synchronization algorithm can achieve effective results if it cannot
 separate old information from new information. Flagging |Bin 42| as a
-deletion in \Cref{fig:pepatches:misaligment:A} means we still must
+deletion in \Cref{fig:pepatches:misalignment:A} means we still must
 produce an \emph{aligment} of the minimal changes produced by |close|.
 
 \subsection{Aligning Patches}
 \label{sec:pepatches:alignments}
+
+  An aligned patch consists in a spine of copied constructors
+leading to a \emph{well-scoped aligment}. This alignment, in turn,
+consists in a sequence of insertions, deletions or spines,
+which finally lead to a |Chg|. This is not so different from
+\texttt{stdiff}s' |Almu|, presented in \Cref{sec:stdiff:diff:fixpoint}.
+In adition to simple insertions, deletions and spines we also
+add explicit information about copies and permutations to aid
+the synchronization engine later on. \Cref{fig:pepatches:alignment-02}
+illustrates a value of type |Patch| and its corresponding
+alignment, of type |PatchAl| defined below.
+
+\begin{myhs}
+\begin{code}
+type PatchAl kappa fam = Holes kappa fam (Al kappa fam)
+\end{code}
+\end{myhs}
+
+\begin{figure}
+\centering
+\victor{DRAW SCOPES!}
+
+\subfloat[Non aligned patch |p|]{%
+\begin{myforest}
+[|Bin|, s sep=4mm
+  [,change
+    [|Bin| [x,metavar] [y,metavar]]
+    [|Bin| [y,metavar] [x,metavar]]]
+  [,change
+    [z,metavar]
+    [|Bin| [|Leaf| [|42|]] [z,metavar]]]]
+\end{myforest}}%
+\qquad
+\subfloat[Result of |align p|]{%
+\begin{myforest}
+[|Bin| , s sep=12mm
+ [|Bin| [|Prm (metavar x) (metavar y)|]
+        [|Prm (metavar y) (metavar x)|]]
+ [,insctx
+   [|Bin| [|Leaf| [|42|]] [SQ]]
+   [|Cpy (metavar z)|]]]
+\end{myforest}}
+\caption{A patch |p| and its corresponding aligned version. Note
+how the aligned version provides more information about
+which constructors are actually copied inside the
+changes performed by |p|.}
+\label{fig:pepatches:alignment-02}
+\end{figure}
 
 \begin{figure}
 \centering
@@ -741,13 +765,13 @@ produce an \emph{aligment} of the minimal changes produced by |close|.
 \end{myforest}
 \label{fig:pepatches:alignment-01:A}}
 \quad\quad
-\subfloat[Deletion of |(:) 42| correctly identified.]{%
+\subfloat[Deletion of |(: 42)| correctly identified.]{%
 \begin{myforest}
 [, delctx 
-  [|(:)| [|Leaf| [|42|]] [SQ]]
-  [|(:)|, s sep=-4mm 
-      [Cpy]
-      [|(:)| [Cpy] [Cpy]]
+  [|(:)| [|42|] [SQ]]
+  [|(:)|, s sep=4mm 
+      [|Cpy (metavar x)|]
+      [|(:)| [|Cpy (metavar y)|] [|Cpy (metavar z)|]]
 %     [,change [x,metavar] [x,metavar]]
 %     [|(:)|, s sep=4mm
 %       [,change [y,metavar] [y,metavar]]
@@ -760,17 +784,19 @@ produce an \emph{aligment} of the minimal changes produced by |close|.
 \label{fig:pepatches:alignment-01}
 \end{figure}
 
-  Computing the \emph{aligment} for a change |c| consists in 
+  Since our patches are locally scoped, computing an aligned patch
+is simply done by maping over the spine and aligning the individual changes.
+Computing the \emph{aligment} for a change |c| consists in 
 identifying which parts of the deletion context correspond
 to which pars of the insertion context, that is, which constructors
 or metavariables represent \emph{the same information} in the 
 source object of the change. 
 
-  The change illustrated in \Cref{fig:pepatches:misalignment:A} -- which
-was alredy shown in \Cref{fig:pepatches:alignment-01:A} -- exemplifies
-well the need for alignments. It is only after recognizing the
-root |(:)| in the deletion context as \emph{deleted} that we can
-uncover the copies that follow it. If we somehow identify that
+  The change shown in \Cref{fig:pepatches:alignment-01:A} -- repeated 
+from \Cref{fig:pepatches:misalignment:A} -- illustrates
+the need for alignments. It is only after recognizing the
+root |(:)| in the deletion context as an actual \emph{deletion} that we can
+uncover the copies in its children it. If we somehow identify that
 the root constructor in the deletion context, |(:)|, represents
 the same data as the root constructor in the insertion context,
 we would end up having to work with a patch that is unecessarily
@@ -781,30 +807,30 @@ insertion context: these really do represent the same information
 and, hence, enable us to uncover the simple copies that the patch
 performs.
 
-  The deletion of |Bin 42| in \Cref{fig:pepatches:alignment-01:B}
-has all fields, except one recursive field, contain no metavariables. 
-We call such trees with no metavariables \emph{rigid} trees.
-Since \emph{rigid} trees contain no metavariables, none of their
-subtrees is being copied, moved or changed anywhere. In fact,
-they have been entirely deleted from the source or inserted
+  The deletion of |(: 42)| in \Cref{fig:pepatches:alignment-01:B}
+has all fields, except one recursive field, containing no metavariables. 
+These trees with no metavariables are denoted as \emph{rigid} trees.
+A \emph{rigid} tree has the guarantee that none of its
+subtrees is being copied, moved or modified. In fact,
+\emph{rigid} trees have been entirely deleted from the source or inserted
 at the destination of the change. Consequently, if a constructor
 in the deletion (resp. insertion) context has all but one of
 its subtrees being \emph{rigid}, it is only natural to consider
-that said constructor was alo \emph{deleted} (resp. \emph{inserted}).
+this constructor to be part of the \emph{deletion} (resp. \emph{insertion}).
 
-  Much like in \texttt{stdiff} we will be representing a deletion or
-insertion of a recursive ``layer'' by identifying the position
-\emph{where} this modification must take place. Moreover, said position
-must be a recursive field of the inserted or deleted constructor -- that is, 
-the deletions or insertions must not alter the type that our patch
-is operating over. This is easy to identify since we 
-thanks to our typed approach, where we always have access to type-level 
-information. \victor{should I talk a bit about how harmony ``solved'' this differently?}
+  We will be representing a deletion or
+insertion of a recursive \emph{layer} by identifying the \emph{position}
+where this modification must take place. Moreover, said position
+must be a recursive field of the constructor -- that is, 
+the deletion or insertion must not alter the type that our patch
+operates over. This is easy to identify since we 
+followed typed approach, where we always have access to type-level 
+information.
 
-  In the remainder of this section we shall discuss how to represent
+  In the remainder of this section we discuss how to represent
 an aligned change, such as \Cref{fig:pepatches:alignment-01:B}, and
-how to compute them from a |Chg kappa fam at|. As a result, we are interested
-in defining the |align| function, declared below.
+how to compute them from a |Chg kappa fam at|. Our starting
+point is in defining the |alignChg| function, declared below.
 
 \begin{myhs}
 \begin{code}
@@ -813,8 +839,18 @@ alignChg  :: Chg kappa fam at -> Al kappa fam (Chg kappa fam) at
 \end{myhs}
 
   In general, we represent insertions and deletions with a
-|Zipper|~\cite{Huet1991}, discussed in \ref{sec:gp:simplistic-zipper},
-which carries trees with no holes (encoded by |SFix kappa fam|) in all
+|Zipper|~\cite{Huet1991}. A zipper over a datatype |t| is
+the type of \emph{one-hole-contexts} over |t|, where the hole
+indicates a selected position. We will only
+be using zippers over a \emph{single} layer of a fixpoint at a time.
+In our case, then, a zipper over the |Bin| constructor
+is either |Bin SQ u| or |Bin u SQ|, indicating a selected position is 
+in the left or the right subtree -- we briefly discuss zippers
+generically in \ref{sec:gp:simplistic-zipper}.
+
+  A value of type |Zipper| then will be equivalent to one layer of
+a fixpoint with one of its recursive positions identified.
+It shall carry trees (encoded by |SFix kappa fam|) in all
 its positions except one, which represents where the alignment
 \emph{continues}. An alignment |Al kappa fam f at| represents a
 sequence of insertions and deletions interleaved with spines which
@@ -824,27 +860,23 @@ the |f| parameter.
 \begin{myhs}
 \begin{code}
 data Al kappa fam f at where
-  Del  :: Zipper (CompoundCnstr kappa fam at) (SFix kappa fam) (Al kappa fam f)  x 
-       -> Al kappa fam f at
-  Ins  :: Zipper (CompoundCnstr kappa fam at) (SFix kappa fam) (Al kappa fam f) x
-       -> Al kappa fam f at
+  Del  :: Zipper (CompoundCnstr kappa fam at) (SFix kappa fam) (Al kappa fam f) at -> Al kappa fam f at
+  Ins  :: Zipper (CompoundCnstr kappa fam at) (SFix kappa fam) (Al kappa fam f) at -> Al kappa fam f at
 \end{code}
 \end{myhs}
 
   The |CompountCnstr| constraint must be carried around to indicate we
 are aligning a type that belongs to the mutually recursive family and
-therefore has a generic representation -- just a Haskell technicality.
+therefore has a generic representation -- this is just a Haskell technicality.
 
   Naturally, if no insertion or deletion can be made but both
 insertion and deletion contexts have the same constructor at their
-root, we want to recognize this constructor as part of the spine and
+root, we want to recognize this constructor as part of a spine and
 continue aligning its fields pairwise.
 
 \begin{myhs}
 \begin{code}
-  Spn  :: (CompoundCnstr kappa fam x)
-       => SRep (Al kappa fam f) (Rep x)
-       -> Al kappa fam f x
+  Spn  :: (CompoundCnstr kappa fam x) => SRep (Al kappa fam f) (Rep at) -> Al kappa fam f at
 \end{code}
 \end{myhs}
 
@@ -882,69 +914,22 @@ remains the same.
 \end{myhs}
 
   Equipped with a definition for aligments, we move on to defining
-|alignChg|.  Given a change |c|, the first step of |alignChg c| is to
-check whether the root of |chgDel c| (resp. |chgIns c|) can be deleted
-(resp. inserted) -- that is, all of its fields are \emph{rigid} trees
+|alignChg|.  Given a change |c|, the first step of |alignChg c| is 
+checking whether the root of |chgDel c| (resp. |chgIns c|) can be deleted
+(resp. inserted) -- that is, all of the of the constructor
+at the root of |chgDel c| (resp. |chgIns c|) are \emph{rigid} trees
 with the exception of a single recursive field. If we can delete the
 root, we flag it as a deletion and continue through the recursive
 \emph{non-rigid} field. If we cannot perform a deletion at the root of
 |chgDel c| nor an insertion at the root of |chgIns c| but they are
 constructed with the same constructor, we identify the
-constructor as the \emph{same information} by putting it on
-a spine and recursing on the children.  
-If |chgDel c| and |chgIns c| do not even have the same
-constructor at the root, we finally fallback and flag an arbitrary
-modification.
+constructor as being part of the alignments' spine
+and recursing on the children. If |chgDel c| and |chgIns c| do not even 
+have the same constructor at the root, nor are copies
+or permutations, we finally fallback and flag an arbitrary modification.
 
-  An aligned patch consists in a spine of copied constructors
-leading to an aligment. This alignment also contains a 
-a spine of copied constructors, which might be interleaved with
-insertions and deletions. Moreover, the alingnment identifies
-a scope for its metavariables and is well-scoped. This enables
-us to represent permutations concisely, retaining the information
-that some constructors might be copied, as shown in 
-\Cref{fig:pepatches:alignment-02}.
-
-\begin{myhs}
-\begin{code}
-type PatchAl kappa fam = Holes kappa fam (Al kappa fam)
-\end{code}
-\end{myhs}
-
-\begin{figure}
-\centering
-\subfloat[Non aligned patch |p|]{%
-\begin{myforest}
-[|Bin|, s sep=4mm
-  [,change
-    [|Bin| [x,metavar] [y,metavar]]
-    [|Bin| [y,metavar] [x,metavar]]]
-  [,change
-    [z,metavar]
-    [|Bin| [|Leaf| [|42|]] [z,metavar]]]]
-\end{myforest}}%
-\qquad
-\subfloat[Result of |align p|]{%
-\begin{myforest}
-[|Bin| , s sep=12mm
- [|Bin| [|Prm (metavar x) (metavar y)|]
-        [|Prm (metavar y) (metavar x)|]]
- [,insctx
-   [|Bin| [|Leaf| [|42|]] [SQ]]
-   [|Cpy|]]]
-\end{myforest}}
-\caption{A patch |p| and its corresponding aligned version. Note
-how the aligned version provides more information about
-which constructors are actually copied inside the
-changes performed by |p|.}
-\label{fig:pepatches:alignment-02}
-\end{figure}
-
-  Producing a |PathAl|, given a |Patch| starts with checking for rigid
-subtrees. This must be carefully translated into an algorithm to
-ensure we remain performant: we must annotate each tree with whether
-they are rigid or not, otherwise we will be looking into an
-exponential time alignment algorithm. Annotating a tree
+  To check whether a constructor can be inserted in an efficient manner
+we must have this information annotated over the tree. Annotating a tree
 augmented with holes with information about whether or not any |Hole|
 constructor occurs is done with |annotRigidity|, shown in
 \Cref{fig:pepatches:rigidity}.
@@ -1007,9 +992,9 @@ can be found in \Cref{fig:pepatches:align-fulldef}, and, albeit long,
 is rather simple. In general lines, |al| attempts to delete as many
 constructors as possible, followed by inserting as many constructors
 as possible; whenever it finds that it deleted and inserted the same
-constructor, it issues a |Spn| alignment and calls itself recursively
-on the leaves of the |Spn|. Ultimately it falls back to |Cpy|, |Prm|
-or |Mod|.
+constructor, it uses a |Spn| instead and calls itself recursively
+on the leaves of the |Spn|. Ultimately, when none of |Del|, |Ins|
+or |Spn| can be used it falls back to |Cpy|, |Prm| or |Mod|.
 
 \begin{myhs}
 \begin{code}
@@ -1073,12 +1058,12 @@ al vars d i = alD (alS vars (al vars)) d i
 \label{fig:pepatches:align-fulldef}
 \end{figure}
 
-  Alignments and changes are interchangeable to an extent. In fact,
-the |disalign| function, which computes a change from an alignment,
-form an isomorphism with |alignChg|.  The |disalign| function is
-skethed below. It plugs deletion and insertion zippers, where casting
-a zipper over |SFix| into a zipper over |Holes|; the rest of the cases
-is straightforward.
+  The |alignChg| and |disalign|, sketched below, form an isomorphism
+betweem alignments and changes. The |disalign| function is plugs
+deletion and insertion zippers, casting a zipper over |SFix| into a
+zipper over |Holes| where necessary; distributes the constructors in
+the spine into both deletion and insertion contexts and translates
+|Cpy| and |Prm| as expected.
 
 \begin{myhs}
 \begin{code}
@@ -1112,7 +1097,7 @@ ensure we can easily produce fresh names later on, if need be.
 Note that |align| introduces information, namelly, new metavariables
 that represent copies over opaque values that appear on the alignment's
 spine. This means that mapping |disalign| to the result of |align|
-will \emph{not} produce the same result. We have \emph{no} isomorphis here.
+will \emph{not} produce the same result. We have \emph{no} isomorphism here.
 
 \begin{myhs}
 \begin{code}
@@ -1135,9 +1120,8 @@ has type.
 
 \begin{myhs}
 \begin{code}
-alRefineM  :: (Monad m) => (forall x . f x -> m (Al' kappa fam g x))
-           -> Al' kappa fam f ty
-           -> m (Al' kappa fam g ty)
+alRefineM  :: (Monad m) => (forall x dot f x -> m (Al' kappa fam g x)) 
+           -> Al' kappa fam f ty -> m (Al' kappa fam g ty)
 \end{code}
 \end{myhs}
 

@@ -554,7 +554,7 @@ it. The |into| function injects a value into the corresponding |El|:
 into  :: forall fam ty ix dot (ix ~ Idx ty fam , Lkup fam ix ~ ty) => ty -> El fam ix
 into  = El
 
-intoRose :: Rose Int -> El RoseFam 'Z
+intoRose :: Rose Int -> El RoseFam (P Z)
 intoRose = into (TApp FamRose)
 \end{code}
 \end{myhs}
