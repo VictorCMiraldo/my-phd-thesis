@@ -1,9 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%                                                                            %%
-%% Package ``hs-digems Forest''                                               %%
+%% Package ``diff Forest''                                                    %%
 %%                                                                            %%
-%% Provides a set of definitions for 'forest' enviromentt that make the       %%
-%% drawing of hs-digems patches easy.                                         %%
+%% Provides a set of definitions for 'forest' enviroments that make the       %%
+%% drawing of hdiff-like patches easy.                                        %%
 %%                                                                            %%
 %% Version: v0.0.1                                                            %%
 %% Authors: Victor Cacciari Miraldo                                           %%
@@ -11,7 +11,7 @@
 %% GitHub Repo: https://github.com/VictorCMiraldo/my-phd-thesis               %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{hdiff-forest}[2019/05/23 hs-digems Forest]
+\ProvidesPackage{hdiff-forest}[2020/03/14 hdiff Forest]
 
 \RequirePackage{forest}
 \RequirePackage{tikz}
@@ -137,12 +137,22 @@
   delctx/.style={delctx'={D}},
   insctx/.style={insctx'={I}},
 %%%%%%%%%%%%%%%
+  alignmentSmall/.style={%
+    tikz+={%
+      \node (ni) at ($ (!c.parent first) + (-3mm,1mm) $) {}; 
+      \node (nf) at ($ (!c.parent last)  + (3mm,1mm)  $) {}; 
+      \draw[hdiff-gray,densely dotted] (ni) to[out=20,in=160]
+         node[pos=#1,solid,text=hdiff-gray,draw=hdiff-gray,fill=white] {\tiny\textit{Al}}
+           (nf);
+    },
+  },
+  alignmentSmall/.default={0},
   alignment/.style={%
     tikz+={%
       \node (ni) at ($ (!cF.first |- !c.parent) + (-3mm,-1mm) $) {}; 
       \node (nf) at ($ (!cL.last  |- !c.parent) + (3mm,-1mm)  $) {}; 
       \draw[hdiff-gray,densely dotted] (ni) to[out=20,in=160]
-         node[pos=#1,solid,text=hdiff-gray,draw=hdiff-gray,fill=white] {\textit{Al}}
+         node[pos=#1,solid,text=hdiff-gray,draw=hdiff-gray,fill=white] {\tiny\textit{Al}}
            (nf);
     },
   },
