@@ -448,7 +448,7 @@ the domain of the mapping |m|, then |x| is an ancestor of |y| if and only if
 \centering
 \subfloat[non order preserving]{%
 \begin{forest}
-[, rootchange clean={8}
+[, change={white}{} , s sep=8mm
   [b,name=sb [c [d] [e, name=se]] [f , name=sf]]
   [g,name=df [b , name=db] [e, name=de]]]
 \draw [->,dashed,thick,black!20!white] (sb) -- (db);
@@ -457,32 +457,32 @@ the domain of the mapping |m|, then |x| is an ancestor of |y| if and only if
 % \draw [->,dashed,thick,black!20!white] (se) -- (de);
 \end{forest}%
 \label{fig:background:tree-mapping-a}}%
-\qquad\qquad%
+\qquad%
 \subfloat[non injective]{%
 \raisebox{9mm}{
 \begin{forest}
-[, rootchange clean={9}
+[, change={white}{} , s sep=8mm
   [b,name=sb [c] [d]]
   [b,name=db [b , name=dbb] [e]]]
 \draw [->,dashed,thick,black!20!white] (sb) -- (db);
 \draw [->,dashed,thick,black!20!white] (sb) -- (dbb);
 \end{forest}%
 \label{fig:background:tree-mapping-b}}}%
-\qquad\qquad%
+\qquad%
 \subfloat[non surjective]{%
 \begin{forest}
-[, rootchange clean={8}
+[, change={white}{} , s sep=8mm
   [b,name=sb [c] [d,name=sd]]
   [a [f,name=df [g] [h]] [e]]]
 \draw [->,dashed,thick,black!20!white] (sb) -- (df);
 \draw [->,dashed,thick,black!20!white] (sd) -- (df);
 \end{forest}%
 \label{fig:background:tree-mapping-c}}%
-\qquad\qquad%
+\qquad%
 \subfloat[non ancestral preserving]{%
 \raisebox{9mm}{%
 \begin{forest}
-[, rootchange clean={8}
+[, change={white}{} , s sep=8mm
   [a,name=sb [b [c] [d,name=sd]] [e,name=se]]
   [f,name=df [g, name=dg]]]
 \draw [->,dashed,thick,black!20!white] (sd) -- (df);
@@ -492,7 +492,7 @@ the domain of the mapping |m|, then |x| is an ancestor of |y| if and only if
 \qquad\qquad\qquad\qquad\qquad%
 \subfloat[valid tree mapping]{%
 \begin{forest}
-[, rootchange clean={8}
+[, change={white}{}, s sep=8mm
   [a,name=sa [b,name=sb [c] [d]] [e,name=se]]
   [f [a, name=da [g [b,name=db]] [e,name=de]] [h]]]
 \draw [->,dashed,thick,black!20!white] (sa) -- (da);
@@ -535,7 +535,7 @@ Consider the tree-edit-scripts between the following two trees:
 
 \begin{center}
 \begin{forest}
-[,rootchange clean={9} % Why text leaks over if I add two digits?
+[, change={white}{} , s sep=12mm
   [|Bin| [|T|] [|U|]]
   [|Bin| [|U|] [|T|]]]
 \end{forest}
@@ -568,7 +568,7 @@ from the \emph{differencing} point of fiew. Consider the trees below,
 
 \begin{center}
 \begin{forest}
-[,rootchange clean={9}
+[, change={white}{} , s sep=12mm
   [|A|]
   [|Bin| [|A|] [|A|]]]
 \end{forest}

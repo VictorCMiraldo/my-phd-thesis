@@ -220,7 +220,7 @@ because |x| is not an element of the domain of |c|.
 \centering
 \subfloat{%
 \begin{myforest}
-[,rootchange 
+[,change 
   [|Bin| [x,metavar] [|Leaf| [|5|]]]
   [|Bin| [x,metavar] [|Leaf| [|6|]]]
 ]
@@ -229,7 +229,7 @@ because |x| is not an element of the domain of |c|.
 \quad\quad\quad
 \subfloat{%
 \begin{myforest}
-[,rootchange 
+[,change 
   [|Bin| [|Leaf| [|42|]] [z,metavar]]
   [|Bin| [|Leaf| [|84|]] [|Bin| [z,metavar] [z,metavar]]]
 ]
@@ -280,7 +280,7 @@ representations.
 \centering
 \subfloat[Insertion as a \emph{change}]{%
 \begin{myforest}
-[,rootchange 
+[,change 
   [|Bin| [|Leaf| [|42|]] [x,metavar]]
   [|Bin| [|Leaf| [|42|]] [|Bin| [|Leaf| [| 84|]] [x,metavar]]]
 ]
@@ -359,7 +359,7 @@ necessary to ensure the change is \emph{closed}, as in
 \centering
 \subfloat[\emph{well-scoped} swap, as a |Chg|]{%
 \begin{myforest}
-[,rootchange 
+[,change 
   [|Bin| [|Leaf| [|42|]] [|Bin| [x,metavar] [y,metavar]]]
   [|Bin| [|Leaf| [|42|]] [|Bin| [y,metavar] [x,metavar]]]
 ]
@@ -433,7 +433,7 @@ to small parts of the patch instead of the whole.
 \centering
 \subfloat[Change that deletes |42| at the head of a list.]{%
 \begin{myforest}
-[,rootchange , s sep=1mm
+[,change , s sep=1mm
   [|(:)| [|42|] [|(:)| [x,metavar] [|(:)| [y,metavar] [z,metavar]]]]
   [|(:)| [x,metavar] [|(:)| [y,metavar] [z,metavar]]]
 ]
@@ -521,7 +521,7 @@ even more information to the synchronization engine.
 to maintain scope.]{%
 \quad
 \begin{myforest}
-[,rootchange 
+[,change 
   [|Bin| [|Leaf| [|42|]] [x,metavar]]
   [|Bin| [|Leaf| [|84|]] [x,metavar]]
 ]
@@ -532,7 +532,7 @@ to maintain scope.]{%
 \subfloat[Minimal; root constructor modified.]{%
 \quad
 \begin{myforest}
-[,rootchange 
+[,change 
   [|Bin| [|Leaf| [|42|]] [x,metavar]]
   [|Tri| [|Leaf| [|42|]] [x,metavar] [|Leaf| [|84|]]]
 ]
@@ -543,7 +543,7 @@ to maintain scope.]{%
 \subfloat[Minimal; |Bin| is necessary to maintain scope.]{%
 \quad
 \begin{myforest}
-[,rootchange
+[,change
   [|Bin| [x,metavar] [y,metavar]]
   [|Bin| [y,metavar] [x,metavar]]
 ]
@@ -741,8 +741,9 @@ type PatchAl kappa fam = Holes kappa fam (Al kappa fam)
 \subfloat[Result of |align p|]{%
 \begin{myforest}
 [|Bin| , s sep=12mm
- [|Bin| [|Prm (metavar x) (metavar y)|]
-        [|Prm (metavar y) (metavar x)|]]
+ [|Bin| , alignment
+   [|Prm (metavar x) (metavar y)|]
+   [|Prm (metavar y) (metavar x)|]]
  [,insctx
    [|Bin| [|Leaf| [|42|]] [SQ]]
    [|Cpy (metavar z)|]]]
@@ -758,7 +759,7 @@ changes performed by |p|.}
 \centering
 \subfloat[Change that deletes |42| at the head of a list.]{%
 \begin{myforest}
-[,rootchange , s sep=1mm
+[,change , s sep=1mm
   [|(:)| [|42|] [|(:)| [x,metavar] [|(:)| [y,metavar] [z,metavar]]]]
   [|(:)| [x,metavar] [|(:)| [y,metavar] [z,metavar]]]
 ]
@@ -767,7 +768,7 @@ changes performed by |p|.}
 \quad\quad
 \subfloat[Deletion of |(: 42)| correctly identified.]{%
 \begin{myforest}
-[, delctx 
+[, delctx , alignment
   [|(:)| [|42|] [SQ]]
   [|(:)|, s sep=4mm 
       [|Cpy (metavar x)|]
@@ -1396,7 +1397,7 @@ alignments guarantees |metavar x| will not appear elsewhere.
   [,change
     [|Bin| [x,metavar] [x,metavar]]
     [x,metavar]]
-  [|Bin| %, bscope % make a begin-scope style 
+  [|Bin| , alignment
     [|Prm (metavar y) (metavar z)|]
     [|Prm (metavar z) (metavar y)|]]
 ]
@@ -1418,7 +1419,7 @@ alignments guarantees |metavar x| will not appear elsewhere.
     [|Leaf| [|42|]]]
   [,insctx
     [|Bin| [|Leaf| [|84|]] [SQ]]
-    [|Bin| %, bscope % make a begin-scope style 
+    [|Bin| , alignment
       [|Prm (metavar y) (metavar z)|]
       [|Prm (metavar z) (metavar y)|]]]
 ]
@@ -1464,7 +1465,7 @@ synchronizatino is possible and results in \Cref{fig:pepatches:merge-01:C}.
 \qquad%
 \subfloat[Synchronization of |p| and |q|]{%
 \begin{myforest}
-[,rootchange
+[,change
   [|Bin| [|Leaf| [|42|]] [y,metavar]]
   [|Bin| [y,metavar] [|Leaf| [|84|]]]
 ]
@@ -1545,7 +1546,7 @@ preserved as is.  The resulting patch can be seen in
 \centering
 \subfloat[|align (diff o a)|]{%
 \begin{myforest}
-[|(:)| 
+[|(:)| , alignment
   [|Prm (metavar x) (metavar y)|] 
     [|(:)| [|Prm (metavar y) (metavar x)|] 
       [|[]|]
@@ -1555,7 +1556,7 @@ preserved as is.  The resulting patch can be seen in
 \qquad\qquad%
 \subfloat[|align (diff o b)|]{%
 \begin{myforest}
-[|(:)| , s sep=14mm
+[|(:)| , alignment
   [Cpy]
   [,insctx
     [|(:)| [|42|] [SQ]]
@@ -1564,7 +1565,7 @@ preserved as is.  The resulting patch can be seen in
 
 \subfloat[Result of merge |diff3 oa ob|]{%
 \begin{myforest}
-[,rootchange
+[,change
   [|(:)| [a,metavar] [|(:)| [b,metavar] [|[]|]]]
   [|(:)| [b,metavar] [|(:)| [|42|] [|(:)| [a,metavar] [|[]|]]]]
 ]
@@ -1875,7 +1876,7 @@ and in |ctxIns chg| by |ctxIns (disalign spn)|, we would get:
 \begin{minipage}{.8\textwidth}
 \centering
 \begin{myforest}
-[,rootchange
+[,change
   [|(:)| [l,metavar] [z,metavar]]
   [|(:)| [a,metavar]
     [|(:)| [l,metavar] [|(:)| [x,metavar] [z,metavar]]]]]
@@ -2287,7 +2288,7 @@ wcs _ _ _          = Nothing
 }\hfill%
 \subfloat[Result of |chg s d|]{%
 \begin{myforest}
-[,rootchange,
+[,change
   [|Bin| [x,metavar] [k]]
   [|Bin| [x,metavar] [y,metavar]]
 ]
@@ -2349,7 +2350,7 @@ are not the same in general.
 \centering
 \subfloat[Do not share nested common subtrees.]{%
 \begin{myforest}
-[,rootchange,
+[,change
   [|Bin| [x,metavar] [k]]
   [|Bin| [x,metavar] [t]]
 ]
@@ -2358,7 +2359,7 @@ are not the same in general.
 \qquad\qquad
 \subfloat[Expand metavariables pursuing all sharing oportunities]{%
 \begin{myforest}
-[,rootchange,
+[,change
   [|Bin| [|Bin| [y,metavar] [z,metavar]] [k]]
   [|Bin| [|Bin| [y,metavar] [z,metavar]] [y,metavar]]
 ]
@@ -2405,7 +2406,7 @@ the parameter |i| in the code above.
 \centering
 \subfloat[Globally-scoped change]{%
 \begin{myforest}
-[,rootchange
+[,change
  [|BinLbl| [|42|] [|Bin| [x, metavar] [y, metavar]] [z,metavar]]
  [|BinLbl| [|42|] [|Bin| [y, metavar] [x, metavar]] [z,metavar]]
 ]
@@ -2493,7 +2494,7 @@ preprocess = synthesize dots
 [,phantom , s sep'+=60pt
 [|Bin| , name=A [|Bin| [|Leaf| [|42|]] [|Leaf| [|42|]]] [|Leaf| [|84|]]]
 [|WD Bin "0f42ab" 3|, tikz+={
-        \draw [forest-digems-black,->] (A.east) [out=25, in=165]to node[midway,above]{|preprocess|} (!c.west);
+        \draw [hdiff-black,->] (A.east) [out=25, in=165]to node[midway,above]{|preprocess|} (!c.west);
       }
   [|WD Bin "310dac" 2| , name=ex1
     [|WD Leaf "0021ab" 1| [|WD 42 "004200" 0|]]
@@ -2645,7 +2646,7 @@ the differences}
 \quad
 \subfloat[|m = Patience|]{%
 \begin{myforest}
-[,rootchange 
+[,change 
   [|Tri| [|Bin| [a] [b]]
          [|Bin| [a] [b]]
          [z,metavar]]
@@ -2658,7 +2659,7 @@ the differences}
 
 \subfloat[|m = NoNest|]{%
 \begin{myforest}
-[,rootchange 
+[,change 
   [|Tri| [x,metavar]     [x,metavar] [y,metavar]]
   [|Tri| [|Bin| [b] [a]] [x,metavar] [y,metavar]]
 ]
@@ -2667,7 +2668,7 @@ the differences}
 \quad
 \subfloat[|m = ProperShare|]{%
 \begin{myforest}
-[,rootchange 
+[,change 
   [|Tri| [|Bin| [x,metavar] [y,metavar]]
          [|Bin| [x,metavar] [y,metavar]]
          [z,metavar]]

@@ -1,0 +1,152 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                                                            %%
+%% Package ``hs-digems Forest''                                               %%
+%%                                                                            %%
+%% Provides a set of definitions for 'forest' enviromentt that make the       %%
+%% drawing of hs-digems patches easy.                                         %%
+%%                                                                            %%
+%% Version: v0.0.1                                                            %%
+%% Authors: Victor Cacciari Miraldo                                           %%
+%% License: MIT License (c) 2019 Victor Cacciari Miraldo                      %%
+%% GitHub Repo: https://github.com/VictorCMiraldo/my-phd-thesis               %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{hdiff-forest}[2019/05/23 hs-digems Forest]
+
+\RequirePackage{forest}
+\RequirePackage{tikz}
+\RequirePackage{xcolor}
+
+\ProcessOptions\relax
+
+\usetikzlibrary{fit}
+\usetikzlibrary{backgrounds}
+\usetikzlibrary{positioning}
+
+%%old: \definecolor{hdiff-metavar}{RGB}{171,72,46}
+%%darker: \definecolor{hdiff-metavar}{RGB}{108,40,23}
+%%purple:\definecolor{hdiff-metavar}{RGB}{56,25,110}
+
+\definecolor{hdiff-constr}{RGB}{80,88,113}
+\definecolor{hdiff-change-bg}{RGB}{220,224,238}
+\definecolor{hdiff-black}{RGB}{97,108,132}
+\definecolor{hdiff-gray}{RGB}{117,128,152}
+
+\definecolor{hdiff-change-border}{RGB}{0,112,33}
+\definecolor{hdiff-metavar}{RGB}{0,112,33}
+
+\definecolor{delctx-bg}{RGB}{240,190,190}
+\definecolor{delctx-border}{RGB}{205,81,81}
+\definecolor{insctx-bg}{RGB}{190,240,225}
+\definecolor{insctx-border}{RGB}{81,205,165}
+
+
+\newcommand{\digemFormatMetavar}[1]{\ensuremath{\#_{#1}}}
+\newcommand{\digemFormatMetavarKappaFam}[2]{\ensuremath{\#^{#1}_{#2}}}
+
+%% This was based on: https://tex.stackexchange.com/questions/342334/drawing-super-nodes-in-a-tree 
+\forestset{%
+  debug=nodewalks,
+  default preamble={%
+      for tree={text=hdiff-constr, 
+                edge=hdiff-black},
+    },
+%%%%%%%%%%%%%%%%
+  metavar/.style={%
+    text=hdiff-metavar,
+    %% delay is crucial here; otherwise the default content
+    %% is used. See manual page 6!
+    delay={content/.wrap pgfmath arg={%
+       \digemFormatMetavar{##1}
+     }{content()}}
+   },
+%%%%%%%%%%%%%%%%
+  triang/.style={%
+      shape=regular polygon,
+      regular polygon sides=3,
+      text=hdiff-black,
+      draw=hdiff-black,
+      font=\itshape,
+      minimum width=1.3em,
+      inner sep=0pt,
+    },
+%%%%%%%%%%%%%
+  change/.style 2 args={% #1 = border ; #2 = char in between
+    text=hdiff-black,
+    s sep=4mm,
+    for 1={fit=rectangle,no edge},
+    for 2={fit=rectangle,no edge},
+    before typesetting nodes={%
+      no edge,
+      before computing xy={l=-1.8mm, for 1={l=2mm}, for 2={l=2mm}},
+      replace by={%
+        [\phantom{} , append, fit=rectangle, no edge, before drawing tree={%
+            tikz+={%
+              \begin{scope}[on background layer]
+                \node (n) [ %fill=hdiff-change-bg, 
+                           % inner sep=\savedinnerysep, 
+                           dashed, draw=#1,
+                           rounded corners, fit to=tree] {}; 
+              \end{scope}
+            },
+            if level=0{}{ %else
+               tikz+={%
+                 \begin{scope}[on background layer]
+                   \path [draw=hdiff-black, \forestoption{edge}] 
+                              (!u.parent anchor) -- (n.north -| !1.child anchor)
+                              \forestoption{edge label};
+                 \end{scope}
+               }
+            },
+          },
+        ]} %end replace-by
+    },
+    tikz+={ \node (m1) at ($ (!1)!0.5!(!2) $) {}; 
+            \node (m2) at ($ (m1) $)          {};
+            \node [text=hdiff-black] at ($ (m1)!0.5!(m2) $) {#2};
+          },
+  },
+  change/.default={hdiff-change-border}{$\mapsto$},
+%%%%%%%%%%%%%%%
+  ctx/.style n args={3}{%
+    text=#3,
+    before typesetting nodes={%
+      before computing xy={for children={l=7mm}, for 1={l-=3mm}},
+      content={#2},
+      fill=white,
+      draw=#3,
+      s sep=4mm,
+      for children={fit=rectangle,no edge},
+      for 1={tikz+={%
+        \begin{scope}[on background layer]
+          \node (n) [densely dotted, rounded corners, draw=#3, fit to=tree] {};
+        \end{scope}},
+        for descendants={
+          if content={SQ}{%
+            text=#3,
+            content={$\square$},
+            alias=#1 
+          }{}},
+      },
+      tikz+={\draw[#3,->] (#1) to[out=0,in=180] (!2.first);
+            },
+    },
+  },
+  delctx'/.style n args={1}{ctx={#1}{\textit{del}}{delctx-border}},
+  insctx'/.style n args={1}{ctx={#1}{\textit{ins}}{insctx-border}},
+  delctx/.style={delctx'={D}},
+  insctx/.style={insctx'={I}},
+%%%%%%%%%%%%%%%
+  alignment/.style={%
+    tikz+={%
+      \node (ni) at ($ (!cF.first |- !c.parent) + (-3mm,-1mm) $) {}; 
+      \node (nf) at ($ (!cL.last  |- !c.parent) + (3mm,-1mm)  $) {}; 
+      \draw[hdiff-gray,densely dotted] (ni) to[out=20,in=160]
+         node[pos=#1,solid,text=hdiff-gray,draw=hdiff-gray,fill=white] {\textit{Al}}
+           (nf);
+    },
+  },
+  alignment/.default={0},
+}
+
+\endinput

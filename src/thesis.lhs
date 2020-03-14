@@ -5,7 +5,7 @@
 %% The draft option disables microtype and displays overful hboxes
 %% in the text, plus its faster to compile
 
-\usepackage{hs-digems-forest}
+\usepackage{hdiff-forest}
 \usepackage[all]{xy}
 
 \title{Type-Safe Generic Differencing of Mutually Recursive Families}
