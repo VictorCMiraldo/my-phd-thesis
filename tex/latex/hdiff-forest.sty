@@ -137,26 +137,17 @@
   delctx/.style={delctx'={D}},
   insctx/.style={insctx'={I}},
 %%%%%%%%%%%%%%%
-  alignmentSmall/.style={%
+  alignment/.style 2 args={%
     tikz+={%
-      \node (ni) at ($ (!c.parent first) + (-3mm,1mm) $) {}; 
-      \node (nf) at ($ (!c.parent last)  + (3mm,1mm)  $) {}; 
+      \node (ni) at ($ (!c.parent first) + (-#2,0) $) {}; 
+      \node (nf) at ($ (!c.parent last)  + (#2,0)  $) {}; 
       \draw[hdiff-gray,densely dotted] (ni) to[out=20,in=160]
          node[pos=#1,solid,text=hdiff-gray,draw=hdiff-gray,fill=white] {\tiny\textit{Al}}
            (nf);
     },
   },
-  alignmentSmall/.default={0},
-  alignment/.style={%
-    tikz+={%
-      \node (ni) at ($ (!cF.first |- !c.parent) + (-3mm,-1mm) $) {}; 
-      \node (nf) at ($ (!cL.last  |- !c.parent) + (3mm,-1mm)  $) {}; 
-      \draw[hdiff-gray,densely dotted] (ni) to[out=20,in=160]
-         node[pos=#1,solid,text=hdiff-gray,draw=hdiff-gray,fill=white] {\tiny\textit{Al}}
-           (nf);
-    },
-  },
-  alignment/.default={0},
+  alignment/.default={0}{8mm},
+  alignmentSmall/.style={alignment={0}{5mm}},
 }
 
 \endinput

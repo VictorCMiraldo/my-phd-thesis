@@ -729,22 +729,22 @@ type PatchAl kappa fam = Holes kappa fam (Al kappa fam)
 
 \subfloat[Non aligned patch |p|]{%
 \begin{myforest}
-[|Bin|, s sep=4mm
-  [,change
+[|Bin|, s sep=3mm
+  [,change , s sep=1mm
     [|Bin| [x,metavar] [y,metavar]]
     [|Bin| [y,metavar] [x,metavar]]]
-  [,change
+  [,change , s sep=1mm
     [z,metavar]
     [|Bin| [|Leaf| [|42|]] [z,metavar]]]]
 \end{myforest}}%
-\qquad
+\quad
 \subfloat[Result of |align p|]{%
 \begin{myforest}
-[|Bin| , s sep=12mm
- [|Bin| , alignment
+[|Bin| 
+ [|Bin| , alignmentSmall
    [|Prm (metavar x) (metavar y)|]
    [|Prm (metavar y) (metavar x)|]]
- [,insctx
+ [,insctx , alignmentSmall
    [|Bin| [|Leaf| [|42|]] [SQ]]
    [|Cpy (metavar z)|]]]
 \end{myforest}}
@@ -768,15 +768,11 @@ changes performed by |p|.}
 \quad\quad
 \subfloat[Deletion of |(: 42)| correctly identified.]{%
 \begin{myforest}
-[, delctx , alignment
+[, delctx , alignmentSmall 
   [|(:)| [|42|] [SQ]]
-  [|(:)|, s sep=4mm 
+  [|(:)|, 
       [|Cpy (metavar x)|]
       [|(:)| [|Cpy (metavar y)|] [|Cpy (metavar z)|]]
-%     [,change [x,metavar] [x,metavar]]
-%     [|(:)|, s sep=4mm
-%       [,change [y,metavar] [y,metavar]]
-%       [,change [z,metavar] [z,metavar]]]
   ]
 ]
 \end{myforest}
@@ -1397,7 +1393,7 @@ alignments guarantees |metavar x| will not appear elsewhere.
   [,change
     [|Bin| [x,metavar] [x,metavar]]
     [x,metavar]]
-  [|Bin| , alignment
+  [|Bin| , alignmentSmall
     [|Prm (metavar y) (metavar z)|]
     [|Prm (metavar z) (metavar y)|]]
 ]
@@ -1406,9 +1402,9 @@ alignments guarantees |metavar x| will not appear elsewhere.
 \begin{myforest}
 [|Bin| , s sep=7mm
   [|Bin| [|Leaf| [|42|]] [|Leaf| [|42|]]]
-  [,insctx
+  [,insctx , alignmentSmall
     [|Bin| [|Leaf| [|84|]] [SQ]]
-    [Cpy]]]
+    [|Cpy (metavar k)|]]]
 \end{myforest}}
 
 \subfloat[Result of |diff3 p q|]{%
@@ -1417,9 +1413,9 @@ alignments guarantees |metavar x| will not appear elsewhere.
   [,change
     [|Bin| [|Leaf| [|42|]] [|Leaf| [|42|]]]
     [|Leaf| [|42|]]]
-  [,insctx
+  [,insctx , alignmentSmall
     [|Bin| [|Leaf| [|84|]] [SQ]]
-    [|Bin| , alignment
+    [|Bin| 
       [|Prm (metavar y) (metavar z)|]
       [|Prm (metavar z) (metavar y)|]]]
 ]
@@ -1448,15 +1444,15 @@ synchronizatino is possible and results in \Cref{fig:pepatches:merge-01:C}.
 \centering
 \subfloat[Patch |p|]{%
 \begin{myforest}
-[|Bin|
+[|Bin| , s sep=4mm
   [|Leaf| [,change [|42|] [|84|]]]
-  [Cpy]]
+  [|Cpy (metavar k)| , alignment={1}{4mm}]]
 \end{myforest}
 \label{fig:pepatches:merge-01:A}}%
 \qquad%
 \subfloat[Change |q|]{%
 \begin{myforest}
-[|Bin|
+[|Bin| , alignmentSmall
   [|Prm (metavar x) (metavar y)|]
   [|Prm (metavar y) (metavar x)|]
 ]
@@ -1546,23 +1542,23 @@ preserved as is.  The resulting patch can be seen in
 \centering
 \subfloat[|align (diff o a)|]{%
 \begin{myforest}
-[|(:)| , alignment
+[|(:)| , alignmentSmall
   [|Prm (metavar x) (metavar y)|] 
     [|(:)| [|Prm (metavar y) (metavar x)|] 
       [|[]|]
     ]
 ]
 \end{myforest}}
-\qquad\qquad%
+\qquad%
 \subfloat[|align (diff o b)|]{%
 \begin{myforest}
-[|(:)| , alignment
-  [Cpy]
-  [,insctx
+[|(:)| , s sep=10mm
+  [|Cpy (metavar a)|, alignment={0}{3mm}]
+  [,insctx, alignmentSmall
     [|(:)| [|42|] [SQ]]
-    [Cpy]]]
+    [|Cpy (metavar b)|]]]
 \end{myforest}}
-
+\quad%
 \subfloat[Result of merge |diff3 oa ob|]{%
 \begin{myforest}
 [,change
@@ -1900,15 +1896,15 @@ not figure it out.}
 \centering
 \subfloat[Aligned Patch |p|]{%
 \begin{myforest}
-[|(,)| , s sep=4mm 
-  [|(:)| [|Cpy|] [,change [|(:)| [a,metavar] [b,metavar]] [b,metavar]]]
+[|(,)| , s sep=4mm , alignment
+  [|(:)| [|Cpy (metavar m)|] [,change [|(:)| [a,metavar] [b,metavar]] [b,metavar]]]
   [,change [c,metavar] [|(:)| [a,metavar] [c,metavar]]]]
 \end{myforest}\label{fig:pepatches:merge-03:A}}\qquad
 \subfloat[Aligned Patch |q|]{%
 \begin{myforest}
-[|(,)| , s sep=4mm 
-  [|(:)| [|Cpy|] [,change [|(:)| [x,metavar] [y,metavar]] [y,metavar]]]
-  [|(:)| [|Cpy|] [,change [z,metavar] [|(:)| [x,metavar] [z,metavar]]]]]
+[|(,)| , s sep=4mm , alignment
+  [|(:)| [|Cpy (metavar n)|] [,change [|(:)| [x,metavar] [y,metavar]] [y,metavar]]]
+  [|(:)| [|Cpy (metavar o)|] [,change [z,metavar] [|(:)| [x,metavar] [z,metavar]]]]]
 \end{myforest}\label{fig:pepatches:merge-03:B}}
 \end{minipage}%
 \begin{minipage}{.3\textwidth}
