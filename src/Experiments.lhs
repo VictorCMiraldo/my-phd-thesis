@@ -166,6 +166,8 @@ runtime and 8GB of virtual memory.
 
 \victor{explain why did we distingish success from mergediff?}
 
+\victor{This might be more complicated and I think I need Bayes rule}
+
 \subsubsection{\texttt{stdiff}}
 
 \begin{table}
