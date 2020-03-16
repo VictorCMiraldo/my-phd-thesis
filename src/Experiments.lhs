@@ -16,10 +16,10 @@ version control, and that can only be done by running algorithms
 over real data.
 
   The evaluation of our algorithms is divided in two separate
-experiments. First, we would like to look at performance -- how fast
-can patches be computed. Secondly, we would like to look at
+experiments. First, we look at performance -- how fast
+can patches be computed. Secondly, we look at
 synchronization success rate -- how often can we solve conflicts that
-\texttt{git merge} failed. The data for this experiments have been
+\texttt{git merge} failed to resolve. The data for this experiments have been
 taken from public \texttt{GitHub} repositories. Each datapoint
 consists in four files representing a merge conflict: \texttt{O.lang}
 is the common ancestor of a \texttt{git merge}, \texttt{A.lang} and
@@ -27,13 +27,16 @@ is the common ancestor of a \texttt{git merge}, \texttt{A.lang} and
 could not automatically reconcile, and \texttt{M.lang} being the file
 that was produced by a human and commited as the resolved merge.
 
-  We have extracted a total of 12687 conflicts from \texttt{GitHub}. They
+\victor{Update ??? below}
+
+  We have extracted a total of ??? conflicts from \texttt{GitHub}. They
 have been obtained from large public repositories in Java, JavaScript, Python,
 Lua and Clojure. The choice of programming languages was motivated
 by the parsers that were readily available in Hackage,
 with the exception of Clojure, where we borrowed the parser from 
 Garufi~\cite{Garufi2018}. More detailed information about data 
-collection is given in \Cref{sec:eval:collection}.
+collection is given in \Cref{sec:eval:collection}; \Cref{tbl:eval:summary-data}
+provides an overview of the gathered conflicts per programming language.
 
 %   In \Cref{sec:eval:performance} we look at plots of the time it took
 % to compute patches with each approach. This strenghtens our analytical
@@ -46,16 +49,37 @@ collection is given in \Cref{sec:eval:collection}.
 
   Unfortunately, the study for \texttt{stdiff} enjoys less datapoints than
 \texttt{hdiff}. The reason being that \texttt{stdiff} requires 
-the \texttt{generics-mrsop} library, which can trigger a memory leak
-on the compiler\footnote{\victor{get mem leak info}} when instantiated
+the \texttt{generics-mrsop} library, which triggers a memory leak
+in GHC\footnote{\victor{get mem leak info}} when instantiated
 for large abstract syntax trees. For this reason, we have only evaluated
-\texttt{stdiff} on the Clojure and Lua subset of our dataset.
+\texttt{stdiff} over the Clojure and Lua conflicts.
 
 
 \victor{Do we have ``research questions''? IF so, we should mention
 them in the intro.}
 
-\section{Performance}
+\begin{table}
+\centering
+\victor{REMOVE BASH}
+
+\begin{tabular}{@@{}llll@@{}} \toprule
+Language & Repositories & Parseable Conflicts & Non-parseable Conflicts \\ \midrule
+Clojure    & 31 & 1215 & 14  \\
+Java       & 19 & 2903 & 849 \\
+JavaScript & 28 & 3395 & 965 \\
+Lua        & 27 & 750 & 91 \\ 
+Python     & 27 & 4387 & 848 \\
+Bash       & 10 & 37 & 3 \\ \midrule
+\multicolumn{2}{r}{Totals:} & 12687 & 2770 \\
+\bottomrule
+\end{tabular}
+\caption{Summary of collected data}
+\label{tbl:eval:summary-data}
+\end{table}
+
+\section{The Experiments}
+
+\subsection{Performance}
 \label{sec:eval:performance}
 
 \begin{figure}
@@ -123,38 +147,50 @@ time act = do
 \end{myhs}
 
 
-\section{Synchronization}
+\subsection{Synchronization}
 \label{sec:eval:merging}
-
-\begin{table}
-\centering
-\begin{tabular}{@@{}llll@@{}} \toprule
-Language & Repositories & Parseable Conflicts & Non-parseable Conflicts \\ \midrule
-Clojure    & 31 & 1215 & 14  \\
-Java       & 19 & 2903 & 849 \\
-JavaScript & 28 & 3395 & 965 \\
-Lua        & 27 & 750 & 91 \\ 
-Python     & 27 & 4387 & 848 \\
-Bash       & 10 & 37 & 3 \\ \midrule
-\multicolumn{2}{r}{Totals:} & 12687 & 2770 \\
-\bottomrule
-\end{tabular}
-\caption{Summary of collected data}
-\label{tbl:eval:summary-data}
-\end{table}
 
   The synchronization experiment consists in attempting to
 run \texttt{merge A.lang O.lang B.lang}, and, upon successful
 synchronization, comparing it against that which was
 produced by a human \texttt{M.lang}. It is important to distinguish
-three outomces: A \texttt{success} indicates the merge was
+three outomces: A \emph{success} indicates the merge was
 succesful and was equal to that produced by a human;
-a \texttt{merge-differs} indicates that the merge was
+aa \emph{merge-differs} indicates that the merge was
 successful but produced a different result than the human;
-and finally \texttt{conflicting} means that the merge was
-unsuccessful.
+and finally \emph{conflicting} means that the merge was
+unsuccessful. The other outcomes can either be a timeout
+or out-of-memory. The merge experiment was run with similar
+resource bounds as the performance experiment: 45 seconds of
+runtime and 8GB of virtual memory.
 
-  
+\victor{explain why did we distingish success from mergediff?}
+
+\subsubsection{\texttt{stdiff}}
+
+\begin{table}
+\victor{properly format and display}
+
+\centering
+\begin{tabular}{@@{}lllll@@{}} \toprule
+Language & Success & Merge Differs & Conflicts & Other \\ \midrule
+Clojure    & 68 & 69 & 850 & 227 \\
+Lua        & 75 & 26 & 486 & 163 \\ \midrule
+\multicolumn{2}{r}{\emph{Total Success}} & 238 & & \\
+\multicolumn{3}{r}{\emph{Success Rate}} & 15\% & \\ 
+\bottomrule
+\end{tabular}
+\caption{Conflicts solved by \texttt{stdiff}, }
+\label{tbl:eval:merge-stdiff}
+\end{table}
+
+  \Cref{tbl:eval:merge-stdiff} shows the results for \texttt{stdiff},
+where we see that overall, 15\% of the conflicts could be solved and, 60\%
+of the conflicts that were solved correspond to what a human would
+have done. 
+
+\subsubsection{\texttt{hdiff}}
+
 
 
 \section{Data Collection}
@@ -180,26 +216,8 @@ after the repository, commit and internal id of \texttt{O.lang}.
 \end{itemize}
 
   The full process is not much more involved but out of
-the scope of this thesis. \victor{Do we refer the reader somewhere?}
-
-\begin{table}
-\centering
-\begin{tabular}{@@{}llll@@{}} \toprule
-Language & Repositories & Parseable Conflicts & Non-parseable Conflicts \\ \midrule
-Clojure    & 31 & 1215 & 14  \\
-Java       & 19 & 2903 & 849 \\
-JavaScript & 28 & 3395 & 965 \\
-Lua        & 27 & 750 & 91 \\ 
-Python     & 27 & 4387 & 848 \\
-Bash       & 10 & 37 & 3 \\ \midrule
-\multicolumn{2}{r}{Totals:} & 12687 & 2770 \\
-\bottomrule
-\end{tabular}
-\caption{Summary of collected data}
-\label{tbl:eval:summary-data}
-\end{table}
-
-  \Cref{tbl:eval:summary-data} provides a summary of the collected data.
+the scope of this thesis. \victor{Do we refer the reader somewhere? I wouldn't mind
+pasting the entire shell script somewhere}
 Overall, we acquired 12687 usable conflicts -- that is, we were able
 to parse the four files parse with the parsers available to us -- and
 2770 conflicts where at least one file yielded a parse error.
