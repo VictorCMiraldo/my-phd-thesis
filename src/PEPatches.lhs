@@ -2186,80 +2186,69 @@ on hdiff to reproduce}
 \section{Computing Changes}
 \label{sec:pepatches:diff}
 
-  In the previous sections we have seen how |Chg| and its cousins,
-|Patch| and |PatchAl| make for an reasonable theoretical ground for
-structural differencing. They posses a grupoid structure with respect
-to composition and can be synchronized. The last aspect, which lifts
-\texttt{hdiff} from a theoretical approach into a practical form of
-structural differencing is the computation of a |Patch|, or, the
-|diff| function. Computing changes relies almost exclusively on being
-able to tell whether or not a given subtree could be shared. We do so
-by querying a \emph{sharing map}, which is constructed in a first pass
-of the algorithm.
+  In the previous sections we have seen how |Chg| can be
+translated into |Patch| and subsequently |PatchAl|, which is used by the
+synchronization algorithm. Moreover, we have seen how using |Chg| 
+provides a desirable theoretical layer for structural differencing -- |Chg|
+admits a simple composition operation which makes it into a grupoid 
+(\Cref{sec:pepatches:metatheory}). 
 
-  In the domain of diffrencing programming languages, one must 
-be careful to not \emph{overshare} trees. That is, a local variable
-declaration \verb!int x = 0;! in an arbitrary function should not
-be shared with a syntatically equal declaration in another function.
-A careful analisys of what can and cannot be shared would require
-domain-specific knowledge of the programming language in question --
-which we did not have time to pursue, unfortunately. 
-Nevertheless, we can impose different restrictions that make
-it \emph{unlikely} that values will be shared accross scope boundaries.
-A simple and effective such measure is not sharing subtrees with
-height strictly less than some configurable parameter, this keeps 
-constants and most variable declarations completely un-shareable.   
-In fact, we will be implementing this very sharing restriction
-but will come back to this point in the Discussion (\Cref{sec:pepatches:discussion}). 
+  In this section we explore how to efficiently compute a |Chg| given
+a source and a destination trees, that is, defining the |diff| function. 
+This process depends on being able to
+tell whether or not a given subtree is supposed to be \emph{shared}.
+Consequently, for a given source |s| and destination |d| we
+start by computing the \emph{sharing map} of |s| and |d|. This
+sharing map is an auxiliar structure which enables us
+to efficiently decide if a given tree |x| is a subtree of |s| and |d|.
+Later, a second pass uses this sharing map and
+\emph{extracts} the deletion and insertion contexts.
 
-  This section explores the definition of the \emph{sharing map} and
-how to compute a |Chg| given such sharing map.
-For now, lets just assume the existence of said sharing map,
-noting that it is trivial to define an inefficient variant of such map 
- -- a subtree |t| can be shared if and only if we can 
-find |t| in the source, |s|, and in the destination, |d|, trees.
-
-  Given two trees, |s| and |d|, we want to produce a change |c| such
-that |chgApply c s == Just d|. The obvious option is |Chg s d|, but that
-change contains no sharing whatsoever and will synchronize badly. 
-Traditional edit-scripts based techniques
-optimize for a lower cost, which usually translates to more copies. Yet, this
-does not necessarily translate to high quality patches: especially when there
-is more than one lowest-cost patch. \digress{In fact, I have not
-came up with a satisfactory definition of ``best'' patch in this \texttt{hdiff}
-setting.}
-
-  Assuming the existence of said \emph{sharing map}, let its query 
-function be |wcs s d| -- which reads as ``which common subtree'' -- with
-type |SFix kappa fam at -> Maybe (MetaVar kappa fam at)|, such that
-|wcs s d x| returns |Just i| when |x| is a common subtree of |s| and
-|d| uniquely identified by |i|. A first, naive, attempt at writing an
-extraction function would simply traverse the source and destination
-trees substituting those subtrees that should be shared by a
-metavariable, like |extract| below.
+  Although the construction of the efficient sharing map will be given in
+\Cref{sec:pepatchs:preprocess}, for the time being we assume its
+existence and focus on the extraction of the insertion and deletion
+contexts. Assuming the existence of a \emph{sharing map}, let its
+query function be |wcs s d|, which reads as ``which common subtree''
+and has type |SFix kappa fam at -> Maybe (MetaVar kappa fam at)|, is such
+that |wcs s d x| returns |Just i| when |x| is a common subtree of |s|
+and |d| uniquely identified by |i|. A first, naive, attempt at writing
+an extraction function would simply traverse the source and
+destination trees substituting those subtrees that should be shared by
+a metavariable. This is sketched by the preliminary |extract|, below.
 
 \begin{myhs}
 \begin{code}
 extract  :: (forall at' dot SFix kappa fam at' -> Maybe Int) 
          -> SFix kappa fam at -> Holes kappa fam (MetaVar kappa fam) at
 extract wcs x = maybe (roll x) Hole (wcs x)
-  where
-    roll (Prim x) = Prim x
-    roll (SFix x) = Roll (repMap (extract wcs) x) 
+  where  roll (Prim x) = Prim x
+         roll (SFix x) = Roll (repMap (extract wcs) x) 
 \end{code}
 \end{myhs}
 
-  Here, although |extract| could already produce changes from 
-source |s| and destination |d|, it would \emph{not} satisfy the
-criteria that |apply (chg s d) s == Just d| for all |s| and |d|.
-The problem can be easily seen with a source and
-a destination trees such that a common subtree occurs
+  This would enable us to sketch a function that computes a change
+given the source and destination trees, such as |chg| below.
+
+\begin{myhs}
+\begin{code}
+chg :: SFix kappa fam at -> SFix kappa fam at -> Chg kappa fam at
+chg s d = let f = wcs s d in Chg (extract f s) (extract f d)
+\end{code}
+\end{myhs}
+  
+  In general lines, thats all there is to it to the differencing
+algorithm: compute the sharing map and traverse the source and 
+destination trees replacing the subtrees that are supposed to be shared 
+by metavariables. Looking carefully at |chg| above, however,
+we see it does \emph{not} produce correct changes, that is,
+it is not the case that |apply (chg s d) s == Just d| for all |s| and |d|.
+The problem can be observed when we pass a source and
+a destination trees where a common subtree occurs
 by itself but also as a subtree of another common subtree. 
 Such situation is illustrated in \Cref{fig:pepatches:extract-problem}.
 In particular, the patch shown in \Cref{fig:pepatches:extract-problem:res} 
 cannot be applied since the deletion context does not instantiate
 the metavariable |metavar y|, required by the insertion context.
-
 
 \begin{figure}
 \subfloat[|s|]{%
@@ -2294,40 +2283,33 @@ wcs _ _ _          = Nothing
 well-formed changes. The nested occurence of |t| within |Bin t u|
 here yields a change with an undefined variable on its insertion
 context.}
-\label{fig:pepatches:extract-problem-01}
+\label{fig:pepatches:extract-problem}
 \end{figure}
 
-\begin{myhs}
-\begin{code}
-chg :: SFix kappa fam at -> SFix kappa fam at -> Chg kappa fam at
-chg s d = let f = wcs s d in Chg (extract f s) (extract f d)
-\end{code}
-\end{myhs}
-
-  There are two natural ways to solve this problem. Either replace |metavar y|
-by |t| and ignore the sharing or replace |metavar x| by |Bin (metavar
+  There are many ways to solve this problem. The two
+following solutions are perhaps the most natural ones.
+We could replace |metavar y|
+by |t| and ignore the sharing or we could replace |metavar x| by |Bin (metavar
 y) (metavar z)|, pushing the metavariables to the leaves maximizing
 sharing. These would give rise to the changes shown in 
-\Cref{fig:pepatches:extract-sol-01}. There is friction
+\Cref{fig:pepatches:extract-sol-01}. There is dichotomy
 between wanting to maximize the spine but at the same time achieve maximal
-sharing without having a clear answer. On the one hand, copies closer
+sharing. On the one hand, copies closer
 to the root are easier to merge and less sharing means it is 
 easier to isolate changes to separate parts of the tree.
-On the other hand, sharing as much as possible might better capture
-the nature of the change being represented better.
+On the other hand, sharing as much as possible might capture
+the change being represented more closely.
 
-  These two methods are not the only solution, though.  Another option
-is to simulate the \unixdiff{} \texttt{--patience} option, which only
-copies uniquely ocurring lines -- in our case, we would only share
-uniquely occuring subtrees. In fact, to make this easy to experiment,
+  Another, less intuitive, solution to the problem
+is to only share uniquely occuring subtrees, effectively simulating
+the \unixdiff{} with the \texttt{--patience} option, which only
+copies uniquely ocurring lines. In fact, to make this easy to experiment,
 we will parameterize our |extract| function with which method should
 we use.
 
 \begin{myhs}
 \begin{code}
-data ExtractionMode  =  NoNested
-                     |  ProperShare
-                     |  Patience
+data ExtractionMode  =  NoNested |  ProperShare |  Patience
 \end{code}
 \end{myhs}
 
@@ -2368,77 +2350,107 @@ context.}
 \label{fig:pepatches:extract-sol-01}
 \end{figure}
 
-  Finally, the |diff| function receives a source and destination
-trees, |s| and |d|, and computes a patch that encodes the information
-necessary to transform the source into the destination. In practice,
-to achieve an efficient ``which common subtree'' query we need to
-preprocess the inputs (\Cref{sec:pepatches:preprocess}) and build the
-sharing map from these preprocessed trees.  We then extract the
-contexts (\Cref{sec:pepatches:extract}), which yields a |Chg|, and finally translate that |Chg| into
-a |Patch| by pulling the largest possible spine, with |close|.
-
-\begin{myhs}
-\begin{code}
-diff  :: (All Digestible kappa) => SFix kappa fam at -> SFix kappa fam at
-      -> Patch kappa fam at
-diff x y =  let  dx             = preprocess x
-                 dy             = preprocess y
-                 (i, sh)        = buildSharingMap opts dx dy
-                 (del :*: ins)  = extract canShare (dx :*: dy)
-            in cpyPrimsOnSpine i (close (Chg del ins))
- where
-   canShare t = 1 < treeHeight (getConst (getAnn t))
-\end{code}
-\end{myhs}
-
-  The |cpyPrimsOnSpine| function will issue copies for the opaque
-values that appear on the spine, as illustrated in \Cref{fig:pepatches:cpyonspine},
-where the |42| does not get shared for its height is smaller than 1 but
-since it occurs in the same location in the deletion and insertion context,
-we flag it as a copy -- which involes issuing a fresh metavariable, hence
-the parameter |i| in the code above.
+  The problem of deciding \emph{what can be shared} has another facet
+to it, which is particuarly relevant in the domain of differencing for
+programming languages: we must be careful not to \emph{overshare}
+trees.  Imagine a local variable declaration \verb!int x = 0;! in an
+arbitrary function; it should \emph{not} be shared with a syntatically
+equal declaration in another function.  A careful analisys of what can
+and cannot be shared would require domain-specific knowledge of the
+programming language in question.  Nevertheless, we can impose
+different restrictions that make it \emph{unlikely} that values will
+be shared accross scope boundaries.  A simple and effective such
+measure is not sharing subtrees with height strictly less than one
+(or a configurable parameter). This keeps constants and most variable
+declarations from being shared, effectvively avoiding the issue.
+\digress{I would like to reiterate the \emph{avoiding-the-issue}
+aspect of this decision. I did attempt to overcome this with a few
+methods which will be discussed shortly
+(\Cref{sec:pepatches:discussion}). None of my attempts at solving the
+issue were very succesful, hence, the best option really became
+avoiding the issue by making sure that we can esily exclude certain
+trees from being shared.}
 
 \begin{figure}
+\victor{Find a better example... not sure this really illustrates
+the differences}
+
 \centering
-\subfloat[Globally-scoped change]{%
+\subfloat[Source and Destination]{%
 \begin{myforest}
-[,change
- [|BinLbl| [|42|] [|Bin| [x, metavar] [y, metavar]] [z,metavar]]
- [|BinLbl| [|42|] [|Bin| [y, metavar] [x, metavar]] [z,metavar]]
+[,phantom, for children={fit=band}
+  [|Tri|,name=r 
+    [|Bin| [a] [b]] 
+    [|Bin| [a] [b]]
+    [k]]
+  [|Tri|
+    [|Bin| [b] [a]] 
+    [|Bin| [a] [b]]
+    [k]]
 ]
-\end{myforest}}\qquad%
-\subfloat[Locally-scoped change with copies in its spine]{%
+\node at ($ (r) - (1.0,0) $) {|extract m|};
+\end{myforest}}%
+\quad
+\subfloat[|m = Patience|]{%
 \begin{myforest}
-[|BinLbl|, s sep=4mm
-  [,change [k,metavar] [k,metavar]]
-  [,change [|Bin| [x, metavar] [y,metavar]]
-           [|Bin| [y, metavar] [x,metavar]]]
-  [,change [z, metavar] [z, metavar]]]
-\end{myforest}}
-\caption{A Globally-scoped change and the result of applying it to |cpyPrimsOnSpine . close|,
-producing a patch with locally scoped changes and copies in its spine.}
-\label{fig:pepatches:cpyonspine}
+[,change 
+  [|Tri| [|Bin| [a] [b]]
+         [|Bin| [a] [b]]
+         [z,metavar]]
+  [|Tri| [|Bin| [b] [a]]
+         [|Bin| [a] [b]]
+         [z,metavar]]
+]
+\end{myforest}
+\label{fig:pepatches:extraction-01:patience}}%
+
+\subfloat[|m = NoNest|]{%
+\begin{myforest}
+[,change 
+  [|Tri| [x,metavar]     [x,metavar] [y,metavar]]
+  [|Tri| [|Bin| [b] [a]] [x,metavar] [y,metavar]]
+]
+\end{myforest}
+\label{fig:pepatches:extraction-01:nonest}}%
+\quad
+\subfloat[|m = ProperShare|]{%
+\begin{myforest}
+[,change 
+  [|Tri| [|Bin| [x,metavar] [y,metavar]]
+         [|Bin| [x,metavar] [y,metavar]]
+         [z,metavar]]
+  [|Tri| [|Bin| [y,metavar] [x,metavar]]
+         [|Bin| [x,metavar] [y,metavar]]
+         [z,metavar]]
+]
+\end{myforest}
+\label{fig:pepatches:extraction-01:proper}}
+\quad
+\caption{Different extraction methods for the same pair or trees.}
+\label{fig:pepatches:extraction-01}
 \end{figure}
 
-  Next we look at how to define the |wcs| oracle efficiently and look 
-at the diffrent algorithms for extracting contexts according to
-each mode in |ExtractionMode|.
-
+  \Cref{fig:pepatches:extraction-01} illustrates the changes that
+would be extracted folowing each |ExtractionMode| for the same source
+and destination. We will soon look at the details of context
+extraction and defining the |diff| function
+(\Cref{sec:pepatches:extract}), but before doing so, we take a quick
+detour and to look at how to define the |wcs| function efficiently next.
+ 
 \subsection{Which Common Subtree, Efficiently}
 
-  Next we look at defining |wcs s d| efficiently. This consists,
-firstly, in computing a set of trees, containing the trees which
-occur as subtrees of |s| and subtrees of |d|, and secondly, being
-able to efficiently process membership queries on this set.
-This is not a new challenge, in fact, Computer Algebra Systems, 
-Theorem Provers and many other symbolic-manipulation-heavy systems 
-use a technique known as \emph{hash-consing} to overcome similar problems.
-Hash-consing~\cite{Goto1974,Filliatre2006} is a canon of programming
-folklore and is most often used as a means of \emph{maximal sharing} of
-subtrees in memory and constant time comparisson -- two trees are
-equal if they are stored in the same memory location -- but it 
-is not limited to it. We will be using a variant of \emph{hash-consing}
-to compute |wcs s d|.
+  Defining |wcs s d| efficiently consists, firstly, in computing a set
+of trees which contains the subtrees of |s| and |d|, and secondly, in
+being able to efficiently query this set for membership.  Symbolic
+manipulation software, such as Computer Algebra Systems, perform
+similar computations frequently, and performance is just as
+important. These systems often rely on a technique known as
+\emph{hash-consing}~\cite{Goto1974,Filliatre2006}, which is canon in
+the programming folklore. Hash consing arises as a means of
+\emph{maximal sharing} of subtrees in memory and constant time
+comparisson -- two trees are equal if they are stored in the same
+memory location -- but it is by far not limited to it. We will be using a
+variant of \emph{hash-consing} to define |wcs s d|.
 
   In our setup for computing |wcs s d| we start with transforming
 |s| and |d| into \emph{merkle-trees}~\cite{Merkle1988}, that is, 
@@ -2599,91 +2611,9 @@ and employ this collision checking to better understand what is the best option.
 I believe this collision checking will be much slower for it brings the complexity
 of the algorithm up}
 
-\subsection{Extracting the Contexts}
+\subsection{Context Extraction and the |diff| function}
 \label{sec:pepatches:extract}
 
-  Having an efficient ``which common subtree'' oracle in our toolbox,
-we move on to defining the different context extraction techniques,
-which are very similar to the naive |extract| that was sketched before.
-We traverse the tree and each time we reach a common subtree, substitute
-by its corresponding metavariable. 
-
-  To some extent, we could compare context extraction to the translation
-of tree mappings into edit-scripts: our tree mappings are given by |wcs|
-and instead of computing an edit-scripts, we compute terms with metavariables.
-Classical algorithms are focused in computing the \emph{least cost}
-edit-script from a given tree mapping. In our case, the notion of
-\emph{least cost} hardly makes sense -- besides not having defined
-a cost semantics to our changes, we are interested in those that
-merge better which might not necessarily be those that insert and delete
-the least amount of constructors. Consequently, there is a lot of
-freedom in defining our context extraction techniques. We have looked
-at three particular examples, but hint at other possibilities
-later on in \Cref{sec:pepatches:discussion}.
-
-\begin{figure}
-\victor{Find a better example... not sure this really illustrates
-the differences}
-\centering
-\subfloat[Source and Destination]{%
-\begin{myforest}
-[,phantom, for children={fit=band}
-  [|Tri|,name=r 
-    [|Bin| [a] [b]] 
-    [|Bin| [a] [b]]
-    [k]]
-  [|Tri|
-    [|Bin| [b] [a]] 
-    [|Bin| [a] [b]]
-    [k]]
-]
-\node at ($ (r) - (1.0,0) $) {|extract m|};
-\end{myforest}}%
-\quad
-\subfloat[|m = Patience|]{%
-\begin{myforest}
-[,change 
-  [|Tri| [|Bin| [a] [b]]
-         [|Bin| [a] [b]]
-         [z,metavar]]
-  [|Tri| [|Bin| [b] [a]]
-         [|Bin| [a] [b]]
-         [z,metavar]]
-]
-\end{myforest}
-\label{fig:pepatches:extraction-01:patience}}%
-
-\subfloat[|m = NoNest|]{%
-\begin{myforest}
-[,change 
-  [|Tri| [x,metavar]     [x,metavar] [y,metavar]]
-  [|Tri| [|Bin| [b] [a]] [x,metavar] [y,metavar]]
-]
-\end{myforest}
-\label{fig:pepatches:extraction-01:nonest}}%
-\quad
-\subfloat[|m = ProperShare|]{%
-\begin{myforest}
-[,change 
-  [|Tri| [|Bin| [x,metavar] [y,metavar]]
-         [|Bin| [x,metavar] [y,metavar]]
-         [z,metavar]]
-  [|Tri| [|Bin| [y,metavar] [x,metavar]]
-         [|Bin| [x,metavar] [y,metavar]]
-         [z,metavar]]
-]
-\end{myforest}
-\label{fig:pepatches:extraction-01:proper}}
-\quad
-\caption{Different extraction methods for the same pair or trees.}
-\label{fig:pepatches:extraction-01}
-\end{figure}
-
-  \Cref{fig:pepatches:extraction-methods} illustrates the changes
-that would be extracted folowing each |ExtractionMode| for the 
-same |s| and |d|. We will soon define each context extraction method,
-but before we do so, we need a few auxiliary definitions.
- 
   Computing the set of common subtrees is straight forward and does
 not involve many design decisions. Deciding which of those subtrees
 are eligible to be shared, though, is an entirely diffrent beast. As
@@ -2694,9 +2624,10 @@ variables. As a matter of fact, a good definition of what can be
 shared might even be impossible without domain-specific knowledge.
 
   We chose to never share subtrees with height smaller than a given
-parameter. Our choise is very pragmatic in the sense that we have
-the height of the trees available from |preprocess| and it does not
-involve any domain specific knowledge. \digress{In the code, I abstracted this
+parameter. Our choise is very pragmatic in the sense that we can
+preprocess all the trees and annotate them with their height,
+which does not involve any domain specific knowledge and is efficient.
+\digress{In the code, I abstracted this
 away by the means of a predicate |CanShare| below. I hoped
 to come back here and implement more refined sharing strategies.
 I never had time for that, unfortunately.}
@@ -2721,10 +2652,22 @@ extract  :: DiffMode -> CanShare kappa fam -> IsSharedMap
 \end{code}
 \end{myhs}
 
+  \digress{To some extent, we could compare context extraction to the
+translation of tree mappings into edit-scripts: our tree matching is
+encoded in |wcs| and instead of computing an edit-scripts, we compute
+terms with metavariables.  Classical algorithms are focused in
+computing the \emph{least cost} edit-script from a given tree
+mapping. In our case, the notion of \emph{least cost} hardly makes
+sense -- besides not having defined a cost semantics to our changes,
+we are interested in those that merge better which might not
+necessarily be those that insert and delete the least amount of
+constructors. Consequently, there is a lot of freedom in defining our
+context extraction techniques. We will look at three particular
+examples next, but I sketch other possibilities later (
+\Cref{sec:pepatches:discussion}).}
 
 \paragraph{Extracting with |NoNested|}
-
-  Extracting contexts with the |NoNested| mode is very simple.
+Extracting contexts with the |NoNested| mode is very simple.
 We first extract the contexts naively, then make a second pass
 removing the variables that appear exclusively in the insertion
 context by the trees they abstracted over. The trick in doing so
@@ -2737,7 +2680,7 @@ noNested1  :: CanShare kappa fam -> T.Trie MetavarAndArity -> PrepFix a kappa fa
            -> Holes kappa fam (Const Int :*: PrepFix a kappa fam) at
 noNested1 h sm x@(PrimAnn _    xi) = Prim xi
 noNested1 h sm x@(SFixAnn ann  xi)
-  =  if h x  then  maybe recurse (mkHole x) $$ lookup (getDigest ann) sm 
+  =  if h x  then  maybe recurse (mkHole x) $$ lookup (identOf ann) sm 
              else  recurse
  where
     recurse     = Roll (repMap (noNexted1 h sm) xi)
@@ -2751,8 +2694,7 @@ whether to forget this was a potential shared tree and
 keep the tree in there instead.
 
 \paragraph{Extracting with |Patience|}
-
-  The |Patience| extraction method is very similar to |NoNested|,
+The |Patience| extraction method is very similar to |NoNested|,
 with the difference that instead of simply looking a hash up
 in the sharing map, it will further check that the given hash
 occurs with arity two -- indicating the tree in question
@@ -2765,8 +2707,7 @@ and in this case, it will be two: once in the deletion context
 and once in the insertion context.
 
 \paragraph{Extracting with |ProperShares|}
-
-  It is arguable that we might want to prioritize sharing
+It is arguable that we might want to prioritize sharing
 over spines, which is exactly what |ProperShares| does.
 We say that a tree |x| is a \emph{proper-share} between |s| and
 |d| whenever no subtree of |x| occurs in |s| and |d| with arity greater
@@ -2781,6 +2722,56 @@ then proceeding just like |Patience|, but instead of checking
 that the arity must be two, we check that the tree is classified
 as a \emph{proper-share}.
 
+\begin{figure}
+\centering
+\subfloat[Globally-scoped change]{%
+\begin{myforest}
+[,change
+ [|BinLbl| [|42|] [|Bin| [x, metavar] [y, metavar]] [z,metavar]]
+ [|BinLbl| [|42|] [|Bin| [y, metavar] [x, metavar]] [z,metavar]]
+]
+\end{myforest}}\qquad%
+\subfloat[Locally-scoped change with copies in its spine]{%
+\begin{myforest}
+[|BinLbl|, s sep=4mm
+  [,change [k,metavar] [k,metavar]]
+  [,change [|Bin| [x, metavar] [y,metavar]]
+           [|Bin| [y, metavar] [x,metavar]]]
+  [,change [z, metavar] [z, metavar]]]
+\end{myforest}}
+\caption{A Globally-scoped change and the result of applying it to |cpyPrimsOnSpine . close|,
+producing a patch with locally scoped changes and copies in its spine.}
+\label{fig:pepatches:cpyonspine}
+\end{figure}
+
+\paragraph{The |diff| function.}  Finally, the |diff| function
+receives a source and destination trees, |s| and |d|, and computes a
+patch that encodes the information necessary to transform the source
+into the destination. The extraction of the contexts yields a |Chg|,
+which is finally translated to a \emph{locally-scoped} |Patch| by
+identifying the largest possible spine, with |close|.
+
+\begin{myhs}
+\begin{code}
+diff  :: (All Digestible kappa) => SFix kappa fam at -> SFix kappa fam at -> Patch kappa fam at
+diff x y =  let  dx             = preprocess x
+                 dy             = preprocess y
+                 (i, sh)        = buildSharingMap opts dx dy
+                 (del :*: ins)  = extract canShare (dx :*: dy)
+            in cpyPrimsOnSpine i (close (Chg del ins))
+ where
+   canShare t = 1 < treeHeight (getConst (getAnn t))
+\end{code}
+\end{myhs}
+
+  The |cpyPrimsOnSpine| function will issue copies for the opaque
+values that appear on the spine, as illustrated in
+\Cref{fig:pepatches:cpyonspine}, where the |42| does not get shared
+for its height is smaller than 1 but since it occurs in the same
+location in the deletion and insertion context, we flag it as a copy
+-- which involes issuing a fresh metavariable, hence the parameter |i|
+in the code above.
+
 \section{Discussion}
 \label{sec:pepatches:discussion}
 
@@ -2790,20 +2781,74 @@ as a \emph{proper-share}.
 might have paid off. We were able to define a computatonally efficient
 differencing algorithm and seen how our patches can still be merged
 and posses a sensible algebraic structure. In \Cref{chap:experiments} we 
-will be discussing the empirical evaluation in detail, but in summary, 
+will be discussing the empirical evaluation in more detail, but in summary, 
 \texttt{hdiff} has shown a very strong potential for practical use. 
 
-\victor{Things I'd like to talk about:
-\begin{itemize}
-  \item sharing
-  \item lack of cost semantics
-  \item complexity hypothesis and relation to edit-scripts
-\end{itemize}
+  The current state of \texttt{hdiff} is still that of a \emph{proof-of-concept}
+as opposed to a pratical implementation of a tool. It is, nevertheless,
+a successfull endeavor in detaching from edit-scripts.
 
-Yet, some of those might be better off in our Discussion \textbf{chapter}... no?}
+\paragraph{Sharing.} We avoided the sharing problem of considering which trees could
+and could not be shared by restricting the height of \emph{shareable} subtrees.
+This was a pragmatic design choice that enabled us to make progress but 
+we have tried a more refined solution.
 
+  We have tried modifying the |preprocess| function by keeping track of
+the \emph{current} scope and to use this information whenever computing
+the hash for the leaves. Scopes were pushed wheneter a generic
+function |intrScope :: SFix kappa fam at -> Maybe String|, supplied by the user,
+would return a |Just|. The definition of |intrScope| would naturally depend
+on the universe in question, and using |const Nothing| works as not having
+scope specific names. A sketch for an example |intrScope| is given below.
 
+\begin{myhs}
+\begin{code}
+intrScope m@(Module dots)        = Just (moduleName m)
+intrScope f@(FunctionDecl dots)  = Just (functionName f)
+intrScope _                      = Nothing
+\end{code}
+\end{myhs}
 
+  The |intrScope| above would instruct the |preprocess| to push module names
+and function names every time it traverses through one such element
+of the family. For example, preprocessing the pseudocode below would
+mean that the hash for \verb!a! inside \verb!fib! would be 
+computed with |["m" , "fib"]| as a salt; but \verb!a! inside \verb!fat!
+would be computed with |["m" , "fat"]| as a salt, yielding a different hash.
+
+\begin{verbatim}
+module m
+  fib n = let a = 0; b = 1; ...
+  fat n = let a = 0; ...
+\end{verbatim}
+
+  This worked out well for many cases, but as soon as a change altered any information
+that was being used as a salt, nothing could be shared anymore. For example,
+if we rename \verb!module m! to \verb!module x!, the source and destination
+would contain no common hashes, since we would have used |["m"]| to salt the hashes
+for the source tree, but |["x"]| for the destination, yielding different hashes.
+Hence, naively keeping track of scopes by hacking the |preprocess| phase would
+not be an option.
+
+\victor{Another difficulty associated with tackling sharing lies in being able
+to specify how to do that generically; would be cool to annotate datatypes}
+\victor{Nevertheless; controlling the height was our best shot and it did work
+out quite well in practice}
+
+\paragraph{Notion of Cost.} Another issue that must be worked on is the notion
+of \emph{best} patch. Traditionally, a differencing algorithm returns a
+patch that approximates the minimun cost for transforming the source into
+the destination, for some cost metric. Most of the times, this cost metric
+counts how many constructors have been deleted and inserted -- in
+the line-based world of the \unixdiff{} this corresponds to counting how
+many lines of text have been deleted and inserted.
+
+  \victor{more text? maybe!} 
+
+\paragraph{Relation to Edit-Scripts.} 
+\victor{We know, for a fact, that computing the least cost edit
+script take $\mathcal{O}(n \log{n})$. Our algo computes a patch
+in $\mathcal{O}(n)$. Whats the relaton? where's the $\log{n}$?}
 
 %%% Local Variables:
 %%% mode: latex
