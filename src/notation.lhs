@@ -56,6 +56,7 @@
 
 %format Almu       = "\HTNI{\mathit{Al}\mu}"
 %format applyAlmu  = "\HVNI{\mathit{applyAl}\mu}"
+%format enumAlmu   = "\HVNI{\mathit{enumAl}\mu}"
 %format PatchGDiff = "\HTNI{\mathit{Patch}_\textsc{gd}}"
 %format PatchST    = "\HTNI{\mathit{Patch}_\textsc{st}}"
 

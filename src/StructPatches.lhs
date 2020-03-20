@@ -1,32 +1,32 @@
-  The \texttt{gdiff}~\cite{Lempsink2009} approach, which flattens a
+  The \texttt{gdiff}~\cite{Lempsink2009} approach, discussed
+in \Cref{sec:gp:well-typed-tree-diff}, which flattens a
 tree into a list, following classical tree edit distance algorithms
-encoded through using type-safe edit scripts, borrows the problems of
+encoded through using type-safe edit scripts, inherits the problems of
 edit-script based approaches. These include ambiguity on the
 representation of patches, non-uniqueness of optimal solutions and
 difficulty of merging. The \texttt{stdiff} approach, discussed
 through this chapter, arose from our study of the difficulties
 about merging \texttt{gdiff} patches~\cite{Vassena2016}. 
 
-  The heterogeneity of |PatchGDiff| makes it inevitable to stumble upon
-a difficult issue when dealing with the merge problem. Recall that a
-value of type |PatchGDiff xs ys| transforms a list of trees |xs| into
-a list of trees |ys|.  If we are given two patches |PatchGDfiff xs ys|
+  The heterogeneity of |PatchGDiff| makes merging difficult.
+Recall that a value of type |PatchGDiff xs ys| transforms a list of trees |xs| into
+a list of trees |ys|.  If we are given two patches |PatchGDiff xs ys|
 and |PatchGDiff xs zs|, we would like to produce two patches
-|PatchGDiff ys rs| and |PatchGDiff zs rs| such that the cannonical
+|PatchGDiff ys rs| and |PatchGDiff zs rs| such that the canonical
 merge square commutes. The problem becomes clear when we try to determine |rs| correctly:
 sometimes such |rs| might not even exist~\cite{Vassena2016}.
 
   Our \texttt{stdiff} approach, or, \emph{structural patches}, marks 
-our first attempt at defining a \emph{homogeneous} patch datatype, |PatchST|,
+our first attempt at defining a \emph{type-indexes} patch datatype, |PatchST|,
 in pursuit of better behaved merge algorithms. The overall idea consists
 in making sure that the type of patches is also \emph{tree structured}, as
 opposed to managing a list-like patch datastructure that is supposed to
 operate over tree structured data. As it turns out, it is not possible to
-have fully homogeneous patches, but we were able to identiy homogeneous
+have fully homogeneous patches, but we were able to identify homogeneous
 parts of our patches which we can use to synchronize changes when
 defining our merge operation, but let us not get ahead of ourselves.
 
-  \emph{Structural Patches}, then, detach from edit-scripts by using
+  \emph{Structural Patches} differ from edit-scripts by using
 tree-shaped, homogeneous patch -- a patch transforms two values of the same
 type.  The edit operations themselves are analoguous to edit
 scripts, we support insertions, deletions and copies, but these are
@@ -86,13 +86,12 @@ and \texttt{gdiff} also requires, to a lesser extent, sums of products structure
 datatypes, hence is easily written with \texttt{generics-mrsop},
 as seen in \Cref{sec:gp:well-typed-tree-diff}.
 
-\victor{Is this attribution of provenance enough?}
-  The contributions in this chapter arise from joint published work
-with Pierre-Evariste Dagand~\cite{Miraldo2017} which later evolved
-into an \href{https://github.com/VictorCMiraldo/stdiff}{Agda
+  The contributions in this chapter arise from joint work
+with Pierre-Evariste Dagand, published in TyDe 2017~\cite{Miraldo2017} and
+coded in Agda~\cite{Norell2008}\href{https://github.com/VictorCMiraldo/stdiff}{Agda
 repository}% 
 \footnote{https://github.com/VictorCMiraldo/stdiff}.
-Later, we collaborated closely with Arian van Putten in translating
+Later, we collaborated closely with a MSc student, Arian van Putten, in translating
 the Agda code to Haskell, extending its scope to mutually recursive
 datatypes. The code presented here, however, is loosely based on van
 Putten's translation of our Agda repository to Haskell as part of his
@@ -102,7 +101,7 @@ throughout.
 
 \victor{TODO: LATER: review the structure; i think it might change!}
   In this chapter we will delve into the construction of |PatchST| and its
-respective components. Firstly, we familiraize ourselves with |PatchST| 
+respective components. Firstly, we familiarize ourselves with |PatchST| 
 and is application function, \Cref{sec:stdiff:patches}. Next we look into
 merging and its cummutativity proof in \Cref{sec:stdiff:merging}. Lastly,
 we discuss the |diff| function in \Cref{sec:stdiff:diff}, which comprises
@@ -112,11 +111,9 @@ its computational complexity.
 \section{The Type of Patches}
 \label{sec:stdiff:patches}
 
-  The |PatchST| type is an intensional model for
-patches over mutually recursive families. 
-We start by considering a single layer of datatype,
-\ie, a single application of the datatypes pattern functor. 
-In \Cref{sec:stdiff:diff:fixpoints} we extend this treatment to recursive datatypes,
+  Next we look at the |PatchST| type, starting with 
+a single layer of datatype, \ie, a single application of the datatypes pattern functor. 
+Later, in \Cref{sec:stdiff:diff:fixpoints} we extend this treatment to recursive datatypes,
 essentially by taking the fixpoint of the constructions in \Cref{sec:stdiff:diff:functors}.
 The \texttt{generics-mrsop} library (\Cref{chap:generic-programming})
 will be used throughout the exposition. 
@@ -170,7 +167,9 @@ we need to reconcile the products that make the fields of the constructors.
 We index the data type |Spine| by the sum codes it operates over
 because we need to lookup the fields of the constructors
 that have changed, and \emph{align} them in the case of |SChg|.
-Intuitively, Spines act on sums and capture the ``largest shared coproduct structure'':
+Alignments will be introduced shrotly, for the time being,
+let us coninue to focus on spines. Intuitively, Spines act on sums and capture 
+the ``largest shared coproduct structure'':
 
 \begin{myhs}
 \begin{code}
@@ -188,17 +187,17 @@ data Spine  (kappa :: kon -> Star) (codes :: [[[Atom kon]]])
 only regular types, or, mutually recursive families consisting of
 a single datatype.  Hence, the |Spine| type would arise naturally as a homogeneous
 type. While extending the Agda model to a full fledged Haskell
-implementation, together with van Putten~\cite{Putten2019}, we noted
+implementation, together with Van Putten~\cite{Putten2019}, we noted
 how this would severely limit the number of potential copy
 opportunities throughout patches. For example, imagine we want to
 patch the following values:
 
 \begin{myhs}
 \begin{code}
-data TA = TA X Y Z
-data TB = TB X Y Z
+data TA = TA X Y Z | TAB TB
+data TB = TB X Y Z | TBA TA
 
-diff (TA x1 y1 z1) (TB x2 y2 z2) =? SChg TA TB ...
+diff (TA x1 y1 z1) (TB x2 y2 z2) = SChg TA TB ...
 \end{code}
 \end{myhs}
 
@@ -212,7 +211,7 @@ care about the recursive structure.
   The semantics of |Spine| are straightforward, but before continuing
 with |applySpine|, a short technical interlude is necessary. The
 |testEquality|, below, is used to compare the type
-indices for porpositional equality. It comes from |Data.Type.Equality|
+indices for propositional equality. It comes from |Data.Type.Equality|
 and has type |f a -> f b -> Maybe (a :~: b)|. Also note that we must
 pass two |SNat| arguments to disambiguate the |ix| and |iy| type
 variables. Without those arguments, these variables would only appear
@@ -235,16 +234,11 @@ constructor. In the |SCns| case we we must ensure that type indices
 match -- for Haskell type families may not be injective -- then simply
 map over the fields with the |applyAt| function, which applies changes
 to atoms.  Otherwise, we reconcile the fields with the |applyAl|
-function.
-
-\victor{Should we show compiling code or simplify the proxies away?}
-\victor{Maybe find a syntax-coloring that shades out the unintersting part?
-we are dvidied in this opinion}
+function, whose definition follow shortly.
 
 \begin{myhs}
 \begin{code}
-applySpine  :: (EqHO kappa)
-            -> SNat ix -> SNat iy
+applySpine  :: (EqHO kappa) -> SNat ix -> SNat iy
             -> Spine kappa codes (Lkup ix codes) (Lkup iy codes)
             -> Rep kappa (Fix kappa codes) (Lkup ix codes)
             -> Maybe (Rep kappa (Fix kappa codes) (Lkup iy codes))
@@ -304,7 +298,8 @@ tree-edit distance sense.
   Provided a partial embedding for atoms, we can therefore interpret
 alignments into a function transporting the source fields over to the
 corresponding destination fields, failure potentially occurring when
-trying to associate incompatible atoms:
+trying to associate incompatible atoms. Recall |(:*)| and
+|NP0| are the constructors of type |NP|:
 
 \begin{myhs}
 \begin{code}
@@ -489,9 +484,9 @@ insCtx (T a ctx)  v  = (a :*)            <$$> insCtx ctx v
   The deletion function discards any information we have about all the
 constructor fields, except for the subtree used to continue the patch
 application process. This is a consequence of our design decision, at the time,
-of having application functions with the largest possible domain. 
+of having application functions as permissive as possible.
 Intuitively, the deletion context identifies the only field that
-should not be deleted. By not checking whether the elemetns 
+should not be deleted. By not checking whether the elements 
 we are applying to match the ones that should be deleted, we get
 an application function that applies to more elements for free.
 
@@ -533,9 +528,7 @@ our abstract formulation of differencing\victor{Where is this?}.
 \begin{code}
 type PatchST kappa codes ix = Almu kappa codes ix ix
 
-applyST  :: (IsNat ix , EqHO kappa)
-         => PatchST kappa codes ix
-         -> Fix codes ix
+applyST  :: (IsNat ix , EqHO kappa) => PatchST kappa codes ix -> Fix codes ix
          -> Maybe (Fix codes ix)
 applyST  = applyAlmu
 \end{code}
@@ -551,7 +544,7 @@ results on type-safe differences~\cite{Lempsink2009}.
 \label{sec:stdiff:merging}
 
   The patches encoded in the |PatchST| type clearly identify 
-a prefix of constructors copied from the root of a tree up unil the
+a prefix of constructors copied from the root of a tree up until the
 location of the changes and any insertion or deletions that might happen
 along the way. Moreover, since these patches also mirror the tree structure
 of the data in question, it becomes quite natural to identify separate changes.
@@ -560,7 +553,7 @@ on the right, they are clearly disjoint and can be merged. Finally,
 the explicit representation of insertions and deletions at the
 fixpoint level gives us a simple global aligment for our synchronizer.
 
-  On this section we discuss a simple merging algorithm,
+  In this section we discuss a simple merging algorithm,
 which reconciles changes from two different patches whenever these 
 are \emph{non interfering}, for example, as
 in \Cref{fig:stdiff:merging0}. We call non interfering patches
@@ -576,17 +569,17 @@ Draw a simple example of mergeable patches here
   A positive aspect of the |PatchST| approach in comparison with
 a purely edit-scripts based approach is the significantly
 simpler merge function. This is due to |PatchST| being having clear
-homoegeneous sections. Consequently, the type of the merge function is simple
+homogeneous sections. Consequently, the type of the merge function is simple
 and reflects the fact that we expect a patch that operates over
 the values of the same type as a result:
 
 \begin{myhs}
 \begin{code}
-mergeST :: PatchST kappa codes ix -> PatchST kappa codes ix -> Maybe (PatchST kappa codes ix)
+merge :: PatchST kappa codes ix -> PatchST kappa codes ix -> Maybe (PatchST kappa codes ix)
 \end{code}
 \end{myhs}
 
-  A call to |mergeST|, in Haskell, returns |Nothing| if the patches have non-disjoint changes,
+  A call to |merge|, in Haskell, returns |Nothing| if the patches have non-disjoint changes,
 that is, if both patches want to change the \emph{same part} of the source tree.
 
 %{
@@ -610,6 +603,7 @@ the merge function much easier. In fact, we have proven that the merge function
 over regular datatypes commutes. A simplified statement of our theorem
 is given below: 
 
+%format mergecommutes = "\HVNI{\hbox{\it merge-{\hskip-0.3em}-commutes}}"
 \begin{myhs}
 \begin{code}
 mergecommutes  :   (p q : Patch kappa codes ix) 
@@ -627,7 +621,7 @@ much more convoluted encoding of |mergecommutes| above.
 
 %}
 
-  Back on the Haskell front, however, it is simpler to rely on the
+  In a Haskell development, however, it is simpler to rely on the
 |Maybe| monad for disjointness.  In fact, we define disjointness
 as whether or not merge returns a |Just|:
 
@@ -638,7 +632,7 @@ disjoint p q = maybe (const True) False (merge p q)
 \end{code}
 \end{myhs}
 
-  The definition of the |mergeST| function is given in its entirety in
+  The definition of the |merge| function is given in its entirety in
 \Cref{fig:stdiff:mergest}, but we discuss some interesting cases
 inline next.  For example, when one change deletes a constructor
 but the other performs a change within said constructor we must
@@ -648,8 +642,7 @@ and the changes in the product of atoms, |at|, are compatible.
 
 \begin{myhs}
 \begin{code}
-mergeST (Del c1 ctx) (Spn (SCns c2 at)) = do  Refl <- testEquality c1 c2 
-                                              mergeCtxAt ctx at
+merge (Del c1 ctx) (Spn (SCns c2 at)) = testEquality c1 c2 >>= \Refl -> mergeCtxAt ctx at
 \end{code}
 \end{myhs}
 
@@ -661,16 +654,13 @@ deleting newly introduced information.
 
 \begin{myhs}
 \begin{code}
-mergeCtxAt  :: DelCtx kappa codes iy xs
-            -> NP (At kappa codes) xs
-            -> Maybe (Almu kappa codes ix iy)
+mergeCtxAt  :: DelCtx kappa codes iy xs -> NP (At kappa codes) xs -> Maybe (Almu kappa codes ix iy)
 mergeCtxAt (H (AlmuMin almu') rest) (AtFix almu :* xs) = do
   Refl <- testEquality (almuDest almu) (almuDest almu')
   x <- mergeAlmu almu' almu
   guard (and $ elimNP identityAt xs)
   pure x
-mergeCtxAt (T at ctx) (x :* xs) 
-  = guard (identityAt x) >> mergeCtxAt ctx xs
+mergeCtxAt (T at ctx) (x :* xs) = guard (identityAt x) >> mergeCtxAt ctx xs
 \end{code} %$
 \end{myhs}
 
@@ -696,11 +686,9 @@ mergeSpine  :: SNat ix -> SNat iy
             -> Spine kappa codes (Lkup ix codes) (Lkup iy codes)
             -> Spine kappa codes (Lkup ix codes) (Lkup iy codes)
             -> Maybe (Spine kappa codes (Lkup ix codes) (Lkup iy codes))
-...
 mergeSpine ix iy (SChg cx cy al) (SCns cz zs)  = do  Refl <- testEquality ix iy
                                                      Refl <- testEquality cx cz
                                                      SCns cy <$$> mergeAlAt al zs
-...
 \end{code}
 \end{myhs}
 
@@ -708,33 +696,36 @@ mergeSpine ix iy (SChg cx cy al) (SCns cz zs)  = do  Refl <- testEquality ix iy
 \begin{myhs}
 \begin{code}
 -- Non-disjoint recursive spines:
-mergeST (Ins _ _)            (Ins _ _)           = Nothing
-mergeST (Spn (SChg _ _ _))   (Del _ _)           = Nothing
-mergeST (Del _ _)            (Spn (Schg _ _ _))  = Nothing
-mergeST (Del _ _)            (Del _ _)           = Nothing
+merge (Ins _ _)            (Ins _ _)           = Nothing
+merge (Spn (SChg _ _ _))   (Del _ _)           = Nothing
+merge (Del _ _)            (Spn (Schg _ _ _))  = Nothing
+merge (Del _ _)            (Del _ _)           = Nothing
 
 -- Obviously disjoint recursive spines:
-mergeST (Spn Scp)            (Del c2 s2) = Just (Del c2 s2)
-mergeST (Del c1 s2)          (Spn Scp)   = Just (Spn Scp)
+merge (Spn Scp)            (Del c2 s2) = Just (Del c2 s2)
+merge (Del c1 s2)          (Spn Scp)   = Just (Spn Scp)
 
 -- Spines might be disjoint from spines and deletions:
-mergeST (Spn s1)             (Spn s2) 
+merge (Spn s1)             (Spn s2) 
   = Spn <$$> mergeSpine (getSNat (Proxy @ix)) (getSNat (Proxy @iy)) s1 s2
-mergeST (Spn (SCns c1 at1))  (Del c2 s2) 
+
+merge (Spn (SCns c1 at1))  (Del c2 s2) 
   = Del c1 <$$> mergeAtCtx at1 s2
-mergeST (Del c1 s1)          (Spn (SCns c2 at2)) 
+
+merge (Del c1 s1)          (Spn (SCns c2 at2)) 
   = do  Refl <- testEquality c1 c2 -- disjoint if same constructor
         mergeCtxAt s1 at2
 
 -- Insertions are disjoint from anything except insertions.
 -- Overall disjointness does depend on the recursive parts, though.
-mergeST (Ins c1 s1)  (Spn s2)     = Spn . SCns c1  <$$> mergeCtxAlmu s1 (Spn s2)
-mergeST (Ins c1 s1)  (Del c2 s2)  = Spn . SCns c1  <$$> mergeCtxAlmu s1 (Del c2 s2)
-mergeST (Spn s1)     (Ins c2 s2)  = Ins c2         <$$> (mergeAlmuCtx (Spn s1) s2)
-mergeST (Del c1 s1)  (Ins c2 s2)  = Ins c2         <$$> (mergeAlmuCtx (Del c1 s1) s2)
+merge (Ins c1 s1)  (Spn s2)     = Spn . SCns c1  <$$> mergeCtxAlmu s1 (Spn s2)
+merge (Ins c1 s1)  (Del c2 s2)  = Spn . SCns c1  <$$> mergeCtxAlmu s1 (Del c2 s2)
+
+merge (Spn s1)     (Ins c2 s2)  = Ins c2         <$$> (mergeAlmuCtx (Spn s1) s2)
+merge (Del c1 s1)  (Ins c2 s2)  = Ins c2         <$$> (mergeAlmuCtx (Del c1 s1) s2)
 \end{code} 
 \end{myhs}
-\caption{Definition of |mergeST|}
+\caption{Definition of |merge|}
 \label{fig:stdiff:mergest}
 \end{figure}
 
@@ -751,8 +742,10 @@ mergeSpine _ _ s                  Scp           = Just Scp
 -- Disjointness depends on recursive parts:
 mergeSpine _ _ (SCns cx xs) (SCns cy ys)       = do  Refl <- testEquality cx cy
                                                      SCns cx <$$> mergeAts xs ys
+
 mergeSpine _ _ (SCns cx xs)  (SChg cy cz al)   = do  Refl <- testEquality cx cy
                                                      SChg cy cz <$$> mergeAtAl xs al
+
 mergeSpine ix iy (SChg cx cy al) (SCns cz zs)  = do  Refl <- testEquality ix iy
                                                      Refl <- testEquality cx cz
                                                      SCns cy <$$> mergeAlAt al zs
@@ -773,17 +766,16 @@ application function. Moreover, we have seen how to
 merge two disjoint differences. However, as programmers, we are mainly 
 interested in \emph{computing} patches from a source and a
 destination. Unfortunately, however, this is where the good news
-stop. Computing a value of type |PatchST| is computationally expensive
-and represents one of the main downsides of the |PatchST| approach.
+stops. Computing a value of type |PatchST| is computationally expensive
+and represents one of the main downsides of this approach.
 
   In this section we explore our attempts at
 computing differences with the \texttt{stdiff} framework.
 We start by outlining a nondeterministic specification
 of an algorithm for computing a |PatchST|, in \Cref{sec:stdiff:naiveenum}.
 We then provide example algorithms that implemented said specification
-in \Cref{sec:stdiff:oraclesenum}. No matter the length of our efforts,
-however, we will always be bound by the necessity of making choices
-which is also inherent to edit scripts. Moreover, the rich structure
+in \Cref{sec:stdiff:oraclesenum}. All these approaches
+however, we will always need to make choices. Moreover, the rich structure
 of |PatchST| makes a memoized algorithm much more difficult to
 be written. Consequently, computing a |PatchST|
 will always be a computationally inefficient process, rendering
@@ -796,13 +788,14 @@ it unusuable in practice.
 a tree |x| into |y| is enumerating all possible patches and filtering
 our those with the smallest \emph{cost}, for some \emph{cost} metric.
 In this section, we will write a naive enumeration engine for 
-|PatchST| and look at how the definition of the notion of
+|PatchST| and argue that exploring suitable notions of
 \emph{cost} brings a lot of tensions to the design.
+\victor{We barely talk about cost...}
 
   The enumeration follows the Agda model~\cite{Miraldo2017}
 closely and is not very surprising. Nevertheless, it does
-act as a good specification for a better implementation, later.
-Just like on the linear case,
+act as a good specification for a better implementation later.
+Just like for the linear case,
 the changes that can transform two values |x| and |y| of a given mutually
 recursive family into one another are the deletion of a constructor from |x|,
 the insertion of a constructor from |y| or changing the constructor
@@ -810,13 +803,11 @@ of |x| into the one from |y|, as witnessed by the |enumAlmu| function below.
   
 \begin{myhs}
 \begin{code}
-enumAlmu  :: Fix ki codes ix
-          -> Fix ki codes iy
-          -> [Almu ki codes ix iy]
-enumAlmu x y
-  =     enumDel (sop $ unFix x)  y
-   <|>  enumIns x                (sop $ unFix y)
-   <|>  Spn <$> enumSpn (snatFixIdx x) (snatFixIdx y) (unFix x) (unFix y)
+enumAlmu  :: Fix ki codes ix -> Fix ki codes iy -> [Almu ki codes ix iy]
+enumAlmu x y  =     enumDel (sop $ unFix x)  y
+              <|>  enumIns x (sop $ unFix y)
+              <|>  Spn <$> enumSpn  (snatFixIdx x) (snatFixIdx y) 
+                                    (unFix x) (unFix y)
   where
     enumDel (Tag c p) y0  = Del c <$> enumDelCtx p y0
     enumIns x0 (Tag c p)  = Ins c <$> enumInsCtx x0 p
@@ -824,48 +815,43 @@ enumAlmu x y
 \end{myhs}
 
   Enumerating all the patches from a deletion context of a given product |p|
-against some fixpoint |y| consists in enumerating the patches 
+against some fixpoint |y| consists of enumerating the patches 
 that transform all of the fields of |p| into |y|. The handling of insertion
 contexts is analogous, hence it is ommited here.
+Recall that the |AlmuMin|, below, is used to flag the resulting context as
+a deletion context. 
 
 \begin{myhs}
 \begin{code}
-enumDelCtx  :: PoA ki (Fix ki codes) prod
-            -> Fix ki codes iy
-            -> [DelCtx ki codes iy prod]
+enumDelCtx  :: PoA ki (Fix ki codes) prod -> Fix ki codes iy -> [DelCtx ki codes iy prod]
 enumDelCtx Nil              _  = []
 enumDelCtx (NA_K x  :* xs)  f  = T (NA_K x) <$> enumDelCtx xs f
-enumDelCtx (NA_I x  :* xs)  f
-  =  (flip H xs . AlmuMin)  <$> enumAlmu x f
-     <|> T (NA_I x)         <$> enumDelCtx xs f
+enumDelCtx (NA_I x  :* xs)  f  =    (flip H xs . AlmuMin)  <$> enumAlmu x f
+                               <|>  T (NA_I x)         <$> enumDelCtx xs f
 \end{code} %$
 \end{myhs}
 
-  Recall that the |AlmuMin| here is used to flag the resulting context as
-a deletion context. 
-
   Next we look into enumerating the spines between |x| and |y|, that is,
-changes to the coproduct structure from |x| to |y|. Differently
-from our Agda model, we need to know which elements of the mutually
-recursive family are being operated over. This will dictate which
+changes to the coproduct structure from |x| to |y|. Unlike
+our Agda model, we need to know over which element of the mutually
+recursive family we are operating. This will dictate which
 constructors from |Spine| we are allowed to use. We gather this
 information through two auxiliary |SNat| parameters.
 
 \begin{myhs}
 \begin{code}
-enumSpn :: SNat ix -> SNat iy
-        -> Rep ki (Fix ki codes) (Lkup ix codes)
-        -> Rep ki (Fix ki codes) (Lkup iy codes)
-        -> [Spine ki codes (Lkup ix codes) (Lkup iy codes)]
+enumSpn  :: SNat ix -> SNat iy
+         -> Rep ki (Fix ki codes) (Lkup ix codes)
+         -> Rep ki (Fix ki codes) (Lkup iy codes)
+         -> [Spine ki codes (Lkup ix codes) (Lkup iy codes)]
 enumSpn six siy (sop -> Tag cx px) (sop -> Tag cy py)
   = case testEquality six siy of
       Nothing -> SChg cx cy <$> enumAl px py
-      Just Refl -> 
-        case testEquality cx cy of
+      Just Refl -> case testEquality cx cy of
            Nothing   -> SChg cx cy <$> enumAl px py
-           Just Refl -> if eqHO px py
-                        then return Scp
-                        else SCns cx <$> mapNPM (uncurry' enumAt) (zipNP px py)
+           Just Refl ->  if eqHO px py
+                         then return Scp
+                         else SCns cx <$> mapNPM (uncurry' enumAt) (zipNP px py)
 \end{code} %$
 \end{myhs}
 
@@ -874,50 +860,59 @@ situation is uniquely determined by a |Spine| constructor. Enumerating
 atoms, |enumAt|, is trivial. Atoms are either opaque types or recursive
 positions. Opaque types are handled by |TrivialK| and recursive positions
 are handled recursively by |enumAlmu|. Finally, alignments of products is analogous
-to the longest common subsequence. We must make sure that we only
-synchronize atoms with |AX| if they have the same type, though. 
-The |enumAl| is displayed below.
+to the longest common subsequence, except that we must make sure that we only
+synchronize atoms with |AX| if they have the same type.
+The |enumAl| below illustrates the non-deterministic enumeration
+of alignments over two products-of-atoms.
+
 
 \begin{myhs}
 \begin{code}
-enumAl  :: PoA ki (Fix ki codes) p1
-        -> PoA ki (Fix ki codes) p2
-        -> [Al ki codes p1 p2]
-enumAl Nil Nil = return A0
-enumAl (x :* xs) Nil  = ADel x  <$> enumAl xs Nil
-enumAl Nil (y :* ys)  = AIns y  <$> enumAl Nil ys
-enumAl (x :* xs) (y :* ys)
-  =      (ADel x <$> enumAl xs (y :* ys))
-    <|>  (AIns y <$> enumAl (x :* xs) ys)
-    <|>  case testEquality x y of
-           Just Refl  -> AX <$> (enumAt x y) <*> enumAl xs ys
-           Nothing    -> mzero
+enumAl  :: PoA ki (Fix ki codes) p1 -> PoA ki (Fix ki codes) p2 -> [Al ki codes p1 p2]
+enumAl Nil        Nil        = return A0
+enumAl (x :* xs)  Nil        = ADel x  <$> enumAl xs Nil
+enumAl Nil        (y :* ys)  = AIns y  <$> enumAl Nil ys
+enumAl (x :* xs)  (y :* ys)  =    (ADel x <$> enumAl xs (y :* ys))
+                             <|>  (AIns y <$> enumAl (x :* xs) ys)
+                             <|>  case testEquality x y of
+                                      Just Refl  -> AX <$> (enumAt x y) <*> enumAl xs ys
+                                      Nothing    -> mzero
 \end{code} %$
 \end{myhs}
+
+
+  Looking at |enumAlmu| and |enumAl|, we can see why this algorithm
+explodes and becomes intractable quickly. In |enumAlmu| we must
+choose between inserting, deleting or copying a recursive constructor.
+In case we chose to copy, we then might call |enumAl|, where 
+we must chose between inserting, deleting or copying fields
+of constructors.
+  
 
 \subsection{Translating from \texttt{gdiff}}
 \label{sec:stdiff:oraclesenum}
 
   Since enumerating all possible patches and then filtering a chosen
 one is time consuming and requires an complex notion
-of cost over |PatchST|, it was clear we should be porsuing better
+of cost over |PatchST|, it was clear we should be pursuing better
 algorithms for our |diff| function. We have attempted two similar approaches to
 filter the unintersting patches out and optimize the search space.
 
-  A first idea, which arose in conjuncton with P.E. Dagand (private communication),
-was to use the already existing \unixdiff{} tool as some sort of \emph{oracle}.
-That is, we should only consider inserting and deleting elements that fall
-on lines marked as such by \unixdiff{}. This idea was translated
-into Haskell by G. Garuffi~\cite{Garuffi2018}, but the performance was still very
-low and we could not compute the |PatchST| of two real-world Clojure files in
-less than a couple minutes.
+  A first idea, which arose in conjuncton with Pierre-Evariste Dagand
+(private communication), was to use the already existing \unixdiff{}
+tool as some sort of \emph{oracle}.  That is, we should only consider
+inserting and deleting elements that fall on lines marked as such by
+\unixdiff{}. This idea was translated into Haskell by Giovani
+Garuffi~\cite{Garuffi2018}, but the performance was still very poor
+and computing the |PatchST| of two real-world Clojure files still
+required several minutes.
 
   From these experiments \cite{Garuffi2018} we learnt that simply restricting
-the search space was not sufficient, and reasons were manifold.
+the search space was not sufficient.
 Besides the complexity introduced by arbitrary heuristics,
 using the \unixdiff{} to flag elements of the AST was still too
 coarse. For one, the \unixdiff{} can insert and delete the same line 
-in some situations. Secondly, many elements of the AST ma fall under the same line. 
+in some situations. Secondly, many elements of the AST may fall on the same line. 
 
   The second option is related, but instead of using a line-based
 oracle, we can use \texttt{gdiff}~\Cref{sec:gp:well-typed-tree-diff} as the oracle,
@@ -937,7 +932,7 @@ data Ann = Modify | Copy
 \end{myhs}
 
   A |Modify| annotation corresponds to a deletion or insertion
-dependending on whether it is the source or destination tree
+depending on whether it is the source or destination tree
 respectively.  Recall that an edit script produced by \texttt{gdiff}
 has type |ES kappa codes xs ys|, where |xs| is the list of types of the
 source trees and |ys| is the list of types of the destination trees.
@@ -948,35 +943,37 @@ The definition of |ES| -- introduced in
 \begin{code}
 data ES (kappa :: kon -> Star) (codes :: [[[Atom kon]]]) 
     :: [Atom kon] -> [Atom kon] -> Star where
-  ES0  :: ES kappa codes Pnil Pnil
-  Ins  :: Cof kappa codes a t  -> ES kappa codes i            (t :++: j)  
-                               -> ES kappa codes i            (a Pcons j)
-  Del  :: Cof kappa codes a t  -> ES kappa codes (t :++: i)   j           
-                               -> ES kappa codes (a Pcons i)  j
-  Cpy  :: Cof kappa codes a t  -> ES kappa codes (t :++: i)   (t :++: j)  
-                               -> ES kappa codes (a Pcons i)  (a Pcons j)
+  ES0  :: ES kappa codes (P []) (P [])
+  Ins  :: Cof kappa codes a t  -> ES kappa codes          i   (t :++:  j)  -> ES kappa codes           i   (a Pcons  j)
+  Del  :: Cof kappa codes a t  -> ES kappa codes (t :++:  i)           j   -> ES kappa codes (a Pcons  i)            j
+  Cpy  :: Cof kappa codes a t  -> ES kappa codes (t :++: i)   (t :++:  j)  -> ES kappa codes (a Pcons i)   (a Pcons  j)
 \end{code}
 \end{myhs}
 
-  Given a value of type |ES kappa codes xs ys|, we have information about which constructors
-of the trees in |NP (NA kappa (Fix kappa codes)) xs| should be copied. Our objective
-then is to annotated the trees with this very information. This is done by the
-|annSrc| and |annDst| functions. We will only look at |annSrc|, the definition
-of |annDst| is symmetric.
+  Given a value of type |ES kappa codes xs ys|, we have information
+about which constructors of the trees in |NP (NA kappa (Fix kappa
+codes)) xs| should be copied. Our objective then is to annotated the
+trees with this very information. This is done by the |annSrc| and
+|annDst| functions. We will only look at |annSrc|, the definition of
+|annDst| is symmetric.
+
+  Annotating the source forest with a given edit-script
+consists in matching which constructors present in the forest
+correspond to a copy and which corresond to a deletion.
+The insertions in the edit-script concern the destinationforest only.
+The |annSrc| function, below, does exactly that, proceeding
+by induction on the edit-script.
 
 \begin{myhs}
 \begin{code}
-annSrc :: NP (NA kappa (Fix kappa codes)) xs
-       -> ES kappa codes xs ys
-       -> NP (NA kappa (FixAnn kappa codes (Const Ann))) xs
+annSrc  :: NP (NA kappa (Fix kappa codes)) xs -> ES kappa codes xs ys
+        -> NP (NA kappa (FixAnn kappa codes (Const Ann))) xs
 annSrc xs         ES0         = Nil
 annSrc Nil        _           = Nil
 annSrc xs         (Ins c es)  = annSrc' xs es
-annSrc (x :* xs)  (Del c es)  =
-  let poa = fromJust $ matchCof c x
+annSrc (x :* xs)  (Del c es)  = let poa = fromJust $ matchCof c x
    in insCofAnn c (Const Modify) (annSrc' (appendNP poa xs) es)
-annSrc' (x :* xs) (Cpy _ c es) =
-  let poa = fromJust $ matchCof c x
+annSrc' (x :* xs) (Cpy _ c es) = let poa = fromJust $ matchCof c x
    in insCofAnn c (Const Copy) (annSrc' (appendNP poa xs) es)
 \end{code}
 \end{myhs}
@@ -994,39 +991,39 @@ and inserts the entire destination tree.
 
 \begin{myhs}
 \begin{code}
-diffAlmu  :: FixAnn kappa codes (Const Ann) ix
-          -> FixAnn kappa codes (Const Ann) iy
+diffAlmu  :: FixAnn kappa codes (Const Ann) ix -> FixAnn kappa codes (Const Ann) iy
           -> Almu kappa codes ix iy
 diffAlmu x@(FixAnn ann1 rep1) y@(FixAnn ann2 rep2) =
   case (getAnn ann1, getAnn ann2) of
     (Copy, Copy)      -> Spn (diffSpine  (getSNat $ Proxy @ix) 
                                          (getSNat $ Proxy @iy) 
                                          rep1 rep2)
-    (Copy, Modify)    ->  if hasCopies y 
-                          then diffIns x rep2 
-                          else stiffAlmu (forgetAnn x) (forgetAnn y)
-    (Modify, Copy)    ->  if hasCopies x 
-                          then diffDel rep1 y 
-                          else stiffAlmu (forgetAnn x) (forgetAnn y)
-    (Modify, Modify)  ->  if hasCopies x 
-                          then diffDel rep1 y 
-                          else stiffAlmu (forgetAnn x) (forgetAnn y)
+
+    (Copy, Modify)    ->  if hasCopies y  then diffIns x rep2 
+                                          else stiffAlmu (forgetAnn x) (forgetAnn y)
+
+    (Modify, Copy)    ->  if hasCopies x  then diffDel rep1 y 
+                                          else stiffAlmu (forgetAnn x) (forgetAnn y)
+
+    (Modify, Modify)  ->  if hasCopies x  then diffDel rep1 y 
+                                          else stiffAlmu (forgetAnn x) (forgetAnn y)
     where
       diffIns x rep  = case sop rep of Tag c ys -> Ins c (diffCtx CtxIns x ys)
       diffDel rep y  = case sop rep of Tag c xs -> Del c (diffCtx CtxDel y xs)
 \end{code}
 \end{myhs}
 
-  The |diffCtx| function, which selects an element of the
+  The |diffCtx| function selects an element of 
 a product to continue diffing against. We naturally select the
 element that has the most constructors marked for copy as the element
 we continue diffing against. The other fields of the product
-are placed on the rigid part of the context.
+are placed on the \emph{rigid} part of the context, that is,
+the trees that will be deleted or inserted entirely, without
+sharing any of their subtrees.
 
 \begin{myhs}
 \begin{code}
-diffCtx  :: InsOrDel kappa codes p
-         -> FixAnn kappa codes (Const Ann) ix
+diffCtx  :: InsOrDel kappa codes p -> FixAnn kappa codes (Const Ann) ix
          -> NP (NA kappa (FixAnn kappa codes (Const Ann))) xs
          -> Ctx kappa codes p ix xs
 \end{code}
@@ -1051,8 +1048,8 @@ of edit-script based approaches are not due, exclusively, to
 using linear data to represent transformations to tree structured data.
 Another important aspect that we unknowingly overlooked, and ultimately did 
 lead to a prohibitively expensive |diff| function, was the necessity to choose
-a single copy oportunity. This happens whenever a subtree could be copied in two or
-more different ways, and, in tree differencing, it occurs often.
+a single copy opportunity. This happens whenever a subtree could be copied in two or
+more different ways, and, in tree differencing this occurs often.
 
   The |PatchST| datatype has many interesting aspects that deserve some
 mention. First, by being globaly synchronized -- that is, explicit insertions
@@ -1062,10 +1059,10 @@ as homogeneous types: a patch transform two values of the same
 member of the mutually recursiev family.
  
   In conclusion, lacking an efficient |diff| algorithm meant that
-\texttt{stdiff} was an important step in our education,
-but unfortunately not worth pursuing further. This meant that a number
+\texttt{stdiff} was an important step leading to new insights,
+but unfortunately was not worth pursuing further. This meant that a number
 of interesting topics such as the algebra of |PatchST| and the notion
-of cost for |PatchST| were not worth further work.
+of cost for |PatchST| were abandoned indefinitely.
 
 %%  If we attempt to write a cost function for |PatchST| we also
 %%run into intersting challenges. Recall that the \emph{cost} function
