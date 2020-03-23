@@ -1356,7 +1356,7 @@ The |PatchPE ki codes| forms either:
 \label{sec:pepatches:merging}
 
   In the previous sections we have seen how |Chg|
-can be used as \emph{the} representation of a transformation
+can be used as the \emph{representation} of a transformation
 between two trees. We have also seen how we can
 extract a \emph{spine}, which indicates a prefix of constructors
 copied from the source to the destination and leads
@@ -1364,7 +1364,36 @@ to changes, which in turn are \emph{aligned} to reveal
 entire insertions and deletions, copies and permutations.
 In this section we will be defining our synchronization
 algorithm, which uses this extra information to better
-merge our patches.
+merge our patches. At the end, we want to have defined
+a function |merge| with the following type:
+
+\begin{myhs}
+\begin{code}
+merge  :: PatchAl kappa fam at -> PatchAl kappa fam al -> Maybe (PatchC kappa fam at)
+\end{code}
+\end{myhs}
+
+  The |merge| function, here, receives two \emph{aligned} patches
+|p| and |q| that make a span -- have at least one common
+element in their domain -- and produces a patch that
+can be annotated with conflicts, denoted by |PatchC|, when
+both |p| and |q| modify the same subtree in two distinct ways.
+If |p| and |q| do \emph{not} make a span it returns |Nothing|.
+\Cref{fig:pepatches:mergesquare} illustrates a span of patches |p|
+and |q| and their merge which is applied to their common ancestor
+and produces a tree which combines the modifications performed
+by |p| and |q|, when possible.
+
+\begin{figure}
+\centering
+\[
+\xymatrix{ & O \ar[dl]_{|p|} \ar[dr]^{|q|} \ar[dd]^(0.8){|merge p q|} & \\
+          A & & B \\
+            & M &}
+\]
+\caption{Illustration of |merge|.}
+\label{fig:pepatches:mergesquare}
+\end{figure}
 
   Recall our patches consist in a spine, which leads to
 locally-scoped alignments. These alignments in turn also
@@ -1407,7 +1436,7 @@ alignments guarantees |metavar x| will not appear elsewhere.
     [|Cpy (metavar k)|]]]
 \end{myforest}}
 
-\subfloat[Result of |diff3 p q|]{%
+\subfloat[Result of |merge p q|]{%
 \begin{myforest}
 [|Bin| , s sep=10mm
   [,change
@@ -1471,24 +1500,21 @@ synchronizatino is possible and results in \Cref{fig:pepatches:merge-01:C}.
 \label{fig:pepatches:merge-01}
 \end{figure}
 
-  Given then two aligned patches, the |diff3 p q| function below
+  Given then two aligned patches, the |merge p q| function below
 will map over the common prefix of the spines
 of |p| and |q|, captured by their least-general-generalization and
 produce a patch with might contain conflicts inside.
 \digress{In the actual implementation we receive two patches
-and align them inside |diff3|, this helps ensuring they will
+and align them inside |merge|, this helps ensuring they will
 have a disjoint set of names.}
-
-\victor{Why don't we return |Maybe PatchC|? the |maybe| would
-indicate whether or not the arguments form a span}
 
 \begin{myhs}
 \begin{code}
-diff3  :: PatchAl kappa fam at -> PatchAl kappa fam at -> PatchC kappa fam at
-diff3 oa ob = holesMap (uncurry' go) (lgg oa ab)
+merge  :: PatchAl kappa fam at -> PatchAl kappa fam at -> Maybe (PatchC kappa fam at)
+merge oa ob = holesMapM (uncurry' go) (lgg oa ab)
   where
     go  :: Holes kappa fam (Al kappa fam) at -> Holes kappa fam (Al kappa fam) at
-        -> Sum (Conflict kappa fam) (Chg kappa fam) at
+        -> Maybe (Sum (Conflict kappa fam) (Chg kappa fam) at)
     go ca cb = mergeAl (alDistr ca) (alDistr cb)
 \end{code}
 \end{myhs}
@@ -1559,7 +1585,7 @@ preserved as is.  The resulting patch can be seen in
     [|Cpy (metavar b)|]]]
 \end{myforest}}
 \quad%
-\subfloat[Result of merge |diff3 oa ob|]{%
+\subfloat[Result of merge |merge oa ob|]{%
 \begin{myforest}
 [,change
   [|(:)| [a,metavar] [|(:)| [b,metavar] [|[]|]]]
@@ -1602,21 +1628,34 @@ it must be equal to |t| is irrelevant -- all occurences of |v| will
 disappear. \victor{is it really irrelevant? what if we decide that
 |v| was something incompatible with |t|?}
 
-  Conflicts will be handled through the |Except| monad.
-Upon finding conflicts, we will simply call |throwError| with a label
-that describes the conflict. The |mergeAl| function, then, is
-just a wrapper around |mergeAlM|, which is defined in terms of 
-the |MergeM| monad for convenience.
+  Conflicts and errors stemming from the arguments to |mergeAl| 
+\emph{not} forming a span will be distinguished by the |MergeErr| datatype,
+below. We also define auxiliary functions to raise each specific
+error in a computation inside the |Except| monad.
 
 \begin{myhs}
 \begin{code}
-type MergeM kappa fam = StateT (MergeState kappa fam) (Except String)
+data MergeErr = NotASpan | Conf String
+
+throwConf    lbl  = throwError (Conf lbl)
+throwInvFailure   = throwError NotASpan
+\end{code}
+\end{myhs}
+
+  The |mergeAl| function, then, is just a wrapper around |mergeAlM|,
+which is defined in terms of the |MergeM| monad, which carries around
+the necessary state and raises errors through the |Except| monad.
+
+\begin{myhs}
+\begin{code}
+type MergeM kappa fam = StateT (MergeState kappa fam) (Except MergeErr)
 
 mergeAl  :: Aligned kappa fam x -> Aligned kappa fam x
-         -> Sum (Conflict kappa fam) (Chg kappa fam) x
+         -> Maybe (Sum (Conflict kappa fam) (Chg kappa fam) x)
 mergeAl x y = case runExcept (evalStateT (mergeAlM p q) mrgStEmpty) of
-                Left err  -> InL (Conflict err p q)
-                Right r   -> InR (disalign r)
+                Left NotASpan    -> Nothing
+                Left (Conf err)  -> Just (InL (Conflict err p q))
+                Right r          -> Just (InR (disalign r))
 \end{code}
 \end{myhs}
 
@@ -1637,7 +1676,7 @@ mergeAlM p q = do
   phase1  <- mergePhase1 p q
   info    <- get
   case splitDelInsMap info of
-    Left   _   -> throwError "failed-contr"
+    Left   _   -> throwConf "failed-contr"
     Right  di  -> alignedMapM (phase2 di) phase1
 \end{code}
 \end{myhs}
@@ -1662,12 +1701,8 @@ $\alpha$-equivalent after they have been instantiated.
 \begin{myhs}
 \begin{code}
 data Phase2 kappa fam at where
-  P2Instantiate   :: Chg kappa fam at
-                  -> Maybe (HolesMV kappa fam at)
-                  -> Phase2 kappa fam at
-  P2TestEq        :: Chg kappa fam at
-                  -> Chg kappa fam at
-                  -> Phase2 kappa fam at
+  P2Instantiate   :: Chg kappa fam at -> Maybe (HolesMV kappa fam at) -> Phase2 kappa fam at
+  P2TestEq        :: Chg kappa fam at -> Chg kappa fam at -> Phase2 kappa fam at
 \end{code}
 \end{myhs}
 
@@ -1715,7 +1750,7 @@ the other changes its contents.
    (Prm x y, Prm x' y')  -> Mod <$$> mrgPrmPrm x y x' y'
    (Prm x y, _)          -> Mod <$$> mrgPrm x y (disalign q)
    (_, Prm x y)          -> Mod <$$> mrgPrm x y (disalign p)
-\end{code}
+\end{code} %$
 \end{myhs}
 
   If we are to merge two permutations, |Prm (metavar x) (metavar y)|
@@ -1760,8 +1795,10 @@ mrgPrm x y c  =   addToIota "prm-chg" x c
 \end{code}
 \end{myhs}
 
+\victor{I'm unsure whether this should really be a conflict... I will
+study the conflicts that appear in practice}
   The |addToIota| function inserts the |(x, c)| entry in |iota| if |x|
-is not yet a member. It throws an error with the supplied label
+is not yet a member. It raises a conflict with the supplied label
 if |x| is already in |iota| with a value that is different than |c|.
 \digress{I believe that we could develop a better algorithm if instead
 of forbidding values different than |c| we check to see whether the
@@ -1776,7 +1813,7 @@ insert different information in the same location.
 \begin{code}
    (Ins (Zipper z p'), Ins (Zipper z' q'))
      | z == z'             -> Ins . Zipper z <$$> mergePhase1 p' q'
-     | otherwise           -> throwError "ins-ins"
+     | otherwise           -> throwConf "ins-ins"
    (Ins (Zipper z p'), _)  -> Ins . Zipper z <$$> mrgPhase1 p' q
    (_ ,Ins (Zipper z q'))  -> Ins . Zipper z <$$> mrgPhase1 p q'
 \end{code}
@@ -1811,16 +1848,16 @@ tryDel  :: Zipper (CompoundCnstr kappa fam x) (SFix kappa fam) (Al kappa fam) x
         -> MergeM kappa fam (Al kappa fam x , Al kappa fam x)
 tryDel (Zipper z h) (Del (Zipper z' h'))
   | z == z'    = return (h , h')
-  | otherwise  = throwError "del-del"
+  | otherwise  = throwConf "del-del"
 tryDel (Zipper z h) (Spn rep) = case zipperRepZip z rep of
-    Nothing  -> throwError "del-spn"
+    Nothing  -> throwInvFailure
     Just r   -> let hs = repLeavesList r
                  in case partition (exElim isInR1) hs of
                       ([Exists (InL Refl :*: x)] , xs)
                         | all isCpyL1 xs  -> return (h , x)
-                        | otherwise       -> throwError "del-spn"
-                      _                   -> throwError "del-spn"
-tryDel (Zipper _ _) _ = throwError "del-mod"
+                        | otherwise       -> throwConf "del-spn"
+                      _                   -> throwConf "del-spn"
+tryDel (Zipper _ _) _ = throwConf "del-mod"
 \end{code}
 \end{myhs}
 
@@ -1931,7 +1968,7 @@ the same constructor and recurse on the fields of the spine pointwise:
 \begin{myhs}
 \begin{code}
    (Spn p', Spn q') -> case zipSRep p' q' of
-       Nothing -> throwError "spn-spn"
+       Nothing -> throwInvFailure
        Just r  -> Spn <$$> repMapM (uncurry' mrgPhase1) r
 \end{code}
 \end{myhs} %
@@ -1977,7 +2014,7 @@ mrgChgChg p' q'
   | isDup p'   = mrgChgDup p' q'
   | isDup q'   = mrgChgDup q' p'
   | otherwise  = case unify (chgDel p') (chgDel q') of
-       Left  _   -> throwError "chg-unif"
+       Left  _   -> throwInvFailure
        Right r   -> onEqvs (M.union r)
                  >> return (P2TestEq p' q')
 \end{code}
@@ -2007,7 +2044,7 @@ mrgPhase1 p q = case (p , q) of
    -- Insertions are preserved as long as they are not simultaneous.
    (Ins (Zipper z p'), Ins (Zipper z' q'))
      | z == z'   -> Ins . Zipper z <$$> mergePhase1 p' q'
-     | otherwise -> throwError "ins-ins"
+     | otherwise -> throwConf "ins-ins"
    (Ins (Zipper z p'), _) -> Ins . Zipper z <$$> mrgPhase1 p' q
    (_ ,Ins (Zipper z q')) -> Ins . Zipper z <$$> mrgPhase1 p q'
 
@@ -2023,7 +2060,7 @@ mrgPhase1 p q = case (p , q) of
 
    -- Two spines it is easy, just pointwise merge their recursive positions
    (Spn p', Spn q') -> case zipSRep p' q' of
-       Nothing -> throwError "spn-spn"
+       Nothing -> throwInvFailure
        Just r  -> Spn <$$> repMapM (uncurry' mrgPhase1) r
 
    -- Finally, modifications sould be instantiated, if possible.
@@ -2092,7 +2129,7 @@ phase2 di (P2Instantiate chg (Just i))  = do
    es <- gets eqs
    case getCommonVars (substApply es (chgIns chg)) (substApply es i) of
            []  -> return (refineChg di chg)
-           xs  -> throwError ("mov-mov " ++ show xs)
+           xs  -> throwConf ("mov-mov " ++ show xs)
 \end{code}
 \end{myhs}
   
