@@ -211,6 +211,11 @@ Distribution & 0.42 & 0.27 & 0.11 & 0.1 & 0.05 & 0.02 & 0.03 \\
 \label{tbl:eval:hdiff-conflict-distr}
 \end{table}
 
+\Cref{tbl:eval:hdiff-conflict-distr} shows the distribution of each conflict type
+throughout the dataset. Note that a patch resulting from a merge can have
+multiple conflicts. This information is useful for deciding which aspects
+of the merge algorithm can yield better rewards. 
+
 
 \section{Data Collection}
 \label{sec:eval:collection}
