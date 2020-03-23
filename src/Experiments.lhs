@@ -182,7 +182,7 @@ Lua        & 75 & 26 & 486 & 163 \\ \midrule
 \multicolumn{3}{r}{\emph{Success Rate}} & 15\% & \\ 
 \bottomrule
 \end{tabular}
-\caption{Conflicts solved by \texttt{stdiff}, }
+\caption{Conflicts solved by \texttt{stdiff}.}
 \label{tbl:eval:merge-stdiff}
 \end{table}
 
@@ -193,6 +193,23 @@ have done.
 
 \subsubsection{\texttt{hdiff}}
 
+\begin{table}
+\centering
+\begin{tabular}{@@{}lllllllll@@{}} 
+ & \rotatebox{50}{\small \texttt{not-eq}}  &
+   \rotatebox{50}{\small \texttt{inst-mod}} &
+   \rotatebox{50}{\small \texttt{del-spn}} &
+   \rotatebox{50}{\small \texttt{ins-ins}} &
+   \rotatebox{50}{\small \texttt{inst-ins}} &
+   \rotatebox{50}{\small \texttt{inst-del}} &
+   Others \\ \midrule
+Amount & 7904 & 5052 & 2144 & 1892 & 868 & 357 & 506 \\
+Distribution & 0.42 & 0.27 & 0.11 & 0.1 & 0.05 & 0.02 & 0.03 \\
+\bottomrule
+\end{tabular}
+\caption{Distribution of conflicts observed by \texttt{hdiff}.}
+\label{tbl:eval:hdiff-conflict-distr}
+\end{table}
 
 
 \section{Data Collection}
