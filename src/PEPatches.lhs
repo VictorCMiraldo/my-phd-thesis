@@ -1893,6 +1893,8 @@ in the spine.
 \end{code}
 \end{myhs}
 
+\victor{Explain |instM|!!!}
+
   \Cref{fig:pepatches:merge-03} illustrates a case where failing to check
 this would result in an erroneous duplication of the value |2|. 
 
