@@ -2811,8 +2811,26 @@ location in the deletion and insertion context, we flag it as a copy
 -- which involes issuing a fresh metavariable, hence the parameter |i|
 in the code above.
 
-\section{Discussion}
+\section{Discussion and Further Work}
 \label{sec:pepatches:discussion}
+
+\victor{
+\begin{itemize}
+  \item Better control over the tree matching process (ability
+to ignore source-location tokens for instance; ability to
+specify scope-aware sharing)
+
+  \item Look into more extraction methods; understand whether there
+is a sensible notion of ``best'' patch.
+
+  \item Agda formalization of \texttt{hdiff}, in particular, the merge algorithm.
+
+  \item Generalization to merging $n$ files
+
+  \item Generalization to arbitraryily-deep zippers
+\end{itemize}
+}
+
 
 \victor{Frst person or third person?}
 
