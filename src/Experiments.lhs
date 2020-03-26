@@ -178,17 +178,21 @@ Naturally, timeout or out-of-memory exceptions can still occur
 and fall under \emph{other}. The merge experiment was capped 
 at 45 seconds of runtime and 8GB of virtual memory.
 
-  The distinction between \emph{success} and \emph{mdif} is important
-but needs to be taken with a grain of salt. It can be that
-a developer performed \emph{more} modifications than just merging
+  It is worth noting that a 100\% success rate is impossible.
+Some conflicts really come from the same subtree being modified in 
+two distinct ways and require human intervention. One of the objectives
+of this experiment is to understand whether or not there
+is a place for structural merging within software development.
+Another note is due on the distinction between \emph{success} and \emph{mdif}.
+Being able to merge a conflict but obtaining a result different from
+what was committed by a human does not imply that either result is wrong.
+Developers can perform \emph{more} modifications than just merging
 when committing \texttt{M}. Or, it can be that \texttt{M} contains a mistake
 which was fixed in a later commit. Therefore, a result of \emph{mdif}
 in a datapoint does not immediatly indicate the wrong behavior
 of our merging algorithm. The success rate, however, provides us
 with a believable lower bound to how many conflicts can be solved
 automatically, in practice.
-
-\victor{explain why did we distingish success from mergediff?}
 
 \victor{This might be more complicated and I think I need Bayes rule}
 
@@ -197,25 +201,66 @@ automatically, in practice.
 \begin{table}
 \small
 \centering
-\begin{tabular}{@@{}lllllll@@{}} \toprule
-Language & \emph{success} (s) & \emph{mdif} (md) & \emph{conf} (c) 
-  & $\frac{s}{s + \mathit{md} + c}$ 
-  & $\frac{s + \mathit{md}}{s + \mathit{md} + c}$ 
-  & Other \\ \midrule
-Clojure       & 68 & 69 & 850 & 0.07 & 0.14 & 227 \\
-Lua           & 75 & 26 & 486 & 0.12 & 0.17 & 163 \\ \midrule
-\emph{totals} & 143 & 95 & 1336 & 0.9 & 0.15 & \\ \bottomrule
+\begin{tabular}{@@{}lrlrlll@@{}} \toprule
+Language & \emph{success} & \% & \emph{merge-diff} & \% & \emph{conf} & Other \\ \midrule
+Clojure       & 68 & 0.07 & 69 & 0.07 & 850 & 227 \\
+Lua           & 75 & 0.13 & 26 & 0.04 & 486 & 163 \\ \midrule
+\emph{totals} & 143 & 0.09 & 95 & 0.06 & 1336 & \\ \bottomrule
 \end{tabular}
 \caption{Conflicts solved by \texttt{stdiff}.}
 \label{tbl:eval:merge-stdiff}
 \end{table}
 
-  \Cref{tbl:eval:merge-stdiff} shows the results for \texttt{stdiff},
-where we observed that 15\% of the collected conflicts could be solved and, 
-in 60\% of these cases the automatic solution did correspond with
+  \Cref{tbl:eval:merge-stdiff} shows the classify the results of 
+attempting to solve each conflict in our dataset using \texttt{stdiff}'s merge function
+(\Cref{sec:stdiff:merging}). The \emph{Other} column shows the amound
+of conflicts that either timedout or raised an out-of-memory exception.
+
+  From \Cref{tbl:eval:merge-stdiff}, we observe that 15\% of the collected conflicts could be 
+solved and, in 60\% of these cases, the automatic solution did correspond with
 what a human would have done. 
 
+\victor{The results are slightly differnt than what Arian reported; thats because
+Arian's implementation had a bug and considered more merges than it should}
+
 \subsubsection{\texttt{hdiff}}
+
+\begin{table}
+\renewcommand{\arraystretch}{1.2}
+\small
+\centering
+\begin{tabular}{@@{}lllllll@@{}} \toprule
+Language & Mode &  Local/Global & \emph{success} & \emph{mdif} & \emph{conf} \\ \midrule
+\multirow{3}{*}{Clojure} 
+  & |Patience| & local & ? & ? & ? \\
+  & |Patience| & global & ? & ? & ? \\
+  & |NoNested| & local & ? & ? & ? \\
+\midrule
+\multirow{3}{*}{Lua} 
+  & |Patience| & local & ? & ? & ? \\
+  & |Patience| & global & ? & ? & ? \\
+  & |NoNested| & local & ? & ? & ? \\
+\midrule
+\bottomrule
+\end{tabular}
+\caption{Conflicts solved by \texttt{hdiff} with different parameters.}
+\label{tbl:eval:merge-hdiff}
+\renewcommand{\arraystretch}{1.3}
+\end{table}
+
+
+  \Cref{tbl:eval:merge-hdiff} shows the classify the results of 
+attempting to solve each conflict in our dataset using \texttt{hdiff}'s merge function
+(\Cref{sec:pepatches:merging}), for a combination of parameters. 
+
+\victor{Should we show the combination of parms or just the one with
+the most success?}
+
+  In those cases where \texttt{hdiff} returned a patch with conflicts,
+that is, we could \emph{not} successfully solve the merge, we recorded
+the distribution of conflicts, where we see that \texttt{not-eq} conflicts
+are by far the most commonly observed. \victor{so what? ...}
+
 
 \begin{table}
 \centering
@@ -228,7 +273,7 @@ what a human would have done.
    \rotatebox{50}{\small \texttt{inst-del}} &
    Others \\ \midrule
 Amount & 7904 & 5052 & 2144 & 1892 & 868 & 357 & 506 \\
-Distribution & 0.42 & 0.27 & 0.11 & 0.1 & 0.05 & 0.02 & 0.03 \\
+Percentile & 0.42 & 0.27 & 0.11 & 0.1 & 0.05 & 0.02 & 0.03 \\
 \bottomrule
 \end{tabular}
 \caption{Distribution of conflicts observed by \texttt{hdiff}.}

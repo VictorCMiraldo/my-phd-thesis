@@ -22,7 +22,7 @@ the patches can be harder to reason about.
   Both of our approaches can be instantiated to mutually recursive
 families of datatypes and, consequently, can be used to compare
 elements of most programming languages.  Writing the software that
-does so, however, comes with additional challenges.  To adress this we
+does so, however, comes with additional challenges.  To address this we
 have developed two new libraries for generic programming in Haskell.
 
   Finally, we empirically evaluate our algorithms by a number of

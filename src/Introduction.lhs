@@ -1,6 +1,6 @@
 
   Version Control is essential for any kind of distributed
-collaborative work. It enables contributors to operate indepentenyl
+collaborative work. It enables contributors to operate independently
 and later combine their work. For that, though, it must 
 address the situation where two developers changed a piece of 
 information in different ways. One option is to lock 
@@ -28,7 +28,7 @@ line-by-line difference between two textual files, determining the
 smallest set of insertions and deletions of lines to transform one
 file into the other. In other words, it tries to share as many lines
 between source and destination as possible.  This is, in fact, the
-most widedespread representation for \emph{patches}, used by tools
+most widespread representation for \emph{patches}, used by tools
 such as git, mercurial and darcs.
 
   The limited grammar of changes used by the \unixdiff{} works
@@ -226,7 +226,7 @@ for data.  We refer to these as \emph{untyped}
 tree differencing algorithms in contrast
 the \emph{typed} approach, which guarantees type safety by construction.
   
-  The Haskell typesystem is expressive enough to enable one to write
+  The Haskell type-system is expressive enough to enable one to write
 \emph{typed} generic programming algorithms. These algorithms, however,
 can only be applied to datatypes that belong in the set of types
 handled by the generic programming library of choice. For example, 
@@ -264,7 +264,7 @@ with \cite{Miraldo2017} with Pierre-\'{E}variste
 Dagand. We worked closely together to define a type-indexed datatype
 used to represent changes in a more structured way than edit-scripts.
 \Cref{chap:structural-patches} goes further into developing
-a merging algorthm and exploring different ways to compute 
+a merging algorithm and exploring different ways to compute 
 patches given two concrete values.
 
   \item \Cref{chap:pattern-expression-patches} is the refinement

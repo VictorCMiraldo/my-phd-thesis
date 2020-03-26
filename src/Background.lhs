@@ -1,7 +1,7 @@
   The most popular tool for computing differences
 between two files is the \unixdiff{}~\cite{McIlroy1974}, 
 it works by comparing files in a \emph{line-by-line} basis and
-attemps to match lines from the source file to lines
+attempts to match lines from the source file to lines
 in the destination file. For example, consider the
 two files below:
 
@@ -75,7 +75,7 @@ the semantics to these operations. The notion of \emph{edit distance}
 between two objects is defined as the cost of the least cost
 \emph{edit-script} between them, where cost is some defined metric,
 often context dependent. One major drawback, for example, is the least
-cost edit-script is chosen arbitrarily in some situations, namelly,
+cost edit-script is chosen arbitrarily in some situations, namely,
 when it is not unique. This makes the results computed by these
 algorithms hard to predict. Another issue, perhaps even more central,
 are the algorithms that arise from this ambiguity which are inherently slow.
@@ -90,7 +90,7 @@ around this last issue by writing edit-scripts in a typed
 form~\cite{Lempsink2009}, but this requires some non-trivial generic
 programming techniques to scale.
 
-  The second half of this chapter is the state-of-the-ast
+  The second half of this chapter is the state-of-the-art
 of the generic programming ecosystem in Haskell. Including
 the \texttt{GHC.Generics} and \texttt{generics-sop}
 libraries, which introduce all the necessary parts for us to build
@@ -103,7 +103,7 @@ our own solutions later, in \Cref{chap:generic-programming}.
 defined as the cost of the least-cost edit-script that transforms
 the source object into the target object -- that is,
 the edit-script with the least insertions and deletions.
-Computing edit-scripts is often refered to as \emph{differencing} objects.
+Computing edit-scripts is often referred to as \emph{differencing} objects.
 Where edit distance computation is only concerned with how
 \emph{similar} one object is to another, \emph{differencing},
 on the other hand, is actually concerned with how to transform 
@@ -145,7 +145,7 @@ suited for identifying shared sequences between strings.
 
   The Levenshtein distance considers insertions, deletions and
 substitutions of characters as edit operations, which can
-be modelled in Haskell by the |EditOp| datatype below.
+be modeled in Haskell by the |EditOp| datatype below.
 
 \begin{myhs}
 \begin{code}
@@ -155,7 +155,7 @@ data EditOp = Ins Char | Del Char | Subst Char Char
 
   The semantics of these edit operations are straightforward. The |apply|
 function, shown below, gives a denotational semantics of |[EditOp]|
-by maping edit-scripts to partial functions over |String|s. 
+by mapping edit-scripts to partial functions over |String|s. 
 
 \begin{myhs}
 \begin{code}
@@ -245,7 +245,7 @@ which is a restriction of the Levenshtein distance and forms
 the specification of the \unixdiff{}~\cite{McIlroy1976} utility.
 
   If we take the |lev| function and modify it in such a way that it only
-considers identity substitutons, that is, |Subst x y| with |x == y|,
+considers identity substitutions, that is, |Subst x y| with |x == y|,
 we end up with a function that computes the classic longest common
 subsequence. Note that this is different from the longest common
 substring problem, as subsequences need not be contiguous.
@@ -266,7 +266,7 @@ cost Cpy      = 0
 \end{code}
 \end{myhs}
 
-  The application function is analoguous to the |apply| for the Levenshtein
+  The application function is analogous to the |apply| for the Levenshtein
 distance. The computation of the minimum cost edit-script, however,
 is not. We must ensure to issue a |Cpy| only when both elements
 are the same, as illustrated in \Cref{fig:background:string-lcs}.
@@ -287,7 +287,7 @@ lcs (x:xs)  (y:ys)  =
    in minimumBy cost (s ++ [i , d])
 \end{code}
 \end{myhs}
-\caption{Speficiation of the \unixdiff{}.}
+\caption{Specification of the \unixdiff{}.}
 \label{fig:background:string-lcs}
 \end{figure}
 
@@ -302,12 +302,12 @@ is a general problem with any \emph{edit-script} based approaches.
   A practical implementation of \unixdiff{} uses a number of
 algorithmic techniques that make it performant. First, it is
 essential to use a memoized |lcs| function to avoid recomputing
-subproblems. It is also common to hash the data being compared to have
-amortized constant time comparisson. More complicated, however, is the
+sub-problems. It is also common to hash the data being compared to have
+amortized constant time comparison. More complicated, however, is the
 adoption of a number of heuristics that tend to perform well in practice.  
 One example is the \texttt{diff --patience} algorithm~\cite{patienceDiff},
 that will emphasize the matching of lines that appear only once in the
-source and destintion files.
+source and destination files.
 
 \subsection{Classic Tree Edit Distance}
 \label{sec:background:tree-edit-distance}
@@ -360,7 +360,7 @@ practice~\cite{Farinier2015,Hashimoto2008,Falleri2014,Paassen2018,Finis2013},
           to[out=225,in=315] node[midway,below] {|del x|} 
           ($ (f1.east) - (0,0.15) $);
 \end{tikzpicture}
-\caption{Insetion and Deletion of node |x|, with arity 2
+\caption{Insertion and Deletion of node |x|, with arity 2
 on a forest}
 \label{fig:background:tree-es-operations}
 \end{figure}
@@ -424,7 +424,7 @@ to be type-safe by construction.
 
   Although edit-scripts provide a very intuitive notion of local
 transformations over a tree, there are many different edit-scripts
-that perform the same transoformation: the order of
+that perform the same transformation: the order of
 insertions and deletions do no matter. This makes it hard to 
 develop algorithms based solely on edit-scripts. 
 The notion of \emph{tree mapping} often comes in handy. It works as
@@ -439,7 +439,7 @@ Let |t| and |u| be two trees, a tree mapping
 between |t| and |u| is an order preserving partial bijection between the
 nodes of a flattened representation of |t| and |u| according
 to their preorder traversal. Moreover, it preserves the 
-ancenstral order of nodes. That is, given two subtrees |x| and |y| in 
+ancestral order of nodes. That is, given two subtrees |x| and |y| in 
 the domain of the mapping |m|, then |x| is an ancestor of |y| if and only if
 |m x| is an ancestor of |m y|.
 \end{definition}
@@ -511,7 +511,7 @@ order of deletions and insertions is irrelevant, which removes the redundancy
 of edit-scripts. Nevertheless, the definition of tree mapping is still very restrictive:
 (i) the ``bijective mapping'' does not enable trees to be duplicated or contracted;
 (ii) the ``order preserving'' does not enable trees to be permuted or moved
-accross ancestor boundaries. These restrictions are there to ensure that
+across ancestor boundaries. These restrictions are there to ensure that
 one can always compute an edit-script from a tree mapping.
 
   Most tree differencing algorithms start by producing a tree mapping and
@@ -561,10 +561,10 @@ that they are type unsafe. It is quite easy to write an edit-script
 that produces an \emph{ill-formed} tree, according to some
 arbitrary schema. Even when writing the edit operations in a
 type-safe way~\cite{Lempsink2009} the synchronization of said changes
-is not guarnteed to be type-safe~\cite{Vassena2016}.
+is not guaranteed to be type-safe~\cite{Vassena2016}.
   
   Finally, we must mention the lack of expressivity that comes from edit-scripts, 
-from the \emph{differencing} point of fiew. Consider the trees below,
+from the \emph{differencing} point of view. Consider the trees below,
 
 \begin{center}
 \begin{forest}
@@ -628,7 +628,7 @@ $$ \qquad
 \end{figure}
 
   Generally speaking, synchronization of changes $p$ and $q$ can be
-modelled in one of two ways. Either we produce one change that works
+modeled in one of two ways. Either we produce one change that works
 on the common ancestor of $p$ and $q$, as in
 \Cref{fig:background:mergesquare-threeway}, or we produce two changes
 that act directly on the images of $p$ and $q$,
@@ -637,7 +637,7 @@ a \emph{three-way merge} and the later a \emph{residual} merge.
 
   Residual merges, specially if based on actual residual
 systems~\cite{Terese2003} pose a few technical challenges --- proving
-the that the laws required for estabilishing an actual residual system
+the that the laws required for establishing an actual residual system
 is non-trivial. Moreover, they tend to be harder to generalize
 to $n$-ary inputs. They do have the advantage of enabling one to
 model merges as pushouts~\cite{Mimram2013}, which could provide a desirable
@@ -712,7 +712,7 @@ which parts of the replicas are copies from the same piece of
 information in the common ancestor. For example, successfully 
 synchronizing the replicas in \Cref{fig:background:diff3-example} 
 depends in recognizing that the insertion of {\small \verb!prod := 1;!} 
-comes after changeing {\small \verb!res := 0;!} 
+comes after modifying {\small \verb!res := 0;!} 
 to {\small \verb!sum := 0;!}. This fact only becomes evident after
 we look at the result of calling the \unixdiff{} on each diverging
 replica -- the copies in each patch identify which parts of the
@@ -1283,7 +1283,7 @@ type is atomic and should not be expanded further; (2) \emph{products}
 \emph{sums} (usually written as |:+:|) which encode the choice between
 constructors. The |Rep (Bin a)| shown before is expressed in this
 form. Note, however, that there is no restriction on \emph{how} these
-can be combined. These combinators are usually refered to as
+can be combined. These combinators are usually referred to as
 \emph{pattern functors} The \emph{pattern
 functor}-based libraries are too permissive though, for instance, |K1
 R Int :*: Maybe| is a perfectly valid \texttt{GHC.Generics}
