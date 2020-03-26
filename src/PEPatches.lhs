@@ -1512,10 +1512,9 @@ have a disjoint set of names.}
 \begin{code}
 merge  :: PatchAl kappa fam at -> PatchAl kappa fam at -> Maybe (PatchC kappa fam at)
 merge oa ob = holesMapM (uncurry' go) (lgg oa ab)
-  where
-    go  :: Holes kappa fam (Al kappa fam) at -> Holes kappa fam (Al kappa fam) at
-        -> Maybe (Sum (Conflict kappa fam) (Chg kappa fam) at)
-    go ca cb = mergeAl (alDistr ca) (alDistr cb)
+  where  go  :: Holes kappa fam (Al kappa fam) at -> Holes kappa fam (Al kappa fam) at
+             -> Maybe (Sum (Conflict kappa fam) (Chg kappa fam) at)
+         go ca cb = mergeAl (alDistr ca) (alDistr cb)
 \end{code}
 \end{myhs}
 
@@ -1615,18 +1614,26 @@ data MergeState kappa fam = MergeState
 \end{myhs}
 
   The equivalences in |eqs| are different from instantiations
-in |iota| in an important way. The entries |(v , p)| in |iota|
+in |iota| in an important way. The entries |(metavar v , p)| in |iota|
 represent a decision made by the merging algorithm: the subtree
-located at |v| must be modified acording to patch |p| -- which
-means that at the end of the process, there will be no occurences of |v| left. 
+located at |metavar v| must be modified acording to patch |p| -- which
+means that at the end of the process, there will be no occurences of |metavar v| left. 
 The equivalences, on the other hand, represent observations made
-by the merging algorithm, that is, an entry |(v , t)| represents
-an observation that the subtree at |v| is, in fact, equal to |t|.
-These facts may or may not be used later on. For example, if we
-already made a decision about how to instantiate |v|, whether or not
-it must be equal to |t| is irrelevant -- all occurences of |v| will
-disappear. \victor{is it really irrelevant? what if we decide that
-|v| was something incompatible with |t|?}
+by the merging algorithm, that is, an entry |(metavar v , t)| represents
+an observation that the subtree at |metavar v| is, in fact, equal to |t|.
+These facts may or may not be used later on. For example, say that
+there is an entry |(metavar u, metavar v)| in |eqs|, but we
+already made a decision about how to instantiate |metavar v|,
+that is, there is also an entry |(metavar v , t)| in |iota|.
+If we substitute occurences of |metavar u| for |v| we risk reintroducing
+occurences of |v|, which can yield in patches that cannot be applied.
+\digress{I believe that there is a more elegant way to address
+this. One option could have been using a single map and register equivalences
+some other way. Say that |metavar v| is discovered to be
+equivalent to |t|, it could be registered as |(metavar v , Chg t t)|,
+that is: |metavar v| was |t| and became |t|. Once again, recall that
+the merging algorithm in this section was very much a work-in-progress
+while my PhD finished.}
 
   Conflicts and errors stemming from the arguments to |mergeAl| 
 \emph{not} forming a span will be distinguished by the |MergeErr| datatype,
@@ -1637,8 +1644,8 @@ error in a computation inside the |Except| monad.
 \begin{code}
 data MergeErr = NotASpan | Conf String
 
-throwConf    lbl  = throwError (Conf lbl)
-throwInvFailure   = throwError NotASpan
+throwConf lbl  = throwError (Conf lbl)
+throwNotASpan  = throwError NotASpan
 \end{code}
 \end{myhs}
 
@@ -1670,8 +1677,7 @@ it then makes a second pass computing the final result.
 
 \begin{myhs}
 \begin{code}
-mergeAlM  :: Al kappa fam at -> Al kappa fam at 
-          -> MergeM kappa fam (Al kappa fam at)
+mergeAlM  :: Al kappa fam at -> Al kappa fam at -> MergeM kappa fam (Al kappa fam at)
 mergeAlM p q = do
   phase1  <- mergePhase1 p q
   info    <- get
@@ -1717,8 +1723,7 @@ The |mergePhase1| function proceeds by induction on its arguments.
 
 \begin{myhs}
 \begin{code}
-mergePhase1  :: Al kappa fam x -> Al kappa fam x
-             -> MergeM kappa fam (Al' kappa fam (Phase2 kappa fam) x)
+mergePhase1  :: Al kappa fam x -> Al kappa fam x -> MergeM kappa fam (Al' kappa fam (Phase2 kappa fam) x)
 mergePhase1 p q = case (p , q) of dots
 \end{code}
 \end{myhs}
@@ -1747,15 +1752,15 @@ the other changes its contents.
 
 \begin{myhs}
 \begin{code}
-   (Prm x y, Prm x' y')  -> Mod <$$> mrgPrmPrm x y x' y'
-   (Prm x y, _)          -> Mod <$$> mrgPrm x y (disalign q)
-   (_, Prm x y)          -> Mod <$$> mrgPrm x y (disalign p)
+   (Prm x y, Prm w z)  -> Mod <$$> mrgPrmPrm x y w z
+   (Prm x y, _)        -> Mod <$$> mrgPrm x y (disalign q)
+   (_, Prm x y)        -> Mod <$$> mrgPrm x y (disalign p)
 \end{code} %$
 \end{myhs}
 
   If we are to merge two permutations, |Prm (metavar x) (metavar y)|
-against |Prm (metavar x') (metavar y')|, for example, we know that
-|metavar x| and |metavar x'| must refer to the same subtree, hence we
+against |Prm (metavar w) (metavar z)|, for example, we know that
+|metavar x| and |metavar w| must refer to the same subtree, hence we
 register their equivalence. But since the two changes permuted the
 same tree, we can only synchronize them if they were permuted to the
 \emph{same place}, in other words, if both permutations turn out to be
@@ -1766,8 +1771,8 @@ equal at the end of the process.
 mrgPrmPrm  :: MetaVar kappa fam x -> MetaVar kappa fam x 
            -> MetaVar kappa fam x -> MetaVar kappa fam x
            -> MergeM kappa fam (Phase2 kappa fam x)
-mrgPrmPrm x y x' y'  =   onEqvs (\eqs -> substInsert eqs x (Hole x'))
-                     >>  return (P2TestEq (Chg (Hole x) (Hole y)) (Chg (Hole x') (Hole y')))
+mrgPrmPrm x y w z  =   onEqvs (\eqs -> substInsert eqs x (Hole w))
+                   >>  return (P2TestEq (Chg (Hole x) (Hole y)) (Chg (Hole w) (Hole z)))
 \end{code}
 \end{myhs}
 
@@ -1787,16 +1792,13 @@ the alignment flagged it as a permutation.
 
 \begin{myhs}
 \begin{code}
-mrgPrm  :: MetaVar kappa fam x -> MetaVar kappa fam x
-        -> Chg kappa fam x
+mrgPrm  :: MetaVar kappa fam x -> MetaVar kappa fam x -> Chg kappa fam x
         -> MergeM kappa fam (Phase2 kappa fam x)
 mrgPrm x y c  =   addToIota "prm-chg" x c
               >>  return (P2Instantiate (Chg (Hole x) (Hole y)) Nothing)
 \end{code}
 \end{myhs}
 
-\victor{I'm unsure whether this should really be a conflict... I will
-study the conflicts that appear in practice}
   The |addToIota| function inserts the |(x, c)| entry in |iota| if |x|
 is not yet a member. It raises a conflict with the supplied label
 if |x| is already in |iota| with a value that is different than |c|.
@@ -1806,8 +1808,20 @@ two different values can also be merged. I ran into many difficulties
 tracking how subtrees were moved and opted for the easy and pragmatic
 option of not doing anything difficult here.}
 
-  Insertions must be preserved as long as they do not attempt to
-insert different information in the same location.
+  Worth noting that the call to |addToIota| in |mrgPrm|, above, 
+will never raise a |"prm-chg"| conflict. This is because |metavar x| 
+and |metavar y| are classified as a permutation hence, each variable occurs
+exactly once in the deletion and once in the insertion contexts.
+Therefore, it is impossible that |x| above was already a member of |iota|.
+\digress{In fact, when we come to discussing the experiments, 
+in \Cref{chap:experiments}, we see that |"prm-chg"| never showed up 
+as a conflict in our whole dataset.}
+
+  With permutations and copies out of the way, we start looking at the
+more intricate branches of the merge function. Insertions are still fairly
+simple and must preserved as long as they do not attempt to
+insert different information in the same location -- we would not
+be able to decide which insertion come first in this situation.
 
 \begin{myhs}
 \begin{code}
@@ -1816,10 +1830,10 @@ insert different information in the same location.
      | otherwise           -> throwConf "ins-ins"
    (Ins (Zipper z p'), _)  -> Ins . Zipper z <$$> mrgPhase1 p' q
    (_ ,Ins (Zipper z q'))  -> Ins . Zipper z <$$> mrgPhase1 p q'
-\end{code}
+\end{code} %
 \end{myhs}
 
-  Next we look at deletions. If one patch
+  Deletions must be \emph{executed}. If one patch
 deletes a constructor but the other modifies the fields the
 constructor, we must ensure that none of the deleted fields
 have been modified by the other patch. This is done by the |tryDel|
@@ -1827,14 +1841,17 @@ function, which attempts to delete a zipper from an alignment, and,
 if successful, returns the pair of alignments we should continue
 to merge.  
 
-\victor{Mention we dont need to swap; this is symmetruic! :)}
-
 \begin{myhs}
 \begin{code}
    (Del zp@(Zipper z _), _)  -> Del . Zipper z <$$> (tryDel zp q >>= uncurry mrgPhase1)
    (_, Del zq@(Zipper z _))  -> Del . Zipper z <$$> (tryDel zq p >>= uncurry mrgPhase1)
-\end{code}
+\end{code} %
 \end{myhs}
+
+  Note that since |merge| is symmetric, we an freely swap the order
+of arguments. \digress{Let me rephrase that. The |merge| \emph{should}
+be symmetric, and \texttt{QuickCheck} tests were positive of this, but I have no
+proof.} 
 
   The |tryDel| function matches on the possible cases for |q| (resp. |p|)
 and checks whether there are any modifications to the locations the
@@ -1850,13 +1867,13 @@ tryDel (Zipper z h) (Del (Zipper z' h'))
   | z == z'    = return (h , h')
   | otherwise  = throwConf "del-del"
 tryDel (Zipper z h) (Spn rep) = case zipperRepZip z rep of
-    Nothing  -> throwInvFailure
+    Nothing  -> throwNotASpan
     Just r   -> let hs = repLeavesList r
                  in case partition (exElim isInR1) hs of
                       ([Exists (InL Refl :*: x)] , xs)
                         | all isCpyL1 xs  -> return (h , x)
                         | otherwise       -> throwConf "del-spn"
-                      _                   -> throwConf "del-spn"
+                      _                   -> error "unreachable; zipRepZip invariant"
 tryDel (Zipper _ _) _ = throwConf "del-mod"
 \end{code}
 \end{myhs}
@@ -1878,10 +1895,35 @@ in \Cref{fig:pepatches:merge-03}.
 
   The |mrgChgSpn| function, below, matches the deletion
 context of the |Chg| against the spine and and returns
-a |P2Instantiate| instruction for change, being careful that
-the variables that show up in the result, after the second phase is done,
-do not mention any variable mentioned by the insertion contexts
-in the spine.
+a |P2Instantiate| instruction for change. The instantiation
+function here, |instM|, receives a deletion context and an alignment
+and attempts to assign the variables in the deletion context
+to changes inside the spine. This is possible whenever 
+the modifications in the spine occur further from the root
+than the variables in the spine. \Cref{fig:pepatches:instm}
+illustrates the implementation of |instM|.
+
+\begin{figure}
+\begin{myhs}
+\begin{code}
+instM :: (All Eq kappa) => HolesMV kappa fam at -> Al kappa fam at -> MergeM kappa fam ()
+instM _           (Cpy _)  = return ()
+instM (Hole v)    a        = addToIota "inst-contr" v (disalign a)
+-- Del ctx and spine must form a span; cannot reference different constructors or primitives.
+instM x@(Prim _)  d        = when (x /= chgDel (disalign d)) throwNotASpan
+instM (Roll r)    (Spn s)  = case zipSRep r s of
+    Nothing   -> throwNotASpan
+    Just res  -> void (repMapM (\x -> uncurry' instM x >> return x) res)
+-- Spine wants to change a portion of the tree that is deleted by the deletion context.
+instM _         (Mod _)    = throwConf "inst-mod"
+instM _         (Prm _ _)  = throwConf "inst-perm"
+instM (Roll _)  (Ins _)    = throwConf "inst-ins"
+instM (Roll _)  (Del _)    = throwConf "inst-del"
+\end{code}
+\end{myhs}
+\caption{Implementation of |instM|.}
+\label{fig:pepatches:instm}
+\end{figure}
 
 \begin{myhs}
 \begin{code}
@@ -1893,42 +1935,45 @@ in the spine.
 \end{code}
 \end{myhs}
 
-\victor{Explain |instM|!!!}
-
-  \Cref{fig:pepatches:merge-03} illustrates a case where failing to check
-this would result in an erroneous duplication of the value |2|. 
-
-  Matching the deletion context of |chg = Chg (metavar c) (: (metavar
-a) (metavar c))| against the spine |spn = Spn (: Cpy (Chg (metavar z)
-(: (metavar x) (metavar z))))| will yield |c| equal to |spn|, which
-means the subtree identified by |c| was modified according to |spn|,
-which is correct. The observation, however, is that the insertion
+  In |mrgChgSpn| we must check that the variables that would show up
+in the result, after the second phase is done, do not mention any
+variable that occurs in the insertion contexts of the
+spine. \Cref{fig:pepatches:merge-03} illustrates a case where failing
+to perform this check would result in an erroneous duplication of the
+value |2|. Matching the deletion context of |chg = Chg (metavar c) (metavar
+a : metavar c)| against the spine |spn = Spn (Cpy : Chg (metavar z)
+(metavar x : (metavar z)))| yields |c| equal to |spn|, which
+correctly identifies that the subtree at |metavar c| was modified according to |spn|.
+The observation, however, is that the insertion
 context of |chg| mentions |metavar a|, which is a subtree that comes
-from somwhere else other than the deletion context of |chg|. If we
-naively substitute |metavar c| in |ctxDel chg| by |ctxDel (disalign spn)|
-and in |ctxIns chg| by |ctxIns (disalign spn)|, we would get:
+from outside the deletion context of |chg|. If we do not perform
+any further check and proceed naively, we would end up
+substituting |metavar c| for |ctxDel (disalign spn)| 
+and for |ctxIns (disalign spn)| in |ctxDel chg| and |ctxIns chg|, respectively,
+which would result in:
 
 \begin{minipage}{.8\textwidth}
 \centering
 \begin{myforest}
 [,change
-  [|(:)| [l,metavar] [z,metavar]]
+  [|(:)| [o,metavar] [z,metavar]]
   [|(:)| [a,metavar]
-    [|(:)| [l,metavar] [|(:)| [x,metavar] [z,metavar]]]]]
+    [|(:)| [o,metavar] [|(:)| [x,metavar] [z,metavar]]]]]
 \end{myforest}
 \end{minipage}
 
   Since we know |metavar x == metavar a|, which was registered when
 merging the left hand side of |(,)|, in
-\Cref{fig:pepatches:merge-03:A,fig:pepatches:merge-03:B}, we have
-that |metavar a| was duplicated. Our implementation will reject this
-since it performs the check that the subtrees that appear in the
-result of instantiating |chg| are separate from those
-that were moved around by |spn|. \digress{I dislike this aspect of
-this synchronization algorithm quite a lot, it feels unecessarily complex and with
-no good justification. There must be a more disciplined way of
-disallowing duplications to be introduced without this but I could
-not figure it out.}
+\Cref{fig:pepatches:merge-03:A,fig:pepatches:merge-03:B}, it becomes
+clear that |metavar a| was erroneously duplicated. Our implementation
+will reject this by performing a check that ensures the set of
+subtrees that appear in the result of instantiating |chg| is disjoint
+from the set of subtrees that were moved around by |spn|. \digress{I
+dislike this aspect of this synchronization algorithm quite a lot, it
+feels unecessarily complex and with no really good justification
+besides the example in \Cref{fig:pepatches:merge-03}, which was distilled
+from real conflicts. There must be a more disciplined way of disallowing duplications to be
+introduced without this but I could not figure it out.}
 
 \begin{figure}
 \begin{minipage}{.65\textwidth}
@@ -1960,17 +2005,15 @@ here are operating over pairs of lists.}
 \label{fig:pepatches:merge-03}
 \end{figure}
 
-  
-\victor{Obviously they must be spines over the same constructor; unless
-the patchs don't make a span.}
-
-  Merging two spines is simple. We must ensure they are spines over
-the same constructor and recurse on the fields of the spine pointwise:
+  Merging two spines is simple. We know they must
+reference the same constructor since the arguments
+to |merge| form a span. All that we have to do
+is recurse on the paired fields of the spines, pointwise:
 
 \begin{myhs}
 \begin{code}
    (Spn p', Spn q') -> case zipSRep p' q' of
-       Nothing -> throwInvFailure
+       Nothing -> throwNotASpan
        Just r  -> Spn <$$> repMapM (uncurry' mrgPhase1) r
 \end{code}
 \end{myhs} %
@@ -1993,8 +2036,7 @@ how this subtree was changed and move on.
 
 \begin{myhs}
 \begin{code}
-mrgChgDup  :: Chg kappa fam x -> Chg kappa fam x
-           -> MergeM kappa fam (Phase2 kappa fam x)
+mrgChgDup  :: Chg kappa fam x -> Chg kappa fam x -> MergeM kappa fam (Phase2 kappa fam x)
 mrgChgDup dup@(Chg (Hole v) _) q' = do
   addToIota "chg-dup" v q' 
   return (P2Instantiate dup Nothing)
@@ -2009,16 +2051,13 @@ equal.
 
 \begin{myhs}
 \begin{code}
-mrgChgChg :: Chg kappa fam x -> Chg kappa fam x
-          -> MergeM kappa fam (Phase2 kappa fam x)
--- Changes must have unifiable domains
-mrgChgChg p' q'
-  | isDup p'   = mrgChgDup p' q'
-  | isDup q'   = mrgChgDup q' p'
-  | otherwise  = case unify (chgDel p') (chgDel q') of
-       Left  _   -> throwInvFailure
-       Right r   -> onEqvs (M.union r)
-                 >> return (P2TestEq p' q')
+mrgChgChg :: Chg kappa fam x -> Chg kappa fam x -> MergeM kappa fam (Phase2 kappa fam x)
+mrgChgChg p' q'  | isDup p'   = mrgChgDup p' q'
+                 | isDup q'   = mrgChgDup q' p'
+                 | otherwise  = case unify (chgDel p') (chgDel q') of
+                      Left  _   -> throwNotASpan
+                      Right r   -> onEqvs (M.union r)
+                                >> return (P2TestEq p' q')
 \end{code}
 \end{myhs}
 
@@ -2062,7 +2101,7 @@ mrgPhase1 p q = case (p , q) of
 
    -- Two spines it is easy, just pointwise merge their recursive positions
    (Spn p', Spn q') -> case zipSRep p' q' of
-       Nothing -> throwInvFailure
+       Nothing -> throwNotASpan
        Just r  -> Spn <$$> repMapM (uncurry' mrgPhase1) r
 
    -- Finally, modifications sould be instantiated, if possible.
