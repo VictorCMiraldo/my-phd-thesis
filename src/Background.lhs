@@ -37,7 +37,7 @@ lines 1 and 3 in the source are deleted and lines
 \emph{deleted} or \emph{inserted} is then packaged into
 an \emph{edit-script}: a list of operations that transforms
 the source file into the destination file. For the example above,
-the edit script would read something like: delete the first line;
+the edit-script would read something like: delete the first line;
 insert two new lines; copy a line; delete a line; insert a line
 and finally copy the last line. The output we would see from
 the \unixdiff{} would show deletions prefixed with a minus sign
@@ -67,8 +67,8 @@ computes tree differences (\Cref{sec:background:tree-edit-distance}).
 
   Recycling linear edit distance into tree edit distance, however,
 also comes with its drawbacks. Linear differencing uses \emph{
-edit-scripts} to represent the differences between two objects.  Edit
-scripts are composed of atomic operations, which traditionally include
+edit-scripts} to represent the differences between two objects.  Edit-scripts 
+are composed of atomic operations, which traditionally include
 operations such as \emph{insert}, \emph{delete} and \emph{copy}. These
 scripts are later interpreted by the application function, which gives
 the semantics to these operations. The notion of \emph{edit distance}
@@ -86,8 +86,8 @@ countless ambiguous choices to return the optimal one.  Finally,
 manipulating edit-scripts in an untyped fashion, say, for instance in
 order to merge then, might produce ill-typed trees -- as in \emph{not
 abiding by a schema} -- as a result~\cite{Vassena2016}.  We can get
-around this last issue by writing edit scripts in a typed
-form~\cite{Lempsink2009}, but this requires some non trivial generic
+around this last issue by writing edit-scripts in a typed
+form~\cite{Lempsink2009}, but this requires some non-trivial generic
 programming techniques to scale.
 
   The second half of this chapter is the state-of-the-ast
@@ -155,7 +155,7 @@ data EditOp = Ins Char | Del Char | Subst Char Char
 
   The semantics of these edit operations are straightforward. The |apply|
 function, shown below, gives a denotational semantics of |[EditOp]|
-by maping edit scripts to partial functions over |String|s. 
+by maping edit-scripts to partial functions over |String|s. 
 
 \begin{myhs}
 \begin{code}
@@ -182,11 +182,11 @@ cost (Subst c d)  = if c == d then 0 else 1
 \end{code}
 \end{myhs}
 
-  We can compute the \emph{edit script}\index{Edit Script}, i.e. a
+  We can compute the \emph{edit-script}\index{edit-script}, i.e. a
 list of edit operations, with the minimum cost quite easily with a
 brute-force and inefficient implementation. 
 \Cref{fig:background:string-leveshtein} shows the
-implementation of the edit script with the minimum Levenshtein
+implementation of the edit-script with the minimum Levenshtein
 distance.
 
 \begin{figure}
@@ -204,7 +204,7 @@ lev (x:xs)  (y:ys)  =
 \end{code} 
 \end{myhs}
 \caption{Definition of the function that returns the
-edit script with the minimum Levenshtein Distance between two strings.}
+edit-script with the minimum Levenshtein Distance between two strings.}
 \label{fig:background:string-levshtein}
 \end{figure}
 
@@ -215,9 +215,9 @@ levenshteinDist s d = cost (head (lev s d))
 \end{code}
 \end{myhs}
 
-  Note that although the Levenshtein distance is unique, the edit
-scripts witnessing it is \emph{not}. Consider the case of |lev "ab" "ba"|
-for instance. All of the edit scripts below have cost 2, which is the
+  Note that although the Levenshtein distance is unique, the edit-scripts
+witnessing it is \emph{not}. Consider the case of |lev "ab" "ba"|
+for instance. All of the edit-scripts below have cost 2, which is the
 minimum possible cost.
 
 \begin{myhs}
@@ -229,10 +229,10 @@ lev "ab" "ba" =?  [ Del 'a' , Subst 'b' 'b' , Ins 'a']
 \end{myhs}
 
   From a edit distance point of view, there is not an issue. The Levenshtein
-distance between |"ab"| and |"ba"| is 2, regardless of the edit
-script chosen. But from an operational point of view,
+distance between |"ab"| and |"ba"| is 2, regardless of the edit-script. 
+But from an operational point of view,
 , \ie, transforming one string into another, this ambiguity
-poses a problem. The lack of criteria to favor one edit script over another
+poses a problem. The lack of criteria to favor one edit-script over another
 means that the result of the differencing algorithm is hard to predict.
 Consequently, developing a predictable diff and merging algorithm 
 becomes a difficult task.
@@ -267,7 +267,7 @@ cost Cpy      = 0
 \end{myhs}
 
   The application function is analoguous to the |apply| for the Levenshtein
-distance. The computation of the minimum cost edit script, however,
+distance. The computation of the minimum cost edit-script, however,
 is not. We must ensure to issue a |Cpy| only when both elements
 are the same, as illustrated in \Cref{fig:background:string-lcs}.
 
@@ -292,7 +292,7 @@ lcs (x:xs)  (y:ys)  =
 \end{figure}
 
   Running the |lcs x y| function, \Cref{fig:background:string-lcs}, will
-yield an \emph{edit script} that enables us to read out one longest
+yield an \emph{edit-script} that enables us to read out one longest
 common subsequence of |x| and |y|. Note that the ambiguity problem is
 still present, however to a lesser degree than with 
 the Levenshtein distance. For example, there are only two edit-scripts 
@@ -322,7 +322,7 @@ Bille2005,Autexier2015,Chawathe1997}.
 It considers \emph{arbitrary} trees as the objects under
 scrutiny. This added degree of freedom carries over to the choice of
 edit operations. Suddenly, there are more edit operations one
-could use to create edit scripts. To name a few, we can have
+could use to create edit-scripts. To name a few, we can have
 flattening insertions and deletions, where the children of the deleted
 node are inserted or removed in-place in the parent node. Another
 operation that only exists in the untyped world is node relabeling.
@@ -397,10 +397,10 @@ apply (Ins l : ops) ts
 \label{fig:background:apply-tree-edit}
 \end{figure}
 
-  We label these approaches as \emph{untyped} because there exists edit
-scripts that yield non-well formed trees. For example, imagine |l| is
+  We label these approaches as \emph{untyped} because there exists edit-scripts
+that yield non-well formed trees. For example, imagine |l| is
 a label with arity 2 -- supposed to receive two
-arguments. Now consider the edit script |Ins l : []|, which will yield
+arguments. Now consider the edit-script |Ins l : []|, which will yield
 the tree |Node l []| once applied to the empty forest. If the objects
 under differencing are required to abide by a certain schema, such as
 abstract syntax trees for example, this becomes an issue.  This is
@@ -412,26 +412,26 @@ can yield invalid trees for some given schema. In the context of
 abstract-syntax, this could be unparseable programs.
 
   It is possible to use the Haskell type system to our advantage and
-write |EOp| in a way that it is guaranteed to return well typed
+write |EOp| in a way that it is guaranteed to return well-typed
 results. Labels will be the different constructors of the family of
 types in question and their arity comes from how many fields each
-constructor expects. Edit scripts will then be indexes by two lists of
+constructor expects. edit-scripts will then be indexes by two lists of
 types: the types of the trees it consumes and the types of the trees
 it produces. We will come back to this in more detail in  
 \Cref{sec:gp:well-typed-tree-diff}, where we review the approach of
 Lempsink and L\"{o}h~\cite{Lempsink2009} at adapting this untyped framework
 to be type-safe by construction.
 
-  Although edit scripts provide a very intuitive notion of local
+  Although edit-scripts provide a very intuitive notion of local
 transformations over a tree, there are many different edit-scripts
 that perform the same transoformation: the order of
 insertions and deletions do no matter. This makes it hard to 
-develop algorithms based solely on edit scripts. 
+develop algorithms based solely on edit-scripts. 
 The notion of \emph{tree mapping} often comes in handy. It works as
-a \emph{normal form} version of edit scripts and represents only the
+a \emph{normal form} version of edit-scripts and represents only the
 nodes that are either relabeled or copied. We must impose a series of
 restrictions on these mappings to maintain the ability to
-produce edit scripts out of it. \Cref{fig:brackground:tree-mapping} 
+produce edit-scripts out of it. \Cref{fig:brackground:tree-mapping} 
 illustrates four invalid and one valid such mappings.
 
 \begin{definition}[Tree Mapping] \label{def:background:tree-mapping}
@@ -508,14 +508,14 @@ example.}
    The tree mapping determines the nodes where either a copy or substitution
 must be performed. Everything else must be deleted or inserted and the
 order of deletions and insertions is irrelevant, which removes the redundancy
-of edit scripts. Nevertheless, the definition of tree mapping is still very restrictive:
+of edit-scripts. Nevertheless, the definition of tree mapping is still very restrictive:
 (i) the ``bijective mapping'' does not enable trees to be duplicated or contracted;
 (ii) the ``order preserving'' does not enable trees to be permuted or moved
 accross ancestor boundaries. These restrictions are there to ensure that
-one can always compute an edit script from a tree mapping.
+one can always compute an edit-script from a tree mapping.
 
   Most tree differencing algorithms start by producing a tree mapping and
-then extracting an edit script from this. There are a plethora of design
+then extracting an edit-script from this. There are a plethora of design
 decisions on how to produce a mapping and often the domain of application
 of the tool will enable one to impose extra restrictions to attempt to squeeze
 maximum performance out of the algorithm. The \texttt{LaDiff}~\cite{Chawathe1996} tool, 
@@ -525,10 +525,10 @@ appearing in the same order, starting at the leaves of the document.
 Tools such as \texttt{XyDiff}~\cite{Marian2002}, used to identify changes in XML documents,
 use hashes to produce matchings efficiently.
 
-\subsection{Shortcomings of Edit Script Based Approaches}
+\subsection{Shortcomings of Edit-Script Based Approaches}
 
-  We argue that regardless of the process by which an edit script is obtained,
-edit scripts have inherent shortcomings when they
+  We argue that regardless of the process by which an edit-script is obtained,
+edit-scripts have inherent shortcomings when they
 are used to compare tree structured data. The first and most striking 
 is that the use of heuristics to compute optimal solutions is unavoidable.
 Consider the tree-edit-scripts between the following two trees:
@@ -542,10 +542,10 @@ Consider the tree-edit-scripts between the following two trees:
 \end{center}
   
   From an \emph{edit distance} point of view, their distance is
-2. This fact can be witnessed by two distinct edit scripts: either
+2. This fact can be witnessed by two distinct edit-scripts: either
 |[Cpy Bin , Del T , Cpy U , Ins T]| or |[Cpy Bin , Ins U , Cpy T , Del
 U]| transform the target into the destination correctly. Yet, from
-a \emph{differencing} point of view, these two edit scripts are fairly different.
+a \emph{differencing} point of view, these two edit-scripts are fairly different.
 Do we care more about |U| or |T|? What if |U| and |T| are also
 trees, but happen to have the same size (so that inserting one or the
 other yields edit-scripts with equal costs)? Ultimately, 
@@ -556,14 +556,14 @@ hard to predict. Moreover, the existence of this type of choice point inherently
 slows algorithms down since the algorithm \emph{must decide} which
 tree to copy. 
 
-  Another issue when dealing with edit script is
-that they are type unsafe. It is quite easy to write an edit
-script that produces an \emph{ill-formed} tree, according to some
+  Another issue when dealing with edit-script is
+that they are type unsafe. It is quite easy to write an edit-script
+that produces an \emph{ill-formed} tree, according to some
 arbitrary schema. Even when writing the edit operations in a
-type safe way~\cite{Lempsink2009} the synchronization of said changes
-is not guarnteed to be type safe~\cite{Vassena2016}.
+type-safe way~\cite{Lempsink2009} the synchronization of said changes
+is not guarnteed to be type-safe~\cite{Vassena2016}.
   
-  Finally, we must mention the lack of expressivity that comes from edit scripts, 
+  Finally, we must mention the lack of expressivity that comes from edit-scripts, 
 from the \emph{differencing} point of fiew. Consider the trees below,
 
 \begin{center}
@@ -574,11 +574,11 @@ from the \emph{differencing} point of fiew. Consider the trees below,
 \end{forest}
 \end{center}
 
-  Optimal edit scripts oblige us to chose between copying |A| 
+  Optimal edit-scripts oblige us to chose between copying |A| 
 as the left or the right subtree. There is no possibility to represent
 duplications, permutations or contractions of subtrees. This means
 that a number of common changes, such as refactorings, yield
-edit scripts with a very high cost even though a good part of the information
+edit-scripts with a very high cost even though a good part of the information
 being deleted or inserted should really have been copied.
 
 \subsection{Synchronizing Changes}
@@ -587,7 +587,7 @@ being deleted or inserted should really have been copied.
   When managing local copies of replicated data such as in software
 version control systems, one is inevitably faced with the problem of
 \emph{synchronizing}~\cite{Balasubramaniam1998} or \emph{merging}
-changes --- when an offline machine goes online with new versions,
+changes -- when an offline machine goes online with new versions,
 when two changes happened simultaneously, etc. The \emph{synchronizer}
 is responsible to identify what has changed and reconcile these
 changes when possible.  Most modern synchronizers operate over the
@@ -638,7 +638,7 @@ a \emph{three-way merge} and the later a \emph{residual} merge.
   Residual merges, specially if based on actual residual
 systems~\cite{Terese2003} pose a few technical challenges --- proving
 the that the laws required for estabilishing an actual residual system
-is non trivial. Moreover, they tend to be harder to generalize
+is non-trivial. Moreover, they tend to be harder to generalize
 to $n$-ary inputs. They do have the advantage of enabling one to
 model merges as pushouts~\cite{Mimram2013}, which could provide a desirable
 metatheoretical foundation. 
@@ -780,7 +780,7 @@ synchronization is locality~\cite{Khanna2007} -- which is enjoyed by
 \texttt{diff3}~\cite{Khanna2007}.  Locality states that changes to 
 distinct locations of a given object can always be synchronized
 without conflicts. In fact, we argue this is the only property we can
-expect out of a general-purpose generic synchronizer.  The reason
+expect out of a general purpose generic synchronizer.  The reason
 being that said synchronizer can rely solely on propositional
 equality of trees and structural disjointness as the criteria to
 estabilish changes as synchronizable.  Other criteria will invariantly
@@ -836,7 +836,7 @@ requirements on the schemas have been developped~\cite{Peters2005}.
 hierarchy between labels, it is implemented into the
 \texttt{DiffXML}~\cite{Mouat2002} and
 \texttt{GumTree}~\cite{Falleri2014} tools and is responsible
-from deducing an edit script given tree matchings, the tree matching
+from deducing an edit-script given tree matchings, the tree matching
 phase differs in each tool. A notable mention is the
 \texttt{XyDiff}~\cite{Marian2002}, which uses hashes to compute
 matchings and, therefore, supports \emph{move} operations maintaining
@@ -848,13 +848,13 @@ yields a robust algorithm, which is applicable in practice.
 Most of these techniques recycle list differencing and can be seen
 as some form of string differencing over the preorder (or postorder)
 traversal of trees, which has quadratic upper bound~\cite{Guha2002}.
-A careful encoding of the edit operations enables one to have edit scripts
+A careful encoding of the edit operations enables one to have edit-scripts
 that are guaranteed to preserve the schema of the data under manipulation
 \cite{Lempsink2009}.
 
   When it comes to synchronization of changes~\cite{Balasubramaniam1998},
 the algorithms are
-heavily dependent on the representation of objects and edit scripts imposed 
+heavily dependent on the representation of objects and edit-scripts imposed 
 by the underlying differencing algorithm.
 The \texttt{diff3}~\cite{Smith1988} tool, developed by Randy Smith in 1988, is still the
 most widely used synchronizer. It has received a formal treatment
@@ -1048,7 +1048,7 @@ sizes of the fields inside a value, ignoring the constructor.
 
   Unlike \texttt{GHC.Generics}, the representation of values is
 defined by induction on the \emph{code} of a datatype, this
-\emph{code} is a type level list of lists of kind |Star|, whose
+\emph{code} is a type-level list of lists of kind |Star|, whose
 semantics is consonant to a formula in disjunctive normal form.  The
 outer list is interpreted as a sum and each of the inner lists as a
 product.  This section provides an overview of \texttt{generic-sop} as
@@ -1074,12 +1074,12 @@ create a value of type |a|. This eliminator then applies |map size| to
 the fields of the constructor, returning something akin to a
 |[Int]|. We then |sum| them up to obtain the final size.
 
-  Codes consist of a type level list of lists. The outer
+  Codes consist of a type-level list of lists. The outer
 list represents the constructors of a type, and will be interpreted as
 a sum, whereas the inner lists are interpreted as the fields of the
 respective constructors, interpreted as products.
 The $\HS{'}$ sign in the code below marks the list
-as operating at the type level, as opposed to term-level lists which
+as operating at the type-level, as opposed to term-level lists which
 exist at run-time. This is an example of Haskell's \emph{datatype}
 promotion~\cite{Yorgey2012}.
 
@@ -1171,7 +1171,7 @@ map f  (x :* xs)  = f x : map f xs
 
   Reflecting on the current definition of |size| and 
 comparing it to the \texttt{GHC.Generics} implementation of |size|, we
-see two improvements: (A) we need one fewer type class, |GSize|,
+see two improvements: (A) we need one fewer typeclass, |GSize|,
 and, (B) the definition is combinator-based. Considering that the
 generated \emph{pattern functor} representation of a Haskell datatype
 will already be in a \emph{sums-of-products}, we do not lose anything
@@ -1208,19 +1208,19 @@ in \Cref{chap:generic-programming}.
 
   Most other generic programming libraries follow a similar pattern of
 defining the \emph{description} of a datatype in the provided uniform
-language by some type level information, and two functions witnessing
+language by some type-level information, and two functions witnessing
 an isomorphism. The most important feature of such library is how this
 description is encoded and which are the primitive operations for
 constructing such encodings. Some libraries,
 mainly deriving from the \texttt{SYB}
 approach~\cite{Lammel2003,Mitchell2007}, use the |Data| and |Typeable|
-type classes instead of static type level information to provide
+typeclasses instead of static type-level information to provide
 generic functionality -- these are a completely different strand of
-work from what we seek. The main approaches that rely on type level
+work from what we seek. The main approaches that rely on type-level
 representations of datatypes are shown in 
 \Cref{fig:background:gplibraries}.
 These can be compared in their
-treatment of recursion and on their choice of type level combinators
+treatment of recursion and on their choice of type-level combinators
 used to represent generic values.
 
 \begin{figure}\centering
@@ -1276,7 +1276,7 @@ expressions over Haskell datatypes~\cite{Serrano2016}, for example.
 
 \paragraph{Pattern Functors versus Codes.}
 
-Most generic programming libraries build their type level descriptions
+Most generic programming libraries build their type-level descriptions
 out of three basic combinators: (1) \emph{constants}, which indicate a
 type is atomic and should not be expanded further; (2) \emph{products}
 (usually written as |:*:|) which are used to build tuples; and (3)

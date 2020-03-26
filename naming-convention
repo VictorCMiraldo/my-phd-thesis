@@ -26,7 +26,7 @@ enforce=("data|type"    # enforce spelling of 'datatype', forbids 'data-type' an
          "sub|tree"
          "pattern functor"
          "general purpose"
-         "type class"
+         "type|class"
          "type family"
          "type-level"
          "type-safe"

@@ -7,7 +7,7 @@ be a good way to add bits like the following:
 
   The \texttt{stdiff} approach gave us a first representation of
 tree-sructured patches over tree-structured data but was still ddeply
-connected to edit scripts: subtrees could only be copied once and
+connected to edit-scripts: subtrees could only be copied once and
 could not be permuted. This means we still suffered from ambiguous
 patches, and, consequently, a coputationally expensive |diff|
 algorithm. Overcoming the drawback of ambiguity requires a shift in
@@ -94,7 +94,7 @@ and nuances of the algorithm, which were not present in said
 paper. \digress{We first wrote our algorithm~\cite{Miraldo2019} using
 the \texttt{generics-mrsop} library even though \texttt{hdiff} does
 not require an explicit sums of products. This means we can port it to
-\genericssimpl{} and gather real world data fort his approach. We
+\genericssimpl{} and gather real-world data fort his approach. We
 present our code in this section on the \genericssimpl{} library.}
 The mateiral in this chapter is a refinement from our ICFP'19
 publication~\cite{Miraldo2019}.
@@ -580,7 +580,7 @@ necessary to maintain well-scopedness. In other words, when |chgDel c| and
 |chgDel c = inj d0 dots dn| and |chgIns c = inj i0 dots in|.  If there
 exists a variable |v| that occurs in |ij| but is not defined in |dj|
 then we cannot put |inj| into a spine whilst maintaining all
-changes well scoped. \Cref{fig:pepatches:example-minimal} illustrates 
+changes well-scoped. \Cref{fig:pepatches:example-minimal} illustrates 
 some cases. 
 %}
 
@@ -2942,8 +2942,8 @@ many lines of text have been deleted and inserted.
   \victor{more text? maybe!} 
 
 \paragraph{Relation to Edit-Scripts.} 
-\victor{We know, for a fact, that computing the least cost edit
-script take $\mathcal{O}(n \log{n})$. Our algo computes a patch
+\victor{We know, for a fact, that computing the least cost edit-script 
+take $\mathcal{O}(n \log{n})$. Our algo computes a patch
 in $\mathcal{O}(n)$. Whats the relaton? where's the $\log{n}$?}
 
 %%% Local Variables:

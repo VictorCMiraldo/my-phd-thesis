@@ -52,6 +52,14 @@ From an edit-distance perspective its unclear.
   This dissertation is a scratch on the surface of the problems surrounding
 structural differencing for source-code. 
 
+Design-space is very large; We found algortihms that are easy to merge
+and hard to compute and vice-versa.
+
+If \texttt{hdiff --patience} does show better merging capability even under
+the more difficult merging algorithm, maybe we should disallow duplications
+and contractions altogether. This does go hand in hand with sharing; with
+better sharing control we could understand that local variable declarations
+are not to be shared outside their scope.
 
 %%% Local Variables:
 %%% mode: latex

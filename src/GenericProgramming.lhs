@@ -65,7 +65,7 @@ numbers}} made it unusable for encoding real programming languages
 such as those in the \texttt{language-python} or \texttt{language-java}
 packages. This frustrating outcome meant that a different approach --
 which did not rely as heavily on type families -- was necessary
-to look at real world sofware version control conflict data.
+to look at real-world sofware version control conflict data.
 
   As it turns out, we can sacrifice the sums-of-products
 structure of \texttt{generics-mrsop} -- significantly decreasing
@@ -205,7 +205,7 @@ data View :: [[ Atom ]] -> Star -> Star where
 
 \noindent A value of |Constr n sum| is a proof that |n| is a 
 valid constructor for |sum|,
-stating that |n < length sum|. |Lkup| performs list lookup at the type level.
+stating that |n < length sum|. |Lkup| performs list lookup at the type-level.
 To improve type error messages, we generate a |TypeError| whenever we
 reach a given index |n| that is out of bounds. Interestingly, our design
 guarantees that this case is never reached by |Constr|.
@@ -444,7 +444,7 @@ type RepMRec (phi :: Nat -> Star) (c :: [[Atom]]) = NS (NP (NA phi)) c
 The only piece missing here is tying the recursive knot. If we want
 our representation to describe a family of datatypes, the obvious
 choice for |phi n| is to look up the type at index |n| in
-|FamRose|. In fact, we are simply performing a type level lookup in
+|FamRose|. In fact, we are simply performing a type-level lookup in
 the family, so we can reuse the |Lkup| from \Cref{sec:gp:explicitfix}.
 
 In principle, this is enough to provide a ground representation for
@@ -485,7 +485,7 @@ second position has |Lkup| already fully-applied, and can stay as is.
 
   We still have to relate a family of types to their respective codes.
 As in other generic programming approaches, we want to make their
-relation explicit. The |Family| type class below realizes this
+relation explicit. The |Family| typeclass below realizes this
 relation, and introduces functions to perform the conversion between
 our representation and the actual types. Using |El| here spares us
 from using a proxy for |fam| in |fromMRec| and |toMRec|:
@@ -716,8 +716,8 @@ data NumericI :: NumericK -> Star where
 \end{myhs}
 
 The last piece of our framework which has to be updated to support
-different sets of opaque types is the |Family| type class, as given in
-\Cref{fig:gp:int}. This type class provides an interesting use case for
+different sets of opaque types is the |Family| typeclass, as given in
+\Cref{fig:gp:int}. This typeclass provides an interesting use case for
 the new dependent features in Haskell; both |kappa| and |codes| are
 parametrized by an implicit argument |kon| which represents the set of
 opaque types.
@@ -731,7 +731,7 @@ class Family (kappa :: kon -> Star) (fam :: [Star]) (codes :: [[[Atom kon]]]) wh
   toMRec    :: SNat ix  -> RepMRec kappa (El fam) (Lkup codes ix) -> El fam ix
 \end{code}
 \end{myhs}
-\caption{|Family| type class with support for different opaque types}
+\caption{|Family| typeclass with support for different opaque types}
 \label{fig:gp:int}
 \end{figure}
 
@@ -997,7 +997,7 @@ deriveFamily (tht (Prog String))
 \end{code}
 \end{myhs}
 
-  The |deriveFamily| takes care of unfolding the (type level) recursion until it
+  The |deriveFamily| takes care of unfolding the (type-level) recursion until it
 reaches a fixpoint.  In this case, the type synonym |FamProgString = P [Prog
 String , dots]| will be generated, together with its |Family|
 instance. Optionally, one can also pass along a custom function to decide
@@ -1050,7 +1050,7 @@ index, |S Z| in this case. The final result for |Rose Int| is |P [P [K
 KInt, I (S Z)]]|.
 
   We now go into |[Rose Int]| for processing.  Once again we need to
-perform some amount of $\beta$-reduction at the type level before
+perform some amount of $\beta$-reduction at the type-level before
 inspecting its fields.  The rest of the process is the same that for
 |Rose Int|.  However, when we encounter the field of type |Rose Int|
 this is already registered, so we just need to use the index |Z| in
@@ -1129,7 +1129,7 @@ of the names of the different parts and other meta information that
 can be useful. It is advantageous to keep metadata separate from the
 generic representation as it would only clutter the definition of
 generic functionality.  This information is tied to a datatype by
-means of an additional type class |HasDatatypeInfo|.  Generic
+means of an additional typeclass |HasDatatypeInfo|.  Generic
 functions may now query the metadata by means of functions like
 |datatypeName|, which reflect the type information into the term
 level.  The definitions are given in \Cref{fig:gp:sopmeta} and follow
@@ -1165,7 +1165,7 @@ code remains almost unchanged, except for adapting it to the larger
 universe of datatypes we can now handle. Unlike \texttt{generic-sop},
 our list of lists representing the sum-of-products structure does not
 contain types of kind |Star|, but |Atom|s. All the types representing
-metadata at the type level must be updated to reflect this new
+metadata at the type-level must be updated to reflect this new
 scenario:
 
 \begin{myhs}
@@ -1178,7 +1178,7 @@ data FieldInfo     ::       Atom kon     -> Star where dots
 
   As we have discussed above, our library is able to generate codes not
 only for single types of kind |Star|, like |Int| or |Bool|, but also
-for types which are the result of type level applications, such as
+for types which are the result of type-level applications, such as
 |Rose Int| and |[Rose Int]|.  The shape of the metadata information in
 |DatatypeInfo|, a module name plus a datatype name, is not enough to
 handle these cases.  We replace the uses of |ModuleName| and
@@ -1234,9 +1234,9 @@ instance HasDatatypeInfo Singl FamRose CodesRose Z where
   Next we look into a detailed implementation of a type-safe
 adaptation of tree edit distance due to \citet{Lempsink2009}.
 In order to make the constructions from \Cref{sec:background:tree-edit-distance}
-type-safe by construction we must lift edit scripts from kind |Star|
+type-safe by construction we must lift edit-scripts from kind |Star|
 to kind |[Star] -> [Star] -> Star|, enabling us to index the types of the
-source trees and the destination trees of particular edit scripts.
+source trees and the destination trees of particular edit-scripts.
 Consequently, instead of differencing a list of trees, we will
 difference an $n$-ary product, |NP|, indexed by the type of each tree.
 
@@ -1285,7 +1285,7 @@ data Cof (kappa :: kon -> Star) (codes :: [[[Atom kon]]])
  
   We need the |ListPrf| argument to |ConstrI| to be able to manipulate
 the type-level lists when defining the application function,
-|applyES|.  But first, we have to define our edit scripts. A value
+|applyES|.  But first, we have to define our edit-scripts. A value
 of type |ES kappa codes xs ys| represents a transformation of a value of
 |NP (NA kappa (Fix kappa codes)) xs| into a value of |NP (NA kappa (Fix ki
 codes)) ys|.  The |NP| serves as a list of trees, as is usual for the
@@ -1355,16 +1355,16 @@ applyES (Cpy _ c es) xs = insCof c <$$> (delCof c xs >>= applyES es)
 
   The approach of providing typed edit operations has many nice
 aspects. It immediately borrows the existing algorithms and 
-metatheory and can improve the size of edit scripts significantly
+metatheory and can improve the size of edit-scripts significantly
 by being able to provide |CpyTree|, |InsTree| and |DelTree| which
 copy, insert and delete entire trees instead of operating
 on individual constructors. This is possible because we can look at
-the type of the edit script in question -- substitute the insertion
+the type of the edit-script in question -- substitute the insertion
 of a constructor by |InsTree| whenever all of its fields are also
 comprised solely of insertions. 
 
-  Although type safe by construction, which is undoubtly a plus point,
-computing edit scripts, with memoization, still takes $\mathcal{O}(n
+  Although type-safe by construction, which is undoubtly a plus point,
+computing edit-scripts, with memoization, still takes $\mathcal{O}(n
 \times m)$ time, where $n$ and $m$ are the number of constructors in
 the source and destination trees. This means this is at least
 quadratic in the size of the smaller input, which is not practical for
@@ -1374,10 +1374,10 @@ rather quite common for tree differencing algorithms. They often belong
 to complexity classes that make them impractical.
 
   Another downside comes to the surface when we want to look into merging
-these edit scripts. \citet{Vassena2016} developed a merging
+these edit-scripts. \citet{Vassena2016} developed a merging
 algorithm but notes some difficult setbacks, mainly due to 
 the heterogenity of |ES|. Suppose, for example, we want to merge |p : ES xs ys|
-and |q : ES xs zs|. This means producing an edit script |r : ES xs ks|.
+and |q : ES xs zs|. This means producing an edit-script |r : ES xs ks|.
 But how can we determine |ks| here? It is not always the case that
 there is a solution. In fact, the merge algorithm~\cite{Vassena2016}
 for |ES| might fail due to conflicting changes \emph{or} the
@@ -1440,7 +1440,7 @@ data SRep (phi :: Star -> Star) :: (Star -> Star) -> Star where
 
   The handling of metadata is borrowed entirely from \texttt{GHC.Generics}
 and captured by the |SMeta| datatype, which records the kind of
-metainformation is stored at the type level.
+metainformation is stored at the type-level.
 
 \begin{myhs}
 \begin{code}
@@ -1922,7 +1922,7 @@ can be computed in two passes: in the first pass we compute the heights and
 leave them annotated in the tree, in the second we run the algorithm. 
 Moreover, we can compute all the necessary synthesized attributes an algortihm
 needs in a single preprocessing phase. This is a crucial maneouver to
-make sure our generic programs can scale to real world inputs.
+make sure our generic programs can scale to real-world inputs.
 
   It is worth mentioning that |cata| and |synthesize| are
 actually implemented in their monadic form and over |HolesAnn| for maximal
@@ -2146,7 +2146,7 @@ a memory leak in the compiler. This renders the library unusable for large famil
 of mutually recursive datatypes at the time of writing this thesis. Luckily, however,
 we were able to work around that by dropping the sums of products structure but
 maintaining a combinator-based approach in \genericssimpl{}, which enabled us to
-run our experiments with real world data, as discussed in \Cref{chap:experiments}.
+run our experiments with real-world data, as discussed in \Cref{chap:experiments}.
 
   While developing \texttt{generics-mrsop} and \genericssimpl{} under close
 collaboration with Alejandro Serrano, we also explored a number

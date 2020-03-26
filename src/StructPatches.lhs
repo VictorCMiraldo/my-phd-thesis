@@ -1,7 +1,7 @@
   The \texttt{gdiff}~\cite{Lempsink2009} approach, discussed
 in \Cref{sec:gp:well-typed-tree-diff}, which flattens a
 tree into a list, following classical tree edit distance algorithms
-encoded through using type-safe edit scripts, inherits the problems of
+encoded through using type-safe edit-scripts, inherits the problems of
 edit-script based approaches. These include ambiguity on the
 representation of patches, non-uniqueness of optimal solutions and
 difficulty of merging. The \texttt{stdiff} approach, discussed
@@ -49,7 +49,7 @@ their roots, we see that on the outermost level they both consist of a
 |Bin|, yet the fields of the source and destination nodes are
 different: the first field changes from a |Bin| to a |Tri|, which
 requires us to reconcile the list of fields |[a, b, c]| into |[a' , b]|.
-Which can be done by the means of an edit script. The second field, however,
+Which can be done by the means of an edit-script. The second field, however,
 witnesses a change in the recursive structure of the type. We see that
 we have inserted new information, namely |(Bin SQ e)|. After inserting
 this \emph{context}, we simply copy |d| from the source to the destination.
@@ -164,7 +164,7 @@ represent the differences somehow. If the values have the same
 constructor we need to reconcile the fields of 
 that constructor whereas if the values have different constructors 
 we need to reconcile the products that make the fields of the constructors.
-We index the data type |Spine| by the sum codes it operates over
+We index the datatype |Spine| by the sum codes it operates over
 because we need to lookup the fields of the constructors
 that have changed, and \emph{align} them in the case of |SChg|.
 Alignments will be introduced shrotly, for the time being,
@@ -265,9 +265,9 @@ reconciling the lists of constructor fields as solving an
 \emph{alignment} problem. 
 
   Finding a suitable alignment between two lists of constructor fields
-amounts to finding a suitable \emph{edit script}, that relates source
-fields to destination fields. The |Al| data type below describes such
-edit scripts for a heterogeneously typed list of atoms. These scripts
+amounts to finding a suitable \emph{edit-script}, that relates source
+fields to destination fields. The |Al| datatype below describes such
+edit-scripts for a heterogeneously typed list of atoms. These scripts
 may insert fields in the destination (|Ains|), delete fields from the
 source (|Adel|), or associate two fields from both lists (|AX|).
 
@@ -373,7 +373,7 @@ this section, we tie the knot and define patches describing changes to
 arbitrary \emph{recursive} datatypes.
 
   To represent generic patches on values of |Fix codes ix|, we will define
-two mutually recursive data types |Almu| and |Ctx|. The semantics of
+two mutually recursive datatypes |Almu| and |Ctx|. The semantics of
 both these datatypes will be given by defining how to \emph{apply}
 them to arbitrary values:
 
@@ -383,7 +383,7 @@ them to arbitrary values:
   insert, remove or modify constructors. Since we are working over mutually
   recursive families, removing or inserting constructors can change the
   overall type. We will use |Almu ix iy| to
-  specify these edit scripts at the constructor-level, describing a transformation
+  specify these edit-scripts at the constructor-level, describing a transformation
   from |Fix codes ix| to |Fix codes iy|.
 
 \item Whenever we choose to insert or delete a recursive subtree, we
@@ -555,8 +555,8 @@ fixpoint level gives us a simple global aligment for our synchronizer.
 
   In this section we discuss a simple merging algorithm,
 which reconciles changes from two different patches whenever these 
-are \emph{non interfering}, for example, as
-in \Cref{fig:stdiff:merging0}. We call non interfering patches
+are \emph{non-interfering}, for example, as
+in \Cref{fig:stdiff:merging0}. We call non-interfering patches
 \emph{disjoint}, as they operate on separate parts of a tree.
 
 \begin{figure}
@@ -933,7 +933,7 @@ data Ann = Modify | Copy
 
   A |Modify| annotation corresponds to a deletion or insertion
 depending on whether it is the source or destination tree
-respectively.  Recall that an edit script produced by \texttt{gdiff}
+respectively.  Recall that an edit-script produced by \texttt{gdiff}
 has type |ES kappa codes xs ys|, where |xs| is the list of types of the
 source trees and |ys| is the list of types of the destination trees.
 The definition of |ES| -- introduced in
@@ -1038,7 +1038,7 @@ annotation flag a copy.
 $n$ is the the number of constructors in the bigger input tree. Although
 orders of magnitude better than naive enumeration or using the \unixdiff{}
 as an oracle, a quadratic algorithm is still not practical, particularly
-when $n$ tens do be large -- real world source files have tens of thousands
+when $n$ tens do be large -- real-world source files have tens of thousands
 abstract syntax elements.
 
 \section{Discussion}
