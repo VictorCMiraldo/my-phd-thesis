@@ -74,3 +74,11 @@ Once again, M.clj ignored an insertion from A.clj; namelly,
 ```
 
 Did not get inserted in the final merge; hdiff did consider this insertion.
+
+## 05 insertion-order extra-ops
+
+This one is also a bit weird; with a deletion and insertion following
+each other, apparently hdiff can swap orders. I think its because
+we swap the arguments on mergePhase1 on one of the deletion cases.
+Nevertheless, the patch produced by hdiff makes sense and moreover,
+the human did insert more statements on the merge commit.
