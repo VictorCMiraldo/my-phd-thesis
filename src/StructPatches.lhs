@@ -6,7 +6,7 @@ edit-script based approaches. These include ambiguity on the
 representation of patches, non-uniqueness of optimal solutions and
 difficulty of merging. The \texttt{stdiff} approach, discussed
 through this chapter, arose from our study of the difficulties
-about merging \texttt{gdiff} patches~\cite{Vassena2016}. 
+about merging \texttt{gdiff} patches~\cite{Vassena2016}.
 
   The heterogeneity of |PatchGDiff| makes merging difficult.
 Recall that a value of type |PatchGDiff xs ys| transforms a list of trees |xs| into
@@ -16,11 +16,11 @@ and |PatchGDiff xs zs|, we would like to produce two patches
 merge square commutes. The problem becomes clear when we try to determine |rs| correctly:
 sometimes such |rs| might not even exist~\cite{Vassena2016}.
 
-  Our \texttt{stdiff} approach, or, \emph{structural patches}, marks 
+  Our \texttt{stdiff} approach, or, \emph{structural patches}, marks
 our first attempt at defining a \emph{type-indexes} patch datatype, |PatchST|,
 in pursuit of better behaved merge algorithms. The overall idea consists
 in making sure that the type of patches is also \emph{tree structured}, as
-opposed to managing a list-like patch datastructure that is supposed to
+opposed to managing a list-like patch data structure that is supposed to
 operate over tree structured data. As it turns out, it is not possible to
 have fully homogeneous patches, but we were able to identify homogeneous
 parts of our patches which we can use to synchronize changes when
@@ -28,7 +28,7 @@ defining our merge operation, but let us not get ahead of ourselves.
 
   \emph{Structural Patches} differ from edit-scripts by using
 tree-shaped, homogeneous patch -- a patch transforms two values of the same
-type.  The edit operations themselves are analoguous to edit
+type.  The edit operations themselves are analogous to edit
 scripts, we support insertions, deletions and copies, but these are
 structured to follow the sums-of-products of datatypes: there is one
 way of changing sums, one way of changing products and one way of
@@ -66,7 +66,7 @@ and copies.
 \end{forest}\qquad
 \label{fig:stdiff:patch0-a}
 }%
-\qquad 
+\qquad
 \subfloat[Destination tree, |t2|]{%
 \begin{forest}
 [ |Bin| [ |Bin| [a'] [b] ] [|Bin| [d] [e]] ]
@@ -79,7 +79,7 @@ and copies.
   To write the \texttt{stdiff} algorithms in
 Haskell, we must rely on the \texttt{generics-mrsop} library (\Cref{sec:gp:mrsop}) as our
 generic programming workhorse for two reasons. First, we do
-require the concept of explicit sums of products in the very 
+require the concept of explicit sums of products in the very
 definition of |PatchST x|. Secondly, we need \texttt{gdiff}'s
 assistance in computing patches (\Cref{sec:stdiff:oraclesenum})
 and \texttt{gdiff} also requires, to a lesser extent, sums of products structured
@@ -89,7 +89,7 @@ as seen in \Cref{sec:gp:well-typed-tree-diff}.
   The contributions in this chapter arise from joint work
 with Pierre-Evariste Dagand, published in TyDe 2017~\cite{Miraldo2017} and
 coded in Agda~\cite{Norell2008}\href{https://github.com/VictorCMiraldo/stdiff}{Agda
-repository}% 
+repository}%
 \footnote{https://github.com/VictorCMiraldo/stdiff}.
 Later, we collaborated closely with a MSc student, Arian van Putten, in translating
 the Agda code to Haskell, extending its scope to mutually recursive
@@ -101,27 +101,27 @@ throughout.
 
 \victor{TODO: LATER: review the structure; i think it might change!}
   In this chapter we will delve into the construction of |PatchST| and its
-respective components. Firstly, we familiarize ourselves with |PatchST| 
+respective components. Firstly, we familiarize ourselves with |PatchST|
 and is application function, \Cref{sec:stdiff:patches}. Next we look into
 merging and its cummutativity proof in \Cref{sec:stdiff:merging}. Lastly,
 we discuss the |diff| function in \Cref{sec:stdiff:diff}, which comprises
 a significant drawback of the \texttt{stdiff} approach for
-its computational complexity. 
+its computational complexity.
 
 \section{The Type of Patches}
 \label{sec:stdiff:patches}
 
-  Next we look at the |PatchST| type, starting with 
-a single layer of datatype, \ie, a single application of the datatypes pattern functor. 
+  Next we look at the |PatchST| type, starting with
+a single layer of datatype, \ie, a single application of the datatypes pattern functor.
 Later, in \Cref{sec:stdiff:diff:fixpoints} we extend this treatment to recursive datatypes,
 essentially by taking the fixpoint of the constructions in \Cref{sec:stdiff:diff:functors}.
 The \texttt{generics-mrsop} library (\Cref{chap:generic-programming})
-will be used throughout the exposition. 
+will be used throughout the exposition.
 
   Recall that a datatype, when seen through its initial
 algebra~\cite{initial-algebra} semantics, can be seen as an infinite
 succession of applications of its pattern functor, call it $F$, to
-itself: $\mu F = F (\mu F)$. The |PatchST| type will describe the differences 
+itself: $\mu F = F (\mu F)$. The |PatchST| type will describe the differences
 between values of $\mu F$ by successively applying the description of differences between
 values of type $F$, closely following the initial algebra semantics of
 datatypes.
@@ -135,7 +135,7 @@ a rainy sunday though}
 
   Handling \emph{one layer} of recursion is done by addressing the possible
 changes at the sum level, followed by some reconciliation at the product
-level when needed. 
+level when needed.
 
   The first part of our algorithm handles the \emph{sums} of the
 universe. Given two values, |x| and |y|, it computes the
@@ -149,7 +149,7 @@ common coproduct structure. We distinguish three possible cases:
 \item |x| and |y| have the same constructor -- i.e., |x =
   inj c px| and |y = inj c py| -- but some subtrees of |x|
   and |y| are distinct, in which case we copy the head constructor and
-  handle all arguments pairwise. 
+  handle all arguments pairwise.
 %
 \item |x| and |y| have distinct constructors, in which case we record
   a change in constructor and a choice of the alignment of the
@@ -157,26 +157,26 @@ common coproduct structure. We distinguish three possible cases:
   might be of a different type in the family.
 \end{itemize}
 
-  The datatype |Spine|, defined below, formalizes this 
+  The datatype |Spine|, defined below, formalizes this
 description. The three cases we describe above correspond to the three
 constructors of |Spine|. When two values are not equal, we need to
-represent the differences somehow. If the values have the same 
-constructor we need to reconcile the fields of 
-that constructor whereas if the values have different constructors 
+represent the differences somehow. If the values have the same
+constructor we need to reconcile the fields of
+that constructor whereas if the values have different constructors
 we need to reconcile the products that make the fields of the constructors.
 We index the datatype |Spine| by the sum codes it operates over
 because we need to lookup the fields of the constructors
 that have changed, and \emph{align} them in the case of |SChg|.
-Alignments will be introduced shrotly, for the time being,
-let us coninue to focus on spines. Intuitively, Spines act on sums and capture 
+Alignments will be introduced shortly, for the time being,
+let us continue to focus on spines. Intuitively, Spines act on sums and capture
 the ``largest shared coproduct structure'':
 
 \begin{myhs}
 \begin{code}
-data Spine  (kappa :: kon -> Star) (codes :: [[[Atom kon]]]) 
+data Spine  (kappa :: kon -> Star) (codes :: [[[Atom kon]]])
             :: [[Atom kon]] -> [[Atom kon]] -> Star where
   Scp   :: Spine kappa codes s1 s1
-  SCns  :: Constr s1 c1 -> NP (At kappa codes) (Lkup c1 s1) 
+  SCns  :: Constr s1 c1 -> NP (At kappa codes) (Lkup c1 s1)
         -> Spine kappa codes s1 s1
   SChg  :: Constr s1 c1 -> Constr s2 c2 -> Al kappa codes (Lkup c1 s1) (Lkup c2 s2)
         -> Spine kappa codes s1 s2
@@ -228,7 +228,7 @@ data SNat :: Nat -> Star where
 \end{code}
 \end{myhs}
 
-  The |applySpine| function is given by 
+  The |applySpine| function is given by
 checking the provided value is made up with the required
 constructor. In the |SCns| case we we must ensure that type indices
 match -- for Haskell type families may not be injective -- then simply
@@ -255,14 +255,14 @@ applySpine _ _ (SChg c1 c2 al) (sop -> Tag c3 xs) = do
 
   The |Spine| datatype and |applySpine| are responsible for matching the
 \emph{constructors} of two trees, but we still need to determine how to
-continue representing the difference in the products of data stored therein. 
+continue representing the difference in the products of data stored therein.
 At this stage in our construction, we are given two heterogeneous lists, corresponding
 to the fields associated with two distinct constructors. As a result,
 these lists need not have the same length nor store values of the same
 type. To do so, we need to decide how to line up the constructor
 fields of the source and destination. We shall refer to the process of
 reconciling the lists of constructor fields as solving an
-\emph{alignment} problem. 
+\emph{alignment} problem.
 
   Finding a suitable alignment between two lists of constructor fields
 amounts to finding a suitable \emph{edit-script}, that relates source
@@ -273,25 +273,25 @@ source (|Adel|), or associate two fields from both lists (|AX|).
 
 \begin{myhs}
 \begin{code}
-data Al  (kappa :: kon -> Star) (codes :: [[[Atom kon]]]) 
+data Al  (kappa :: kon -> Star) (codes :: [[[Atom kon]]])
          :: [Atom kon] -> [Atom kon] -> Star where
   A0    :: Al kappa codes (P []) (P [])
-  AX    :: At kappa codes x -> Al kappa codes xs ys 
+  AX    :: At kappa codes x -> Al kappa codes xs ys
         -> Al kappa codes (x Pcons xs)  (x Pcons ys)
-  ADel  :: NA kappa (Fix kappa codes) x -> Al kappa codes xs ys 
+  ADel  :: NA kappa (Fix kappa codes) x -> Al kappa codes xs ys
         -> Al kappa codes (x Pcons xs) ys
-  AIns  :: NA kappa (Fix kappa codes) x -> Al kappa codes xs ys 
+  AIns  :: NA kappa (Fix kappa codes) x -> Al kappa codes xs ys
         -> Al kappa codes xs (x Pcons ys)
 \end{code}
 \end{myhs}
 
   We require alignments to preserve the order of the arguments of each
 constructor, thus forbidding permutations of arguments. In effect,
-the datatype of alignments can be viewed as an intensional
+the datatype of alignments can be viewed as an intentional
 representation of (partial) \emph{order and type preserving maps},
 along the lines of McBride's order preserving
 embeddings~\cite{McBride2005}, mapping source fields to destination
-fields. This makes sure that our patches also give rise to tree 
+fields. This makes sure that our patches also give rise to tree
 mappings (\Cref{sec:background:tree-edit-distance}) in the classical
 tree-edit distance sense.
 
@@ -309,7 +309,7 @@ applyAl  :: (EqHO kappa)
          -> Maybe (PoA kappa (Fix kappa codes) ys)
 applyAl A0                NP0         = return NP0
 applyAl (AX    dx  dxs)   (x :*  xs)  = (:*)    <$$> applyAt (dx :*: x) <*> applyAl dxs xs
-applyAl (AIns  x   dxs)          xs   = (x :*)  <$$> applyAl dxs xs 
+applyAl (AIns  x   dxs)          xs   = (x :*)  <$$> applyAl dxs xs
 applyAl (ADel  x   dxs)   (y :*  xs)  = guard (eq1 x y) *> applyAl dxs xs
 \end{code}
 \end{myhs}
@@ -320,7 +320,7 @@ or opaque data. In case of opaque data, we simply record the old value and the n
 \begin{myhs}
 \begin{code}
 data TrivialK (kappa :: kon -> Star) :: kon -> Star where
-  Trivial :: kappa kon -> kappa kon -> TrivialK kappa kon 
+  Trivial :: kappa kon -> kappa kon -> TrivialK kappa kon
 \end{code}
 \end{myhs}
 
@@ -329,10 +329,10 @@ the recursive position with |Almu|, which we will get to shortly.
 
 \begin{myhs}
 \begin{code}
-data At  (kappa :: kon -> Star) (codes :: [[[Atom kon]]]) 
+data At  (kappa :: kon -> Star) (codes :: [[[Atom kon]]])
          :: Atom kon -> Star where
   AtSet  :: TrivialK kappa kon -> At kappa codes ((P K kon))
-  AtFix  :: (IsNat ix) 
+  AtFix  :: (IsNat ix)
          => Almu kappa codes ix ix -> At kappa codes ((P I ix))
 \end{code}
 \end{myhs}
@@ -351,7 +351,7 @@ applyAt  :: EqHO ki
          => At kappa codes at
          -> NA kappa (Fix kappa codes)) at
          -> Maybe (NA kappa (Fix kappa codes) at)
-applyAt (AtSet (Trivial x y)) (NA_K a)  
+applyAt (AtSet (Trivial x y)) (NA_K a)
   | eqHO x y   = Just (NA_K a)
   | eqHO x a   = Just (NA_K b)
   | otherwise  = Nothing
@@ -359,7 +359,7 @@ applyAt (AtFix px) (NA_I x) = NA_I <$$> applyAlmu px x
 \end{code}
 \end{myhs}
 
-  The last step is to address how to makde changes over the
+  The last step is to address how to make changes over the
 recursive structure of our value, defining |Almu| and |applyAlmu|,
 which will be our next concern.
 
@@ -378,7 +378,7 @@ both these datatypes will be given by defining how to \emph{apply}
 them to arbitrary values:
 
 \begin{itemize}
-\item Much like alignments for products, a similar phenomenom appears
+\item Much like alignments for products, a similar phenomenon appears
   at fixpoints. When comparing two recursive structures, we can
   insert, remove or modify constructors. Since we are working over mutually
   recursive families, removing or inserting constructors can change the
@@ -391,7 +391,7 @@ them to arbitrary values:
   we will define a new type |Ctx dots :: P [Atom kon] -> Star|, inspired by
   zippers~\cite{Huet1997,McBride2001}, to navigate through our data-structures. A
   value of type |Ctx dots p| selects a single atom |I| from the product of type
-  |p|. 
+  |p|.
 \end{itemize}
 
 Modeling changes over fixpoints closely follows our definition of
@@ -403,9 +403,9 @@ them. It is precisely these operations that we must account for here.
 
 \begin{myhs}
 \begin{code}
-data Almu  (kappa :: kon -> Star) (codes :: [[[Atom kon]]]) 
+data Almu  (kappa :: kon -> Star) (codes :: [[[Atom kon]]])
            :: Nat -> Nat -> Star where
-  Spn  :: Spine kappa codes (Lkup ix codes) (Lkup iy codes) 
+  Spn  :: Spine kappa codes (Lkup ix codes) (Lkup iy codes)
        -> Almu kappa codes ix iy
   Ins  :: Constr (Lkup iy codes) c
        -> InsCtx kappa codes ix (Lkup c (Lkup iy codes))
@@ -432,7 +432,7 @@ to ensure the transformation is on the right direction.
 \begin{myhs}
 \begin{code}
 type InsCtx kappa codes  = Ctx kappa codes        (Almu kappa codes)
-type DelCtx kappa codes  = Ctx kappa codes (Flip  (Almu kappa codes)) 
+type DelCtx kappa codes  = Ctx kappa codes (Flip  (Almu kappa codes))
 
 newtype Flip f ix iy = Flip { unFlip :: f iy ix }
 \end{code}
@@ -441,11 +441,11 @@ newtype Flip f ix iy = Flip { unFlip :: f iy ix }
 Our definition of insertion and deletions relies on identifying
 \emph{one} recursive argument among the product of possibilities. To
 model this accurately, we define an indexed zipper to identify a
-recursive atom (indicated by a value of type |I|) amongst a product of
+recursive atom (indicated by a value of type |I|) within a product of
 atoms.  Conversely, upon deleting a constructor from the source
 structure, we exploit |Ctx| to indicate find the subtree that should
 be used for the remainder of the patch application, discarding all
-other constructor fields. We parametrize the |Ctx| type
+other constructor fields. We parameterize the |Ctx| type
 with a |Nat -> Nat -> Star| argument to distinguish between these
 two cases, as seen above.
 
@@ -466,7 +466,7 @@ data Ctx (kappa :: kon -> Star) (codes :: [[[Atom kon]]]) (p :: Nat -> Nat -> St
   Consequently, we will have two application functions for contexts,
 one that inserts and one that removes contexts. This makes
 clear the need to flip the type indexes of |Almu| when defining
-|DelCtx|. Inserting a context is done by receiving a tree and 
+|DelCtx|. Inserting a context is done by receiving a tree and
 returning the product stored in the context with the distinguished
 field applied to the received tree:
 
@@ -486,7 +486,7 @@ constructor fields, except for the subtree used to continue the patch
 application process. This is a consequence of our design decision, at the time,
 of having application functions as permissive as possible.
 Intuitively, the deletion context identifies the only field that
-should not be deleted. By not checking whether the elements 
+should not be deleted. By not checking whether the elements
 we are applying to match the ones that should be deleted, we get
 an application function that applies to more elements for free.
 
@@ -516,12 +516,12 @@ applyAlmu (Ins  c ctx)  (Fix rep)  = Fix . inj c <$$> insCtx ctx f
 applyAlmu (Del  c ctx)  (Fix rep)  = delCtx ctx <$$> match c rep
 \end{code}
 \end{myhs}
- 
+
   The two underscores at the |Spn| case are just an extraction of
 the necessary singletons to make the |applySpine| typecheck. These
 can be easily replaced by |getSNat| with the correct proxies.
 
-  In fact, defining |PatchST ix| as |Almu ix ix| will fit the 
+  In fact, defining |PatchST ix| as |Almu ix ix| will fit the
 our abstract formulation of differencing\victor{Where is this?}.
 
 \begin{myhs}
@@ -543,7 +543,7 @@ results on type-safe differences~\cite{Lempsink2009}.
 \section{Merging Patches}
 \label{sec:stdiff:merging}
 
-  The patches encoded in the |PatchST| type clearly identify 
+  The patches encoded in the |PatchST| type clearly identify
 a prefix of constructors copied from the root of a tree up until the
 location of the changes and any insertion or deletions that might happen
 along the way. Moreover, since these patches also mirror the tree structure
@@ -551,10 +551,10 @@ of the data in question, it becomes quite natural to identify separate changes.
 For example, if one change works on the left subtree of the root, and another
 on the right, they are clearly disjoint and can be merged. Finally,
 the explicit representation of insertions and deletions at the
-fixpoint level gives us a simple global aligment for our synchronizer.
+fixpoint level gives us a simple global alignment for our synchronizer.
 
   In this section we discuss a simple merging algorithm,
-which reconciles changes from two different patches whenever these 
+which reconciles changes from two different patches whenever these
 are \emph{non-interfering}, for example, as
 in \Cref{fig:stdiff:merging0}. We call non-interfering patches
 \emph{disjoint}, as they operate on separate parts of a tree.
@@ -586,7 +586,7 @@ that is, if both patches want to change the \emph{same part} of the source tree.
 %option agda
   Prior to prototyping \texttt{stdiff} in Haskell, we already had a working model
 of \texttt{stdiff} in Agda~\cite{Miraldo2017}, which was created with the goal of proving
-that the merging algorithm would respect locality. In our Agda model, we have divided 
+that the merging algorithm would respect locality. In our Agda model, we have divided
 the merge function and the notion of disjointness, which yields a total merge function
 for the subset of disjoint patches:
 
@@ -596,17 +596,17 @@ merge : (p q : Patch kappa codes ix) -> Disjoint p q -> Patch kappa codes ix
 \end{code}
 \end{myhs}
 
-  A value of type |Disjoint p q| corresponts to a proof that |p|
+  A value of type |Disjoint p q| corresponds to a proof that |p|
 and |q| change different parts of the source tree and is a symmetric relation --
 that is, |Disjoint p q| iff |Disjoint q p|. This separation makes reasoning about
 the merge function much easier. In fact, we have proven that the merge function
 over regular datatypes commutes. A simplified statement of our theorem
-is given below: 
+is given below:
 
 %format mergecommutes = "\HVNI{\hbox{\it merge-{\hskip-0.3em}-commutes}}"
 \begin{myhs}
 \begin{code}
-mergecommutes  :   (p q : Patch kappa codes ix) 
+mergecommutes  :   (p q : Patch kappa codes ix)
                ->  (hyp : Disjoint p q)
                ->  apply (merge p q hyp) . q == apply (merge q p (sym hyp)) . p
 \end{code}
@@ -615,8 +615,8 @@ mergecommutes  :   (p q : Patch kappa codes ix)
   It is also worth noting that encoding the |merge| to be applied to the
 divergent replicas instead of the common ancestor -- \emph{residual-like} approach
 to merging,\Cref{sec:background:synchronizing-changes} -- is instrumental to
-write a concise property and, consequently, proove the result. A merge
-function that applies to the common ancestor would probably require a 
+write a concise property and, consequently, prove the result. A merge
+function that applies to the common ancestor would probably require a
 much more convoluted encoding of |mergecommutes| above.
 
 %}
@@ -638,7 +638,7 @@ inline next.  For example, when one change deletes a constructor
 but the other performs a change within said constructor we must
 check that they operate over \emph{the same} constructor. When that
 is the case, we must go ahead and ensure the deletion context, |ctx|,
-and the changes in the product of atoms, |at|, are compatible. 
+and the changes in the product of atoms, |at|, are compatible.
 
 \begin{myhs}
 \begin{code}
@@ -706,13 +706,13 @@ merge (Spn Scp)            (Del c2 s2) = Just (Del c2 s2)
 merge (Del c1 s2)          (Spn Scp)   = Just (Spn Scp)
 
 -- Spines might be disjoint from spines and deletions:
-merge (Spn s1)             (Spn s2) 
+merge (Spn s1)             (Spn s2)
   = Spn <$$> mergeSpine (getSNat (Proxy @ix)) (getSNat (Proxy @iy)) s1 s2
 
-merge (Spn (SCns c1 at1))  (Del c2 s2) 
+merge (Spn (SCns c1 at1))  (Del c2 s2)
   = Del c1 <$$> mergeAtCtx at1 s2
 
-merge (Del c1 s1)          (Spn (SCns c2 at2)) 
+merge (Del c1 s1)          (Spn (SCns c2 at2))
   = do  Refl <- testEquality c1 c2 -- disjoint if same constructor
         mergeCtxAt s1 at2
 
@@ -723,7 +723,7 @@ merge (Ins c1 s1)  (Del c2 s2)  = Spn . SCns c1  <$$> mergeCtxAlmu s1 (Del c2 s2
 
 merge (Spn s1)     (Ins c2 s2)  = Ins c2         <$$> (mergeAlmuCtx (Spn s1) s2)
 merge (Del c1 s1)  (Ins c2 s2)  = Ins c2         <$$> (mergeAlmuCtx (Del c1 s1) s2)
-\end{code} 
+\end{code}
 \end{myhs}
 \caption{Definition of |merge|}
 \label{fig:stdiff:mergest}
@@ -763,7 +763,7 @@ differences. We have seen that this representation is interesting in
 and by itself: being richly-structured and typed, it can be thought of
 as a non-trivial programming language whose denotation is given by the
 application function. Moreover, we have seen how to
-merge two disjoint differences. However, as programmers, we are mainly 
+merge two disjoint differences. However, as programmers, we are mainly
 interested in \emph{computing} patches from a source and a
 destination. Unfortunately, however, this is where the good news
 stops. Computing a value of type |PatchST| is computationally expensive
@@ -787,7 +787,7 @@ it unusuable in practice.
   The simplest option for computing a patch that transforms
 a tree |x| into |y| is enumerating all possible patches and filtering
 our those with the smallest \emph{cost}, for some \emph{cost} metric.
-In this section, we will write a naive enumeration engine for 
+In this section, we will write a naive enumeration engine for
 |PatchST| and argue that exploring suitable notions of
 \emph{cost} brings a lot of tensions to the design.
 \victor{We barely talk about cost...}
@@ -800,13 +800,13 @@ the changes that can transform two values |x| and |y| of a given mutually
 recursive family into one another are the deletion of a constructor from |x|,
 the insertion of a constructor from |y| or changing the constructor
 of |x| into the one from |y|, as witnessed by the |enumAlmu| function below.
-  
+
 \begin{myhs}
 \begin{code}
 enumAlmu  :: Fix ki codes ix -> Fix ki codes iy -> [Almu ki codes ix iy]
 enumAlmu x y  =     enumDel (sop $ unFix x)  y
               <|>  enumIns x (sop $ unFix y)
-              <|>  Spn <$> enumSpn  (snatFixIdx x) (snatFixIdx y) 
+              <|>  Spn <$> enumSpn  (snatFixIdx x) (snatFixIdx y)
                                     (unFix x) (unFix y)
   where
     enumDel (Tag c p) y0  = Del c <$> enumDelCtx p y0
@@ -815,11 +815,11 @@ enumAlmu x y  =     enumDel (sop $ unFix x)  y
 \end{myhs}
 
   Enumerating all the patches from a deletion context of a given product |p|
-against some fixpoint |y| consists of enumerating the patches 
+against some fixpoint |y| consists of enumerating the patches
 that transform all of the fields of |p| into |y|. The handling of insertion
 contexts is analogous, hence it is ommited here.
 Recall that the |AlmuMin|, below, is used to flag the resulting context as
-a deletion context. 
+a deletion context.
 
 \begin{myhs}
 \begin{code}
@@ -884,10 +884,10 @@ enumAl (x :* xs)  (y :* ys)  =    (ADel x <$> enumAl xs (y :* ys))
   Looking at |enumAlmu| and |enumAl|, we can see why this algorithm
 explodes and becomes intractable quickly. In |enumAlmu| we must
 choose between inserting, deleting or copying a recursive constructor.
-In case we chose to copy, we then might call |enumAl|, where 
+In case we chose to copy, we then might call |enumAl|, where
 we must chose between inserting, deleting or copying fields
 of constructors.
-  
+
 
 \subsection{Translating from \texttt{gdiff}}
 \label{sec:stdiff:oraclesenum}
@@ -911,8 +911,8 @@ required several minutes.
 the search space was not sufficient.
 Besides the complexity introduced by arbitrary heuristics,
 using the \unixdiff{} to flag elements of the AST was still too
-coarse. For one, the \unixdiff{} can insert and delete the same line 
-in some situations. Secondly, many elements of the AST may fall on the same line. 
+coarse. For one, the \unixdiff{} can insert and delete the same line
+in some situations. Secondly, many elements of the AST may fall on the same line.
 
   The second option is related, but instead of using a line-based
 oracle, we can use \texttt{gdiff}~\Cref{sec:gp:well-typed-tree-diff} as the oracle,
@@ -941,7 +941,7 @@ The definition of |ES| -- introduced in
 
 \begin{myhs}
 \begin{code}
-data ES (kappa :: kon -> Star) (codes :: [[[Atom kon]]]) 
+data ES (kappa :: kon -> Star) (codes :: [[[Atom kon]]])
     :: [Atom kon] -> [Atom kon] -> Star where
   ES0  :: ES kappa codes (P []) (P [])
   Ins  :: Cof kappa codes a t  -> ES kappa codes          i   (t :++:  j)  -> ES kappa codes           i   (a Pcons  j)
@@ -959,8 +959,8 @@ trees with this very information. This is done by the |annSrc| and
 
   Annotating the source forest with a given edit-script
 consists in matching which constructors present in the forest
-correspond to a copy and which corresond to a deletion.
-The insertions in the edit-script concern the destinationforest only.
+correspond to a copy and which correspond to a deletion.
+The insertions in the edit-script concern the destination forest only.
 The |annSrc| function, below, does exactly that, proceeding
 by induction on the edit-script.
 
@@ -995,17 +995,17 @@ diffAlmu  :: FixAnn kappa codes (Const Ann) ix -> FixAnn kappa codes (Const Ann)
           -> Almu kappa codes ix iy
 diffAlmu x@(FixAnn ann1 rep1) y@(FixAnn ann2 rep2) =
   case (getAnn ann1, getAnn ann2) of
-    (Copy, Copy)      -> Spn (diffSpine  (getSNat $ Proxy @ix) 
-                                         (getSNat $ Proxy @iy) 
+    (Copy, Copy)      -> Spn (diffSpine  (getSNat $ Proxy @ix)
+                                         (getSNat $ Proxy @iy)
                                          rep1 rep2)
 
-    (Copy, Modify)    ->  if hasCopies y  then diffIns x rep2 
+    (Copy, Modify)    ->  if hasCopies y  then diffIns x rep2
                                           else stiffAlmu (forgetAnn x) (forgetAnn y)
 
-    (Modify, Copy)    ->  if hasCopies x  then diffDel rep1 y 
+    (Modify, Copy)    ->  if hasCopies x  then diffDel rep1 y
                                           else stiffAlmu (forgetAnn x) (forgetAnn y)
 
-    (Modify, Modify)  ->  if hasCopies x  then diffDel rep1 y 
+    (Modify, Modify)  ->  if hasCopies x  then diffDel rep1 y
                                           else stiffAlmu (forgetAnn x) (forgetAnn y)
     where
       diffIns x rep  = case sop rep of Tag c ys -> Ins c (diffCtx CtxIns x ys)
@@ -1013,7 +1013,7 @@ diffAlmu x@(FixAnn ann1 rep1) y@(FixAnn ann2 rep2) =
 \end{code}
 \end{myhs}
 
-  The |diffCtx| function selects an element of 
+  The |diffCtx| function selects an element of
 a product to continue diffing against. We naturally select the
 element that has the most constructors marked for copy as the element
 we continue diffing against. The other fields of the product
@@ -1031,7 +1031,7 @@ diffCtx  :: InsOrDel kappa codes p -> FixAnn kappa codes (Const Ann) ix
 
   The other functions for translating two |FixAnn kappa codes (Const Ann) ix|
 into a |PatchST| are straightforward and follow a similar reasoning process:
-extract the anotations and defer copies until both source and destination
+extract the annotations and defer copies until both source and destination
 annotation flag a copy.
 
   This version of the |diff| function runs in $\mathcal{O}(n^2)$ time, where
@@ -1043,21 +1043,21 @@ abstract syntax elements.
 
 \section{Discussion}
 
-  With \texttt{stdiff} we learnt that the difficulties 
+  With \texttt{stdiff} we learned that the difficulties
 of edit-script based approaches are not due, exclusively, to
 using linear data to represent transformations to tree structured data.
-Another important aspect that we unknowingly overlooked, and ultimately did 
+Another important aspect that we unknowingly overlooked, and ultimately did
 lead to a prohibitively expensive |diff| function, was the necessity to choose
 a single copy opportunity. This happens whenever a subtree could be copied in two or
 more different ways, and, in tree differencing this occurs often.
 
   The |PatchST| datatype has many interesting aspects that deserve some
-mention. First, by being globaly synchronized -- that is, explicit insertions
+mention. First, by being globally synchronized -- that is, explicit insertions
 and deletions with one hole -- these patches are easy to merge. Moreover,
 we have seen that it is possible, and desirable, to encode patches
 as homogeneous types: a patch transform two values of the same
-member of the mutually recursiev family.
- 
+member of the mutually recursive family.
+
   In conclusion, lacking an efficient |diff| algorithm meant that
 \texttt{stdiff} was an important step leading to new insights,
 but unfortunately was not worth pursuing further. This meant that a number
@@ -1066,9 +1066,9 @@ of cost for |PatchST| were abandoned indefinitely.
 
 %%  If we attempt to write a cost function for |PatchST| we also
 %%run into intersting challenges. Recall that the \emph{cost} function
-%%provides a metric to decide which patch is preferred. 
+%%provides a metric to decide which patch is preferred.
 %%Now take insertions and deletions at the |Almu| level
-%%and changes at the spine leven, |Spn (SChg c1 c2 al)|. 
+%%and changes at the spine leven, |Spn (SChg c1 c2 al)|.
 %%The second clearly offers many more
 %%copy opportunities, and hence, should be preferred.
 %%Now consider the two patches below, that transform |t1| into |t2|,
@@ -1092,13 +1092,13 @@ of cost for |PatchST| were abandoned indefinitely.
 %%\end{forest}\qquad
 %%\label{fig:stdiff:patch1-a}
 %%}%
-%%\qquad 
+%%\qquad
 %%\subfloat[Destination tree, |t2|]{%
 %%\begin{forest}
 %%[ |Tri| [a'] [Leaf] [b'] ]
 %%\end{forest}\qquad
 %%\label{fig:stdiff:patch1-b}}
-%%\caption{Source and destination trees where we clearly prefer an |Spn (SChg _ _ _)| over 
+%%\caption{Source and destination trees where we clearly prefer an |Spn (SChg _ _ _)| over
 %%|Ins Tri (dots (Del Bin dots) dots)|}
 %%\label{fig:stdiff:patch1}
 %%\end{figure}
@@ -1106,10 +1106,10 @@ of cost for |PatchST| were abandoned indefinitely.
 %%  We would like to distinguish |good| from |bad| above by the means
 %%of |cost|, that is, |cost good < cost bad|. Consequently, the cost
 %%of insertions and deletions \emph{must} carry the size of the subtrees
-%%they fix. 
+%%they fix.
 %%
 %%Yet, in situations where
-%%|a| and |a'| above have no copy oportunities, 
+%%|a| and |a'| above have no copy oportunities,
 %%
 %%  Recall that on the longest common subsequence scenario,
 %%\Cref{sec:background:string-edit-distance}, the cost function was
@@ -1120,7 +1120,7 @@ of cost for |PatchST| were abandoned indefinitely.
 %%it is likely that the |bad| patch is chosen instead of what we would expect.
 %%The reason is because deletions and insertions for tree shaped
 %%data are not atomic, and hence, should not have a fixed cost. They insert
-%%and delete entire trees. 
+%%and delete entire trees.
 %%
 %%\victor{We do not have a full answer to this problem; how should I write this?}
 
