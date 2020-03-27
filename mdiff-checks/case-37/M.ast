@@ -1,0 +1,2296 @@
+(Script
+ ()
+ (:
+  (ExprStmt
+   ()
+   (AssignExpr
+    ()
+    OpAssign
+    (LDot () (VarRef () (Id () "THREE")) "AssimpJSONLoader")
+    (FuncExpr
+     ()
+     Nothing
+     (: (Id () "manager") [])
+     (:
+      (ExprStmt
+       ()
+       (AssignExpr
+        ()
+        OpAssign
+        (LDot () (ThisRef ()) "manager")
+        (CondExpr
+         ()
+         (InfixExpr
+          ()
+          OpStrictNEq
+          (VarRef () (Id () "manager"))
+          (VarRef () (Id () "undefined")))
+         (VarRef () (Id () "manager"))
+         (DotRef
+          ()
+          (VarRef () (Id () "THREE"))
+          (Id () "DefaultLoadingManager")))))
+      []))))
+  (:
+   (ExprStmt
+    ()
+    (AssignExpr
+     ()
+     OpAssign
+     (LDot
+      ()
+      (DotRef () (VarRef () (Id () "THREE")) (Id () "AssimpJSONLoader"))
+      "prototype")
+     (ObjectLit
+      ()
+      (:
+       ((,)
+        (PropId () (Id () "constructor"))
+        (DotRef () (VarRef () (Id () "THREE")) (Id () "AssimpJSONLoader")))
+       (:
+        ((,)
+         (PropId () (Id () "load"))
+         (FuncExpr
+          ()
+          Nothing
+          (:
+           (Id () "url")
+           (:
+            (Id () "onLoad")
+            (: (Id () "onProgress") (: (Id () "onError") []))))
+          (:
+           (VarDeclStmt
+            ()
+            (: (VarDecl () (Id () "scope") (Just (ThisRef ()))) []))
+           (:
+            (ExprStmt
+             ()
+             (AssignExpr
+              ()
+              OpAssign
+              (LDot () (ThisRef ()) "texturePath")
+              (CondExpr
+               ()
+               (InfixExpr
+                ()
+                OpLAnd
+                (DotRef () (ThisRef ()) (Id () "texturePath"))
+                (InfixExpr
+                 ()
+                 OpStrictEq
+                 (PrefixExpr
+                  ()
+                  PrefixTypeof
+                  (DotRef () (ThisRef ()) (Id () "texturePath")))
+                 (StringLit () "string")))
+               (DotRef () (ThisRef ()) (Id () "texturePath"))
+               (CallExpr
+                ()
+                (DotRef () (ThisRef ()) (Id () "extractUrlBase"))
+                (: (VarRef () (Id () "url")) [])))))
+            (:
+             (VarDeclStmt
+              ()
+              (:
+               (VarDecl
+                ()
+                (Id () "loader")
+                (Just
+                 (NewExpr
+                  ()
+                  (DotRef () (VarRef () (Id () "THREE")) (Id () "XHRLoader"))
+                  (: (DotRef () (ThisRef ()) (Id () "manager")) []))))
+               []))
+             (:
+              (ExprStmt
+               ()
+               (CallExpr
+                ()
+                (DotRef
+                 ()
+                 (VarRef () (Id () "loader"))
+                 (Id () "setCrossOrigin"))
+                (: (DotRef () (ThisRef ()) (Id () "crossOrigin")) [])))
+              (:
+               (ExprStmt
+                ()
+                (CallExpr
+                 ()
+                 (DotRef () (VarRef () (Id () "loader")) (Id () "load"))
+                 (:
+                  (VarRef () (Id () "url"))
+                  (:
+                   (FuncExpr
+                    ()
+                    Nothing
+                    (: (Id () "text") [])
+                    (:
+                     (VarDeclStmt
+                      ()
+                      (:
+                       (VarDecl
+                        ()
+                        (Id () "json")
+                        (Just
+                         (CallExpr
+                          ()
+                          (DotRef () (VarRef () (Id () "JSON")) (Id () "parse"))
+                          (: (VarRef () (Id () "text")) []))))
+                       (:
+                        (VarDecl () (Id () "scene") Nothing)
+                        (: (VarDecl () (Id () "metadata") Nothing) []))))
+                     (:
+                      (ExprStmt
+                       ()
+                       (AssignExpr
+                        ()
+                        OpAssign
+                        (LVar () "metadata")
+                        (DotRef
+                         ()
+                         (VarRef () (Id () "json"))
+                         (Id () "__metadata__"))))
+                      (:
+                       (IfSingleStmt
+                        ()
+                        (InfixExpr
+                         ()
+                         OpStrictNEq
+                         (PrefixExpr
+                          ()
+                          PrefixTypeof
+                          (VarRef () (Id () "metadata")))
+                         (StringLit () "undefined"))
+                        (BlockStmt
+                         ()
+                         (:
+                          (IfStmt
+                           ()
+                           (InfixExpr
+                            ()
+                            OpStrictNEq
+                            (DotRef
+                             ()
+                             (VarRef () (Id () "metadata"))
+                             (Id () "format"))
+                            (StringLit () "assimp2json"))
+                           (BlockStmt
+                            ()
+                            (:
+                             (ExprStmt
+                              ()
+                              (CallExpr
+                               ()
+                               (VarRef () (Id () "onError"))
+                               (:
+                                (StringLit () "Not an assimp2json scene")
+                                [])))
+                             (: (ReturnStmt () Nothing) [])))
+                           (IfSingleStmt
+                            ()
+                            (InfixExpr
+                             ()
+                             OpLAnd
+                             (InfixExpr
+                              ()
+                              OpLT
+                              (DotRef
+                               ()
+                               (VarRef () (Id () "metadata"))
+                               (Id () "version"))
+                              (IntLit () 100))
+                             (InfixExpr
+                              ()
+                              OpGEq
+                              (DotRef
+                               ()
+                               (VarRef () (Id () "metadata"))
+                               (Id () "version"))
+                              (IntLit () 200)))
+                            (BlockStmt
+                             ()
+                             (:
+                              (ExprStmt
+                               ()
+                               (CallExpr
+                                ()
+                                (VarRef () (Id () "onError"))
+                                (:
+                                 (StringLit
+                                  ()
+                                  "Unsupported assimp2json file format version")
+                                 [])))
+                              (: (ReturnStmt () Nothing) [])))))
+                          [])))
+                       (:
+                        (ExprStmt
+                         ()
+                         (AssignExpr
+                          ()
+                          OpAssign
+                          (LVar () "scene")
+                          (CallExpr
+                           ()
+                           (DotRef
+                            ()
+                            (VarRef () (Id () "scope"))
+                            (Id () "parse"))
+                           (: (VarRef () (Id () "json")) []))))
+                        (:
+                         (ExprStmt
+                          ()
+                          (CallExpr
+                           ()
+                           (VarRef () (Id () "onLoad"))
+                           (: (VarRef () (Id () "scene")) [])))
+                         []))))))
+                   (:
+                    (VarRef () (Id () "onProgress"))
+                    (: (VarRef () (Id () "onError")) []))))))
+               [])))))))
+        (:
+         ((,)
+          (PropId () (Id () "setCrossOrigin"))
+          (FuncExpr
+           ()
+           Nothing
+           (: (Id () "value") [])
+           (:
+            (ExprStmt
+             ()
+             (AssignExpr
+              ()
+              OpAssign
+              (LDot () (ThisRef ()) "crossOrigin")
+              (VarRef () (Id () "value"))))
+            [])))
+         (:
+          ((,)
+           (PropId () (Id () "setTexturePath"))
+           (FuncExpr
+            ()
+            Nothing
+            (: (Id () "value") [])
+            (:
+             (ExprStmt
+              ()
+              (AssignExpr
+               ()
+               OpAssign
+               (LDot () (ThisRef ()) "texturePath")
+               (VarRef () (Id () "value"))))
+             [])))
+          (:
+           ((,)
+            (PropId () (Id () "extractUrlBase"))
+            (FuncExpr
+             ()
+             Nothing
+             (: (Id () "url") [])
+             (:
+              (VarDeclStmt
+               ()
+               (:
+                (VarDecl
+                 ()
+                 (Id () "parts")
+                 (Just
+                  (CallExpr
+                   ()
+                   (DotRef () (VarRef () (Id () "url")) (Id () "split"))
+                   (: (StringLit () "/") []))))
+                []))
+              (:
+               (ExprStmt
+                ()
+                (CallExpr
+                 ()
+                 (DotRef () (VarRef () (Id () "parts")) (Id () "pop"))
+                 []))
+               (:
+                (ReturnStmt
+                 ()
+                 (Just
+                  (InfixExpr
+                   ()
+                   OpAdd
+                   (CondExpr
+                    ()
+                    (InfixExpr
+                     ()
+                     OpLT
+                     (DotRef () (VarRef () (Id () "parts")) (Id () "length"))
+                     (IntLit () 1))
+                    (StringLit () ".")
+                    (CallExpr
+                     ()
+                     (DotRef () (VarRef () (Id () "parts")) (Id () "join"))
+                     (: (StringLit () "/") [])))
+                   (StringLit () "/"))))
+                [])))))
+           (:
+            ((,)
+             (PropId () (Id () "parse"))
+             (FuncExpr
+              ()
+              Nothing
+              (: (Id () "json") [])
+              (:
+               (VarDeclStmt
+                ()
+                (:
+                 (VarDecl
+                  ()
+                  (Id () "meshes")
+                  (Just
+                   (CallExpr
+                    ()
+                    (DotRef () (ThisRef ()) (Id () "parseList"))
+                    (:
+                     (DotRef () (VarRef () (Id () "json")) (Id () "meshes"))
+                     (: (DotRef () (ThisRef ()) (Id () "parseMesh")) [])))))
+                 []))
+               (:
+                (VarDeclStmt
+                 ()
+                 (:
+                  (VarDecl
+                   ()
+                   (Id () "materials")
+                   (Just
+                    (CallExpr
+                     ()
+                     (DotRef () (ThisRef ()) (Id () "parseList"))
+                     (:
+                      (DotRef () (VarRef () (Id () "json")) (Id () "materials"))
+                      (:
+                       (DotRef () (ThisRef ()) (Id () "parseMaterial"))
+                       [])))))
+                  []))
+                (:
+                 (ReturnStmt
+                  ()
+                  (Just
+                   (CallExpr
+                    ()
+                    (DotRef () (ThisRef ()) (Id () "parseObject"))
+                    (:
+                     (VarRef () (Id () "json"))
+                     (:
+                      (DotRef () (VarRef () (Id () "json")) (Id () "rootnode"))
+                      (:
+                       (VarRef () (Id () "meshes"))
+                       (: (VarRef () (Id () "materials")) [])))))))
+                 [])))))
+            (:
+             ((,)
+              (PropId () (Id () "parseList"))
+              (FuncExpr
+               ()
+               Nothing
+               (: (Id () "json") (: (Id () "handler") []))
+               (:
+                (VarDeclStmt
+                 ()
+                 (:
+                  (VarDecl
+                   ()
+                   (Id () "meshes")
+                   (Just
+                    (NewExpr
+                     ()
+                     (VarRef () (Id () "Array"))
+                     (:
+                      (DotRef () (VarRef () (Id () "json")) (Id () "length"))
+                      []))))
+                  []))
+                (:
+                 (ForStmt
+                  ()
+                  (VarInit (: (VarDecl () (Id () "i") (Just (IntLit () 0))) []))
+                  (Just
+                   (InfixExpr
+                    ()
+                    OpLT
+                    (VarRef () (Id () "i"))
+                    (DotRef () (VarRef () (Id () "json")) (Id () "length"))))
+                  (Just (UnaryAssignExpr () PrefixInc (LVar () "i")))
+                  (BlockStmt
+                   ()
+                   (:
+                    (ExprStmt
+                     ()
+                     (AssignExpr
+                      ()
+                      OpAssign
+                      (LBracket
+                       ()
+                       (VarRef () (Id () "meshes"))
+                       (VarRef () (Id () "i")))
+                      (CallExpr
+                       ()
+                       (DotRef () (VarRef () (Id () "handler")) (Id () "call"))
+                       (:
+                        (ThisRef ())
+                        (:
+                         (BracketRef
+                          ()
+                          (VarRef () (Id () "json"))
+                          (VarRef () (Id () "i")))
+                         [])))))
+                    [])))
+                 (: (ReturnStmt () (Just (VarRef () (Id () "meshes")))) [])))))
+             (:
+              ((,)
+               (PropId () (Id () "parseMesh"))
+               (FuncExpr
+                ()
+                Nothing
+                (: (Id () "json") [])
+                (:
+                 (VarDeclStmt
+                  ()
+                  (:
+                   (VarDecl () (Id () "vertex") Nothing)
+                   (:
+                    (VarDecl () (Id () "geometry") Nothing)
+                    (:
+                     (VarDecl () (Id () "i") Nothing)
+                     (:
+                      (VarDecl () (Id () "e") Nothing)
+                      (:
+                       (VarDecl () (Id () "in_data") Nothing)
+                       (: (VarDecl () (Id () "src") Nothing) [])))))))
+                 (:
+                  (ExprStmt
+                   ()
+                   (AssignExpr
+                    ()
+                    OpAssign
+                    (LVar () "geometry")
+                    (NewExpr
+                     ()
+                     (DotRef () (VarRef () (Id () "THREE")) (Id () "Geometry"))
+                     [])))
+                  (:
+                   (ForStmt
+                    ()
+                    (ExprInit
+                     (ListExpr
+                      ()
+                      (:
+                       (AssignExpr
+                        ()
+                        OpAssign
+                        (LVar () "in_data")
+                        (DotRef
+                         ()
+                         (VarRef () (Id () "json"))
+                         (Id () "vertices")))
+                       (:
+                        (AssignExpr () OpAssign (LVar () "i") (IntLit () 0))
+                        (:
+                         (AssignExpr
+                          ()
+                          OpAssign
+                          (LVar () "e")
+                          (DotRef
+                           ()
+                           (VarRef () (Id () "in_data"))
+                           (Id () "length")))
+                         [])))))
+                    (Just
+                     (InfixExpr
+                      ()
+                      OpLT
+                      (VarRef () (Id () "i"))
+                      (VarRef () (Id () "e"))))
+                    Nothing
+                    (BlockStmt
+                     ()
+                     (:
+                      (ExprStmt
+                       ()
+                       (CallExpr
+                        ()
+                        (DotRef
+                         ()
+                         (DotRef
+                          ()
+                          (VarRef () (Id () "geometry"))
+                          (Id () "vertices"))
+                         (Id () "push"))
+                        (:
+                         (NewExpr
+                          ()
+                          (DotRef
+                           ()
+                           (VarRef () (Id () "THREE"))
+                           (Id () "Vector3"))
+                          (:
+                           (BracketRef
+                            ()
+                            (VarRef () (Id () "in_data"))
+                            (UnaryAssignExpr () PostfixInc (LVar () "i")))
+                           (:
+                            (BracketRef
+                             ()
+                             (VarRef () (Id () "in_data"))
+                             (UnaryAssignExpr () PostfixInc (LVar () "i")))
+                            (:
+                             (BracketRef
+                              ()
+                              (VarRef () (Id () "in_data"))
+                              (UnaryAssignExpr () PostfixInc (LVar () "i")))
+                             []))))
+                         [])))
+                      [])))
+                   (:
+                    (VarDeclStmt
+                     ()
+                     (: (VarDecl () (Id () "cnt") (Just (IntLit () 0))) []))
+                    (:
+                     (ForStmt
+                      ()
+                      (ExprInit
+                       (ListExpr
+                        ()
+                        (:
+                         (AssignExpr
+                          ()
+                          OpAssign
+                          (LVar () "in_data")
+                          (DotRef
+                           ()
+                           (VarRef () (Id () "json"))
+                           (Id () "faces")))
+                         (:
+                          (AssignExpr () OpAssign (LVar () "i") (IntLit () 0))
+                          (:
+                           (AssignExpr
+                            ()
+                            OpAssign
+                            (LVar () "e")
+                            (DotRef
+                             ()
+                             (VarRef () (Id () "in_data"))
+                             (Id () "length")))
+                           [])))))
+                      (Just
+                       (InfixExpr
+                        ()
+                        OpLT
+                        (VarRef () (Id () "i"))
+                        (VarRef () (Id () "e"))))
+                      (Just (UnaryAssignExpr () PrefixInc (LVar () "i")))
+                      (BlockStmt
+                       ()
+                       (:
+                        (ExprStmt
+                         ()
+                         (AssignExpr
+                          ()
+                          OpAssign
+                          (LVar () "src")
+                          (BracketRef
+                           ()
+                           (VarRef () (Id () "in_data"))
+                           (VarRef () (Id () "i")))))
+                        (:
+                         (ExprStmt
+                          ()
+                          (AssignExpr
+                           ()
+                           OpAssign
+                           (LVar () "face")
+                           (NewExpr
+                            ()
+                            (DotRef
+                             ()
+                             (VarRef () (Id () "THREE"))
+                             (Id () "Face3"))
+                            (:
+                             (BracketRef
+                              ()
+                              (VarRef () (Id () "src"))
+                              (IntLit () 0))
+                             (:
+                              (BracketRef
+                               ()
+                               (VarRef () (Id () "src"))
+                               (IntLit () 1))
+                              (:
+                               (BracketRef
+                                ()
+                                (VarRef () (Id () "src"))
+                                (IntLit () 2))
+                               []))))))
+                         (:
+                          (ExprStmt
+                           ()
+                           (CallExpr
+                            ()
+                            (DotRef
+                             ()
+                             (DotRef
+                              ()
+                              (VarRef () (Id () "geometry"))
+                              (Id () "faces"))
+                             (Id () "push"))
+                            (: (VarRef () (Id () "face")) [])))
+                          [])))))
+                     (:
+                      (ExprStmt
+                       ()
+                       (AssignExpr
+                        ()
+                        OpAssign
+                        (LDot () (VarRef () (Id () "json")) "texturecoords")
+                        (InfixExpr
+                         ()
+                         OpLOr
+                         (DotRef
+                          ()
+                          (VarRef () (Id () "json"))
+                          (Id () "texturecoords"))
+                         (ArrayLit () []))))
+                      (:
+                       (ForStmt
+                        ()
+                        (ExprInit
+                         (ListExpr
+                          ()
+                          (:
+                           (AssignExpr () OpAssign (LVar () "i") (IntLit () 0))
+                           (:
+                            (AssignExpr
+                             ()
+                             OpAssign
+                             (LVar () "e")
+                             (DotRef
+                              ()
+                              (DotRef
+                               ()
+                               (VarRef () (Id () "json"))
+                               (Id () "texturecoords"))
+                              (Id () "length")))
+                            []))))
+                        (Just
+                         (InfixExpr
+                          ()
+                          OpLT
+                          (VarRef () (Id () "i"))
+                          (VarRef () (Id () "e"))))
+                        (Just (UnaryAssignExpr () PrefixInc (LVar () "i")))
+                        (BlockStmt
+                         ()
+                         (:
+                          (FunctionStmt
+                           ()
+                           (Id () "convertTextureCoords")
+                           (:
+                            (Id () "in_uv")
+                            (:
+                             (Id () "out_faces")
+                             (: (Id () "out_vertex_uvs") [])))
+                           (:
+                            (VarDeclStmt
+                             ()
+                             (:
+                              (VarDecl () (Id () "i") Nothing)
+                              (:
+                               (VarDecl () (Id () "e") Nothing)
+                               (:
+                                (VarDecl () (Id () "face") Nothing)
+                                (:
+                                 (VarDecl () (Id () "a") Nothing)
+                                 (:
+                                  (VarDecl () (Id () "b") Nothing)
+                                  (: (VarDecl () (Id () "c") Nothing) [])))))))
+                            (:
+                             (ForStmt
+                              ()
+                              (ExprInit
+                               (ListExpr
+                                ()
+                                (:
+                                 (AssignExpr
+                                  ()
+                                  OpAssign
+                                  (LVar () "i")
+                                  (IntLit () 0))
+                                 (:
+                                  (AssignExpr
+                                   ()
+                                   OpAssign
+                                   (LVar () "e")
+                                   (DotRef
+                                    ()
+                                    (VarRef () (Id () "out_faces"))
+                                    (Id () "length")))
+                                  []))))
+                              (Just
+                               (InfixExpr
+                                ()
+                                OpLT
+                                (VarRef () (Id () "i"))
+                                (VarRef () (Id () "e"))))
+                              (Just
+                               (UnaryAssignExpr () PrefixInc (LVar () "i")))
+                              (BlockStmt
+                               ()
+                               (:
+                                (ExprStmt
+                                 ()
+                                 (AssignExpr
+                                  ()
+                                  OpAssign
+                                  (LVar () "face")
+                                  (BracketRef
+                                   ()
+                                   (VarRef () (Id () "out_faces"))
+                                   (VarRef () (Id () "i")))))
+                                (:
+                                 (ExprStmt
+                                  ()
+                                  (AssignExpr
+                                   ()
+                                   OpAssign
+                                   (LVar () "a")
+                                   (InfixExpr
+                                    ()
+                                    OpMul
+                                    (DotRef
+                                     ()
+                                     (VarRef () (Id () "face"))
+                                     (Id () "a"))
+                                    (IntLit () 2))))
+                                 (:
+                                  (ExprStmt
+                                   ()
+                                   (AssignExpr
+                                    ()
+                                    OpAssign
+                                    (LVar () "b")
+                                    (InfixExpr
+                                     ()
+                                     OpMul
+                                     (DotRef
+                                      ()
+                                      (VarRef () (Id () "face"))
+                                      (Id () "b"))
+                                     (IntLit () 2))))
+                                  (:
+                                   (ExprStmt
+                                    ()
+                                    (AssignExpr
+                                     ()
+                                     OpAssign
+                                     (LVar () "c")
+                                     (InfixExpr
+                                      ()
+                                      OpMul
+                                      (DotRef
+                                       ()
+                                       (VarRef () (Id () "face"))
+                                       (Id () "c"))
+                                      (IntLit () 2))))
+                                   (:
+                                    (ExprStmt
+                                     ()
+                                     (CallExpr
+                                      ()
+                                      (DotRef
+                                       ()
+                                       (VarRef () (Id () "out_vertex_uvs"))
+                                       (Id () "push"))
+                                      (:
+                                       (ArrayLit
+                                        ()
+                                        (:
+                                         (NewExpr
+                                          ()
+                                          (DotRef
+                                           ()
+                                           (VarRef () (Id () "THREE"))
+                                           (Id () "Vector2"))
+                                          (:
+                                           (BracketRef
+                                            ()
+                                            (VarRef () (Id () "in_uv"))
+                                            (VarRef () (Id () "a")))
+                                           (:
+                                            (BracketRef
+                                             ()
+                                             (VarRef () (Id () "in_uv"))
+                                             (InfixExpr
+                                              ()
+                                              OpAdd
+                                              (VarRef () (Id () "a"))
+                                              (IntLit () 1)))
+                                            [])))
+                                         (:
+                                          (NewExpr
+                                           ()
+                                           (DotRef
+                                            ()
+                                            (VarRef () (Id () "THREE"))
+                                            (Id () "Vector2"))
+                                           (:
+                                            (BracketRef
+                                             ()
+                                             (VarRef () (Id () "in_uv"))
+                                             (VarRef () (Id () "b")))
+                                            (:
+                                             (BracketRef
+                                              ()
+                                              (VarRef () (Id () "in_uv"))
+                                              (InfixExpr
+                                               ()
+                                               OpAdd
+                                               (VarRef () (Id () "b"))
+                                               (IntLit () 1)))
+                                             [])))
+                                          (:
+                                           (NewExpr
+                                            ()
+                                            (DotRef
+                                             ()
+                                             (VarRef () (Id () "THREE"))
+                                             (Id () "Vector2"))
+                                            (:
+                                             (BracketRef
+                                              ()
+                                              (VarRef () (Id () "in_uv"))
+                                              (VarRef () (Id () "c")))
+                                             (:
+                                              (BracketRef
+                                               ()
+                                               (VarRef () (Id () "in_uv"))
+                                               (InfixExpr
+                                                ()
+                                                OpAdd
+                                                (VarRef () (Id () "c"))
+                                                (IntLit () 1)))
+                                              [])))
+                                           []))))
+                                       [])))
+                                    [])))))))
+                             [])))
+                          (:
+                           (ExprStmt
+                            ()
+                            (CallExpr
+                             ()
+                             (VarRef () (Id () "convertTextureCoords"))
+                             (:
+                              (BracketRef
+                               ()
+                               (DotRef
+                                ()
+                                (VarRef () (Id () "json"))
+                                (Id () "texturecoords"))
+                               (VarRef () (Id () "i")))
+                              (:
+                               (DotRef
+                                ()
+                                (VarRef () (Id () "geometry"))
+                                (Id () "faces"))
+                               (:
+                                (BracketRef
+                                 ()
+                                 (DotRef
+                                  ()
+                                  (VarRef () (Id () "geometry"))
+                                  (Id () "faceVertexUvs"))
+                                 (VarRef () (Id () "i")))
+                                [])))))
+                           []))))
+                       (:
+                        (IfSingleStmt
+                         ()
+                         (DotRef
+                          ()
+                          (VarRef () (Id () "json"))
+                          (Id () "normals"))
+                         (BlockStmt
+                          ()
+                          (:
+                           (FunctionStmt
+                            ()
+                            (Id () "convertNormals")
+                            (: (Id () "in_nor") (: (Id () "out_faces") []))
+                            (:
+                             (VarDeclStmt
+                              ()
+                              (:
+                               (VarDecl () (Id () "i") Nothing)
+                               (:
+                                (VarDecl () (Id () "e") Nothing)
+                                (:
+                                 (VarDecl () (Id () "face") Nothing)
+                                 (:
+                                  (VarDecl () (Id () "a") Nothing)
+                                  (:
+                                   (VarDecl () (Id () "b") Nothing)
+                                   (: (VarDecl () (Id () "c") Nothing) [])))))))
+                             (:
+                              (ForStmt
+                               ()
+                               (ExprInit
+                                (ListExpr
+                                 ()
+                                 (:
+                                  (AssignExpr
+                                   ()
+                                   OpAssign
+                                   (LVar () "i")
+                                   (IntLit () 0))
+                                  (:
+                                   (AssignExpr
+                                    ()
+                                    OpAssign
+                                    (LVar () "e")
+                                    (DotRef
+                                     ()
+                                     (VarRef () (Id () "out_faces"))
+                                     (Id () "length")))
+                                   []))))
+                               (Just
+                                (InfixExpr
+                                 ()
+                                 OpLT
+                                 (VarRef () (Id () "i"))
+                                 (VarRef () (Id () "e"))))
+                               (Just
+                                (UnaryAssignExpr () PrefixInc (LVar () "i")))
+                               (BlockStmt
+                                ()
+                                (:
+                                 (ExprStmt
+                                  ()
+                                  (AssignExpr
+                                   ()
+                                   OpAssign
+                                   (LVar () "face")
+                                   (BracketRef
+                                    ()
+                                    (VarRef () (Id () "out_faces"))
+                                    (VarRef () (Id () "i")))))
+                                 (:
+                                  (ExprStmt
+                                   ()
+                                   (AssignExpr
+                                    ()
+                                    OpAssign
+                                    (LVar () "a")
+                                    (InfixExpr
+                                     ()
+                                     OpMul
+                                     (DotRef
+                                      ()
+                                      (VarRef () (Id () "face"))
+                                      (Id () "a"))
+                                     (IntLit () 3))))
+                                  (:
+                                   (ExprStmt
+                                    ()
+                                    (AssignExpr
+                                     ()
+                                     OpAssign
+                                     (LVar () "b")
+                                     (InfixExpr
+                                      ()
+                                      OpMul
+                                      (DotRef
+                                       ()
+                                       (VarRef () (Id () "face"))
+                                       (Id () "b"))
+                                      (IntLit () 3))))
+                                   (:
+                                    (ExprStmt
+                                     ()
+                                     (AssignExpr
+                                      ()
+                                      OpAssign
+                                      (LVar () "c")
+                                      (InfixExpr
+                                       ()
+                                       OpMul
+                                       (DotRef
+                                        ()
+                                        (VarRef () (Id () "face"))
+                                        (Id () "c"))
+                                       (IntLit () 3))))
+                                    (:
+                                     (ExprStmt
+                                      ()
+                                      (AssignExpr
+                                       ()
+                                       OpAssign
+                                       (LDot
+                                        ()
+                                        (VarRef () (Id () "face"))
+                                        "vertexNormals")
+                                       (ArrayLit
+                                        ()
+                                        (:
+                                         (NewExpr
+                                          ()
+                                          (DotRef
+                                           ()
+                                           (VarRef () (Id () "THREE"))
+                                           (Id () "Vector3"))
+                                          (:
+                                           (BracketRef
+                                            ()
+                                            (VarRef () (Id () "in_nor"))
+                                            (VarRef () (Id () "a")))
+                                           (:
+                                            (BracketRef
+                                             ()
+                                             (VarRef () (Id () "in_nor"))
+                                             (InfixExpr
+                                              ()
+                                              OpAdd
+                                              (VarRef () (Id () "a"))
+                                              (IntLit () 1)))
+                                            (:
+                                             (BracketRef
+                                              ()
+                                              (VarRef () (Id () "in_nor"))
+                                              (InfixExpr
+                                               ()
+                                               OpAdd
+                                               (VarRef () (Id () "a"))
+                                               (IntLit () 2)))
+                                             []))))
+                                         (:
+                                          (NewExpr
+                                           ()
+                                           (DotRef
+                                            ()
+                                            (VarRef () (Id () "THREE"))
+                                            (Id () "Vector3"))
+                                           (:
+                                            (BracketRef
+                                             ()
+                                             (VarRef () (Id () "in_nor"))
+                                             (VarRef () (Id () "b")))
+                                            (:
+                                             (BracketRef
+                                              ()
+                                              (VarRef () (Id () "in_nor"))
+                                              (InfixExpr
+                                               ()
+                                               OpAdd
+                                               (VarRef () (Id () "b"))
+                                               (IntLit () 1)))
+                                             (:
+                                              (BracketRef
+                                               ()
+                                               (VarRef () (Id () "in_nor"))
+                                               (InfixExpr
+                                                ()
+                                                OpAdd
+                                                (VarRef () (Id () "b"))
+                                                (IntLit () 2)))
+                                              []))))
+                                          (:
+                                           (NewExpr
+                                            ()
+                                            (DotRef
+                                             ()
+                                             (VarRef () (Id () "THREE"))
+                                             (Id () "Vector3"))
+                                            (:
+                                             (BracketRef
+                                              ()
+                                              (VarRef () (Id () "in_nor"))
+                                              (VarRef () (Id () "c")))
+                                             (:
+                                              (BracketRef
+                                               ()
+                                               (VarRef () (Id () "in_nor"))
+                                               (InfixExpr
+                                                ()
+                                                OpAdd
+                                                (VarRef () (Id () "c"))
+                                                (IntLit () 1)))
+                                              (:
+                                               (BracketRef
+                                                ()
+                                                (VarRef () (Id () "in_nor"))
+                                                (InfixExpr
+                                                 ()
+                                                 OpAdd
+                                                 (VarRef () (Id () "c"))
+                                                 (IntLit () 2)))
+                                               []))))
+                                           []))))))
+                                     [])))))))
+                              [])))
+                           (:
+                            (ExprStmt
+                             ()
+                             (CallExpr
+                              ()
+                              (VarRef () (Id () "convertNormals"))
+                              (:
+                               (DotRef
+                                ()
+                                (VarRef () (Id () "json"))
+                                (Id () "normals"))
+                               (:
+                                (DotRef
+                                 ()
+                                 (VarRef () (Id () "geometry"))
+                                 (Id () "faces"))
+                                []))))
+                            []))))
+                        (:
+                         (IfSingleStmt
+                          ()
+                          (InfixExpr
+                           ()
+                           OpLAnd
+                           (DotRef
+                            ()
+                            (VarRef () (Id () "json"))
+                            (Id () "colors"))
+                           (BracketRef
+                            ()
+                            (DotRef
+                             ()
+                             (VarRef () (Id () "json"))
+                             (Id () "colors"))
+                            (IntLit () 0)))
+                          (BlockStmt
+                           ()
+                           (:
+                            (FunctionStmt
+                             ()
+                             (Id () "convertColors")
+                             (: (Id () "in_color") (: (Id () "out_faces") []))
+                             (:
+                              (ForStmt
+                               ()
+                               (VarInit
+                                (:
+                                 (VarDecl () (Id () "i") (Just (IntLit () 0)))
+                                 (:
+                                  (VarDecl
+                                   ()
+                                   (Id () "e")
+                                   (Just
+                                    (DotRef
+                                     ()
+                                     (VarRef () (Id () "out_faces"))
+                                     (Id () "length"))))
+                                  [])))
+                               (Just
+                                (InfixExpr
+                                 ()
+                                 OpLT
+                                 (VarRef () (Id () "i"))
+                                 (VarRef () (Id () "e"))))
+                               (Just
+                                (UnaryAssignExpr () PrefixInc (LVar () "i")))
+                               (BlockStmt
+                                ()
+                                (:
+                                 (VarDeclStmt
+                                  ()
+                                  (:
+                                   (VarDecl
+                                    ()
+                                    (Id () "face")
+                                    (Just
+                                     (BracketRef
+                                      ()
+                                      (VarRef () (Id () "out_faces"))
+                                      (VarRef () (Id () "i")))))
+                                   []))
+                                 (:
+                                  (VarDeclStmt
+                                   ()
+                                   (:
+                                    (VarDecl
+                                     ()
+                                     (Id () "a")
+                                     (Just
+                                      (InfixExpr
+                                       ()
+                                       OpMul
+                                       (DotRef
+                                        ()
+                                        (VarRef () (Id () "face"))
+                                        (Id () "a"))
+                                       (IntLit () 4))))
+                                    []))
+                                  (:
+                                   (VarDeclStmt
+                                    ()
+                                    (:
+                                     (VarDecl
+                                      ()
+                                      (Id () "b")
+                                      (Just
+                                       (InfixExpr
+                                        ()
+                                        OpMul
+                                        (DotRef
+                                         ()
+                                         (VarRef () (Id () "face"))
+                                         (Id () "b"))
+                                        (IntLit () 4))))
+                                     []))
+                                   (:
+                                    (VarDeclStmt
+                                     ()
+                                     (:
+                                      (VarDecl
+                                       ()
+                                       (Id () "c")
+                                       (Just
+                                        (InfixExpr
+                                         ()
+                                         OpMul
+                                         (DotRef
+                                          ()
+                                          (VarRef () (Id () "face"))
+                                          (Id () "c"))
+                                         (IntLit () 4))))
+                                      []))
+                                    (:
+                                     (ExprStmt
+                                      ()
+                                      (AssignExpr
+                                       ()
+                                       OpAssign
+                                       (LDot
+                                        ()
+                                        (VarRef () (Id () "face"))
+                                        "vertexColors")
+                                       (ArrayLit
+                                        ()
+                                        (:
+                                         (CallExpr
+                                          ()
+                                          (DotRef
+                                           ()
+                                           (NewExpr
+                                            ()
+                                            (DotRef
+                                             ()
+                                             (VarRef () (Id () "THREE"))
+                                             (Id () "Color"))
+                                            [])
+                                           (Id () "fromArray"))
+                                          (: (VarRef () (Id () "a")) []))
+                                         (:
+                                          (CallExpr
+                                           ()
+                                           (DotRef
+                                            ()
+                                            (NewExpr
+                                             ()
+                                             (DotRef
+                                              ()
+                                              (VarRef () (Id () "THREE"))
+                                              (Id () "Color"))
+                                             [])
+                                            (Id () "fromArray"))
+                                           (: (VarRef () (Id () "b")) []))
+                                          (:
+                                           (CallExpr
+                                            ()
+                                            (DotRef
+                                             ()
+                                             (NewExpr
+                                              ()
+                                              (DotRef
+                                               ()
+                                               (VarRef () (Id () "THREE"))
+                                               (Id () "Color"))
+                                              [])
+                                             (Id () "fromArray"))
+                                            (: (VarRef () (Id () "c")) []))
+                                           []))))))
+                                     [])))))))
+                              []))
+                            (:
+                             (ExprStmt
+                              ()
+                              (CallExpr
+                               ()
+                               (VarRef () (Id () "convertColors"))
+                               (:
+                                (BracketRef
+                                 ()
+                                 (DotRef
+                                  ()
+                                  (VarRef () (Id () "json"))
+                                  (Id () "colors"))
+                                 (IntLit () 0))
+                                (:
+                                 (DotRef
+                                  ()
+                                  (VarRef () (Id () "geometry"))
+                                  (Id () "faces"))
+                                 []))))
+                             []))))
+                         (:
+                          (ExprStmt
+                           ()
+                           (CallExpr
+                            ()
+                            (DotRef
+                             ()
+                             (VarRef () (Id () "geometry"))
+                             (Id () "computeBoundingSphere"))
+                            []))
+                          (:
+                           (ReturnStmt () (Just (VarRef () (Id () "geometry"))))
+                           [])))))))))))))
+              (:
+               ((,)
+                (PropId () (Id () "parseMaterial"))
+                (FuncExpr
+                 ()
+                 Nothing
+                 (: (Id () "json") [])
+                 (:
+                  (VarDeclStmt
+                   ()
+                   (:
+                    (VarDecl () (Id () "mat") (Just (NullLit ())))
+                    (:
+                     (VarDecl () (Id () "scope") (Just (ThisRef ())))
+                     (:
+                      (VarDecl () (Id () "i") Nothing)
+                      (:
+                       (VarDecl () (Id () "prop") Nothing)
+                       (:
+                        (VarDecl
+                         ()
+                         (Id () "has_textures")
+                         (Just (ArrayLit () [])))
+                        (:
+                         (VarDecl
+                          ()
+                          (Id () "init_props")
+                          (Just
+                           (ObjectLit
+                            ()
+                            (:
+                             ((,)
+                              (PropId () (Id () "shading"))
+                              (DotRef
+                               ()
+                               (VarRef () (Id () "THREE"))
+                               (Id () "SmoothShading")))
+                             []))))
+                         [])))))))
+                  (:
+                   (FunctionStmt
+                    ()
+                    (Id () "toColor")
+                    (: (Id () "value_arr") [])
+                    (:
+                     (VarDeclStmt
+                      ()
+                      (:
+                       (VarDecl
+                        ()
+                        (Id () "col")
+                        (Just
+                         (NewExpr
+                          ()
+                          (DotRef
+                           ()
+                           (VarRef () (Id () "THREE"))
+                           (Id () "Color"))
+                          [])))
+                       []))
+                     (:
+                      (ExprStmt
+                       ()
+                       (CallExpr
+                        ()
+                        (DotRef () (VarRef () (Id () "col")) (Id () "setRGB"))
+                        (:
+                         (BracketRef
+                          ()
+                          (VarRef () (Id () "value_arr"))
+                          (IntLit () 0))
+                         (:
+                          (BracketRef
+                           ()
+                           (VarRef () (Id () "value_arr"))
+                           (IntLit () 1))
+                          (:
+                           (BracketRef
+                            ()
+                            (VarRef () (Id () "value_arr"))
+                            (IntLit () 2))
+                           [])))))
+                      (: (ReturnStmt () (Just (VarRef () (Id () "col")))) []))))
+                   (:
+                    (FunctionStmt
+                     ()
+                     (Id () "defaultTexture")
+                     []
+                     (:
+                      (VarDeclStmt
+                       ()
+                       (:
+                        (VarDecl
+                         ()
+                         (Id () "im")
+                         (Just (NewExpr () (VarRef () (Id () "Image")) [])))
+                        []))
+                      (:
+                       (ExprStmt
+                        ()
+                        (AssignExpr
+                         ()
+                         OpAssign
+                         (LDot () (VarRef () (Id () "im")) "width")
+                         (IntLit () 1)))
+                       (:
+                        (ExprStmt
+                         ()
+                         (AssignExpr
+                          ()
+                          OpAssign
+                          (LDot () (VarRef () (Id () "im")) "height")
+                          (IntLit () 1)))
+                        (:
+                         (ReturnStmt
+                          ()
+                          (Just
+                           (NewExpr
+                            ()
+                            (DotRef
+                             ()
+                             (VarRef () (Id () "THREE"))
+                             (Id () "Texture"))
+                            (: (VarRef () (Id () "im")) []))))
+                         [])))))
+                    (:
+                     (ForInStmt
+                      ()
+                      (ForInVar (Id () "i"))
+                      (DotRef
+                       ()
+                       (VarRef () (Id () "json"))
+                       (Id () "properties"))
+                      (BlockStmt
+                       ()
+                       (:
+                        (ExprStmt
+                         ()
+                         (AssignExpr
+                          ()
+                          OpAssign
+                          (LVar () "prop")
+                          (BracketRef
+                           ()
+                           (DotRef
+                            ()
+                            (VarRef () (Id () "json"))
+                            (Id () "properties"))
+                           (VarRef () (Id () "i")))))
+                        (:
+                         (IfStmt
+                          ()
+                          (InfixExpr
+                           ()
+                           OpStrictEq
+                           (DotRef () (VarRef () (Id () "prop")) (Id () "key"))
+                           (StringLit () "$tex.file"))
+                          (BlockStmt
+                           ()
+                           (:
+                            (IfSingleStmt
+                             ()
+                             (InfixExpr
+                              ()
+                              OpLOr
+                              (InfixExpr
+                               ()
+                               OpLOr
+                               (InfixExpr
+                                ()
+                                OpLOr
+                                (InfixExpr
+                                 ()
+                                 OpStrictEq
+                                 (DotRef
+                                  ()
+                                  (VarRef () (Id () "prop"))
+                                  (Id () "semantic"))
+                                 (IntLit () 1))
+                                (InfixExpr
+                                 ()
+                                 OpStrictEq
+                                 (DotRef
+                                  ()
+                                  (VarRef () (Id () "prop"))
+                                  (Id () "semantic"))
+                                 (IntLit () 5)))
+                               (InfixExpr
+                                ()
+                                OpStrictEq
+                                (DotRef
+                                 ()
+                                 (VarRef () (Id () "prop"))
+                                 (Id () "semantic"))
+                                (IntLit () 6)))
+                              (InfixExpr
+                               ()
+                               OpStrictEq
+                               (DotRef
+                                ()
+                                (VarRef () (Id () "prop"))
+                                (Id () "semantic"))
+                               (IntLit () 2)))
+                             (BlockStmt
+                              ()
+                              (:
+                               (ExprStmt
+                                ()
+                                (CallExpr
+                                 ()
+                                 (FuncExpr
+                                  ()
+                                  Nothing
+                                  (: (Id () "semantic") [])
+                                  (:
+                                   (VarDeclStmt
+                                    ()
+                                    (:
+                                     (VarDecl
+                                      ()
+                                      (Id () "loader")
+                                      (Just
+                                       (NewExpr
+                                        ()
+                                        (DotRef
+                                         ()
+                                         (VarRef () (Id () "THREE"))
+                                         (Id () "TextureLoader"))
+                                        (:
+                                         (DotRef
+                                          ()
+                                          (VarRef () (Id () "scope"))
+                                          (Id () "manager"))
+                                         []))))
+                                     (:
+                                      (VarDecl () (Id () "keyname") Nothing)
+                                      [])))
+                                   (:
+                                    (IfStmt
+                                     ()
+                                     (InfixExpr
+                                      ()
+                                      OpStrictEq
+                                      (VarRef () (Id () "semantic"))
+                                      (IntLit () 1))
+                                     (BlockStmt
+                                      ()
+                                      (:
+                                       (ExprStmt
+                                        ()
+                                        (AssignExpr
+                                         ()
+                                         OpAssign
+                                         (LVar () "keyname")
+                                         (StringLit () "map")))
+                                       []))
+                                     (IfStmt
+                                      ()
+                                      (InfixExpr
+                                       ()
+                                       OpStrictEq
+                                       (VarRef () (Id () "semantic"))
+                                       (IntLit () 5))
+                                      (BlockStmt
+                                       ()
+                                       (:
+                                        (ExprStmt
+                                         ()
+                                         (AssignExpr
+                                          ()
+                                          OpAssign
+                                          (LVar () "keyname")
+                                          (StringLit () "bumpMap")))
+                                        []))
+                                      (IfStmt
+                                       ()
+                                       (InfixExpr
+                                        ()
+                                        OpStrictEq
+                                        (VarRef () (Id () "semantic"))
+                                        (IntLit () 6))
+                                       (BlockStmt
+                                        ()
+                                        (:
+                                         (ExprStmt
+                                          ()
+                                          (AssignExpr
+                                           ()
+                                           OpAssign
+                                           (LVar () "keyname")
+                                           (StringLit () "normalMap")))
+                                         []))
+                                       (IfSingleStmt
+                                        ()
+                                        (InfixExpr
+                                         ()
+                                         OpStrictEq
+                                         (VarRef () (Id () "semantic"))
+                                         (IntLit () 2))
+                                        (BlockStmt
+                                         ()
+                                         (:
+                                          (ExprStmt
+                                           ()
+                                           (AssignExpr
+                                            ()
+                                            OpAssign
+                                            (LVar () "keyname")
+                                            (StringLit () "specularMap")))
+                                          []))))))
+                                    (:
+                                     (ExprStmt
+                                      ()
+                                      (CallExpr
+                                       ()
+                                       (DotRef
+                                        ()
+                                        (VarRef () (Id () "has_textures"))
+                                        (Id () "push"))
+                                       (: (VarRef () (Id () "keyname")) [])))
+                                     (:
+                                      (ExprStmt
+                                       ()
+                                       (CallExpr
+                                        ()
+                                        (DotRef
+                                         ()
+                                         (VarRef () (Id () "loader"))
+                                         (Id () "setCrossOrigin"))
+                                        (:
+                                         (DotRef
+                                          ()
+                                          (ThisRef ())
+                                          (Id () "crossOrigin"))
+                                         [])))
+                                      (:
+                                       (VarDeclStmt
+                                        ()
+                                        (:
+                                         (VarDecl
+                                          ()
+                                          (Id () "material_url")
+                                          (Just
+                                           (InfixExpr
+                                            ()
+                                            OpAdd
+                                            (InfixExpr
+                                             ()
+                                             OpAdd
+                                             (DotRef
+                                              ()
+                                              (VarRef () (Id () "scope"))
+                                              (Id () "texturePath"))
+                                             (StringLit () "/"))
+                                            (DotRef
+                                             ()
+                                             (VarRef () (Id () "prop"))
+                                             (Id () "value")))))
+                                         []))
+                                       (:
+                                        (ExprStmt
+                                         ()
+                                         (AssignExpr
+                                          ()
+                                          OpAssign
+                                          (LVar () "material_url")
+                                          (CallExpr
+                                           ()
+                                           (DotRef
+                                            ()
+                                            (VarRef () (Id () "material_url"))
+                                            (Id () "replace"))
+                                           (:
+                                            (RegexpLit () "\\\\" True False)
+                                            (: (StringLit () "/") [])))))
+                                        (:
+                                         (ExprStmt
+                                          ()
+                                          (CallExpr
+                                           ()
+                                           (DotRef
+                                            ()
+                                            (VarRef () (Id () "loader"))
+                                            (Id () "load"))
+                                           (:
+                                            (VarRef () (Id () "material_url"))
+                                            (:
+                                             (FuncExpr
+                                              ()
+                                              Nothing
+                                              (: (Id () "tex") [])
+                                              (:
+                                               (IfSingleStmt
+                                                ()
+                                                (VarRef () (Id () "tex"))
+                                                (BlockStmt
+                                                 ()
+                                                 (:
+                                                  (ExprStmt
+                                                   ()
+                                                   (AssignExpr
+                                                    ()
+                                                    OpAssign
+                                                    (LDot
+                                                     ()
+                                                     (VarRef () (Id () "tex"))
+                                                     "wrapS")
+                                                    (AssignExpr
+                                                     ()
+                                                     OpAssign
+                                                     (LDot
+                                                      ()
+                                                      (VarRef () (Id () "tex"))
+                                                      "wrapT")
+                                                     (DotRef
+                                                      ()
+                                                      (VarRef
+                                                       ()
+                                                       (Id () "THREE"))
+                                                      (Id
+                                                       ()
+                                                       "RepeatWrapping")))))
+                                                  (:
+                                                   (ExprStmt
+                                                    ()
+                                                    (AssignExpr
+                                                     ()
+                                                     OpAssign
+                                                     (LBracket
+                                                      ()
+                                                      (VarRef () (Id () "mat"))
+                                                      (VarRef
+                                                       ()
+                                                       (Id () "keyname")))
+                                                     (VarRef () (Id () "tex"))))
+                                                   (:
+                                                    (ExprStmt
+                                                     ()
+                                                     (AssignExpr
+                                                      ()
+                                                      OpAssign
+                                                      (LDot
+                                                       ()
+                                                       (VarRef () (Id () "mat"))
+                                                       "needsUpdate")
+                                                      (BoolLit () True)))
+                                                    [])))))
+                                               []))
+                                             []))))
+                                         []))))))))
+                                 (:
+                                  (DotRef
+                                   ()
+                                   (VarRef () (Id () "prop"))
+                                   (Id () "semantic"))
+                                  [])))
+                               [])))
+                            []))
+                          (IfStmt
+                           ()
+                           (InfixExpr
+                            ()
+                            OpStrictEq
+                            (DotRef () (VarRef () (Id () "prop")) (Id () "key"))
+                            (StringLit () "?mat.name"))
+                           (BlockStmt
+                            ()
+                            (:
+                             (ExprStmt
+                              ()
+                              (AssignExpr
+                               ()
+                               OpAssign
+                               (LDot () (VarRef () (Id () "init_props")) "name")
+                               (DotRef
+                                ()
+                                (VarRef () (Id () "prop"))
+                                (Id () "value"))))
+                             []))
+                           (IfStmt
+                            ()
+                            (InfixExpr
+                             ()
+                             OpStrictEq
+                             (DotRef
+                              ()
+                              (VarRef () (Id () "prop"))
+                              (Id () "key"))
+                             (StringLit () "$clr.diffuse"))
+                            (BlockStmt
+                             ()
+                             (:
+                              (ExprStmt
+                               ()
+                               (AssignExpr
+                                ()
+                                OpAssign
+                                (LDot
+                                 ()
+                                 (VarRef () (Id () "init_props"))
+                                 "color")
+                                (CallExpr
+                                 ()
+                                 (VarRef () (Id () "toColor"))
+                                 (:
+                                  (DotRef
+                                   ()
+                                   (VarRef () (Id () "prop"))
+                                   (Id () "value"))
+                                  []))))
+                              []))
+                            (IfStmt
+                             ()
+                             (InfixExpr
+                              ()
+                              OpStrictEq
+                              (DotRef
+                               ()
+                               (VarRef () (Id () "prop"))
+                               (Id () "key"))
+                              (StringLit () "$clr.specular"))
+                             (BlockStmt
+                              ()
+                              (:
+                               (ExprStmt
+                                ()
+                                (AssignExpr
+                                 ()
+                                 OpAssign
+                                 (LDot
+                                  ()
+                                  (VarRef () (Id () "init_props"))
+                                  "specular")
+                                 (CallExpr
+                                  ()
+                                  (VarRef () (Id () "toColor"))
+                                  (:
+                                   (DotRef
+                                    ()
+                                    (VarRef () (Id () "prop"))
+                                    (Id () "value"))
+                                   []))))
+                               []))
+                             (IfStmt
+                              ()
+                              (InfixExpr
+                               ()
+                               OpStrictEq
+                               (DotRef
+                                ()
+                                (VarRef () (Id () "prop"))
+                                (Id () "key"))
+                               (StringLit () "$clr.emissive"))
+                              (BlockStmt
+                               ()
+                               (:
+                                (ExprStmt
+                                 ()
+                                 (AssignExpr
+                                  ()
+                                  OpAssign
+                                  (LDot
+                                   ()
+                                   (VarRef () (Id () "init_props"))
+                                   "emissive")
+                                  (CallExpr
+                                   ()
+                                   (VarRef () (Id () "toColor"))
+                                   (:
+                                    (DotRef
+                                     ()
+                                     (VarRef () (Id () "prop"))
+                                     (Id () "value"))
+                                    []))))
+                                []))
+                              (IfStmt
+                               ()
+                               (InfixExpr
+                                ()
+                                OpStrictEq
+                                (DotRef
+                                 ()
+                                 (VarRef () (Id () "prop"))
+                                 (Id () "key"))
+                                (StringLit () "$mat.shadingm"))
+                               (BlockStmt
+                                ()
+                                (:
+                                 (IfSingleStmt
+                                  ()
+                                  (InfixExpr
+                                   ()
+                                   OpStrictEq
+                                   (DotRef
+                                    ()
+                                    (VarRef () (Id () "prop"))
+                                    (Id () "value"))
+                                   (IntLit () 1))
+                                  (BlockStmt
+                                   ()
+                                   (:
+                                    (ExprStmt
+                                     ()
+                                     (AssignExpr
+                                      ()
+                                      OpAssign
+                                      (LDot
+                                       ()
+                                       (VarRef () (Id () "init_props"))
+                                       "shading")
+                                      (DotRef
+                                       ()
+                                       (VarRef () (Id () "THREE"))
+                                       (Id () "FlatShading"))))
+                                    [])))
+                                 []))
+                               (IfSingleStmt
+                                ()
+                                (InfixExpr
+                                 ()
+                                 OpStrictEq
+                                 (DotRef
+                                  ()
+                                  (VarRef () (Id () "prop"))
+                                  (Id () "key"))
+                                 (StringLit () "$mat.shininess"))
+                                (BlockStmt
+                                 ()
+                                 (:
+                                  (ExprStmt
+                                   ()
+                                   (AssignExpr
+                                    ()
+                                    OpAssign
+                                    (LDot
+                                     ()
+                                     (VarRef () (Id () "init_props"))
+                                     "shininess")
+                                    (DotRef
+                                     ()
+                                     (VarRef () (Id () "prop"))
+                                     (Id () "value"))))
+                                  [])))))))))
+                         []))))
+                     (:
+                      (IfSingleStmt
+                       ()
+                       (DotRef
+                        ()
+                        (VarRef () (Id () "has_textures"))
+                        (Id () "length"))
+                       (BlockStmt
+                        ()
+                        (:
+                         (ForStmt
+                          ()
+                          (ExprInit
+                           (AssignExpr
+                            ()
+                            OpAssign
+                            (LVar () "i")
+                            (InfixExpr
+                             ()
+                             OpSub
+                             (DotRef
+                              ()
+                              (VarRef () (Id () "has_textures"))
+                              (Id () "length"))
+                             (IntLit () 1))))
+                          (Just
+                           (InfixExpr
+                            ()
+                            OpGEq
+                            (VarRef () (Id () "i"))
+                            (IntLit () 0)))
+                          (Just (UnaryAssignExpr () PrefixDec (LVar () "i")))
+                          (BlockStmt
+                           ()
+                           (:
+                            (ExprStmt
+                             ()
+                             (AssignExpr
+                              ()
+                              OpAssign
+                              (LBracket
+                               ()
+                               (VarRef () (Id () "init_props"))
+                               (BracketRef
+                                ()
+                                (VarRef () (Id () "has_textures"))
+                                (VarRef () (Id () "i"))))
+                              (CallExpr
+                               ()
+                               (VarRef () (Id () "defaultTexture"))
+                               [])))
+                            [])))
+                         [])))
+                      (:
+                       (ExprStmt
+                        ()
+                        (AssignExpr
+                         ()
+                         OpAssign
+                         (LVar () "mat")
+                         (NewExpr
+                          ()
+                          (DotRef
+                           ()
+                           (VarRef () (Id () "THREE"))
+                           (Id () "MeshPhongMaterial"))
+                          (: (VarRef () (Id () "init_props")) []))))
+                       (:
+                        (ReturnStmt () (Just (VarRef () (Id () "mat"))))
+                        [])))))))))
+               (:
+                ((,)
+                 (PropId () (Id () "parseObject"))
+                 (FuncExpr
+                  ()
+                  Nothing
+                  (:
+                   (Id () "json")
+                   (:
+                    (Id () "node")
+                    (: (Id () "meshes") (: (Id () "materials") []))))
+                  (:
+                   (VarDeclStmt
+                    ()
+                    (:
+                     (VarDecl
+                      ()
+                      (Id () "obj")
+                      (Just
+                       (NewExpr
+                        ()
+                        (DotRef
+                         ()
+                         (VarRef () (Id () "THREE"))
+                         (Id () "Object3D"))
+                        [])))
+                     (:
+                      (VarDecl () (Id () "i") Nothing)
+                      (: (VarDecl () (Id () "idx") Nothing) []))))
+                   (:
+                    (ExprStmt
+                     ()
+                     (AssignExpr
+                      ()
+                      OpAssign
+                      (LDot () (VarRef () (Id () "obj")) "name")
+                      (InfixExpr
+                       ()
+                       OpLOr
+                       (DotRef () (VarRef () (Id () "node")) (Id () "name"))
+                       (StringLit () ""))))
+                    (:
+                     (ExprStmt
+                      ()
+                      (AssignExpr
+                       ()
+                       OpAssign
+                       (LDot () (VarRef () (Id () "obj")) "matrix")
+                       (CallExpr
+                        ()
+                        (DotRef
+                         ()
+                         (CallExpr
+                          ()
+                          (DotRef
+                           ()
+                           (NewExpr
+                            ()
+                            (DotRef
+                             ()
+                             (VarRef () (Id () "THREE"))
+                             (Id () "Matrix4"))
+                            [])
+                           (Id () "fromArray"))
+                          (:
+                           (DotRef
+                            ()
+                            (VarRef () (Id () "node"))
+                            (Id () "transformation"))
+                           []))
+                         (Id () "transpose"))
+                        [])))
+                     (:
+                      (ExprStmt
+                       ()
+                       (CallExpr
+                        ()
+                        (DotRef
+                         ()
+                         (DotRef () (VarRef () (Id () "obj")) (Id () "matrix"))
+                         (Id () "decompose"))
+                        (:
+                         (DotRef
+                          ()
+                          (VarRef () (Id () "obj"))
+                          (Id () "position"))
+                         (:
+                          (DotRef
+                           ()
+                           (VarRef () (Id () "obj"))
+                           (Id () "quaternion"))
+                          (:
+                           (DotRef () (VarRef () (Id () "obj")) (Id () "scale"))
+                           [])))))
+                      (:
+                       (ForStmt
+                        ()
+                        (ExprInit
+                         (AssignExpr () OpAssign (LVar () "i") (IntLit () 0)))
+                        (Just
+                         (InfixExpr
+                          ()
+                          OpLAnd
+                          (DotRef
+                           ()
+                           (VarRef () (Id () "node"))
+                           (Id () "meshes"))
+                          (InfixExpr
+                           ()
+                           OpLT
+                           (VarRef () (Id () "i"))
+                           (DotRef
+                            ()
+                            (DotRef
+                             ()
+                             (VarRef () (Id () "node"))
+                             (Id () "meshes"))
+                            (Id () "length")))))
+                        (Just (UnaryAssignExpr () PrefixInc (LVar () "i")))
+                        (BlockStmt
+                         ()
+                         (:
+                          (ExprStmt
+                           ()
+                           (AssignExpr
+                            ()
+                            OpAssign
+                            (LVar () "idx")
+                            (BracketRef
+                             ()
+                             (DotRef
+                              ()
+                              (VarRef () (Id () "node"))
+                              (Id () "meshes"))
+                             (VarRef () (Id () "i")))))
+                          (:
+                           (ExprStmt
+                            ()
+                            (CallExpr
+                             ()
+                             (DotRef () (VarRef () (Id () "obj")) (Id () "add"))
+                             (:
+                              (NewExpr
+                               ()
+                               (DotRef
+                                ()
+                                (VarRef () (Id () "THREE"))
+                                (Id () "Mesh"))
+                               (:
+                                (BracketRef
+                                 ()
+                                 (VarRef () (Id () "meshes"))
+                                 (VarRef () (Id () "idx")))
+                                (:
+                                 (BracketRef
+                                  ()
+                                  (VarRef () (Id () "materials"))
+                                  (DotRef
+                                   ()
+                                   (BracketRef
+                                    ()
+                                    (DotRef
+                                     ()
+                                     (VarRef () (Id () "json"))
+                                     (Id () "meshes"))
+                                    (VarRef () (Id () "idx")))
+                                   (Id () "materialindex")))
+                                 [])))
+                              [])))
+                           []))))
+                       (:
+                        (ForStmt
+                         ()
+                         (ExprInit
+                          (AssignExpr () OpAssign (LVar () "i") (IntLit () 0)))
+                         (Just
+                          (InfixExpr
+                           ()
+                           OpLAnd
+                           (DotRef
+                            ()
+                            (VarRef () (Id () "node"))
+                            (Id () "children"))
+                           (InfixExpr
+                            ()
+                            OpLT
+                            (VarRef () (Id () "i"))
+                            (DotRef
+                             ()
+                             (DotRef
+                              ()
+                              (VarRef () (Id () "node"))
+                              (Id () "children"))
+                             (Id () "length")))))
+                         (Just (UnaryAssignExpr () PrefixInc (LVar () "i")))
+                         (BlockStmt
+                          ()
+                          (:
+                           (ExprStmt
+                            ()
+                            (CallExpr
+                             ()
+                             (DotRef () (VarRef () (Id () "obj")) (Id () "add"))
+                             (:
+                              (CallExpr
+                               ()
+                               (DotRef () (ThisRef ()) (Id () "parseObject"))
+                               (:
+                                (VarRef () (Id () "json"))
+                                (:
+                                 (BracketRef
+                                  ()
+                                  (DotRef
+                                   ()
+                                   (VarRef () (Id () "node"))
+                                   (Id () "children"))
+                                  (VarRef () (Id () "i")))
+                                 (:
+                                  (VarRef () (Id () "meshes"))
+                                  (: (VarRef () (Id () "materials")) [])))))
+                              [])))
+                           [])))
+                        (:
+                         (ReturnStmt () (Just (VarRef () (Id () "obj"))))
+                         [])))))))))
+                [])))))))))))))
+   [])))

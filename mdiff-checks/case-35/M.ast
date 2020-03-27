@@ -1,0 +1,1599 @@
+(Seq
+ (Collection
+  Parens
+  (Cons
+   (Term (TaggedString Var "ns"))
+   Space
+   (Cons
+    (Term (TaggedString Var "onyx.scheduler.percentage-multi-job-test"))
+    NewLine
+    (Cons
+     (Collection
+      Parens
+      (Cons
+       (Term (TaggedString Var ":require"))
+       Space
+       (Cons
+        (Collection
+         Vec
+         (Cons
+          (Term (TaggedString Var "clojure.test"))
+          Space
+          (Cons
+           (Term (TaggedString Var ":refer"))
+           Space
+           (Cons (Term (TaggedString Var ":all")) EmptySep Nil))))
+        NewLine
+        (Cons
+         (Collection
+          Vec
+          (Cons
+           (Term (TaggedString Var "clojure.test.check"))
+           Space
+           (Cons
+            (Term (TaggedString Var ":as"))
+            Space
+            (Cons (Term (TaggedString Var "tc")) EmptySep Nil))))
+         NewLine
+         (Cons
+          (Collection
+           Vec
+           (Cons
+            (Term (TaggedString Var "clojure.test.check.generators"))
+            Space
+            (Cons
+             (Term (TaggedString Var ":as"))
+             Space
+             (Cons (Term (TaggedString Var "gen")) EmptySep Nil))))
+          NewLine
+          (Cons
+           (Collection
+            Vec
+            (Cons
+             (Term (TaggedString Var "clojure.test.check.properties"))
+             Space
+             (Cons
+              (Term (TaggedString Var ":as"))
+              Space
+              (Cons (Term (TaggedString Var "prop")) EmptySep Nil))))
+           NewLine
+           (Cons
+            (Collection
+             Vec
+             (Cons
+              (Term (TaggedString Var "com.gfredericks.test.chuck"))
+              Space
+              (Cons
+               (Term (TaggedString Var ":refer"))
+               Space
+               (Cons
+                (Collection
+                 Vec
+                 (Cons (Term (TaggedString Var "times")) EmptySep Nil))
+                EmptySep
+                Nil))))
+            NewLine
+            (Cons
+             (Collection
+              Vec
+              (Cons
+               (Term
+                (TaggedString Var "com.gfredericks.test.chuck.clojure-test"))
+               Space
+               (Cons
+                (Term (TaggedString Var ":refer"))
+                Space
+                (Cons
+                 (Collection
+                  Vec
+                  (Cons (Term (TaggedString Var "checking")) EmptySep Nil))
+                 EmptySep
+                 Nil))))
+             NewLine
+             (Cons
+              (Collection
+               Vec
+               (Cons
+                (Term (TaggedString Var "onyx.scheduling.common-job-scheduler"))
+                Space
+                (Cons
+                 (Term (TaggedString Var ":refer"))
+                 Space
+                 (Cons
+                  (Collection
+                   Vec
+                   (Cons
+                    (Term (TaggedString Var "reconfigure-cluster-workload"))
+                    EmptySep
+                    Nil))
+                  EmptySep
+                  Nil))))
+              NewLine
+              (Cons
+               (Collection
+                Vec
+                (Cons
+                 (Term (TaggedString Var "onyx.log.generators"))
+                 Space
+                 (Cons
+                  (Term (TaggedString Var ":as"))
+                  Space
+                  (Cons (Term (TaggedString Var "log-gen")) EmptySep Nil))))
+               NewLine
+               (Cons
+                (Collection
+                 Vec
+                 (Cons
+                  (Term (TaggedString Var "onyx.test-helper"))
+                  Space
+                  (Cons
+                   (Term (TaggedString Var ":refer"))
+                   Space
+                   (Cons
+                    (Collection
+                     Vec
+                     (Cons
+                      (Term (TaggedString Var "job-allocation-counts"))
+                      Space
+                      (Cons
+                       (Term (TaggedString Var "get-counts"))
+                       EmptySep
+                       Nil)))
+                    EmptySep
+                    Nil))))
+                NewLine
+                (Cons
+                 (Collection
+                  Vec
+                  (Cons
+                   (Term (TaggedString Var "onyx.static.planning"))
+                   Space
+                   (Cons
+                    (Term (TaggedString Var ":as"))
+                    Space
+                    (Cons (Term (TaggedString Var "planning")) EmptySep Nil))))
+                 NewLine
+                 (Cons
+                  (Collection
+                   Vec
+                   (Cons (Term (TaggedString Var "onyx.api")) EmptySep Nil))
+                  EmptySep
+                  Nil)))))))))))))
+     EmptySep
+     Nil))))
+ (Seq
+  (Collection
+   Parens
+   (Cons
+    (Term (TaggedString Var "def"))
+    Space
+    (Cons
+     (Term (TaggedString Var "peer-config"))
+     NewLine
+     (Cons
+      (Collection
+       Set
+       (Cons
+        (Term (TaggedString Var ":onyx/id"))
+        Space
+        (Cons
+         (Term (TaggedString String "my-id"))
+         NewLine
+         (Cons
+          (Term (TaggedString Var ":onyx.messaging/impl"))
+          Space
+          (Cons
+           (Term (TaggedString Var ":atom"))
+           NewLine
+           (Cons
+            (Term (TaggedString Var ":onyx.peer/job-scheduler"))
+            Space
+            (Cons
+             (Term (TaggedString Var ":onyx.job-scheduler/percentage"))
+             EmptySep
+             Nil)))))))
+      EmptySep
+      Nil))))
+  (Seq
+   (Collection
+    Parens
+    (Cons
+     (Term (TaggedString Var "deftest"))
+     Space
+     (Cons
+      (Term (TaggedString Var "log-percentage-multi-job"))
+      NewLine
+      (Cons
+       (Collection
+        Parens
+        (Cons
+         (Term (TaggedString Var "let"))
+         Space
+         (Cons
+          (Collection
+           Vec
+           (Cons
+            (Term (TaggedString Var "job-1-id"))
+            Space
+            (Cons
+             (Term (TaggedString String "job-1"))
+             NewLine
+             (Cons
+              (Term (TaggedString Var "job-1"))
+              Space
+              (Cons
+               (Collection
+                Set
+                (Cons
+                 (Term (TaggedString Var ":workflow"))
+                 Space
+                 (Cons
+                  (Collection
+                   Vec
+                   (Cons
+                    (Collection
+                     Vec
+                     (Cons
+                      (Term (TaggedString Var ":a"))
+                      Space
+                      (Cons (Term (TaggedString Var ":b")) EmptySep Nil)))
+                    EmptySep
+                    Nil))
+                  NewLine
+                  (Cons
+                   (Term (TaggedString Var ":catalog"))
+                   Space
+                   (Cons
+                    (Collection
+                     Vec
+                     (Cons
+                      (Collection
+                       Set
+                       (Cons
+                        (Term (TaggedString Var ":onyx/name"))
+                        Space
+                        (Cons
+                         (Term (TaggedString Var ":a"))
+                         NewLine
+                         (Cons
+                          (Term (TaggedString Var ":onyx/plugin"))
+                          Space
+                          (Cons
+                           (Term
+                            (TaggedString Var ":onyx.test-helper/dummy-input"))
+                           NewLine
+                           (Cons
+                            (Term (TaggedString Var ":onyx/type"))
+                            Space
+                            (Cons
+                             (Term (TaggedString Var ":input"))
+                             NewLine
+                             (Cons
+                              (Term (TaggedString Var ":onyx/medium"))
+                              Space
+                              (Cons
+                               (Term (TaggedString Var ":dummy"))
+                               NewLine
+                               (Cons
+                                (Term (TaggedString Var ":onyx/batch-size"))
+                                Space
+                                (Cons
+                                 (Term (TaggedString Var "20"))
+                                 EmptySep
+                                 Nil)))))))))))
+                      NewLine
+                      (Cons
+                       (Collection
+                        Set
+                        (Cons
+                         (Term (TaggedString Var ":onyx/name"))
+                         Space
+                         (Cons
+                          (Term (TaggedString Var ":b"))
+                          NewLine
+                          (Cons
+                           (Term (TaggedString Var ":onyx/plugin"))
+                           Space
+                           (Cons
+                            (Term
+                             (TaggedString
+                              Var
+                              ":onyx.test-helper/dummy-output"))
+                            NewLine
+                            (Cons
+                             (Term (TaggedString Var ":onyx/type"))
+                             Space
+                             (Cons
+                              (Term (TaggedString Var ":output"))
+                              NewLine
+                              (Cons
+                               (Term (TaggedString Var ":onyx/medium"))
+                               Space
+                               (Cons
+                                (Term (TaggedString Var ":dummy"))
+                                NewLine
+                                (Cons
+                                 (Term (TaggedString Var ":onyx/batch-size"))
+                                 Space
+                                 (Cons
+                                  (Term (TaggedString Var "20"))
+                                  EmptySep
+                                  Nil)))))))))))
+                       EmptySep
+                       Nil)))
+                    NewLine
+                    (Cons
+                     (Term (TaggedString Var ":percentage"))
+                     Space
+                     (Cons
+                      (Term (TaggedString Var "70"))
+                      NewLine
+                      (Cons
+                       (Term (TaggedString Var ":task-scheduler"))
+                       Space
+                       (Cons
+                        (Term
+                         (TaggedString Var ":onyx.task-scheduler/balanced"))
+                        EmptySep
+                        Nil)))))))))
+               NewLine
+               (Cons
+                (Term (TaggedString Var "job-2-id"))
+                Space
+                (Cons
+                 (Term (TaggedString String "job-2"))
+                 NewLine
+                 (Cons
+                  (Term (TaggedString Var "job-2"))
+                  Space
+                  (Cons
+                   (Collection
+                    Set
+                    (Cons
+                     (Term (TaggedString Var ":workflow"))
+                     Space
+                     (Cons
+                      (Collection
+                       Vec
+                       (Cons
+                        (Collection
+                         Vec
+                         (Cons
+                          (Term (TaggedString Var ":c"))
+                          Space
+                          (Cons (Term (TaggedString Var ":d")) EmptySep Nil)))
+                        EmptySep
+                        Nil))
+                      NewLine
+                      (Cons
+                       (Term (TaggedString Var ":catalog"))
+                       Space
+                       (Cons
+                        (Collection
+                         Vec
+                         (Cons
+                          (Collection
+                           Set
+                           (Cons
+                            (Term (TaggedString Var ":onyx/name"))
+                            Space
+                            (Cons
+                             (Term (TaggedString Var ":c"))
+                             NewLine
+                             (Cons
+                              (Term (TaggedString Var ":onyx/plugin"))
+                              Space
+                              (Cons
+                               (Term
+                                (TaggedString
+                                 Var
+                                 ":onyx.test-helper/dummy-input"))
+                               NewLine
+                               (Cons
+                                (Term (TaggedString Var ":onyx/type"))
+                                Space
+                                (Cons
+                                 (Term (TaggedString Var ":input"))
+                                 NewLine
+                                 (Cons
+                                  (Term (TaggedString Var ":onyx/medium"))
+                                  Space
+                                  (Cons
+                                   (Term (TaggedString Var ":dummy"))
+                                   NewLine
+                                   (Cons
+                                    (Term (TaggedString Var ":onyx/batch-size"))
+                                    Space
+                                    (Cons
+                                     (Term (TaggedString Var "20"))
+                                     EmptySep
+                                     Nil)))))))))))
+                          NewLine
+                          (Cons
+                           (Collection
+                            Set
+                            (Cons
+                             (Term (TaggedString Var ":onyx/name"))
+                             Space
+                             (Cons
+                              (Term (TaggedString Var ":d"))
+                              NewLine
+                              (Cons
+                               (Term (TaggedString Var ":onyx/plugin"))
+                               Space
+                               (Cons
+                                (Term
+                                 (TaggedString
+                                  Var
+                                  ":onyx.test-helper/dummy-output"))
+                                NewLine
+                                (Cons
+                                 (Term (TaggedString Var ":onyx/type"))
+                                 Space
+                                 (Cons
+                                  (Term (TaggedString Var ":output"))
+                                  NewLine
+                                  (Cons
+                                   (Term (TaggedString Var ":onyx/medium"))
+                                   Space
+                                   (Cons
+                                    (Term (TaggedString Var ":dummy"))
+                                    NewLine
+                                    (Cons
+                                     (Term
+                                      (TaggedString Var ":onyx/batch-size"))
+                                     Space
+                                     (Cons
+                                      (Term (TaggedString Var "20"))
+                                      EmptySep
+                                      Nil)))))))))))
+                           EmptySep
+                           Nil)))
+                        NewLine
+                        (Cons
+                         (Term (TaggedString Var ":task-scheduler"))
+                         Space
+                         (Cons
+                          (Term
+                           (TaggedString Var ":onyx.task-scheduler/balanced"))
+                          NewLine
+                          (Cons
+                           (Term (TaggedString Var ":percentage"))
+                           Space
+                           (Cons
+                            (Term (TaggedString Var "30"))
+                            EmptySep
+                            Nil)))))))))
+                   NewLine
+                   (Cons
+                    (Term (TaggedString Var "job-entry-1"))
+                    Space
+                    (Cons
+                     (Collection
+                      Parens
+                      (Cons
+                       (Term
+                        (TaggedString Var "onyx.api/create-submit-job-entry"))
+                       NewLine
+                       (Cons
+                        (Term (TaggedString Var "job-1-id"))
+                        NewLine
+                        (Cons
+                         (Term (TaggedString Var "peer-config"))
+                         NewLine
+                         (Cons
+                          (Term (TaggedString Var "job-1"))
+                          NewLine
+                          (Cons
+                           (Collection
+                            Parens
+                            (Cons
+                             (Term (TaggedString Var "planning/discover-tasks"))
+                             Space
+                             (Cons
+                              (Collection
+                               Parens
+                               (Cons
+                                (Term (TaggedString Var ":catalog"))
+                                Space
+                                (Cons
+                                 (Term (TaggedString Var "job-1"))
+                                 EmptySep
+                                 Nil)))
+                              Space
+                              (Cons
+                               (Collection
+                                Parens
+                                (Cons
+                                 (Term (TaggedString Var ":workflow"))
+                                 Space
+                                 (Cons
+                                  (Term (TaggedString Var "job-1"))
+                                  EmptySep
+                                  Nil)))
+                               EmptySep
+                               Nil))))
+                           EmptySep
+                           Nil))))))
+                     NewLine
+                     (Cons
+                      (Term (TaggedString Var "job-entry-2"))
+                      Space
+                      (Cons
+                       (Collection
+                        Parens
+                        (Cons
+                         (Term
+                          (TaggedString Var "onyx.api/create-submit-job-entry"))
+                         NewLine
+                         (Cons
+                          (Term (TaggedString Var "job-2-id"))
+                          NewLine
+                          (Cons
+                           (Term (TaggedString Var "peer-config"))
+                           NewLine
+                           (Cons
+                            (Term (TaggedString Var "job-2"))
+                            NewLine
+                            (Cons
+                             (Collection
+                              Parens
+                              (Cons
+                               (Term
+                                (TaggedString Var "planning/discover-tasks"))
+                               Space
+                               (Cons
+                                (Collection
+                                 Parens
+                                 (Cons
+                                  (Term (TaggedString Var ":catalog"))
+                                  Space
+                                  (Cons
+                                   (Term (TaggedString Var "job-2"))
+                                   EmptySep
+                                   Nil)))
+                                Space
+                                (Cons
+                                 (Collection
+                                  Parens
+                                  (Cons
+                                   (Term (TaggedString Var ":workflow"))
+                                   Space
+                                   (Cons
+                                    (Term (TaggedString Var "job-2"))
+                                    EmptySep
+                                    Nil)))
+                                 EmptySep
+                                 Nil))))
+                             EmptySep
+                             Nil))))))
+                       EmptySep
+                       Nil)))))))))))))
+          NewLine
+          (Cons
+           (Collection
+            Parens
+            (Cons
+             (Term (TaggedString Var "checking"))
+             NewLine
+             (Cons
+              (Term
+               (TaggedString
+                String
+                "70/30% split for percentage job scheduler succeeded"))
+              NewLine
+              (Cons
+               (Collection
+                Parens
+                (Cons
+                 (Term (TaggedString Var "times"))
+                 Space
+                 (Cons (Term (TaggedString Var "50")) EmptySep Nil)))
+               NewLine
+               (Cons
+                (Collection
+                 Vec
+                 (Cons
+                  (Collection
+                   Set
+                   (Cons
+                    (Term (TaggedString Var ":keys"))
+                    Space
+                    (Cons
+                     (Collection
+                      Vec
+                      (Cons
+                       (Term (TaggedString Var "replica"))
+                       Space
+                       (Cons (Term (TaggedString Var "entries")) EmptySep Nil)))
+                     EmptySep
+                     Nil)))
+                  NewLine
+                  (Cons
+                   (Collection
+                    Parens
+                    (Cons
+                     (Term (TaggedString Var "log-gen/apply-entries-gen"))
+                     NewLine
+                     (Cons
+                      (Collection
+                       Parens
+                       (Cons
+                        (Term (TaggedString Var "gen/return"))
+                        NewLine
+                        (Cons
+                         (Collection
+                          Set
+                          (Cons
+                           (Term (TaggedString Var ":replica"))
+                           Space
+                           (Cons
+                            (Collection
+                             Set
+                             (Cons
+                              (Term (TaggedString Var ":job-scheduler"))
+                              Space
+                              (Cons
+                               (Term
+                                (TaggedString
+                                 Var
+                                 ":onyx.job-scheduler/percentage"))
+                               NewLine
+                               (Cons
+                                (Term (TaggedString Var ":messaging"))
+                                Space
+                                (Cons
+                                 (Collection
+                                  Set
+                                  (Cons
+                                   (Term
+                                    (TaggedString Var ":onyx.messaging/impl"))
+                                   Space
+                                   (Cons
+                                    (Term (TaggedString Var ":atom"))
+                                    EmptySep
+                                    Nil)))
+                                 EmptySep
+                                 Nil)))))
+                            NewLine
+                            (Cons
+                             (Term (TaggedString Var ":message-id"))
+                             Space
+                             (Cons
+                              (Term (TaggedString Var "0"))
+                              NewLine
+                              (Cons
+                               (Term (TaggedString Var ":entries"))
+                               NewLine
+                               (Cons
+                                (Collection
+                                 Parens
+                                 (Cons
+                                  (Term (TaggedString Var "assoc"))
+                                  Space
+                                  (Cons
+                                   (Collection
+                                    Parens
+                                    (Cons
+                                     (Term
+                                      (TaggedString
+                                       Var
+                                       "log-gen/generate-join-queues"))
+                                     Space
+                                     (Cons
+                                      (Collection
+                                       Parens
+                                       (Cons
+                                        (Term
+                                         (TaggedString
+                                          Var
+                                          "log-gen/generate-group-and-peer-ids"))
+                                        Space
+                                        (Cons
+                                         (Term (TaggedString Var "1"))
+                                         Space
+                                         (Cons
+                                          (Term (TaggedString Var "10"))
+                                          EmptySep
+                                          Nil))))
+                                      EmptySep
+                                      Nil)))
+                                   NewLine
+                                   (Cons
+                                    (Term (TaggedString Var ":job-1"))
+                                    Space
+                                    (Cons
+                                     (Collection
+                                      Set
+                                      (Cons
+                                       (Term (TaggedString Var ":queue"))
+                                       Space
+                                       (Cons
+                                        (Collection
+                                         Vec
+                                         (Cons
+                                          (Term
+                                           (TaggedString Var "job-entry-1"))
+                                          EmptySep
+                                          Nil))
+                                        EmptySep
+                                        Nil)))
+                                     NewLine
+                                     (Cons
+                                      (Term (TaggedString Var ":job-2"))
+                                      Space
+                                      (Cons
+                                       (Collection
+                                        Set
+                                        (Cons
+                                         (Term (TaggedString Var ":queue"))
+                                         Space
+                                         (Cons
+                                          (Collection
+                                           Vec
+                                           (Cons
+                                            (Term
+                                             (TaggedString Var "job-entry-2"))
+                                            EmptySep
+                                            Nil))
+                                          EmptySep
+                                          Nil)))
+                                       EmptySep
+                                       Nil)))))))
+                                EmptySep
+                                Nil)))))))
+                         EmptySep
+                         Nil)))
+                      EmptySep
+                      Nil)))
+                   EmptySep
+                   Nil)))
+                NewLine
+                (Cons
+                 (Collection
+                  Parens
+                  (Cons
+                   (Term (TaggedString Var "is"))
+                   Space
+                   (Cons
+                    (Collection
+                     Parens
+                     (Cons
+                      (Term (TaggedString Var "="))
+                      Space
+                      (Cons
+                       (Collection
+                        Parens
+                        (Cons
+                         (Term (TaggedString Var "apply"))
+                         Space
+                         (Cons
+                          (Term (TaggedString Var "+"))
+                          Space
+                          (Cons
+                           (Collection
+                            Parens
+                            (Cons
+                             (Term (TaggedString Var "map"))
+                             Space
+                             (Cons
+                              (Term (TaggedString Var "count"))
+                              Space
+                              (Cons
+                               (Collection
+                                Parens
+                                (Cons
+                                 (Term (TaggedString Var "vals"))
+                                 Space
+                                 (Cons
+                                  (Collection
+                                   Parens
+                                   (Cons
+                                    (Term (TaggedString Var "get-in"))
+                                    Space
+                                    (Cons
+                                     (Term (TaggedString Var "replica"))
+                                     Space
+                                     (Cons
+                                      (Collection
+                                       Vec
+                                       (Cons
+                                        (Term (TaggedString Var ":allocations"))
+                                        Space
+                                        (Cons
+                                         (Term (TaggedString Var "job-1-id"))
+                                         EmptySep
+                                         Nil)))
+                                      EmptySep
+                                      Nil))))
+                                  EmptySep
+                                  Nil)))
+                               EmptySep
+                               Nil))))
+                           EmptySep
+                           Nil))))
+                       Space
+                       (Cons (Term (TaggedString Var "7")) EmptySep Nil))))
+                    EmptySep
+                    Nil)))
+                 NewLine
+                 (Cons
+                  (Collection
+                   Parens
+                   (Cons
+                    (Term (TaggedString Var "is"))
+                    Space
+                    (Cons
+                     (Collection
+                      Parens
+                      (Cons
+                       (Term (TaggedString Var "="))
+                       Space
+                       (Cons
+                        (Collection
+                         Parens
+                         (Cons
+                          (Term (TaggedString Var "apply"))
+                          Space
+                          (Cons
+                           (Term (TaggedString Var "+"))
+                           Space
+                           (Cons
+                            (Collection
+                             Parens
+                             (Cons
+                              (Term (TaggedString Var "map"))
+                              Space
+                              (Cons
+                               (Term (TaggedString Var "count"))
+                               Space
+                               (Cons
+                                (Collection
+                                 Parens
+                                 (Cons
+                                  (Term (TaggedString Var "vals"))
+                                  Space
+                                  (Cons
+                                   (Collection
+                                    Parens
+                                    (Cons
+                                     (Term (TaggedString Var "get-in"))
+                                     Space
+                                     (Cons
+                                      (Term (TaggedString Var "replica"))
+                                      Space
+                                      (Cons
+                                       (Collection
+                                        Vec
+                                        (Cons
+                                         (Term
+                                          (TaggedString Var ":allocations"))
+                                         Space
+                                         (Cons
+                                          (Term (TaggedString Var "job-2-id"))
+                                          EmptySep
+                                          Nil)))
+                                       EmptySep
+                                       Nil))))
+                                   EmptySep
+                                   Nil)))
+                                EmptySep
+                                Nil))))
+                            EmptySep
+                            Nil))))
+                        Space
+                        (Cons (Term (TaggedString Var "3")) EmptySep Nil))))
+                     EmptySep
+                     Nil)))
+                  EmptySep
+                  Nil)))))))
+           EmptySep
+           Nil))))
+       EmptySep
+       Nil))))
+   (Seq
+    (Collection
+     Parens
+     (Cons
+      (Term (TaggedString Var "deftest"))
+      Space
+      (Cons
+       (Term (TaggedString Var "log-percentage-multi-job-rebalance"))
+       NewLine
+       (Cons
+        (Collection
+         Parens
+         (Cons
+          (Term (TaggedString Var "let"))
+          Space
+          (Cons
+           (Collection
+            Vec
+            (Cons
+             (Term (TaggedString Var "job-1-id"))
+             Space
+             (Cons
+              (Term (TaggedString String "job-1"))
+              NewLine
+              (Cons
+               (Term (TaggedString Var "job-1"))
+               Space
+               (Cons
+                (Collection
+                 Set
+                 (Cons
+                  (Term (TaggedString Var ":workflow"))
+                  Space
+                  (Cons
+                   (Collection
+                    Vec
+                    (Cons
+                     (Collection
+                      Vec
+                      (Cons
+                       (Term (TaggedString Var ":a"))
+                       Space
+                       (Cons (Term (TaggedString Var ":b")) EmptySep Nil)))
+                     EmptySep
+                     Nil))
+                   NewLine
+                   (Cons
+                    (Term (TaggedString Var ":catalog"))
+                    Space
+                    (Cons
+                     (Collection
+                      Vec
+                      (Cons
+                       (Collection
+                        Set
+                        (Cons
+                         (Term (TaggedString Var ":onyx/name"))
+                         Space
+                         (Cons
+                          (Term (TaggedString Var ":a"))
+                          NewLine
+                          (Cons
+                           (Term (TaggedString Var ":onyx/plugin"))
+                           Space
+                           (Cons
+                            (Term
+                             (TaggedString Var ":onyx.test-helper/dummy-input"))
+                            NewLine
+                            (Cons
+                             (Term (TaggedString Var ":onyx/type"))
+                             Space
+                             (Cons
+                              (Term (TaggedString Var ":input"))
+                              NewLine
+                              (Cons
+                               (Term (TaggedString Var ":onyx/medium"))
+                               Space
+                               (Cons
+                                (Term (TaggedString Var ":dummy"))
+                                NewLine
+                                (Cons
+                                 (Term (TaggedString Var ":onyx/batch-size"))
+                                 Space
+                                 (Cons
+                                  (Term (TaggedString Var "20"))
+                                  EmptySep
+                                  Nil)))))))))))
+                       NewLine
+                       (Cons
+                        (Collection
+                         Set
+                         (Cons
+                          (Term (TaggedString Var ":onyx/name"))
+                          Space
+                          (Cons
+                           (Term (TaggedString Var ":b"))
+                           NewLine
+                           (Cons
+                            (Term (TaggedString Var ":onyx/plugin"))
+                            Space
+                            (Cons
+                             (Term
+                              (TaggedString
+                               Var
+                               ":onyx.test-helper/dummy-output"))
+                             NewLine
+                             (Cons
+                              (Term (TaggedString Var ":onyx/type"))
+                              Space
+                              (Cons
+                               (Term (TaggedString Var ":output"))
+                               NewLine
+                               (Cons
+                                (Term (TaggedString Var ":onyx/medium"))
+                                Space
+                                (Cons
+                                 (Term (TaggedString Var ":dummy"))
+                                 NewLine
+                                 (Cons
+                                  (Term (TaggedString Var ":onyx/batch-size"))
+                                  Space
+                                  (Cons
+                                   (Term (TaggedString Var "20"))
+                                   EmptySep
+                                   Nil)))))))))))
+                        EmptySep
+                        Nil)))
+                     NewLine
+                     (Cons
+                      (Term (TaggedString Var ":percentage"))
+                      Space
+                      (Cons
+                       (Term (TaggedString Var "70"))
+                       NewLine
+                       (Cons
+                        (Term (TaggedString Var ":task-scheduler"))
+                        Space
+                        (Cons
+                         (Term
+                          (TaggedString Var ":onyx.task-scheduler/balanced"))
+                         EmptySep
+                         Nil)))))))))
+                NewLine
+                (Cons
+                 (Term (TaggedString Var "job-2-id"))
+                 Space
+                 (Cons
+                  (Term (TaggedString String "job-2"))
+                  NewLine
+                  (Cons
+                   (Term (TaggedString Var "job-2"))
+                   Space
+                   (Cons
+                    (Collection
+                     Set
+                     (Cons
+                      (Term (TaggedString Var ":workflow"))
+                      Space
+                      (Cons
+                       (Collection
+                        Vec
+                        (Cons
+                         (Collection
+                          Vec
+                          (Cons
+                           (Term (TaggedString Var ":c"))
+                           Space
+                           (Cons (Term (TaggedString Var ":d")) EmptySep Nil)))
+                         EmptySep
+                         Nil))
+                       NewLine
+                       (Cons
+                        (Term (TaggedString Var ":catalog"))
+                        Space
+                        (Cons
+                         (Collection
+                          Vec
+                          (Cons
+                           (Collection
+                            Set
+                            (Cons
+                             (Term (TaggedString Var ":onyx/name"))
+                             Space
+                             (Cons
+                              (Term (TaggedString Var ":c"))
+                              NewLine
+                              (Cons
+                               (Term (TaggedString Var ":onyx/plugin"))
+                               Space
+                               (Cons
+                                (Term
+                                 (TaggedString
+                                  Var
+                                  ":onyx.test-helper/dummy-input"))
+                                NewLine
+                                (Cons
+                                 (Term (TaggedString Var ":onyx/type"))
+                                 Space
+                                 (Cons
+                                  (Term (TaggedString Var ":input"))
+                                  NewLine
+                                  (Cons
+                                   (Term (TaggedString Var ":onyx/medium"))
+                                   Space
+                                   (Cons
+                                    (Term (TaggedString Var ":dummy"))
+                                    NewLine
+                                    (Cons
+                                     (Term
+                                      (TaggedString Var ":onyx/batch-size"))
+                                     Space
+                                     (Cons
+                                      (Term (TaggedString Var "20"))
+                                      EmptySep
+                                      Nil)))))))))))
+                           NewLine
+                           (Cons
+                            (Collection
+                             Set
+                             (Cons
+                              (Term (TaggedString Var ":onyx/name"))
+                              Space
+                              (Cons
+                               (Term (TaggedString Var ":d"))
+                               NewLine
+                               (Cons
+                                (Term (TaggedString Var ":onyx/plugin"))
+                                Space
+                                (Cons
+                                 (Term
+                                  (TaggedString
+                                   Var
+                                   ":onyx.test-helper/dummy-output"))
+                                 NewLine
+                                 (Cons
+                                  (Term (TaggedString Var ":onyx/type"))
+                                  Space
+                                  (Cons
+                                   (Term (TaggedString Var ":output"))
+                                   NewLine
+                                   (Cons
+                                    (Term (TaggedString Var ":onyx/medium"))
+                                    Space
+                                    (Cons
+                                     (Term (TaggedString Var ":dummy"))
+                                     NewLine
+                                     (Cons
+                                      (Term
+                                       (TaggedString Var ":onyx/batch-size"))
+                                      Space
+                                      (Cons
+                                       (Term (TaggedString Var "20"))
+                                       EmptySep
+                                       Nil)))))))))))
+                            EmptySep
+                            Nil)))
+                         NewLine
+                         (Cons
+                          (Term (TaggedString Var ":task-scheduler"))
+                          Space
+                          (Cons
+                           (Term
+                            (TaggedString Var ":onyx.task-scheduler/balanced"))
+                           NewLine
+                           (Cons
+                            (Term (TaggedString Var ":percentage"))
+                            Space
+                            (Cons
+                             (Term (TaggedString Var "30"))
+                             EmptySep
+                             Nil)))))))))
+                    NewLine
+                    (Cons
+                     (Term (TaggedString Var "job-entry-1"))
+                     Space
+                     (Cons
+                      (Collection
+                       Parens
+                       (Cons
+                        (Term
+                         (TaggedString Var "onyx.api/create-submit-job-entry"))
+                        NewLine
+                        (Cons
+                         (Term (TaggedString Var "job-1-id"))
+                         NewLine
+                         (Cons
+                          (Term (TaggedString Var "peer-config"))
+                          NewLine
+                          (Cons
+                           (Term (TaggedString Var "job-1"))
+                           NewLine
+                           (Cons
+                            (Collection
+                             Parens
+                             (Cons
+                              (Term
+                               (TaggedString Var "planning/discover-tasks"))
+                              Space
+                              (Cons
+                               (Collection
+                                Parens
+                                (Cons
+                                 (Term (TaggedString Var ":catalog"))
+                                 Space
+                                 (Cons
+                                  (Term (TaggedString Var "job-1"))
+                                  EmptySep
+                                  Nil)))
+                               Space
+                               (Cons
+                                (Collection
+                                 Parens
+                                 (Cons
+                                  (Term (TaggedString Var ":workflow"))
+                                  Space
+                                  (Cons
+                                   (Term (TaggedString Var "job-1"))
+                                   EmptySep
+                                   Nil)))
+                                EmptySep
+                                Nil))))
+                            EmptySep
+                            Nil))))))
+                      NewLine
+                      (Cons
+                       (Term (TaggedString Var "job-entry-2"))
+                       Space
+                       (Cons
+                        (Collection
+                         Parens
+                         (Cons
+                          (Term
+                           (TaggedString
+                            Var
+                            "onyx.api/create-submit-job-entry"))
+                          NewLine
+                          (Cons
+                           (Term (TaggedString Var "job-2-id"))
+                           NewLine
+                           (Cons
+                            (Term (TaggedString Var "peer-config"))
+                            NewLine
+                            (Cons
+                             (Term (TaggedString Var "job-2"))
+                             NewLine
+                             (Cons
+                              (Collection
+                               Parens
+                               (Cons
+                                (Term
+                                 (TaggedString Var "planning/discover-tasks"))
+                                Space
+                                (Cons
+                                 (Collection
+                                  Parens
+                                  (Cons
+                                   (Term (TaggedString Var ":catalog"))
+                                   Space
+                                   (Cons
+                                    (Term (TaggedString Var "job-2"))
+                                    EmptySep
+                                    Nil)))
+                                 Space
+                                 (Cons
+                                  (Collection
+                                   Parens
+                                   (Cons
+                                    (Term (TaggedString Var ":workflow"))
+                                    Space
+                                    (Cons
+                                     (Term (TaggedString Var "job-2"))
+                                     EmptySep
+                                     Nil)))
+                                  EmptySep
+                                  Nil))))
+                              EmptySep
+                              Nil))))))
+                        EmptySep
+                        Nil)))))))))))))
+           NewLine
+           (Cons
+            (Collection
+             Parens
+             (Cons
+              (Term (TaggedString Var "checking"))
+              NewLine
+              (Cons
+               (Term
+                (TaggedString
+                 String
+                 "70/30% split for percentage job scheduler succeeded after rebalance"))
+               NewLine
+               (Cons
+                (Collection
+                 Parens
+                 (Cons
+                  (Term (TaggedString Var "times"))
+                  Space
+                  (Cons (Term (TaggedString Var "50")) EmptySep Nil)))
+                NewLine
+                (Cons
+                 (Collection
+                  Vec
+                  (Cons
+                   (Collection
+                    Set
+                    (Cons
+                     (Term (TaggedString Var ":keys"))
+                     Space
+                     (Cons
+                      (Collection
+                       Vec
+                       (Cons
+                        (Term (TaggedString Var "replica"))
+                        Space
+                        (Cons
+                         (Term (TaggedString Var "entries"))
+                         EmptySep
+                         Nil)))
+                      EmptySep
+                      Nil)))
+                   NewLine
+                   (Cons
+                    (Collection
+                     Parens
+                     (Cons
+                      (Term (TaggedString Var "log-gen/apply-entries-gen"))
+                      NewLine
+                      (Cons
+                       (Collection
+                        Parens
+                        (Cons
+                         (Term (TaggedString Var "gen/return"))
+                         NewLine
+                         (Cons
+                          (Collection
+                           Set
+                           (Cons
+                            (Term (TaggedString Var ":replica"))
+                            Space
+                            (Cons
+                             (Collection
+                              Set
+                              (Cons
+                               (Term (TaggedString Var ":job-scheduler"))
+                               Space
+                               (Cons
+                                (Term
+                                 (TaggedString
+                                  Var
+                                  ":onyx.job-scheduler/percentage"))
+                                NewLine
+                                (Cons
+                                 (Term (TaggedString Var ":messaging"))
+                                 Space
+                                 (Cons
+                                  (Collection
+                                   Set
+                                   (Cons
+                                    (Term
+                                     (TaggedString Var ":onyx.messaging/impl"))
+                                    Space
+                                    (Cons
+                                     (Term (TaggedString Var ":atom"))
+                                     EmptySep
+                                     Nil)))
+                                  EmptySep
+                                  Nil)))))
+                             NewLine
+                             (Cons
+                              (Term (TaggedString Var ":message-id"))
+                              Space
+                              (Cons
+                               (Term (TaggedString Var "0"))
+                               NewLine
+                               (Cons
+                                (Term (TaggedString Var ":entries"))
+                                NewLine
+                                (Cons
+                                 (Collection
+                                  Parens
+                                  (Cons
+                                   (Term (TaggedString Var "assoc"))
+                                   Space
+                                   (Cons
+                                    (Collection
+                                     Parens
+                                     (Cons
+                                      (Term
+                                       (TaggedString
+                                        Var
+                                        "log-gen/generate-join-queues"))
+                                      Space
+                                      (Cons
+                                       (Collection
+                                        Parens
+                                        (Cons
+                                         (Term
+                                          (TaggedString
+                                           Var
+                                           "log-gen/generate-group-and-peer-ids"))
+                                         Space
+                                         (Cons
+                                          (Term (TaggedString Var "2"))
+                                          Space
+                                          (Cons
+                                           (Term (TaggedString Var "10"))
+                                           EmptySep
+                                           Nil))))
+                                       EmptySep
+                                       Nil)))
+                                    NewLine
+                                    (Cons
+                                     (Term (TaggedString Var ":job-1"))
+                                     Space
+                                     (Cons
+                                      (Collection
+                                       Set
+                                       (Cons
+                                        (Term (TaggedString Var ":queue"))
+                                        Space
+                                        (Cons
+                                         (Collection
+                                          Vec
+                                          (Cons
+                                           (Term
+                                            (TaggedString Var "job-entry-1"))
+                                           EmptySep
+                                           Nil))
+                                         EmptySep
+                                         Nil)))
+                                      NewLine
+                                      (Cons
+                                       (Term (TaggedString Var ":job-2"))
+                                       Space
+                                       (Cons
+                                        (Collection
+                                         Set
+                                         (Cons
+                                          (Term (TaggedString Var ":queue"))
+                                          Space
+                                          (Cons
+                                           (Collection
+                                            Vec
+                                            (Cons
+                                             (Term
+                                              (TaggedString Var "job-entry-2"))
+                                             EmptySep
+                                             Nil))
+                                           EmptySep
+                                           Nil)))
+                                        EmptySep
+                                        Nil)))))))
+                                 EmptySep
+                                 Nil)))))))
+                          EmptySep
+                          Nil)))
+                       EmptySep
+                       Nil)))
+                    EmptySep
+                    Nil)))
+                 NewLine
+                 (Cons
+                  (Collection
+                   Parens
+                   (Cons
+                    (Term (TaggedString Var "is"))
+                    Space
+                    (Cons
+                     (Collection
+                      Parens
+                      (Cons
+                       (Term (TaggedString Var "="))
+                       Space
+                       (Cons
+                        (Collection
+                         Parens
+                         (Cons
+                          (Term (TaggedString Var "apply"))
+                          Space
+                          (Cons
+                           (Term (TaggedString Var "+"))
+                           Space
+                           (Cons
+                            (Collection
+                             Parens
+                             (Cons
+                              (Term (TaggedString Var "map"))
+                              Space
+                              (Cons
+                               (Term (TaggedString Var "count"))
+                               Space
+                               (Cons
+                                (Collection
+                                 Parens
+                                 (Cons
+                                  (Term (TaggedString Var "vals"))
+                                  Space
+                                  (Cons
+                                   (Collection
+                                    Parens
+                                    (Cons
+                                     (Term (TaggedString Var "get-in"))
+                                     Space
+                                     (Cons
+                                      (Term (TaggedString Var "replica"))
+                                      Space
+                                      (Cons
+                                       (Collection
+                                        Vec
+                                        (Cons
+                                         (Term
+                                          (TaggedString Var ":allocations"))
+                                         Space
+                                         (Cons
+                                          (Term (TaggedString Var "job-1-id"))
+                                          EmptySep
+                                          Nil)))
+                                       EmptySep
+                                       Nil))))
+                                   EmptySep
+                                   Nil)))
+                                EmptySep
+                                Nil))))
+                            EmptySep
+                            Nil))))
+                        Space
+                        (Cons (Term (TaggedString Var "14")) EmptySep Nil))))
+                     EmptySep
+                     Nil)))
+                  NewLine
+                  (Cons
+                   (Collection
+                    Parens
+                    (Cons
+                     (Term (TaggedString Var "is"))
+                     Space
+                     (Cons
+                      (Collection
+                       Parens
+                       (Cons
+                        (Term (TaggedString Var "="))
+                        Space
+                        (Cons
+                         (Collection
+                          Parens
+                          (Cons
+                           (Term (TaggedString Var "apply"))
+                           Space
+                           (Cons
+                            (Term (TaggedString Var "+"))
+                            Space
+                            (Cons
+                             (Collection
+                              Parens
+                              (Cons
+                               (Term (TaggedString Var "map"))
+                               Space
+                               (Cons
+                                (Term (TaggedString Var "count"))
+                                Space
+                                (Cons
+                                 (Collection
+                                  Parens
+                                  (Cons
+                                   (Term (TaggedString Var "vals"))
+                                   Space
+                                   (Cons
+                                    (Collection
+                                     Parens
+                                     (Cons
+                                      (Term (TaggedString Var "get-in"))
+                                      Space
+                                      (Cons
+                                       (Term (TaggedString Var "replica"))
+                                       Space
+                                       (Cons
+                                        (Collection
+                                         Vec
+                                         (Cons
+                                          (Term
+                                           (TaggedString Var ":allocations"))
+                                          Space
+                                          (Cons
+                                           (Term (TaggedString Var "job-2-id"))
+                                           EmptySep
+                                           Nil)))
+                                        EmptySep
+                                        Nil))))
+                                    EmptySep
+                                    Nil)))
+                                 EmptySep
+                                 Nil))))
+                             EmptySep
+                             Nil))))
+                         Space
+                         (Cons (Term (TaggedString Var "6")) EmptySep Nil))))
+                      EmptySep
+                      Nil)))
+                   EmptySep
+                   Nil)))))))
+            EmptySep
+            Nil))))
+        EmptySep
+        Nil))))
+    Empty))))

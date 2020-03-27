@@ -1,0 +1,2561 @@
+(Module
+ (:
+  (StmtExpr
+   (Strings
+    (:
+     "\"\"\"Set up a model directory.\n\nRequires:\n\n    lang_data --- Rules for the tokenizer\n        * prefix.txt\n        * suffix.txt\n        * infix.txt\n        * morphs.json\n        * specials.json\n\n    corpora --- Data files\n        * WordNet\n        * words.sgt.prob --- Smoothed unigram probabilities\n        * clusters.txt --- Output of hierarchical clustering, e.g. Brown clusters\n        * vectors.tgz --- output of something like word2vec\n\"\"\""
+     [])
+    ())
+   ())
+  (:
+   (FromImport
+    (ImportRelative 0 (Just (: (Ident "__future__" ()) [])) ())
+    (FromItems (: (FromItem (Ident "unicode_literals" ()) Nothing ()) []) ())
+    ())
+   (:
+    (FromImport
+     (ImportRelative 0 (Just (: (Ident "ast" ()) [])) ())
+     (FromItems (: (FromItem (Ident "literal_eval" ()) Nothing ()) []) ())
+     ())
+    (:
+     (Import (: (ImportItem (: (Ident "math" ()) []) Nothing ()) []) ())
+     (:
+      (Import (: (ImportItem (: (Ident "gzip" ()) []) Nothing ()) []) ())
+      (:
+       (Import (: (ImportItem (: (Ident "json" ()) []) Nothing ()) []) ())
+       (:
+        (Import (: (ImportItem (: (Ident "plac" ()) []) Nothing ()) []) ())
+        (:
+         (FromImport
+          (ImportRelative 0 (Just (: (Ident "pathlib" ()) [])) ())
+          (FromItems (: (FromItem (Ident "Path" ()) Nothing ()) []) ())
+          ())
+         (:
+          (FromImport
+           (ImportRelative 0 (Just (: (Ident "shutil" ()) [])) ())
+           (FromItems (: (FromItem (Ident "copyfile" ()) Nothing ()) []) ())
+           ())
+          (:
+           (FromImport
+            (ImportRelative 0 (Just (: (Ident "shutil" ()) [])) ())
+            (FromItems (: (FromItem (Ident "copytree" ()) Nothing ()) []) ())
+            ())
+           (:
+            (Import (: (ImportItem (: (Ident "io" ()) []) Nothing ()) []) ())
+            (:
+             (FromImport
+              (ImportRelative 0 (Just (: (Ident "collections" ()) [])) ())
+              (FromItems
+               (: (FromItem (Ident "defaultdict" ()) Nothing ()) [])
+               ())
+              ())
+             (:
+              (FromImport
+               (ImportRelative
+                0
+                (Just (: (Ident "spacy" ()) (: (Ident "vocab" ()) [])))
+                ())
+               (FromItems (: (FromItem (Ident "Vocab" ()) Nothing ()) []) ())
+               ())
+              (:
+               (FromImport
+                (ImportRelative
+                 0
+                 (Just (: (Ident "spacy" ()) (: (Ident "vocab" ()) [])))
+                 ())
+                (FromItems
+                 (: (FromItem (Ident "write_binary_vectors" ()) Nothing ()) [])
+                 ())
+                ())
+               (:
+                (FromImport
+                 (ImportRelative
+                  0
+                  (Just (: (Ident "spacy" ()) (: (Ident "strings" ()) [])))
+                  ())
+                 (FromItems
+                  (: (FromItem (Ident "hash_string" ()) Nothing ()) [])
+                  ())
+                 ())
+                (:
+                 (FromImport
+                  (ImportRelative
+                   0
+                   (Just (: (Ident "preshed" ()) (: (Ident "counter" ()) [])))
+                   ())
+                  (FromItems
+                   (: (FromItem (Ident "PreshCounter" ()) Nothing ()) [])
+                   ())
+                  ())
+                 (:
+                  (FromImport
+                   (ImportRelative
+                    0
+                    (Just
+                     (: (Ident "spacy" ()) (: (Ident "parts_of_speech" ()) [])))
+                    ())
+                   (FromItems
+                    (:
+                     (FromItem (Ident "NOUN" ()) Nothing ())
+                     (:
+                      (FromItem (Ident "VERB" ()) Nothing ())
+                      (: (FromItem (Ident "ADJ" ()) Nothing ()) [])))
+                    ())
+                   ())
+                  (:
+                   (Import
+                    (:
+                     (ImportItem
+                      (: (Ident "spacy" ()) (: (Ident "en" ()) []))
+                      Nothing
+                      ())
+                     [])
+                    ())
+                   (:
+                    (Import
+                     (:
+                      (ImportItem
+                       (: (Ident "spacy" ()) (: (Ident "de" ()) []))
+                       Nothing
+                       ())
+                      [])
+                     ())
+                    (:
+                     (Import
+                      (:
+                       (ImportItem
+                        (: (Ident "spacy" ()) (: (Ident "fi" ()) []))
+                        Nothing
+                        ())
+                       [])
+                      ())
+                     (:
+                      (Import
+                       (:
+                        (ImportItem
+                         (: (Ident "spacy" ()) (: (Ident "it" ()) []))
+                         Nothing
+                         ())
+                        [])
+                       ())
+                      (:
+                       (Fun
+                        (Ident "setup_tokenizer" ())
+                        (:
+                         (Param (Ident "lang_data_dir" ()) Nothing Nothing ())
+                         (: (Param (Ident "tok_dir" ()) Nothing Nothing ()) []))
+                        Nothing
+                        (:
+                         (Conditional
+                          (:
+                           ((,)
+                            (UnaryOp
+                             (Not ())
+                             (Call
+                              (Dot
+                               (Var (Ident "tok_dir" ()) ())
+                               (Ident "exists" ())
+                               ())
+                              []
+                              ())
+                             ())
+                            (:
+                             (StmtExpr
+                              (Call
+                               (Dot
+                                (Var (Ident "tok_dir" ()) ())
+                                (Ident "mkdir" ())
+                                ())
+                               []
+                               ())
+                              ())
+                             []))
+                           [])
+                          []
+                          ())
+                         (:
+                          (For
+                           (: (Var (Ident "filename" ()) ()) [])
+                           (Paren
+                            (Tuple
+                             (:
+                              (Strings (: "'infix.txt'" []) ())
+                              (:
+                               (Strings (: "'morphs.json'" []) ())
+                               (:
+                                (Strings (: "'prefix.txt'" []) ())
+                                (:
+                                 (Strings (: "'specials.json'" []) ())
+                                 (: (Strings (: "'suffix.txt'" []) ()) [])))))
+                             ())
+                            ())
+                           (:
+                            (Assign
+                             (: (Var (Ident "src" ()) ()) [])
+                             (BinaryOp
+                              (Divide ())
+                              (Var (Ident "lang_data_dir" ()) ())
+                              (Var (Ident "filename" ()) ())
+                              ())
+                             ())
+                            (:
+                             (Assign
+                              (: (Var (Ident "dst" ()) ()) [])
+                              (BinaryOp
+                               (Divide ())
+                               (Var (Ident "tok_dir" ()) ())
+                               (Var (Ident "filename" ()) ())
+                               ())
+                              ())
+                             (:
+                              (StmtExpr
+                               (Call
+                                (Var (Ident "copyfile" ()) ())
+                                (:
+                                 (ArgExpr
+                                  (Call
+                                   (Var (Ident "str" ()) ())
+                                   (: (ArgExpr (Var (Ident "src" ()) ()) ()) [])
+                                   ())
+                                  ())
+                                 (:
+                                  (ArgExpr
+                                   (Call
+                                    (Var (Ident "str" ()) ())
+                                    (:
+                                     (ArgExpr (Var (Ident "dst" ()) ()) ())
+                                     [])
+                                    ())
+                                   ())
+                                  []))
+                                ())
+                               ())
+                              [])))
+                           []
+                           ())
+                          []))
+                        ())
+                       (:
+                        (Fun
+                         (Ident "_read_clusters" ())
+                         (: (Param (Ident "loc" ()) Nothing Nothing ()) [])
+                         Nothing
+                         (:
+                          (Conditional
+                           (:
+                            ((,)
+                             (UnaryOp
+                              (Not ())
+                              (Call
+                               (Dot
+                                (Var (Ident "loc" ()) ())
+                                (Ident "exists" ())
+                                ())
+                               []
+                               ())
+                              ())
+                             (:
+                              (StmtExpr
+                               (Call
+                                (Var (Ident "print" ()) ())
+                                (:
+                                 (ArgExpr
+                                  (Strings
+                                   (: "\"Warning: Clusters file not found\"" [])
+                                   ())
+                                  ())
+                                 [])
+                                ())
+                               ())
+                              (: (Return (Just (Dictionary [] ())) ()) [])))
+                            [])
+                           []
+                           ())
+                          (:
+                           (Assign
+                            (: (Var (Ident "clusters" ()) ()) [])
+                            (Dictionary [] ())
+                            ())
+                           (:
+                            (For
+                             (: (Var (Ident "line" ()) ()) [])
+                             (Call
+                              (Dot
+                               (Var (Ident "io" ()) ())
+                               (Ident "open" ())
+                               ())
+                              (:
+                               (ArgExpr
+                                (Call
+                                 (Var (Ident "str" ()) ())
+                                 (: (ArgExpr (Var (Ident "loc" ()) ()) ()) [])
+                                 ())
+                                ())
+                               (:
+                                (ArgExpr (Strings (: "'r'" []) ()) ())
+                                (:
+                                 (ArgKeyword
+                                  (Ident "encoding" ())
+                                  (Strings (: "'utf8'" []) ())
+                                  ())
+                                 [])))
+                              ())
+                             (:
+                              (Try
+                               (:
+                                (Assign
+                                 (:
+                                  (Tuple
+                                   (:
+                                    (Var (Ident "cluster" ()) ())
+                                    (:
+                                     (Var (Ident "word" ()) ())
+                                     (: (Var (Ident "freq" ()) ()) [])))
+                                   ())
+                                  [])
+                                 (Call
+                                  (Dot
+                                   (Var (Ident "line" ()) ())
+                                   (Ident "split" ())
+                                   ())
+                                  []
+                                  ())
+                                 ())
+                                [])
+                               (:
+                                (Handler
+                                 (ExceptClause
+                                  (Just
+                                   ((,)
+                                    (Var (Ident "ValueError" ()) ())
+                                    Nothing))
+                                  ())
+                                 (: (Continue ()) [])
+                                 ())
+                                [])
+                               []
+                               []
+                               ())
+                              (:
+                               (Conditional
+                                (:
+                                 ((,)
+                                  (BinaryOp
+                                   (GreaterThanEquals ())
+                                   (Call
+                                    (Var (Ident "int" ()) ())
+                                    (:
+                                     (ArgExpr (Var (Ident "freq" ()) ()) ())
+                                     [])
+                                    ())
+                                   (Int 3 "3" ())
+                                   ())
+                                  (:
+                                   (Assign
+                                    (:
+                                     (Subscript
+                                      (Var (Ident "clusters" ()) ())
+                                      (Var (Ident "word" ()) ())
+                                      ())
+                                     [])
+                                    (Var (Ident "cluster" ()) ())
+                                    ())
+                                   []))
+                                 [])
+                                (:
+                                 (Assign
+                                  (:
+                                   (Subscript
+                                    (Var (Ident "clusters" ()) ())
+                                    (Var (Ident "word" ()) ())
+                                    ())
+                                   [])
+                                  (Strings (: "'0'" []) ())
+                                  ())
+                                 [])
+                                ())
+                               []))
+                             []
+                             ())
+                            (:
+                             (For
+                              (:
+                               (Var (Ident "word" ()) ())
+                               (: (Var (Ident "cluster" ()) ()) []))
+                              (Call
+                               (Var (Ident "list" ()) ())
+                               (:
+                                (ArgExpr
+                                 (Call
+                                  (Dot
+                                   (Var (Ident "clusters" ()) ())
+                                   (Ident "items" ())
+                                   ())
+                                  []
+                                  ())
+                                 ())
+                                [])
+                               ())
+                              (:
+                               (Conditional
+                                (:
+                                 ((,)
+                                  (BinaryOp
+                                   (NotIn ())
+                                   (Call
+                                    (Dot
+                                     (Var (Ident "word" ()) ())
+                                     (Ident "lower" ())
+                                     ())
+                                    []
+                                    ())
+                                   (Var (Ident "clusters" ()) ())
+                                   ())
+                                  (:
+                                   (Assign
+                                    (:
+                                     (Subscript
+                                      (Var (Ident "clusters" ()) ())
+                                      (Call
+                                       (Dot
+                                        (Var (Ident "word" ()) ())
+                                        (Ident "lower" ())
+                                        ())
+                                       []
+                                       ())
+                                      ())
+                                     [])
+                                    (Var (Ident "cluster" ()) ())
+                                    ())
+                                   []))
+                                 [])
+                                []
+                                ())
+                               (:
+                                (Conditional
+                                 (:
+                                  ((,)
+                                   (BinaryOp
+                                    (NotIn ())
+                                    (Call
+                                     (Dot
+                                      (Var (Ident "word" ()) ())
+                                      (Ident "title" ())
+                                      ())
+                                     []
+                                     ())
+                                    (Var (Ident "clusters" ()) ())
+                                    ())
+                                   (:
+                                    (Assign
+                                     (:
+                                      (Subscript
+                                       (Var (Ident "clusters" ()) ())
+                                       (Call
+                                        (Dot
+                                         (Var (Ident "word" ()) ())
+                                         (Ident "title" ())
+                                         ())
+                                        []
+                                        ())
+                                       ())
+                                      [])
+                                     (Var (Ident "cluster" ()) ())
+                                     ())
+                                    []))
+                                  [])
+                                 []
+                                 ())
+                                (:
+                                 (Conditional
+                                  (:
+                                   ((,)
+                                    (BinaryOp
+                                     (NotIn ())
+                                     (Call
+                                      (Dot
+                                       (Var (Ident "word" ()) ())
+                                       (Ident "upper" ())
+                                       ())
+                                      []
+                                      ())
+                                     (Var (Ident "clusters" ()) ())
+                                     ())
+                                    (:
+                                     (Assign
+                                      (:
+                                       (Subscript
+                                        (Var (Ident "clusters" ()) ())
+                                        (Call
+                                         (Dot
+                                          (Var (Ident "word" ()) ())
+                                          (Ident "upper" ())
+                                          ())
+                                         []
+                                         ())
+                                        ())
+                                       [])
+                                      (Var (Ident "cluster" ()) ())
+                                      ())
+                                     []))
+                                   [])
+                                  []
+                                  ())
+                                 [])))
+                              []
+                              ())
+                             (:
+                              (Return (Just (Var (Ident "clusters" ()) ())) ())
+                              [])))))
+                         ())
+                        (:
+                         (Fun
+                          (Ident "_read_probs" ())
+                          (: (Param (Ident "loc" ()) Nothing Nothing ()) [])
+                          Nothing
+                          (:
+                           (Conditional
+                            (:
+                             ((,)
+                              (UnaryOp
+                               (Not ())
+                               (Call
+                                (Dot
+                                 (Var (Ident "loc" ()) ())
+                                 (Ident "exists" ())
+                                 ())
+                                []
+                                ())
+                               ())
+                              (:
+                               (StmtExpr
+                                (Call
+                                 (Var (Ident "print" ()) ())
+                                 (:
+                                  (ArgExpr
+                                   (Strings
+                                    (:
+                                     "\"Probabilities file not found. Trying freqs.\""
+                                     [])
+                                    ())
+                                   ())
+                                  [])
+                                 ())
+                                ())
+                               (:
+                                (Return
+                                 (Just
+                                  (Tuple
+                                   (:
+                                    (Dictionary [] ())
+                                    (: (Float 0.0 "0.0" ()) []))
+                                   ()))
+                                 ())
+                                [])))
+                             [])
+                            []
+                            ())
+                           (:
+                            (Assign
+                             (: (Var (Ident "probs" ()) ()) [])
+                             (Dictionary [] ())
+                             ())
+                            (:
+                             (For
+                              (:
+                               (Var (Ident "i" ()) ())
+                               (: (Var (Ident "line" ()) ()) []))
+                              (Call
+                               (Var (Ident "enumerate" ()) ())
+                               (:
+                                (ArgExpr
+                                 (Call
+                                  (Dot
+                                   (Var (Ident "io" ()) ())
+                                   (Ident "open" ())
+                                   ())
+                                  (:
+                                   (ArgExpr
+                                    (Call
+                                     (Var (Ident "str" ()) ())
+                                     (:
+                                      (ArgExpr (Var (Ident "loc" ()) ()) ())
+                                      [])
+                                     ())
+                                    ())
+                                   (:
+                                    (ArgExpr (Strings (: "'r'" []) ()) ())
+                                    (:
+                                     (ArgKeyword
+                                      (Ident "encoding" ())
+                                      (Strings (: "'utf8'" []) ())
+                                      ())
+                                     [])))
+                                  ())
+                                 ())
+                                [])
+                               ())
+                              (:
+                               (Assign
+                                (:
+                                 (Tuple
+                                  (:
+                                   (Var (Ident "prob" ()) ())
+                                   (: (Var (Ident "word" ()) ()) []))
+                                  ())
+                                 [])
+                                (Call
+                                 (Dot
+                                  (Var (Ident "line" ()) ())
+                                  (Ident "split" ())
+                                  ())
+                                 []
+                                 ())
+                                ())
+                               (:
+                                (Assign
+                                 (: (Var (Ident "prob" ()) ()) [])
+                                 (Call
+                                  (Var (Ident "float" ()) ())
+                                  (: (ArgExpr (Var (Ident "prob" ()) ()) ()) [])
+                                  ())
+                                 ())
+                                (:
+                                 (Assign
+                                  (:
+                                   (Subscript
+                                    (Var (Ident "probs" ()) ())
+                                    (Var (Ident "word" ()) ())
+                                    ())
+                                   [])
+                                  (Var (Ident "prob" ()) ())
+                                  ())
+                                 [])))
+                              []
+                              ())
+                             (:
+                              (Return
+                               (Just
+                                (Tuple
+                                 (:
+                                  (Var (Ident "probs" ()) ())
+                                  (:
+                                   (Subscript
+                                    (Var (Ident "probs" ()) ())
+                                    (Strings (: "'-OOV-'" []) ())
+                                    ())
+                                   []))
+                                 ()))
+                               ())
+                              []))))
+                          ())
+                         (:
+                          (Fun
+                           (Ident "_read_freqs" ())
+                           (:
+                            (Param (Ident "loc" ()) Nothing Nothing ())
+                            (:
+                             (Param
+                              (Ident "max_length" ())
+                              Nothing
+                              (Just (Int 100 "100" ()))
+                              ())
+                             (:
+                              (Param
+                               (Ident "min_doc_freq" ())
+                               Nothing
+                               (Just (Int 5 "5" ()))
+                               ())
+                              (:
+                               (Param
+                                (Ident "min_freq" ())
+                                Nothing
+                                (Just (Int 200 "200" ()))
+                                ())
+                               []))))
+                           Nothing
+                           (:
+                            (Conditional
+                             (:
+                              ((,)
+                               (UnaryOp
+                                (Not ())
+                                (Call
+                                 (Dot
+                                  (Var (Ident "loc" ()) ())
+                                  (Ident "exists" ())
+                                  ())
+                                 []
+                                 ())
+                                ())
+                               (:
+                                (StmtExpr
+                                 (Call
+                                  (Var (Ident "print" ()) ())
+                                  (:
+                                   (ArgExpr
+                                    (Strings
+                                     (:
+                                      "\"Warning: Frequencies file not found\""
+                                      [])
+                                     ())
+                                    ())
+                                   [])
+                                  ())
+                                 ())
+                                (:
+                                 (Return
+                                  (Just
+                                   (Tuple
+                                    (:
+                                     (Dictionary [] ())
+                                     (: (Float 0.0 "0.0" ()) []))
+                                    ()))
+                                  ())
+                                 [])))
+                              [])
+                             []
+                             ())
+                            (:
+                             (Assign
+                              (: (Var (Ident "counts" ()) ()) [])
+                              (Call (Var (Ident "PreshCounter" ()) ()) [] ())
+                              ())
+                             (:
+                              (Assign
+                               (: (Var (Ident "total" ()) ()) [])
+                               (Int 0 "0" ())
+                               ())
+                              (:
+                               (Conditional
+                                (:
+                                 ((,)
+                                  (Call
+                                   (Dot
+                                    (Call
+                                     (Var (Ident "str" ()) ())
+                                     (:
+                                      (ArgExpr (Var (Ident "loc" ()) ()) ())
+                                      [])
+                                     ())
+                                    (Ident "endswith" ())
+                                    ())
+                                   (:
+                                    (ArgExpr (Strings (: "'gz'" []) ()) ())
+                                    [])
+                                   ())
+                                  (:
+                                   (Assign
+                                    (: (Var (Ident "file_" ()) ()) [])
+                                    (Call
+                                     (Dot
+                                      (Var (Ident "gzip" ()) ())
+                                      (Ident "open" ())
+                                      ())
+                                     (:
+                                      (ArgExpr
+                                       (Call
+                                        (Var (Ident "str" ()) ())
+                                        (:
+                                         (ArgExpr (Var (Ident "loc" ()) ()) ())
+                                         [])
+                                        ())
+                                       ())
+                                      [])
+                                     ())
+                                    ())
+                                   []))
+                                 [])
+                                (:
+                                 (Assign
+                                  (: (Var (Ident "file_" ()) ()) [])
+                                  (Call
+                                   (Dot
+                                    (Var (Ident "loc" ()) ())
+                                    (Ident "open" ())
+                                    ())
+                                   []
+                                   ())
+                                  ())
+                                 [])
+                                ())
+                               (:
+                                (For
+                                 (:
+                                  (Var (Ident "i" ()) ())
+                                  (: (Var (Ident "line" ()) ()) []))
+                                 (Call
+                                  (Var (Ident "enumerate" ()) ())
+                                  (:
+                                   (ArgExpr (Var (Ident "file_" ()) ()) ())
+                                   [])
+                                  ())
+                                 (:
+                                  (Assign
+                                   (:
+                                    (Tuple
+                                     (:
+                                      (Var (Ident "freq" ()) ())
+                                      (:
+                                       (Var (Ident "doc_freq" ()) ())
+                                       (: (Var (Ident "key" ()) ()) [])))
+                                     ())
+                                    [])
+                                   (Call
+                                    (Dot
+                                     (Var (Ident "line" ()) ())
+                                     (Ident "split" ())
+                                     ())
+                                    (:
+                                     (ArgExpr (Strings (: "'\\t'" []) ()) ())
+                                     (: (ArgExpr (Int 2 "2" ()) ()) []))
+                                    ())
+                                   ())
+                                  (:
+                                   (Assign
+                                    (: (Var (Ident "freq" ()) ()) [])
+                                    (Call
+                                     (Var (Ident "int" ()) ())
+                                     (:
+                                      (ArgExpr (Var (Ident "freq" ()) ()) ())
+                                      [])
+                                     ())
+                                    ())
+                                   (:
+                                    (StmtExpr
+                                     (Call
+                                      (Dot
+                                       (Var (Ident "counts" ()) ())
+                                       (Ident "inc" ())
+                                       ())
+                                      (:
+                                       (ArgExpr
+                                        (BinaryOp
+                                         (Plus ())
+                                         (Var (Ident "i" ()) ())
+                                         (Int 1 "1" ())
+                                         ())
+                                        ())
+                                       (:
+                                        (ArgExpr (Var (Ident "freq" ()) ()) ())
+                                        []))
+                                      ())
+                                     ())
+                                    (:
+                                     (AugmentedAssign
+                                      (Var (Ident "total" ()) ())
+                                      (PlusAssign ())
+                                      (Var (Ident "freq" ()) ())
+                                      ())
+                                     []))))
+                                 []
+                                 ())
+                                (:
+                                 (StmtExpr
+                                  (Call
+                                   (Dot
+                                    (Var (Ident "counts" ()) ())
+                                    (Ident "smooth" ())
+                                    ())
+                                   []
+                                   ())
+                                  ())
+                                 (:
+                                  (Assign
+                                   (: (Var (Ident "log_total" ()) ()) [])
+                                   (Call
+                                    (Dot
+                                     (Var (Ident "math" ()) ())
+                                     (Ident "log" ())
+                                     ())
+                                    (:
+                                     (ArgExpr (Var (Ident "total" ()) ()) ())
+                                     [])
+                                    ())
+                                   ())
+                                  (:
+                                   (Assign
+                                    (: (Var (Ident "probs" ()) ()) [])
+                                    (Dictionary [] ())
+                                    ())
+                                   (:
+                                    (For
+                                     (: (Var (Ident "line" ()) ()) [])
+                                     (Call
+                                      (Dot
+                                       (Var (Ident "loc" ()) ())
+                                       (Ident "open" ())
+                                       ())
+                                      []
+                                      ())
+                                     (:
+                                      (Assign
+                                       (:
+                                        (Tuple
+                                         (:
+                                          (Var (Ident "freq" ()) ())
+                                          (:
+                                           (Var (Ident "doc_freq" ()) ())
+                                           (: (Var (Ident "key" ()) ()) [])))
+                                         ())
+                                        [])
+                                       (Call
+                                        (Dot
+                                         (Var (Ident "line" ()) ())
+                                         (Ident "split" ())
+                                         ())
+                                        (:
+                                         (ArgExpr
+                                          (Strings (: "'\\t'" []) ())
+                                          ())
+                                         (: (ArgExpr (Int 2 "2" ()) ()) []))
+                                        ())
+                                       ())
+                                      (:
+                                       (Assign
+                                        (: (Var (Ident "doc_freq" ()) ()) [])
+                                        (Call
+                                         (Var (Ident "int" ()) ())
+                                         (:
+                                          (ArgExpr
+                                           (Var (Ident "doc_freq" ()) ())
+                                           ())
+                                          [])
+                                         ())
+                                        ())
+                                       (:
+                                        (Assign
+                                         (: (Var (Ident "freq" ()) ()) [])
+                                         (Call
+                                          (Var (Ident "int" ()) ())
+                                          (:
+                                           (ArgExpr
+                                            (Var (Ident "freq" ()) ())
+                                            ())
+                                           [])
+                                          ())
+                                         ())
+                                        (:
+                                         (Conditional
+                                          (:
+                                           ((,)
+                                            (BinaryOp
+                                             (And ())
+                                             (BinaryOp
+                                              (And ())
+                                              (BinaryOp
+                                               (GreaterThanEquals ())
+                                               (Var (Ident "doc_freq" ()) ())
+                                               (Var
+                                                (Ident "min_doc_freq" ())
+                                                ())
+                                               ())
+                                              (BinaryOp
+                                               (GreaterThanEquals ())
+                                               (Var (Ident "freq" ()) ())
+                                               (Var (Ident "min_freq" ()) ())
+                                               ())
+                                              ())
+                                             (BinaryOp
+                                              (LessThan ())
+                                              (Call
+                                               (Var (Ident "len" ()) ())
+                                               (:
+                                                (ArgExpr
+                                                 (Var (Ident "key" ()) ())
+                                                 ())
+                                                [])
+                                               ())
+                                              (Var (Ident "max_length" ()) ())
+                                              ())
+                                             ())
+                                            (:
+                                             (Assign
+                                              (: (Var (Ident "word" ()) ()) [])
+                                              (Call
+                                               (Var
+                                                (Ident "literal_eval" ())
+                                                ())
+                                               (:
+                                                (ArgExpr
+                                                 (Var (Ident "key" ()) ())
+                                                 ())
+                                                [])
+                                               ())
+                                              ())
+                                             (:
+                                              (Assign
+                                               (:
+                                                (Var
+                                                 (Ident "smooth_count" ())
+                                                 ())
+                                                [])
+                                               (Call
+                                                (Dot
+                                                 (Var (Ident "counts" ()) ())
+                                                 (Ident "smoother" ())
+                                                 ())
+                                                (:
+                                                 (ArgExpr
+                                                  (Call
+                                                   (Var (Ident "int" ()) ())
+                                                   (:
+                                                    (ArgExpr
+                                                     (Var (Ident "freq" ()) ())
+                                                     ())
+                                                    [])
+                                                   ())
+                                                  ())
+                                                 [])
+                                                ())
+                                               ())
+                                              (:
+                                               (Assign
+                                                (:
+                                                 (Var
+                                                  (Ident "log_smooth_count" ())
+                                                  ())
+                                                 [])
+                                                (Call
+                                                 (Dot
+                                                  (Var (Ident "math" ()) ())
+                                                  (Ident "log" ())
+                                                  ())
+                                                 (:
+                                                  (ArgExpr
+                                                   (Var
+                                                    (Ident "smooth_count" ())
+                                                    ())
+                                                   ())
+                                                  [])
+                                                 ())
+                                                ())
+                                               (:
+                                                (Assign
+                                                 (:
+                                                  (Subscript
+                                                   (Var (Ident "probs" ()) ())
+                                                   (Var (Ident "word" ()) ())
+                                                   ())
+                                                  [])
+                                                 (BinaryOp
+                                                  (Minus ())
+                                                  (Call
+                                                   (Dot
+                                                    (Var (Ident "math" ()) ())
+                                                    (Ident "log" ())
+                                                    ())
+                                                   (:
+                                                    (ArgExpr
+                                                     (Var
+                                                      (Ident "smooth_count" ())
+                                                      ())
+                                                     ())
+                                                    [])
+                                                   ())
+                                                  (Var
+                                                   (Ident "log_total" ())
+                                                   ())
+                                                  ())
+                                                 ())
+                                                [])))))
+                                           [])
+                                          []
+                                          ())
+                                         []))))
+                                     []
+                                     ())
+                                    (:
+                                     (Assign
+                                      (: (Var (Ident "oov_prob" ()) ()) [])
+                                      (BinaryOp
+                                       (Minus ())
+                                       (Call
+                                        (Dot
+                                         (Var (Ident "math" ()) ())
+                                         (Ident "log" ())
+                                         ())
+                                        (:
+                                         (ArgExpr
+                                          (Call
+                                           (Dot
+                                            (Var (Ident "counts" ()) ())
+                                            (Ident "smoother" ())
+                                            ())
+                                           (: (ArgExpr (Int 0 "0" ()) ()) [])
+                                           ())
+                                          ())
+                                         [])
+                                        ())
+                                       (Var (Ident "log_total" ()) ())
+                                       ())
+                                      ())
+                                     (:
+                                      (Return
+                                       (Just
+                                        (Tuple
+                                         (:
+                                          (Var (Ident "probs" ()) ())
+                                          (: (Var (Ident "oov_prob" ()) ()) []))
+                                         ()))
+                                       ())
+                                      [])))))))))))
+                           ())
+                          (:
+                           (Fun
+                            (Ident "_read_senses" ())
+                            (: (Param (Ident "loc" ()) Nothing Nothing ()) [])
+                            Nothing
+                            (:
+                             (Assign
+                              (: (Var (Ident "lexicon" ()) ()) [])
+                              (Call
+                               (Var (Ident "defaultdict" ()) ())
+                               (:
+                                (ArgExpr
+                                 (Lambda
+                                  []
+                                  (Call
+                                   (Var (Ident "defaultdict" ()) ())
+                                   (:
+                                    (ArgExpr (Var (Ident "list" ()) ()) ())
+                                    [])
+                                   ())
+                                  ())
+                                 ())
+                                [])
+                               ())
+                              ())
+                             (:
+                              (Conditional
+                               (:
+                                ((,)
+                                 (UnaryOp
+                                  (Not ())
+                                  (Call
+                                   (Dot
+                                    (Var (Ident "loc" ()) ())
+                                    (Ident "exists" ())
+                                    ())
+                                   []
+                                   ())
+                                  ())
+                                 (:
+                                  (StmtExpr
+                                   (Call
+                                    (Var (Ident "print" ()) ())
+                                    (:
+                                     (ArgExpr
+                                      (Strings
+                                       (:
+                                        "\"Warning: WordNet senses not found\""
+                                        [])
+                                       ())
+                                      ())
+                                     [])
+                                    ())
+                                   ())
+                                  (:
+                                   (Return
+                                    (Just (Var (Ident "lexicon" ()) ()))
+                                    ())
+                                   [])))
+                                [])
+                               []
+                               ())
+                              (:
+                               (Assign
+                                (: (Var (Ident "sense_names" ()) ()) [])
+                                (Call
+                                 (Var (Ident "dict" ()) ())
+                                 (:
+                                  (ArgExpr
+                                   (Generator
+                                    (Comprehension
+                                     (ComprehensionExpr
+                                      (Paren
+                                       (Tuple
+                                        (:
+                                         (Var (Ident "s" ()) ())
+                                         (: (Var (Ident "i" ()) ()) []))
+                                        ())
+                                       ()))
+                                     (CompFor
+                                      False
+                                      (:
+                                       (Var (Ident "i" ()) ())
+                                       (: (Var (Ident "s" ()) ()) []))
+                                      (Call
+                                       (Var (Ident "enumerate" ()) ())
+                                       (:
+                                        (ArgExpr
+                                         (Dot
+                                          (Dot
+                                           (Var (Ident "spacy" ()) ())
+                                           (Ident "senses" ())
+                                           ())
+                                          (Ident "STRINGS" ())
+                                          ())
+                                         ())
+                                        [])
+                                       ())
+                                      Nothing
+                                      ())
+                                     ())
+                                    ())
+                                   ())
+                                  [])
+                                 ())
+                                ())
+                               (:
+                                (Assign
+                                 (: (Var (Ident "pos_ids" ()) ()) [])
+                                 (Dictionary
+                                  (:
+                                   (DictMappingPair
+                                    (Strings (: "'noun'" []) ())
+                                    (Var (Ident "NOUN" ()) ()))
+                                   (:
+                                    (DictMappingPair
+                                     (Strings (: "'verb'" []) ())
+                                     (Var (Ident "VERB" ()) ()))
+                                    (:
+                                     (DictMappingPair
+                                      (Strings (: "'adjective'" []) ())
+                                      (Var (Ident "ADJ" ()) ()))
+                                     [])))
+                                  ())
+                                 ())
+                                (:
+                                 (For
+                                  (: (Var (Ident "line" ()) ()) [])
+                                  (Call
+                                   (Dot
+                                    (Var (Ident "codecs" ()) ())
+                                    (Ident "open" ())
+                                    ())
+                                   (:
+                                    (ArgExpr
+                                     (Call
+                                      (Var (Ident "str" ()) ())
+                                      (:
+                                       (ArgExpr (Var (Ident "loc" ()) ()) ())
+                                       [])
+                                      ())
+                                     ())
+                                    (:
+                                     (ArgExpr (Strings (: "'r'" []) ()) ())
+                                     (:
+                                      (ArgExpr (Strings (: "'utf8'" []) ()) ())
+                                      [])))
+                                   ())
+                                  (:
+                                   (Assign
+                                    (: (Var (Ident "sense_strings" ()) ()) [])
+                                    (Call
+                                     (Dot
+                                      (Var (Ident "line" ()) ())
+                                      (Ident "split" ())
+                                      ())
+                                     []
+                                     ())
+                                    ())
+                                   (:
+                                    (Assign
+                                     (: (Var (Ident "word" ()) ()) [])
+                                     (Call
+                                      (Dot
+                                       (Var (Ident "sense_strings" ()) ())
+                                       (Ident "pop" ())
+                                       ())
+                                      (: (ArgExpr (Int 0 "0" ()) ()) [])
+                                      ())
+                                     ())
+                                    (:
+                                     (For
+                                      (: (Var (Ident "sense" ()) ()) [])
+                                      (Var (Ident "sense_strings" ()) ())
+                                      (:
+                                       (Assign
+                                        (:
+                                         (Tuple
+                                          (:
+                                           (Var (Ident "pos" ()) ())
+                                           (: (Var (Ident "sense" ()) ()) []))
+                                          ())
+                                         [])
+                                        (Call
+                                         (Dot
+                                          (SlicedExpr
+                                           (Var (Ident "sense" ()) ())
+                                           (:
+                                            (SliceProper
+                                             (Just (Int 3 "3" ()))
+                                             Nothing
+                                             Nothing
+                                             ())
+                                            [])
+                                           ())
+                                          (Ident "split" ())
+                                          ())
+                                         (:
+                                          (ArgExpr (Strings (: "'.'" []) ()) ())
+                                          [])
+                                         ())
+                                        ())
+                                       (:
+                                        (Assign
+                                         (: (Var (Ident "sense_name" ()) ()) [])
+                                         (BinaryOp
+                                          (Modulo ())
+                                          (Strings (: "'%s_%s'" []) ())
+                                          (Paren
+                                           (Tuple
+                                            (:
+                                             (Call
+                                              (Dot
+                                               (Subscript
+                                                (Var (Ident "pos" ()) ())
+                                                (Int 0 "0" ())
+                                                ())
+                                               (Ident "upper" ())
+                                               ())
+                                              []
+                                              ())
+                                             (:
+                                              (Call
+                                               (Dot
+                                                (Var (Ident "sense" ()) ())
+                                                (Ident "lower" ())
+                                                ())
+                                               []
+                                               ())
+                                              []))
+                                            ())
+                                           ())
+                                          ())
+                                         ())
+                                        (:
+                                         (Conditional
+                                          (:
+                                           ((,)
+                                            (BinaryOp
+                                             (NotEquals ())
+                                             (Var (Ident "sense_name" ()) ())
+                                             (Strings (: "'N_tops'" []) ())
+                                             ())
+                                            (:
+                                             (Assign
+                                              (:
+                                               (Var (Ident "sense_id" ()) ())
+                                               [])
+                                              (Subscript
+                                               (Var (Ident "sense_names" ()) ())
+                                               (Var (Ident "sense_name" ()) ())
+                                               ())
+                                              ())
+                                             (:
+                                              (StmtExpr
+                                               (Call
+                                                (Dot
+                                                 (Subscript
+                                                  (Subscript
+                                                   (Var (Ident "lexicon" ()) ())
+                                                   (Var (Ident "word" ()) ())
+                                                   ())
+                                                  (Subscript
+                                                   (Var (Ident "pos_ids" ()) ())
+                                                   (Var (Ident "pos" ()) ())
+                                                   ())
+                                                  ())
+                                                 (Ident "append" ())
+                                                 ())
+                                                (:
+                                                 (ArgExpr
+                                                  (Var (Ident "sense_id" ()) ())
+                                                  ())
+                                                 [])
+                                                ())
+                                               ())
+                                              [])))
+                                           [])
+                                          []
+                                          ())
+                                         [])))
+                                      []
+                                      ())
+                                     [])))
+                                  []
+                                  ())
+                                 (:
+                                  (Return
+                                   (Just (Var (Ident "lexicon" ()) ()))
+                                   ())
+                                  []))))))
+                            ())
+                           (:
+                            (Fun
+                             (Ident "setup_vocab" ())
+                             (:
+                              (Param
+                               (Ident "get_lex_attr" ())
+                               Nothing
+                               Nothing
+                               ())
+                              (:
+                               (Param (Ident "tag_map" ()) Nothing Nothing ())
+                               (:
+                                (Param (Ident "src_dir" ()) Nothing Nothing ())
+                                (:
+                                 (Param (Ident "dst_dir" ()) Nothing Nothing ())
+                                 []))))
+                             Nothing
+                             (:
+                              (Conditional
+                               (:
+                                ((,)
+                                 (UnaryOp
+                                  (Not ())
+                                  (Call
+                                   (Dot
+                                    (Var (Ident "dst_dir" ()) ())
+                                    (Ident "exists" ())
+                                    ())
+                                   []
+                                   ())
+                                  ())
+                                 (:
+                                  (StmtExpr
+                                   (Call
+                                    (Dot
+                                     (Var (Ident "dst_dir" ()) ())
+                                     (Ident "mkdir" ())
+                                     ())
+                                    []
+                                    ())
+                                   ())
+                                  []))
+                                [])
+                               []
+                               ())
+                              (:
+                               (Assign
+                                (: (Var (Ident "vectors_src" ()) ()) [])
+                                (BinaryOp
+                                 (Divide ())
+                                 (Var (Ident "src_dir" ()) ())
+                                 (Strings (: "'vectors.tgz'" []) ())
+                                 ())
+                                ())
+                               (:
+                                (Conditional
+                                 (:
+                                  ((,)
+                                   (Call
+                                    (Dot
+                                     (Var (Ident "vectors_src" ()) ())
+                                     (Ident "exists" ())
+                                     ())
+                                    []
+                                    ())
+                                   (:
+                                    (StmtExpr
+                                     (Call
+                                      (Var (Ident "write_binary_vectors" ()) ())
+                                      (:
+                                       (ArgExpr
+                                        (Call
+                                         (Var (Ident "str" ()) ())
+                                         (:
+                                          (ArgExpr
+                                           (Var (Ident "vectors_src" ()) ())
+                                           ())
+                                          [])
+                                         ())
+                                        ())
+                                       (:
+                                        (ArgExpr
+                                         (Call
+                                          (Var (Ident "str" ()) ())
+                                          (:
+                                           (ArgExpr
+                                            (BinaryOp
+                                             (Divide ())
+                                             (Var (Ident "dst_dir" ()) ())
+                                             (Strings (: "'vec.bin'" []) ())
+                                             ())
+                                            ())
+                                           [])
+                                          ())
+                                         ())
+                                        []))
+                                      ())
+                                     ())
+                                    []))
+                                  [])
+                                 (:
+                                  (StmtExpr
+                                   (Call
+                                    (Var (Ident "print" ()) ())
+                                    (:
+                                     (ArgExpr
+                                      (Strings
+                                       (:
+                                        "\"Warning: Word vectors file not found\""
+                                        [])
+                                       ())
+                                      ())
+                                     [])
+                                    ())
+                                   ())
+                                  [])
+                                 ())
+                                (:
+                                 (Assign
+                                  (: (Var (Ident "vocab" ()) ()) [])
+                                  (Call
+                                   (Var (Ident "Vocab" ()) ())
+                                   (:
+                                    (ArgKeyword
+                                     (Ident "get_lex_attr" ())
+                                     (Var (Ident "get_lex_attr" ()) ())
+                                     ())
+                                    (:
+                                     (ArgKeyword
+                                      (Ident "tag_map" ())
+                                      (Var (Ident "tag_map" ()) ())
+                                      ())
+                                     []))
+                                   ())
+                                  ())
+                                 (:
+                                  (Assign
+                                   (: (Var (Ident "clusters" ()) ()) [])
+                                   (Call
+                                    (Var (Ident "_read_clusters" ()) ())
+                                    (:
+                                     (ArgExpr
+                                      (BinaryOp
+                                       (Divide ())
+                                       (Var (Ident "src_dir" ()) ())
+                                       (Strings (: "'clusters.txt'" []) ())
+                                       ())
+                                      ())
+                                     [])
+                                    ())
+                                   ())
+                                  (:
+                                   (Assign
+                                    (:
+                                     (Tuple
+                                      (:
+                                       (Var (Ident "probs" ()) ())
+                                       (: (Var (Ident "oov_prob" ()) ()) []))
+                                      ())
+                                     [])
+                                    (Call
+                                     (Var (Ident "_read_probs" ()) ())
+                                     (:
+                                      (ArgExpr
+                                       (BinaryOp
+                                        (Divide ())
+                                        (Var (Ident "src_dir" ()) ())
+                                        (Strings (: "'words.sgt.prob'" []) ())
+                                        ())
+                                       ())
+                                      [])
+                                     ())
+                                    ())
+                                   (:
+                                    (Conditional
+                                     (:
+                                      ((,)
+                                       (UnaryOp
+                                        (Not ())
+                                        (Var (Ident "probs" ()) ())
+                                        ())
+                                       (:
+                                        (Assign
+                                         (:
+                                          (Tuple
+                                           (:
+                                            (Var (Ident "probs" ()) ())
+                                            (:
+                                             (Var (Ident "oov_prob" ()) ())
+                                             []))
+                                           ())
+                                          [])
+                                         (Call
+                                          (Var (Ident "_read_freqs" ()) ())
+                                          (:
+                                           (ArgExpr
+                                            (BinaryOp
+                                             (Divide ())
+                                             (Var (Ident "src_dir" ()) ())
+                                             (Strings (: "'freqs.txt'" []) ())
+                                             ())
+                                            ())
+                                           [])
+                                          ())
+                                         ())
+                                        []))
+                                      [])
+                                     []
+                                     ())
+                                    (:
+                                     (Conditional
+                                      (:
+                                       ((,)
+                                        (UnaryOp
+                                         (Not ())
+                                         (Var (Ident "probs" ()) ())
+                                         ())
+                                        (:
+                                         (Assign
+                                          (: (Var (Ident "oov_prob" ()) ()) [])
+                                          (UnaryOp
+                                           (Minus ())
+                                           (Int 20 "20" ())
+                                           ())
+                                          ())
+                                         []))
+                                       [])
+                                      (:
+                                       (Assign
+                                        (: (Var (Ident "oov_prob" ()) ()) [])
+                                        (Call
+                                         (Var (Ident "min" ()) ())
+                                         (:
+                                          (ArgExpr
+                                           (Call
+                                            (Dot
+                                             (Var (Ident "probs" ()) ())
+                                             (Ident "values" ())
+                                             ())
+                                            []
+                                            ())
+                                           ())
+                                          [])
+                                         ())
+                                        ())
+                                       [])
+                                      ())
+                                     (:
+                                      (For
+                                       (: (Var (Ident "word" ()) ()) [])
+                                       (Var (Ident "clusters" ()) ())
+                                       (:
+                                        (Conditional
+                                         (:
+                                          ((,)
+                                           (BinaryOp
+                                            (NotIn ())
+                                            (Var (Ident "word" ()) ())
+                                            (Var (Ident "probs" ()) ())
+                                            ())
+                                           (:
+                                            (Assign
+                                             (:
+                                              (Subscript
+                                               (Var (Ident "probs" ()) ())
+                                               (Var (Ident "word" ()) ())
+                                               ())
+                                              [])
+                                             (Var (Ident "oov_prob" ()) ())
+                                             ())
+                                            []))
+                                          [])
+                                         []
+                                         ())
+                                        [])
+                                       []
+                                       ())
+                                      (:
+                                       (Assign
+                                        (: (Var (Ident "lexicon" ()) ()) [])
+                                        (List [] ())
+                                        ())
+                                       (:
+                                        (For
+                                         (:
+                                          (Var (Ident "word" ()) ())
+                                          (: (Var (Ident "prob" ()) ()) []))
+                                         (Call
+                                          (Var (Ident "reversed" ()) ())
+                                          (:
+                                           (ArgExpr
+                                            (Call
+                                             (Var (Ident "sorted" ()) ())
+                                             (:
+                                              (ArgExpr
+                                               (Call
+                                                (Var (Ident "list" ()) ())
+                                                (:
+                                                 (ArgExpr
+                                                  (Call
+                                                   (Dot
+                                                    (Var (Ident "probs" ()) ())
+                                                    (Ident "items" ())
+                                                    ())
+                                                   []
+                                                   ())
+                                                  ())
+                                                 [])
+                                                ())
+                                               ())
+                                              (:
+                                               (ArgKeyword
+                                                (Ident "key" ())
+                                                (Lambda
+                                                 (:
+                                                  (Param
+                                                   (Ident "item" ())
+                                                   Nothing
+                                                   Nothing
+                                                   ())
+                                                  [])
+                                                 (Subscript
+                                                  (Var (Ident "item" ()) ())
+                                                  (Int 1 "1" ())
+                                                  ())
+                                                 ())
+                                                ())
+                                               []))
+                                             ())
+                                            ())
+                                           [])
+                                          ())
+                                         (:
+                                          (Assign
+                                           (: (Var (Ident "lexeme" ()) ()) [])
+                                           (Subscript
+                                            (Var (Ident "vocab" ()) ())
+                                            (Var (Ident "word" ()) ())
+                                            ())
+                                           ())
+                                          (:
+                                           (Assign
+                                            (:
+                                             (Dot
+                                              (Var (Ident "lexeme" ()) ())
+                                              (Ident "prob" ())
+                                              ())
+                                             [])
+                                            (Var (Ident "prob" ()) ())
+                                            ())
+                                           (:
+                                            (Assign
+                                             (:
+                                              (Dot
+                                               (Var (Ident "lexeme" ()) ())
+                                               (Ident "is_oov" ())
+                                               ())
+                                              [])
+                                             (Bool False ())
+                                             ())
+                                            (:
+                                             (Conditional
+                                              (:
+                                               ((,)
+                                                (BinaryOp
+                                                 (In ())
+                                                 (Var (Ident "word" ()) ())
+                                                 (Var (Ident "clusters" ()) ())
+                                                 ())
+                                                (:
+                                                 (Assign
+                                                  (:
+                                                   (Dot
+                                                    (Var (Ident "lexeme" ()) ())
+                                                    (Ident "cluster" ())
+                                                    ())
+                                                   [])
+                                                  (Call
+                                                   (Var (Ident "int" ()) ())
+                                                   (:
+                                                    (ArgExpr
+                                                     (SlicedExpr
+                                                      (Subscript
+                                                       (Var
+                                                        (Ident "clusters" ())
+                                                        ())
+                                                       (Var
+                                                        (Ident "word" ())
+                                                        ())
+                                                       ())
+                                                      (:
+                                                       (SliceProper
+                                                        Nothing
+                                                        Nothing
+                                                        (Just
+                                                         (Just
+                                                          (UnaryOp
+                                                           (Minus ())
+                                                           (Int 1 "1" ())
+                                                           ())))
+                                                        ())
+                                                       [])
+                                                      ())
+                                                     ())
+                                                    (:
+                                                     (ArgExpr (Int 2 "2" ()) ())
+                                                     []))
+                                                   ())
+                                                  ())
+                                                 []))
+                                               [])
+                                              (:
+                                               (Assign
+                                                (:
+                                                 (Dot
+                                                  (Var (Ident "lexeme" ()) ())
+                                                  (Ident "cluster" ())
+                                                  ())
+                                                 [])
+                                                (Int 0 "0" ())
+                                                ())
+                                               [])
+                                              ())
+                                             []))))
+                                         []
+                                         ())
+                                        (:
+                                         (StmtExpr
+                                          (Call
+                                           (Dot
+                                            (Var (Ident "vocab" ()) ())
+                                            (Ident "dump" ())
+                                            ())
+                                           (:
+                                            (ArgExpr
+                                             (Call
+                                              (Var (Ident "str" ()) ())
+                                              (:
+                                               (ArgExpr
+                                                (BinaryOp
+                                                 (Divide ())
+                                                 (Var (Ident "dst_dir" ()) ())
+                                                 (Strings
+                                                  (: "'lexemes.bin'" [])
+                                                  ())
+                                                 ())
+                                                ())
+                                               [])
+                                              ())
+                                             ())
+                                            [])
+                                           ())
+                                          ())
+                                         (:
+                                          (StmtExpr
+                                           (Call
+                                            (Dot
+                                             (Dot
+                                              (Var (Ident "vocab" ()) ())
+                                              (Ident "strings" ())
+                                              ())
+                                             (Ident "dump" ())
+                                             ())
+                                            (:
+                                             (ArgExpr
+                                              (Call
+                                               (Var (Ident "str" ()) ())
+                                               (:
+                                                (ArgExpr
+                                                 (BinaryOp
+                                                  (Divide ())
+                                                  (Var (Ident "dst_dir" ()) ())
+                                                  (Strings
+                                                   (: "'strings.txt'" [])
+                                                   ())
+                                                  ())
+                                                 ())
+                                                [])
+                                               ())
+                                              ())
+                                             [])
+                                            ())
+                                           ())
+                                          (:
+                                           (With
+                                            (:
+                                             ((,)
+                                              (Call
+                                               (Dot
+                                                (Paren
+                                                 (BinaryOp
+                                                  (Divide ())
+                                                  (Var (Ident "dst_dir" ()) ())
+                                                  (Strings
+                                                   (: "'oov_prob'" [])
+                                                   ())
+                                                  ())
+                                                 ())
+                                                (Ident "open" ())
+                                                ())
+                                               (:
+                                                (ArgExpr
+                                                 (Strings (: "'w'" []) ())
+                                                 ())
+                                                [])
+                                               ())
+                                              (Just
+                                               (Var (Ident "file_" ()) ())))
+                                             [])
+                                            (:
+                                             (StmtExpr
+                                              (Call
+                                               (Dot
+                                                (Var (Ident "file_" ()) ())
+                                                (Ident "write" ())
+                                                ())
+                                               (:
+                                                (ArgExpr
+                                                 (BinaryOp
+                                                  (Modulo ())
+                                                  (Strings (: "'%f'" []) ())
+                                                  (Var (Ident "oov_prob" ()) ())
+                                                  ())
+                                                 ())
+                                                [])
+                                               ())
+                                              ())
+                                             [])
+                                            ())
+                                           []))))))))))))))
+                             ())
+                            (:
+                             (Fun
+                              (Ident "main" ())
+                              (:
+                               (Param (Ident "lang_id" ()) Nothing Nothing ())
+                               (:
+                                (Param
+                                 (Ident "lang_data_dir" ())
+                                 Nothing
+                                 Nothing
+                                 ())
+                                (:
+                                 (Param
+                                  (Ident "corpora_dir" ())
+                                  Nothing
+                                  Nothing
+                                  ())
+                                 (:
+                                  (Param
+                                   (Ident "model_dir" ())
+                                   Nothing
+                                   Nothing
+                                   ())
+                                  []))))
+                              Nothing
+                              (:
+                               (Assign
+                                (: (Var (Ident "languages" ()) ()) [])
+                                (Dictionary
+                                 (:
+                                  (DictMappingPair
+                                   (Strings (: "'en'" []) ())
+                                   (Call
+                                    (Dot
+                                     (Dot
+                                      (Dot
+                                       (Var (Ident "spacy" ()) ())
+                                       (Ident "en" ())
+                                       ())
+                                      (Ident "English" ())
+                                      ())
+                                     (Ident "default_lex_attrs" ())
+                                     ())
+                                    []
+                                    ()))
+                                  (:
+                                   (DictMappingPair
+                                    (Strings (: "'de'" []) ())
+                                    (Call
+                                     (Dot
+                                      (Dot
+                                       (Dot
+                                        (Var (Ident "spacy" ()) ())
+                                        (Ident "de" ())
+                                        ())
+                                       (Ident "German" ())
+                                       ())
+                                      (Ident "default_lex_attrs" ())
+                                      ())
+                                     []
+                                     ()))
+                                   (:
+                                    (DictMappingPair
+                                     (Strings (: "'fi'" []) ())
+                                     (Call
+                                      (Dot
+                                       (Dot
+                                        (Dot
+                                         (Var (Ident "spacy" ()) ())
+                                         (Ident "fi" ())
+                                         ())
+                                        (Ident "Finnish" ())
+                                        ())
+                                       (Ident "default_lex_attrs" ())
+                                       ())
+                                      []
+                                      ()))
+                                    (:
+                                     (DictMappingPair
+                                      (Strings (: "'it'" []) ())
+                                      (Call
+                                       (Dot
+                                        (Dot
+                                         (Dot
+                                          (Var (Ident "spacy" ()) ())
+                                          (Ident "it" ())
+                                          ())
+                                         (Ident "Italian" ())
+                                         ())
+                                        (Ident "default_lex_attrs" ())
+                                        ())
+                                       []
+                                       ()))
+                                     []))))
+                                 ())
+                                ())
+                               (:
+                                (Assign
+                                 (: (Var (Ident "model_dir" ()) ()) [])
+                                 (Call
+                                  (Var (Ident "Path" ()) ())
+                                  (:
+                                   (ArgExpr (Var (Ident "model_dir" ()) ()) ())
+                                   [])
+                                  ())
+                                 ())
+                                (:
+                                 (Assign
+                                  (: (Var (Ident "lang_data_dir" ()) ()) [])
+                                  (BinaryOp
+                                   (Divide ())
+                                   (Call
+                                    (Var (Ident "Path" ()) ())
+                                    (:
+                                     (ArgExpr
+                                      (Var (Ident "lang_data_dir" ()) ())
+                                      ())
+                                     [])
+                                    ())
+                                   (Var (Ident "lang_id" ()) ())
+                                   ())
+                                  ())
+                                 (:
+                                  (Assign
+                                   (: (Var (Ident "corpora_dir" ()) ()) [])
+                                   (BinaryOp
+                                    (Divide ())
+                                    (Call
+                                     (Var (Ident "Path" ()) ())
+                                     (:
+                                      (ArgExpr
+                                       (Var (Ident "corpora_dir" ()) ())
+                                       ())
+                                      [])
+                                     ())
+                                    (Var (Ident "lang_id" ()) ())
+                                    ())
+                                   ())
+                                  (:
+                                   (Assert
+                                    (:
+                                     (Call
+                                      (Dot
+                                       (Var (Ident "corpora_dir" ()) ())
+                                       (Ident "exists" ())
+                                       ())
+                                      []
+                                      ())
+                                     [])
+                                    ())
+                                   (:
+                                    (Assert
+                                     (:
+                                      (Call
+                                       (Dot
+                                        (Var (Ident "lang_data_dir" ()) ())
+                                        (Ident "exists" ())
+                                        ())
+                                       []
+                                       ())
+                                      [])
+                                     ())
+                                    (:
+                                     (Conditional
+                                      (:
+                                       ((,)
+                                        (UnaryOp
+                                         (Not ())
+                                         (Call
+                                          (Dot
+                                           (Var (Ident "model_dir" ()) ())
+                                           (Ident "exists" ())
+                                           ())
+                                          []
+                                          ())
+                                         ())
+                                        (:
+                                         (StmtExpr
+                                          (Call
+                                           (Dot
+                                            (Var (Ident "model_dir" ()) ())
+                                            (Ident "mkdir" ())
+                                            ())
+                                           []
+                                           ())
+                                          ())
+                                         []))
+                                       [])
+                                      []
+                                      ())
+                                     (:
+                                      (Assign
+                                       (: (Var (Ident "tag_map" ()) ()) [])
+                                       (Call
+                                        (Dot
+                                         (Var (Ident "json" ()) ())
+                                         (Ident "load" ())
+                                         ())
+                                        (:
+                                         (ArgExpr
+                                          (Call
+                                           (Dot
+                                            (Paren
+                                             (BinaryOp
+                                              (Divide ())
+                                              (Var
+                                               (Ident "lang_data_dir" ())
+                                               ())
+                                              (Strings
+                                               (: "'tag_map.json'" [])
+                                               ())
+                                              ())
+                                             ())
+                                            (Ident "open" ())
+                                            ())
+                                           []
+                                           ())
+                                          ())
+                                         [])
+                                        ())
+                                       ())
+                                      (:
+                                       (StmtExpr
+                                        (Call
+                                         (Var (Ident "setup_tokenizer" ()) ())
+                                         (:
+                                          (ArgExpr
+                                           (Var (Ident "lang_data_dir" ()) ())
+                                           ())
+                                          (:
+                                           (ArgExpr
+                                            (BinaryOp
+                                             (Divide ())
+                                             (Var (Ident "model_dir" ()) ())
+                                             (Strings (: "'tokenizer'" []) ())
+                                             ())
+                                            ())
+                                           []))
+                                         ())
+                                        ())
+                                       (:
+                                        (StmtExpr
+                                         (Call
+                                          (Var (Ident "setup_vocab" ()) ())
+                                          (:
+                                           (ArgExpr
+                                            (Subscript
+                                             (Var (Ident "languages" ()) ())
+                                             (Var (Ident "lang_id" ()) ())
+                                             ())
+                                            ())
+                                           (:
+                                            (ArgExpr
+                                             (Var (Ident "tag_map" ()) ())
+                                             ())
+                                            (:
+                                             (ArgExpr
+                                              (Var (Ident "corpora_dir" ()) ())
+                                              ())
+                                             (:
+                                              (ArgExpr
+                                               (BinaryOp
+                                                (Divide ())
+                                                (Var (Ident "model_dir" ()) ())
+                                                (Strings (: "'vocab'" []) ())
+                                                ())
+                                               ())
+                                              []))))
+                                          ())
+                                         ())
+                                        (:
+                                         (Conditional
+                                          (:
+                                           ((,)
+                                            (Call
+                                             (Dot
+                                              (Paren
+                                               (BinaryOp
+                                                (Divide ())
+                                                (Var
+                                                 (Ident "lang_data_dir" ())
+                                                 ())
+                                                (Strings
+                                                 (: "'gazetteer.json'" [])
+                                                 ())
+                                                ())
+                                               ())
+                                              (Ident "exists" ())
+                                              ())
+                                             []
+                                             ())
+                                            (:
+                                             (StmtExpr
+                                              (Call
+                                               (Var (Ident "copyfile" ()) ())
+                                               (:
+                                                (ArgExpr
+                                                 (Call
+                                                  (Var (Ident "str" ()) ())
+                                                  (:
+                                                   (ArgExpr
+                                                    (BinaryOp
+                                                     (Divide ())
+                                                     (Var
+                                                      (Ident "lang_data_dir" ())
+                                                      ())
+                                                     (Strings
+                                                      (: "'gazetteer.json'" [])
+                                                      ())
+                                                     ())
+                                                    ())
+                                                   [])
+                                                  ())
+                                                 ())
+                                                (:
+                                                 (ArgExpr
+                                                  (Call
+                                                   (Var (Ident "str" ()) ())
+                                                   (:
+                                                    (ArgExpr
+                                                     (BinaryOp
+                                                      (Divide ())
+                                                      (BinaryOp
+                                                       (Divide ())
+                                                       (Var
+                                                        (Ident "model_dir" ())
+                                                        ())
+                                                       (Strings
+                                                        (: "'vocab'" [])
+                                                        ())
+                                                       ())
+                                                      (Strings
+                                                       (: "'gazetteer.json'" [])
+                                                       ())
+                                                      ())
+                                                     ())
+                                                    [])
+                                                   ())
+                                                  ())
+                                                 []))
+                                               ())
+                                              ())
+                                             []))
+                                           [])
+                                          []
+                                          ())
+                                         (:
+                                          (Conditional
+                                           (:
+                                            ((,)
+                                             (Call
+                                              (Dot
+                                               (Paren
+                                                (BinaryOp
+                                                 (Divide ())
+                                                 (Var
+                                                  (Ident "lang_data_dir" ())
+                                                  ())
+                                                 (Strings
+                                                  (: "'tag_map.json'" [])
+                                                  ())
+                                                 ())
+                                                ())
+                                               (Ident "exists" ())
+                                               ())
+                                              []
+                                              ())
+                                             (:
+                                              (StmtExpr
+                                               (Call
+                                                (Var (Ident "copyfile" ()) ())
+                                                (:
+                                                 (ArgExpr
+                                                  (Call
+                                                   (Var (Ident "str" ()) ())
+                                                   (:
+                                                    (ArgExpr
+                                                     (BinaryOp
+                                                      (Divide ())
+                                                      (Var
+                                                       (Ident
+                                                        "lang_data_dir"
+                                                        ())
+                                                       ())
+                                                      (Strings
+                                                       (: "'tag_map.json'" [])
+                                                       ())
+                                                      ())
+                                                     ())
+                                                    [])
+                                                   ())
+                                                  ())
+                                                 (:
+                                                  (ArgExpr
+                                                   (Call
+                                                    (Var (Ident "str" ()) ())
+                                                    (:
+                                                     (ArgExpr
+                                                      (BinaryOp
+                                                       (Divide ())
+                                                       (BinaryOp
+                                                        (Divide ())
+                                                        (Var
+                                                         (Ident "model_dir" ())
+                                                         ())
+                                                        (Strings
+                                                         (: "'vocab'" [])
+                                                         ())
+                                                        ())
+                                                       (Strings
+                                                        (: "'tag_map.json'" [])
+                                                        ())
+                                                       ())
+                                                      ())
+                                                     [])
+                                                    ())
+                                                   ())
+                                                  []))
+                                                ())
+                                               ())
+                                              []))
+                                            [])
+                                           []
+                                           ())
+                                          (:
+                                           (Conditional
+                                            (:
+                                             ((,)
+                                              (Call
+                                               (Dot
+                                                (Paren
+                                                 (BinaryOp
+                                                  (Divide ())
+                                                  (Var
+                                                   (Ident "lang_data_dir" ())
+                                                   ())
+                                                  (Strings
+                                                   (: "'lemma_rules.json'" [])
+                                                   ())
+                                                  ())
+                                                 ())
+                                                (Ident "exists" ())
+                                                ())
+                                               []
+                                               ())
+                                              (:
+                                               (StmtExpr
+                                                (Call
+                                                 (Var (Ident "copyfile" ()) ())
+                                                 (:
+                                                  (ArgExpr
+                                                   (Call
+                                                    (Var (Ident "str" ()) ())
+                                                    (:
+                                                     (ArgExpr
+                                                      (BinaryOp
+                                                       (Divide ())
+                                                       (Var
+                                                        (Ident
+                                                         "lang_data_dir"
+                                                         ())
+                                                        ())
+                                                       (Strings
+                                                        (:
+                                                         "'lemma_rules.json'"
+                                                         [])
+                                                        ())
+                                                       ())
+                                                      ())
+                                                     [])
+                                                    ())
+                                                   ())
+                                                  (:
+                                                   (ArgExpr
+                                                    (Call
+                                                     (Var (Ident "str" ()) ())
+                                                     (:
+                                                      (ArgExpr
+                                                       (BinaryOp
+                                                        (Divide ())
+                                                        (BinaryOp
+                                                         (Divide ())
+                                                         (Var
+                                                          (Ident "model_dir" ())
+                                                          ())
+                                                         (Strings
+                                                          (: "'vocab'" [])
+                                                          ())
+                                                         ())
+                                                        (Strings
+                                                         (:
+                                                          "'lemma_rules.json'"
+                                                          [])
+                                                         ())
+                                                        ())
+                                                       ())
+                                                      [])
+                                                     ())
+                                                    ())
+                                                   []))
+                                                 ())
+                                                ())
+                                               []))
+                                             [])
+                                            []
+                                            ())
+                                           (:
+                                            (Conditional
+                                             (:
+                                              ((,)
+                                               (BinaryOp
+                                                (And ())
+                                                (UnaryOp
+                                                 (Not ())
+                                                 (Call
+                                                  (Dot
+                                                   (Paren
+                                                    (BinaryOp
+                                                     (Divide ())
+                                                     (Var
+                                                      (Ident "model_dir" ())
+                                                      ())
+                                                     (Strings
+                                                      (: "'wordnet'" [])
+                                                      ())
+                                                     ())
+                                                    ())
+                                                   (Ident "exists" ())
+                                                   ())
+                                                  []
+                                                  ())
+                                                 ())
+                                                (Call
+                                                 (Dot
+                                                  (Paren
+                                                   (BinaryOp
+                                                    (Divide ())
+                                                    (Var
+                                                     (Ident "corpora_dir" ())
+                                                     ())
+                                                    (Strings
+                                                     (: "'wordnet'" [])
+                                                     ())
+                                                    ())
+                                                   ())
+                                                  (Ident "exists" ())
+                                                  ())
+                                                 []
+                                                 ())
+                                                ())
+                                               (:
+                                                (StmtExpr
+                                                 (Call
+                                                  (Var (Ident "copytree" ()) ())
+                                                  (:
+                                                   (ArgExpr
+                                                    (Call
+                                                     (Var (Ident "str" ()) ())
+                                                     (:
+                                                      (ArgExpr
+                                                       (BinaryOp
+                                                        (Divide ())
+                                                        (BinaryOp
+                                                         (Divide ())
+                                                         (Var
+                                                          (Ident
+                                                           "corpora_dir"
+                                                           ())
+                                                          ())
+                                                         (Strings
+                                                          (: "'wordnet'" [])
+                                                          ())
+                                                         ())
+                                                        (Strings
+                                                         (: "'dict'" [])
+                                                         ())
+                                                        ())
+                                                       ())
+                                                      [])
+                                                     ())
+                                                    ())
+                                                   (:
+                                                    (ArgExpr
+                                                     (Call
+                                                      (Var (Ident "str" ()) ())
+                                                      (:
+                                                       (ArgExpr
+                                                        (BinaryOp
+                                                         (Divide ())
+                                                         (Var
+                                                          (Ident "model_dir" ())
+                                                          ())
+                                                         (Strings
+                                                          (: "'wordnet'" [])
+                                                          ())
+                                                         ())
+                                                        ())
+                                                       [])
+                                                      ())
+                                                     ())
+                                                    []))
+                                                  ())
+                                                 ())
+                                                []))
+                                              [])
+                                             []
+                                             ())
+                                            []))))))))))))))
+                              ())
+                             (:
+                              (Conditional
+                               (:
+                                ((,)
+                                 (BinaryOp
+                                  (Equality ())
+                                  (Var (Ident "__name__" ()) ())
+                                  (Strings (: "'__main__'" []) ())
+                                  ())
+                                 (:
+                                  (StmtExpr
+                                   (Call
+                                    (Dot
+                                     (Var (Ident "plac" ()) ())
+                                     (Ident "call" ())
+                                     ())
+                                    (:
+                                     (ArgExpr (Var (Ident "main" ()) ()) ())
+                                     [])
+                                    ())
+                                   ())
+                                  []))
+                                [])
+                               []
+                               ())
+                              []))))))))))))))))))))))))))))))

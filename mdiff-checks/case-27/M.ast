@@ -1,0 +1,4231 @@
+(Module
+ (:
+  (StmtExpr (Strings (: "\"\"\"Tests for certbot.le_util.\"\"\"" []) ()) ())
+  (:
+   (Import (: (ImportItem (: (Ident "argparse" ()) []) Nothing ()) []) ())
+   (:
+    (Import (: (ImportItem (: (Ident "errno" ()) []) Nothing ()) []) ())
+    (:
+     (Import (: (ImportItem (: (Ident "os" ()) []) Nothing ()) []) ())
+     (:
+      (Import (: (ImportItem (: (Ident "shutil" ()) []) Nothing ()) []) ())
+      (:
+       (Import (: (ImportItem (: (Ident "stat" ()) []) Nothing ()) []) ())
+       (:
+        (Import (: (ImportItem (: (Ident "tempfile" ()) []) Nothing ()) []) ())
+        (:
+         (Import (: (ImportItem (: (Ident "unittest" ()) []) Nothing ()) []) ())
+         (:
+          (Import (: (ImportItem (: (Ident "mock" ()) []) Nothing ()) []) ())
+          (:
+           (Import (: (ImportItem (: (Ident "six" ()) []) Nothing ()) []) ())
+           (:
+            (FromImport
+             (ImportRelative 0 (Just (: (Ident "certbot" ()) [])) ())
+             (FromItems (: (FromItem (Ident "errors" ()) Nothing ()) []) ())
+             ())
+            (:
+             (FromImport
+              (ImportRelative
+               0
+               (Just (: (Ident "certbot" ()) (: (Ident "tests" ()) [])))
+               ())
+              (FromItems (: (FromItem (Ident "test_util" ()) Nothing ()) []) ())
+              ())
+             (:
+              (Class
+               (Ident "RunScriptTest" ())
+               (:
+                (ArgExpr
+                 (Dot (Var (Ident "unittest" ()) ()) (Ident "TestCase" ()) ())
+                 ())
+                [])
+               (:
+                (StmtExpr
+                 (Strings
+                  (: "\"\"\"Tests for certbot.le_util.run_script.\"\"\"" [])
+                  ())
+                 ())
+                (:
+                 (Decorated
+                  (: (Decorator (: (Ident "classmethod" ()) []) [] ()) [])
+                  (Fun
+                   (Ident "_call" ())
+                   (:
+                    (Param (Ident "cls" ()) Nothing Nothing ())
+                    (: (Param (Ident "params" ()) Nothing Nothing ()) []))
+                   Nothing
+                   (:
+                    (FromImport
+                     (ImportRelative
+                      0
+                      (Just
+                       (: (Ident "certbot" ()) (: (Ident "le_util" ()) [])))
+                      ())
+                     (FromItems
+                      (: (FromItem (Ident "run_script" ()) Nothing ()) [])
+                      ())
+                     ())
+                    (:
+                     (Return
+                      (Just
+                       (Call
+                        (Var (Ident "run_script" ()) ())
+                        (: (ArgExpr (Var (Ident "params" ()) ()) ()) [])
+                        ()))
+                      ())
+                     []))
+                   ())
+                  ())
+                 (:
+                  (Decorated
+                   (:
+                    (Decorator
+                     (: (Ident "mock" ()) (: (Ident "patch" ()) []))
+                     (:
+                      (ArgExpr
+                       (Strings
+                        (: "\"certbot.le_util.subprocess.Popen\"" [])
+                        ())
+                       ())
+                      [])
+                     ())
+                    [])
+                   (Fun
+                    (Ident "test_default" ())
+                    (:
+                     (Param (Ident "self" ()) Nothing Nothing ())
+                     (: (Param (Ident "mock_popen" ()) Nothing Nothing ()) []))
+                    Nothing
+                    (:
+                     (StmtExpr
+                      (Strings
+                       (:
+                        "\"\"\"These will be changed soon enough with reload.\"\"\""
+                        [])
+                       ())
+                      ())
+                     (:
+                      (Assign
+                       (:
+                        (Dot
+                         (Call (Var (Ident "mock_popen" ()) ()) [] ())
+                         (Ident "returncode" ())
+                         ())
+                        [])
+                       (Int 0 "0" ())
+                       ())
+                      (:
+                       (Assign
+                        (:
+                         (Dot
+                          (Dot
+                           (Call (Var (Ident "mock_popen" ()) ()) [] ())
+                           (Ident "communicate" ())
+                           ())
+                          (Ident "return_value" ())
+                          ())
+                         [])
+                        (Paren
+                         (Tuple
+                          (:
+                           (Strings (: "\"stdout\"" []) ())
+                           (: (Strings (: "\"stderr\"" []) ()) []))
+                          ())
+                         ())
+                        ())
+                       (:
+                        (Assign
+                         (:
+                          (Tuple
+                           (:
+                            (Var (Ident "out" ()) ())
+                            (: (Var (Ident "err" ()) ()) []))
+                           ())
+                          [])
+                         (Call
+                          (Dot (Var (Ident "self" ()) ()) (Ident "_call" ()) ())
+                          (:
+                           (ArgExpr
+                            (List (: (Strings (: "\"test\"" []) ()) []) ())
+                            ())
+                           [])
+                          ())
+                         ())
+                        (:
+                         (StmtExpr
+                          (Call
+                           (Dot
+                            (Var (Ident "self" ()) ())
+                            (Ident "assertEqual" ())
+                            ())
+                           (:
+                            (ArgExpr (Var (Ident "out" ()) ()) ())
+                            (:
+                             (ArgExpr (Strings (: "\"stdout\"" []) ()) ())
+                             []))
+                           ())
+                          ())
+                         (:
+                          (StmtExpr
+                           (Call
+                            (Dot
+                             (Var (Ident "self" ()) ())
+                             (Ident "assertEqual" ())
+                             ())
+                            (:
+                             (ArgExpr (Var (Ident "err" ()) ()) ())
+                             (:
+                              (ArgExpr (Strings (: "\"stderr\"" []) ()) ())
+                              []))
+                            ())
+                           ())
+                          []))))))
+                    ())
+                   ())
+                  (:
+                   (Decorated
+                    (:
+                     (Decorator
+                      (: (Ident "mock" ()) (: (Ident "patch" ()) []))
+                      (:
+                       (ArgExpr
+                        (Strings
+                         (: "\"certbot.le_util.subprocess.Popen\"" [])
+                         ())
+                        ())
+                       [])
+                      ())
+                     [])
+                    (Fun
+                     (Ident "test_bad_process" ())
+                     (:
+                      (Param (Ident "self" ()) Nothing Nothing ())
+                      (: (Param (Ident "mock_popen" ()) Nothing Nothing ()) []))
+                     Nothing
+                     (:
+                      (Assign
+                       (:
+                        (Dot
+                         (Var (Ident "mock_popen" ()) ())
+                         (Ident "side_effect" ())
+                         ())
+                        [])
+                       (Var (Ident "OSError" ()) ())
+                       ())
+                      (:
+                       (StmtExpr
+                        (Call
+                         (Dot
+                          (Var (Ident "self" ()) ())
+                          (Ident "assertRaises" ())
+                          ())
+                         (:
+                          (ArgExpr
+                           (Dot
+                            (Var (Ident "errors" ()) ())
+                            (Ident "SubprocessError" ())
+                            ())
+                           ())
+                          (:
+                           (ArgExpr
+                            (Dot
+                             (Var (Ident "self" ()) ())
+                             (Ident "_call" ())
+                             ())
+                            ())
+                           (:
+                            (ArgExpr
+                             (List (: (Strings (: "\"test\"" []) ()) []) ())
+                             ())
+                            [])))
+                         ())
+                        ())
+                       []))
+                     ())
+                    ())
+                   (:
+                    (Decorated
+                     (:
+                      (Decorator
+                       (: (Ident "mock" ()) (: (Ident "patch" ()) []))
+                       (:
+                        (ArgExpr
+                         (Strings
+                          (: "\"certbot.le_util.subprocess.Popen\"" [])
+                          ())
+                         ())
+                        [])
+                       ())
+                      [])
+                     (Fun
+                      (Ident "test_failure" ())
+                      (:
+                       (Param (Ident "self" ()) Nothing Nothing ())
+                       (:
+                        (Param (Ident "mock_popen" ()) Nothing Nothing ())
+                        []))
+                      Nothing
+                      (:
+                       (Assign
+                        (:
+                         (Dot
+                          (Dot
+                           (Call (Var (Ident "mock_popen" ()) ()) [] ())
+                           (Ident "communicate" ())
+                           ())
+                          (Ident "return_value" ())
+                          ())
+                         [])
+                        (Paren
+                         (Tuple
+                          (:
+                           (Strings (: "\"\"" []) ())
+                           (: (Strings (: "\"\"" []) ()) []))
+                          ())
+                         ())
+                        ())
+                       (:
+                        (Assign
+                         (:
+                          (Dot
+                           (Call (Var (Ident "mock_popen" ()) ()) [] ())
+                           (Ident "returncode" ())
+                           ())
+                          [])
+                         (Int 1 "1" ())
+                         ())
+                        (:
+                         (StmtExpr
+                          (Call
+                           (Dot
+                            (Var (Ident "self" ()) ())
+                            (Ident "assertRaises" ())
+                            ())
+                           (:
+                            (ArgExpr
+                             (Dot
+                              (Var (Ident "errors" ()) ())
+                              (Ident "SubprocessError" ())
+                              ())
+                             ())
+                            (:
+                             (ArgExpr
+                              (Dot
+                               (Var (Ident "self" ()) ())
+                               (Ident "_call" ())
+                               ())
+                              ())
+                             (:
+                              (ArgExpr
+                               (List (: (Strings (: "\"test\"" []) ()) []) ())
+                               ())
+                              [])))
+                           ())
+                          ())
+                         [])))
+                      ())
+                     ())
+                    [])))))
+               ())
+              (:
+               (Class
+                (Ident "ExeExistsTest" ())
+                (:
+                 (ArgExpr
+                  (Dot (Var (Ident "unittest" ()) ()) (Ident "TestCase" ()) ())
+                  ())
+                 [])
+                (:
+                 (StmtExpr
+                  (Strings
+                   (: "\"\"\"Tests for certbot.le_util.exe_exists.\"\"\"" [])
+                   ())
+                  ())
+                 (:
+                  (Decorated
+                   (: (Decorator (: (Ident "classmethod" ()) []) [] ()) [])
+                   (Fun
+                    (Ident "_call" ())
+                    (:
+                     (Param (Ident "cls" ()) Nothing Nothing ())
+                     (: (Param (Ident "exe" ()) Nothing Nothing ()) []))
+                    Nothing
+                    (:
+                     (FromImport
+                      (ImportRelative
+                       0
+                       (Just
+                        (: (Ident "certbot" ()) (: (Ident "le_util" ()) [])))
+                       ())
+                      (FromItems
+                       (: (FromItem (Ident "exe_exists" ()) Nothing ()) [])
+                       ())
+                      ())
+                     (:
+                      (Return
+                       (Just
+                        (Call
+                         (Var (Ident "exe_exists" ()) ())
+                         (: (ArgExpr (Var (Ident "exe" ()) ()) ()) [])
+                         ()))
+                       ())
+                      []))
+                    ())
+                   ())
+                  (:
+                   (Decorated
+                    (:
+                     (Decorator
+                      (: (Ident "mock" ()) (: (Ident "patch" ()) []))
+                      (:
+                       (ArgExpr
+                        (Strings (: "\"certbot.le_util.os.path.isfile\"" []) ())
+                        ())
+                       [])
+                      ())
+                     (:
+                      (Decorator
+                       (: (Ident "mock" ()) (: (Ident "patch" ()) []))
+                       (:
+                        (ArgExpr
+                         (Strings (: "\"certbot.le_util.os.access\"" []) ())
+                         ())
+                        [])
+                       ())
+                      []))
+                    (Fun
+                     (Ident "test_full_path" ())
+                     (:
+                      (Param (Ident "self" ()) Nothing Nothing ())
+                      (:
+                       (Param (Ident "mock_access" ()) Nothing Nothing ())
+                       (:
+                        (Param (Ident "mock_isfile" ()) Nothing Nothing ())
+                        [])))
+                     Nothing
+                     (:
+                      (Assign
+                       (:
+                        (Dot
+                         (Var (Ident "mock_access" ()) ())
+                         (Ident "return_value" ())
+                         ())
+                        [])
+                       (Bool True ())
+                       ())
+                      (:
+                       (Assign
+                        (:
+                         (Dot
+                          (Var (Ident "mock_isfile" ()) ())
+                          (Ident "return_value" ())
+                          ())
+                         [])
+                        (Bool True ())
+                        ())
+                       (:
+                        (StmtExpr
+                         (Call
+                          (Dot
+                           (Var (Ident "self" ()) ())
+                           (Ident "assertTrue" ())
+                           ())
+                          (:
+                           (ArgExpr
+                            (Call
+                             (Dot
+                              (Var (Ident "self" ()) ())
+                              (Ident "_call" ())
+                              ())
+                             (:
+                              (ArgExpr
+                               (Strings (: "\"/path/to/exe\"" []) ())
+                               ())
+                              [])
+                             ())
+                            ())
+                           [])
+                          ())
+                         ())
+                        [])))
+                     ())
+                    ())
+                   (:
+                    (Decorated
+                     (:
+                      (Decorator
+                       (: (Ident "mock" ()) (: (Ident "patch" ()) []))
+                       (:
+                        (ArgExpr
+                         (Strings
+                          (: "\"certbot.le_util.os.path.isfile\"" [])
+                          ())
+                         ())
+                        [])
+                       ())
+                      (:
+                       (Decorator
+                        (: (Ident "mock" ()) (: (Ident "patch" ()) []))
+                        (:
+                         (ArgExpr
+                          (Strings (: "\"certbot.le_util.os.access\"" []) ())
+                          ())
+                         [])
+                        ())
+                       []))
+                     (Fun
+                      (Ident "test_on_path" ())
+                      (:
+                       (Param (Ident "self" ()) Nothing Nothing ())
+                       (:
+                        (Param (Ident "mock_access" ()) Nothing Nothing ())
+                        (:
+                         (Param (Ident "mock_isfile" ()) Nothing Nothing ())
+                         [])))
+                      Nothing
+                      (:
+                       (Assign
+                        (:
+                         (Dot
+                          (Var (Ident "mock_access" ()) ())
+                          (Ident "return_value" ())
+                          ())
+                         [])
+                        (Bool True ())
+                        ())
+                       (:
+                        (Assign
+                         (:
+                          (Dot
+                           (Var (Ident "mock_isfile" ()) ())
+                           (Ident "return_value" ())
+                           ())
+                          [])
+                         (Bool True ())
+                         ())
+                        (:
+                         (StmtExpr
+                          (Call
+                           (Dot
+                            (Var (Ident "self" ()) ())
+                            (Ident "assertTrue" ())
+                            ())
+                           (:
+                            (ArgExpr
+                             (Call
+                              (Dot
+                               (Var (Ident "self" ()) ())
+                               (Ident "_call" ())
+                               ())
+                              (: (ArgExpr (Strings (: "\"exe\"" []) ()) ()) [])
+                              ())
+                             ())
+                            [])
+                           ())
+                          ())
+                         [])))
+                      ())
+                     ())
+                    (:
+                     (Decorated
+                      (:
+                       (Decorator
+                        (: (Ident "mock" ()) (: (Ident "patch" ()) []))
+                        (:
+                         (ArgExpr
+                          (Strings
+                           (: "\"certbot.le_util.os.path.isfile\"" [])
+                           ())
+                          ())
+                         [])
+                        ())
+                       (:
+                        (Decorator
+                         (: (Ident "mock" ()) (: (Ident "patch" ()) []))
+                         (:
+                          (ArgExpr
+                           (Strings (: "\"certbot.le_util.os.access\"" []) ())
+                           ())
+                          [])
+                         ())
+                        []))
+                      (Fun
+                       (Ident "test_not_found" ())
+                       (:
+                        (Param (Ident "self" ()) Nothing Nothing ())
+                        (:
+                         (Param (Ident "mock_access" ()) Nothing Nothing ())
+                         (:
+                          (Param (Ident "mock_isfile" ()) Nothing Nothing ())
+                          [])))
+                       Nothing
+                       (:
+                        (Assign
+                         (:
+                          (Dot
+                           (Var (Ident "mock_access" ()) ())
+                           (Ident "return_value" ())
+                           ())
+                          [])
+                         (Bool False ())
+                         ())
+                        (:
+                         (Assign
+                          (:
+                           (Dot
+                            (Var (Ident "mock_isfile" ()) ())
+                            (Ident "return_value" ())
+                            ())
+                           [])
+                          (Bool True ())
+                          ())
+                         (:
+                          (StmtExpr
+                           (Call
+                            (Dot
+                             (Var (Ident "self" ()) ())
+                             (Ident "assertFalse" ())
+                             ())
+                            (:
+                             (ArgExpr
+                              (Call
+                               (Dot
+                                (Var (Ident "self" ()) ())
+                                (Ident "_call" ())
+                                ())
+                               (: (ArgExpr (Strings (: "\"exe\"" []) ()) ()) [])
+                               ())
+                              ())
+                             [])
+                            ())
+                           ())
+                          [])))
+                       ())
+                      ())
+                     [])))))
+                ())
+               (:
+                (Class
+                 (Ident "MakeOrVerifyDirTest" ())
+                 (:
+                  (ArgExpr
+                   (Dot (Var (Ident "unittest" ()) ()) (Ident "TestCase" ()) ())
+                   ())
+                  [])
+                 (:
+                  (StmtExpr
+                   (Strings
+                    (:
+                     "\"\"\"Tests for certbot.le_util.make_or_verify_dir.\n\n    Note that it is not possible to test for a wrong directory owner,\n    as this testing script would have to be run as root.\n\n    \"\"\""
+                     [])
+                    ())
+                   ())
+                  (:
+                   (Fun
+                    (Ident "setUp" ())
+                    (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                    Nothing
+                    (:
+                     (Assign
+                      (:
+                       (Dot
+                        (Var (Ident "self" ()) ())
+                        (Ident "root_path" ())
+                        ())
+                       [])
+                      (Call
+                       (Dot
+                        (Var (Ident "tempfile" ()) ())
+                        (Ident "mkdtemp" ())
+                        ())
+                       []
+                       ())
+                      ())
+                     (:
+                      (Assign
+                       (:
+                        (Dot (Var (Ident "self" ()) ()) (Ident "path" ()) ())
+                        [])
+                       (Call
+                        (Dot
+                         (Dot (Var (Ident "os" ()) ()) (Ident "path" ()) ())
+                         (Ident "join" ())
+                         ())
+                        (:
+                         (ArgExpr
+                          (Dot
+                           (Var (Ident "self" ()) ())
+                           (Ident "root_path" ())
+                           ())
+                          ())
+                         (: (ArgExpr (Strings (: "\"foo\"" []) ()) ()) []))
+                        ())
+                       ())
+                      (:
+                       (StmtExpr
+                        (Call
+                         (Dot (Var (Ident "os" ()) ()) (Ident "mkdir" ()) ())
+                         (:
+                          (ArgExpr
+                           (Dot (Var (Ident "self" ()) ()) (Ident "path" ()) ())
+                           ())
+                          (: (ArgExpr (Int 256 "0o400" ()) ()) []))
+                         ())
+                        ())
+                       (:
+                        (Assign
+                         (:
+                          (Dot (Var (Ident "self" ()) ()) (Ident "uid" ()) ())
+                          [])
+                         (Call
+                          (Dot (Var (Ident "os" ()) ()) (Ident "getuid" ()) ())
+                          []
+                          ())
+                         ())
+                        []))))
+                    ())
+                   (:
+                    (Fun
+                     (Ident "tearDown" ())
+                     (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                     Nothing
+                     (:
+                      (StmtExpr
+                       (Call
+                        (Dot
+                         (Var (Ident "shutil" ()) ())
+                         (Ident "rmtree" ())
+                         ())
+                        (:
+                         (ArgExpr
+                          (Dot
+                           (Var (Ident "self" ()) ())
+                           (Ident "root_path" ())
+                           ())
+                          ())
+                         (:
+                          (ArgKeyword
+                           (Ident "ignore_errors" ())
+                           (Bool True ())
+                           ())
+                          []))
+                        ())
+                       ())
+                      [])
+                     ())
+                    (:
+                     (Fun
+                      (Ident "_call" ())
+                      (:
+                       (Param (Ident "self" ()) Nothing Nothing ())
+                       (:
+                        (Param (Ident "directory" ()) Nothing Nothing ())
+                        (: (Param (Ident "mode" ()) Nothing Nothing ()) [])))
+                      Nothing
+                      (:
+                       (FromImport
+                        (ImportRelative
+                         0
+                         (Just
+                          (: (Ident "certbot" ()) (: (Ident "le_util" ()) [])))
+                         ())
+                        (FromItems
+                         (:
+                          (FromItem (Ident "make_or_verify_dir" ()) Nothing ())
+                          [])
+                         ())
+                        ())
+                       (:
+                        (Return
+                         (Just
+                          (Call
+                           (Var (Ident "make_or_verify_dir" ()) ())
+                           (:
+                            (ArgExpr (Var (Ident "directory" ()) ()) ())
+                            (:
+                             (ArgExpr (Var (Ident "mode" ()) ()) ())
+                             (:
+                              (ArgExpr
+                               (Dot
+                                (Var (Ident "self" ()) ())
+                                (Ident "uid" ())
+                                ())
+                               ())
+                              (:
+                               (ArgKeyword
+                                (Ident "strict" ())
+                                (Bool True ())
+                                ())
+                               []))))
+                           ()))
+                         ())
+                        []))
+                      ())
+                     (:
+                      (Fun
+                       (Ident "test_creates_dir_when_missing" ())
+                       (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                       Nothing
+                       (:
+                        (Assign
+                         (: (Var (Ident "path" ()) ()) [])
+                         (Call
+                          (Dot
+                           (Dot (Var (Ident "os" ()) ()) (Ident "path" ()) ())
+                           (Ident "join" ())
+                           ())
+                          (:
+                           (ArgExpr
+                            (Dot
+                             (Var (Ident "self" ()) ())
+                             (Ident "root_path" ())
+                             ())
+                            ())
+                           (: (ArgExpr (Strings (: "\"bar\"" []) ()) ()) []))
+                          ())
+                         ())
+                        (:
+                         (StmtExpr
+                          (Call
+                           (Dot
+                            (Var (Ident "self" ()) ())
+                            (Ident "_call" ())
+                            ())
+                           (:
+                            (ArgExpr (Var (Ident "path" ()) ()) ())
+                            (: (ArgExpr (Int 424 "0o650" ()) ()) []))
+                           ())
+                          ())
+                         (:
+                          (StmtExpr
+                           (Call
+                            (Dot
+                             (Var (Ident "self" ()) ())
+                             (Ident "assertTrue" ())
+                             ())
+                            (:
+                             (ArgExpr
+                              (Call
+                               (Dot
+                                (Dot
+                                 (Var (Ident "os" ()) ())
+                                 (Ident "path" ())
+                                 ())
+                                (Ident "isdir" ())
+                                ())
+                               (: (ArgExpr (Var (Ident "path" ()) ()) ()) [])
+                               ())
+                              ())
+                             [])
+                            ())
+                           ())
+                          (:
+                           (StmtExpr
+                            (Call
+                             (Dot
+                              (Var (Ident "self" ()) ())
+                              (Ident "assertEqual" ())
+                              ())
+                             (:
+                              (ArgExpr
+                               (Call
+                                (Dot
+                                 (Var (Ident "stat" ()) ())
+                                 (Ident "S_IMODE" ())
+                                 ())
+                                (:
+                                 (ArgExpr
+                                  (Dot
+                                   (Call
+                                    (Dot
+                                     (Var (Ident "os" ()) ())
+                                     (Ident "stat" ())
+                                     ())
+                                    (:
+                                     (ArgExpr (Var (Ident "path" ()) ()) ())
+                                     [])
+                                    ())
+                                   (Ident "st_mode" ())
+                                   ())
+                                  ())
+                                 [])
+                                ())
+                               ())
+                              (: (ArgExpr (Int 424 "0o650" ()) ()) []))
+                             ())
+                            ())
+                           []))))
+                       ())
+                      (:
+                       (Fun
+                        (Ident "test_existing_correct_mode_does_not_fail" ())
+                        (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                        Nothing
+                        (:
+                         (StmtExpr
+                          (Call
+                           (Dot
+                            (Var (Ident "self" ()) ())
+                            (Ident "_call" ())
+                            ())
+                           (:
+                            (ArgExpr
+                             (Dot
+                              (Var (Ident "self" ()) ())
+                              (Ident "path" ())
+                              ())
+                             ())
+                            (: (ArgExpr (Int 256 "0o400" ()) ()) []))
+                           ())
+                          ())
+                         (:
+                          (StmtExpr
+                           (Call
+                            (Dot
+                             (Var (Ident "self" ()) ())
+                             (Ident "assertEqual" ())
+                             ())
+                            (:
+                             (ArgExpr
+                              (Call
+                               (Dot
+                                (Var (Ident "stat" ()) ())
+                                (Ident "S_IMODE" ())
+                                ())
+                               (:
+                                (ArgExpr
+                                 (Dot
+                                  (Call
+                                   (Dot
+                                    (Var (Ident "os" ()) ())
+                                    (Ident "stat" ())
+                                    ())
+                                   (:
+                                    (ArgExpr
+                                     (Dot
+                                      (Var (Ident "self" ()) ())
+                                      (Ident "path" ())
+                                      ())
+                                     ())
+                                    [])
+                                   ())
+                                  (Ident "st_mode" ())
+                                  ())
+                                 ())
+                                [])
+                               ())
+                              ())
+                             (: (ArgExpr (Int 256 "0o400" ()) ()) []))
+                            ())
+                           ())
+                          []))
+                        ())
+                       (:
+                        (Fun
+                         (Ident "test_existing_wrong_mode_fails" ())
+                         (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                         Nothing
+                         (:
+                          (StmtExpr
+                           (Call
+                            (Dot
+                             (Var (Ident "self" ()) ())
+                             (Ident "assertRaises" ())
+                             ())
+                            (:
+                             (ArgExpr
+                              (Dot
+                               (Var (Ident "errors" ()) ())
+                               (Ident "Error" ())
+                               ())
+                              ())
+                             (:
+                              (ArgExpr
+                               (Dot
+                                (Var (Ident "self" ()) ())
+                                (Ident "_call" ())
+                                ())
+                               ())
+                              (:
+                               (ArgExpr
+                                (Dot
+                                 (Var (Ident "self" ()) ())
+                                 (Ident "path" ())
+                                 ())
+                                ())
+                               (: (ArgExpr (Int 384 "0o600" ()) ()) []))))
+                            ())
+                           ())
+                          [])
+                         ())
+                        (:
+                         (Fun
+                          (Ident "test_reraises_os_error" ())
+                          (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                          Nothing
+                          (:
+                           (With
+                            (:
+                             ((,)
+                              (Call
+                               (Dot
+                                (Dot
+                                 (Var (Ident "mock" ()) ())
+                                 (Ident "patch" ())
+                                 ())
+                                (Ident "object" ())
+                                ())
+                               (:
+                                (ArgExpr (Var (Ident "os" ()) ()) ())
+                                (:
+                                 (ArgExpr (Strings (: "\"makedirs\"" []) ()) ())
+                                 []))
+                               ())
+                              (Just (Var (Ident "makedirs" ()) ())))
+                             [])
+                            (:
+                             (Assign
+                              (:
+                               (Dot
+                                (Var (Ident "makedirs" ()) ())
+                                (Ident "side_effect" ())
+                                ())
+                               [])
+                              (Call (Var (Ident "OSError" ()) ()) [] ())
+                              ())
+                             (:
+                              (StmtExpr
+                               (Call
+                                (Dot
+                                 (Var (Ident "self" ()) ())
+                                 (Ident "assertRaises" ())
+                                 ())
+                                (:
+                                 (ArgExpr (Var (Ident "OSError" ()) ()) ())
+                                 (:
+                                  (ArgExpr
+                                   (Dot
+                                    (Var (Ident "self" ()) ())
+                                    (Ident "_call" ())
+                                    ())
+                                   ())
+                                  (:
+                                   (ArgExpr (Strings (: "\"bar\"" []) ()) ())
+                                   (:
+                                    (ArgExpr (Int 12312312 "12312312" ()) ())
+                                    []))))
+                                ())
+                               ())
+                              []))
+                            ())
+                           [])
+                          ())
+                         []))))))))
+                 ())
+                (:
+                 (Class
+                  (Ident "CheckPermissionsTest" ())
+                  (:
+                   (ArgExpr
+                    (Dot
+                     (Var (Ident "unittest" ()) ())
+                     (Ident "TestCase" ())
+                     ())
+                    ())
+                   [])
+                  (:
+                   (StmtExpr
+                    (Strings
+                     (:
+                      "\"\"\"Tests for certbot.le_util.check_permissions.\n\n    Note that it is not possible to test for a wrong file owner,\n    as this testing script would have to be run as root.\n\n    \"\"\""
+                      [])
+                     ())
+                    ())
+                   (:
+                    (Fun
+                     (Ident "setUp" ())
+                     (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                     Nothing
+                     (:
+                      (Assign
+                       (:
+                        (Tuple
+                         (:
+                          (Var (Ident "_" ()) ())
+                          (:
+                           (Dot (Var (Ident "self" ()) ()) (Ident "path" ()) ())
+                           []))
+                         ())
+                        [])
+                       (Call
+                        (Dot
+                         (Var (Ident "tempfile" ()) ())
+                         (Ident "mkstemp" ())
+                         ())
+                        []
+                        ())
+                       ())
+                      (:
+                       (Assign
+                        (:
+                         (Dot (Var (Ident "self" ()) ()) (Ident "uid" ()) ())
+                         [])
+                        (Call
+                         (Dot (Var (Ident "os" ()) ()) (Ident "getuid" ()) ())
+                         []
+                         ())
+                        ())
+                       []))
+                     ())
+                    (:
+                     (Fun
+                      (Ident "tearDown" ())
+                      (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                      Nothing
+                      (:
+                       (StmtExpr
+                        (Call
+                         (Dot (Var (Ident "os" ()) ()) (Ident "remove" ()) ())
+                         (:
+                          (ArgExpr
+                           (Dot (Var (Ident "self" ()) ()) (Ident "path" ()) ())
+                           ())
+                          [])
+                         ())
+                        ())
+                       [])
+                      ())
+                     (:
+                      (Fun
+                       (Ident "_call" ())
+                       (:
+                        (Param (Ident "self" ()) Nothing Nothing ())
+                        (: (Param (Ident "mode" ()) Nothing Nothing ()) []))
+                       Nothing
+                       (:
+                        (FromImport
+                         (ImportRelative
+                          0
+                          (Just
+                           (: (Ident "certbot" ()) (: (Ident "le_util" ()) [])))
+                          ())
+                         (FromItems
+                          (:
+                           (FromItem (Ident "check_permissions" ()) Nothing ())
+                           [])
+                          ())
+                         ())
+                        (:
+                         (Return
+                          (Just
+                           (Call
+                            (Var (Ident "check_permissions" ()) ())
+                            (:
+                             (ArgExpr
+                              (Dot
+                               (Var (Ident "self" ()) ())
+                               (Ident "path" ())
+                               ())
+                              ())
+                             (:
+                              (ArgExpr (Var (Ident "mode" ()) ()) ())
+                              (:
+                               (ArgExpr
+                                (Dot
+                                 (Var (Ident "self" ()) ())
+                                 (Ident "uid" ())
+                                 ())
+                                ())
+                               [])))
+                            ()))
+                          ())
+                         []))
+                       ())
+                      (:
+                       (Fun
+                        (Ident "test_ok_mode" ())
+                        (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                        Nothing
+                        (:
+                         (StmtExpr
+                          (Call
+                           (Dot (Var (Ident "os" ()) ()) (Ident "chmod" ()) ())
+                           (:
+                            (ArgExpr
+                             (Dot
+                              (Var (Ident "self" ()) ())
+                              (Ident "path" ())
+                              ())
+                             ())
+                            (: (ArgExpr (Int 384 "0o600" ()) ()) []))
+                           ())
+                          ())
+                         (:
+                          (StmtExpr
+                           (Call
+                            (Dot
+                             (Var (Ident "self" ()) ())
+                             (Ident "assertTrue" ())
+                             ())
+                            (:
+                             (ArgExpr
+                              (Call
+                               (Dot
+                                (Var (Ident "self" ()) ())
+                                (Ident "_call" ())
+                                ())
+                               (: (ArgExpr (Int 384 "0o600" ()) ()) [])
+                               ())
+                              ())
+                             [])
+                            ())
+                           ())
+                          []))
+                        ())
+                       (:
+                        (Fun
+                         (Ident "test_wrong_mode" ())
+                         (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                         Nothing
+                         (:
+                          (StmtExpr
+                           (Call
+                            (Dot (Var (Ident "os" ()) ()) (Ident "chmod" ()) ())
+                            (:
+                             (ArgExpr
+                              (Dot
+                               (Var (Ident "self" ()) ())
+                               (Ident "path" ())
+                               ())
+                              ())
+                             (: (ArgExpr (Int 256 "0o400" ()) ()) []))
+                            ())
+                           ())
+                          (:
+                           (StmtExpr
+                            (Call
+                             (Dot
+                              (Var (Ident "self" ()) ())
+                              (Ident "assertFalse" ())
+                              ())
+                             (:
+                              (ArgExpr
+                               (Call
+                                (Dot
+                                 (Var (Ident "self" ()) ())
+                                 (Ident "_call" ())
+                                 ())
+                                (: (ArgExpr (Int 384 "0o600" ()) ()) [])
+                                ())
+                               ())
+                              [])
+                             ())
+                            ())
+                           []))
+                         ())
+                        []))))))
+                  ())
+                 (:
+                  (Class
+                   (Ident "UniqueFileTest" ())
+                   (:
+                    (ArgExpr
+                     (Dot
+                      (Var (Ident "unittest" ()) ())
+                      (Ident "TestCase" ())
+                      ())
+                     ())
+                    [])
+                   (:
+                    (StmtExpr
+                     (Strings
+                      (:
+                       "\"\"\"Tests for certbot.le_util.unique_file.\"\"\""
+                       [])
+                      ())
+                     ())
+                    (:
+                     (Fun
+                      (Ident "setUp" ())
+                      (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                      Nothing
+                      (:
+                       (Assign
+                        (:
+                         (Dot
+                          (Var (Ident "self" ()) ())
+                          (Ident "root_path" ())
+                          ())
+                         [])
+                        (Call
+                         (Dot
+                          (Var (Ident "tempfile" ()) ())
+                          (Ident "mkdtemp" ())
+                          ())
+                         []
+                         ())
+                        ())
+                       (:
+                        (Assign
+                         (:
+                          (Dot
+                           (Var (Ident "self" ()) ())
+                           (Ident "default_name" ())
+                           ())
+                          [])
+                         (Call
+                          (Dot
+                           (Dot (Var (Ident "os" ()) ()) (Ident "path" ()) ())
+                           (Ident "join" ())
+                           ())
+                          (:
+                           (ArgExpr
+                            (Dot
+                             (Var (Ident "self" ()) ())
+                             (Ident "root_path" ())
+                             ())
+                            ())
+                           (:
+                            (ArgExpr (Strings (: "\"foo.txt\"" []) ()) ())
+                            []))
+                          ())
+                         ())
+                        []))
+                      ())
+                     (:
+                      (Fun
+                       (Ident "tearDown" ())
+                       (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                       Nothing
+                       (:
+                        (StmtExpr
+                         (Call
+                          (Dot
+                           (Var (Ident "shutil" ()) ())
+                           (Ident "rmtree" ())
+                           ())
+                          (:
+                           (ArgExpr
+                            (Dot
+                             (Var (Ident "self" ()) ())
+                             (Ident "root_path" ())
+                             ())
+                            ())
+                           (:
+                            (ArgKeyword
+                             (Ident "ignore_errors" ())
+                             (Bool True ())
+                             ())
+                            []))
+                          ())
+                         ())
+                        [])
+                       ())
+                      (:
+                       (Fun
+                        (Ident "_call" ())
+                        (:
+                         (Param (Ident "self" ()) Nothing Nothing ())
+                         (:
+                          (Param
+                           (Ident "mode" ())
+                           Nothing
+                           (Just (Int 384 "0o600" ()))
+                           ())
+                          []))
+                        Nothing
+                        (:
+                         (FromImport
+                          (ImportRelative
+                           0
+                           (Just
+                            (:
+                             (Ident "certbot" ())
+                             (: (Ident "le_util" ()) [])))
+                           ())
+                          (FromItems
+                           (: (FromItem (Ident "unique_file" ()) Nothing ()) [])
+                           ())
+                          ())
+                         (:
+                          (Return
+                           (Just
+                            (Call
+                             (Var (Ident "unique_file" ()) ())
+                             (:
+                              (ArgExpr
+                               (Dot
+                                (Var (Ident "self" ()) ())
+                                (Ident "default_name" ())
+                                ())
+                               ())
+                              (: (ArgExpr (Var (Ident "mode" ()) ()) ()) []))
+                             ()))
+                           ())
+                          []))
+                        ())
+                       (:
+                        (Fun
+                         (Ident "test_returns_fd_for_writing" ())
+                         (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                         Nothing
+                         (:
+                          (Assign
+                           (:
+                            (Tuple
+                             (:
+                              (Var (Ident "fd" ()) ())
+                              (: (Var (Ident "name" ()) ()) []))
+                             ())
+                            [])
+                           (Call
+                            (Dot
+                             (Var (Ident "self" ()) ())
+                             (Ident "_call" ())
+                             ())
+                            []
+                            ())
+                           ())
+                          (:
+                           (StmtExpr
+                            (Call
+                             (Dot
+                              (Var (Ident "fd" ()) ())
+                              (Ident "write" ())
+                              ())
+                             (: (ArgExpr (Strings (: "\"bar\"" []) ()) ()) [])
+                             ())
+                            ())
+                           (:
+                            (StmtExpr
+                             (Call
+                              (Dot
+                               (Var (Ident "fd" ()) ())
+                               (Ident "close" ())
+                               ())
+                              []
+                              ())
+                             ())
+                            (:
+                             (StmtExpr
+                              (Call
+                               (Dot
+                                (Var (Ident "self" ()) ())
+                                (Ident "assertEqual" ())
+                                ())
+                               (:
+                                (ArgExpr
+                                 (Call
+                                  (Dot
+                                   (Call
+                                    (Var (Ident "open" ()) ())
+                                    (:
+                                     (ArgExpr (Var (Ident "name" ()) ()) ())
+                                     [])
+                                    ())
+                                   (Ident "read" ())
+                                   ())
+                                  []
+                                  ())
+                                 ())
+                                (:
+                                 (ArgExpr (Strings (: "\"bar\"" []) ()) ())
+                                 []))
+                               ())
+                              ())
+                             []))))
+                         ())
+                        (:
+                         (Fun
+                          (Ident "test_right_mode" ())
+                          (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                          Nothing
+                          (:
+                           (StmtExpr
+                            (Call
+                             (Dot
+                              (Var (Ident "self" ()) ())
+                              (Ident "assertEqual" ())
+                              ())
+                             (:
+                              (ArgExpr (Int 448 "0o700" ()) ())
+                              (:
+                               (ArgExpr
+                                (BinaryOp
+                                 (BinaryAnd ())
+                                 (Dot
+                                  (Call
+                                   (Dot
+                                    (Var (Ident "os" ()) ())
+                                    (Ident "stat" ())
+                                    ())
+                                   (:
+                                    (ArgExpr
+                                     (Subscript
+                                      (Call
+                                       (Dot
+                                        (Var (Ident "self" ()) ())
+                                        (Ident "_call" ())
+                                        ())
+                                       (: (ArgExpr (Int 448 "0o700" ()) ()) [])
+                                       ())
+                                      (Int 1 "1" ())
+                                      ())
+                                     ())
+                                    [])
+                                   ())
+                                  (Ident "st_mode" ())
+                                  ())
+                                 (Int 511 "0o777" ())
+                                 ())
+                                ())
+                               []))
+                             ())
+                            ())
+                           (:
+                            (StmtExpr
+                             (Call
+                              (Dot
+                               (Var (Ident "self" ()) ())
+                               (Ident "assertEqual" ())
+                               ())
+                              (:
+                               (ArgExpr (Int 64 "0o100" ()) ())
+                               (:
+                                (ArgExpr
+                                 (BinaryOp
+                                  (BinaryAnd ())
+                                  (Dot
+                                   (Call
+                                    (Dot
+                                     (Var (Ident "os" ()) ())
+                                     (Ident "stat" ())
+                                     ())
+                                    (:
+                                     (ArgExpr
+                                      (Subscript
+                                       (Call
+                                        (Dot
+                                         (Var (Ident "self" ()) ())
+                                         (Ident "_call" ())
+                                         ())
+                                        (: (ArgExpr (Int 64 "0o100" ()) ()) [])
+                                        ())
+                                       (Int 1 "1" ())
+                                       ())
+                                      ())
+                                     [])
+                                    ())
+                                   (Ident "st_mode" ())
+                                   ())
+                                  (Int 511 "0o777" ())
+                                  ())
+                                 ())
+                                []))
+                              ())
+                             ())
+                            []))
+                          ())
+                         (:
+                          (Fun
+                           (Ident "test_default_exists" ())
+                           (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                           Nothing
+                           (:
+                            (Assign
+                             (: (Var (Ident "name1" ()) ()) [])
+                             (Subscript
+                              (Call
+                               (Dot
+                                (Var (Ident "self" ()) ())
+                                (Ident "_call" ())
+                                ())
+                               []
+                               ())
+                              (Int 1 "1" ())
+                              ())
+                             ())
+                            (:
+                             (Assign
+                              (: (Var (Ident "name2" ()) ()) [])
+                              (Subscript
+                               (Call
+                                (Dot
+                                 (Var (Ident "self" ()) ())
+                                 (Ident "_call" ())
+                                 ())
+                                []
+                                ())
+                               (Int 1 "1" ())
+                               ())
+                              ())
+                             (:
+                              (Assign
+                               (: (Var (Ident "name3" ()) ()) [])
+                               (Subscript
+                                (Call
+                                 (Dot
+                                  (Var (Ident "self" ()) ())
+                                  (Ident "_call" ())
+                                  ())
+                                 []
+                                 ())
+                                (Int 1 "1" ())
+                                ())
+                               ())
+                              (:
+                               (StmtExpr
+                                (Call
+                                 (Dot
+                                  (Var (Ident "self" ()) ())
+                                  (Ident "assertNotEqual" ())
+                                  ())
+                                 (:
+                                  (ArgExpr (Var (Ident "name1" ()) ()) ())
+                                  (:
+                                   (ArgExpr (Var (Ident "name2" ()) ()) ())
+                                   []))
+                                 ())
+                                ())
+                               (:
+                                (StmtExpr
+                                 (Call
+                                  (Dot
+                                   (Var (Ident "self" ()) ())
+                                   (Ident "assertNotEqual" ())
+                                   ())
+                                  (:
+                                   (ArgExpr (Var (Ident "name1" ()) ()) ())
+                                   (:
+                                    (ArgExpr (Var (Ident "name3" ()) ()) ())
+                                    []))
+                                  ())
+                                 ())
+                                (:
+                                 (StmtExpr
+                                  (Call
+                                   (Dot
+                                    (Var (Ident "self" ()) ())
+                                    (Ident "assertNotEqual" ())
+                                    ())
+                                   (:
+                                    (ArgExpr (Var (Ident "name2" ()) ()) ())
+                                    (:
+                                     (ArgExpr (Var (Ident "name3" ()) ()) ())
+                                     []))
+                                   ())
+                                  ())
+                                 (:
+                                  (StmtExpr
+                                   (Call
+                                    (Dot
+                                     (Var (Ident "self" ()) ())
+                                     (Ident "assertEqual" ())
+                                     ())
+                                    (:
+                                     (ArgExpr
+                                      (Call
+                                       (Dot
+                                        (Dot
+                                         (Var (Ident "os" ()) ())
+                                         (Ident "path" ())
+                                         ())
+                                        (Ident "dirname" ())
+                                        ())
+                                       (:
+                                        (ArgExpr (Var (Ident "name1" ()) ()) ())
+                                        [])
+                                       ())
+                                      ())
+                                     (:
+                                      (ArgExpr
+                                       (Dot
+                                        (Var (Ident "self" ()) ())
+                                        (Ident "root_path" ())
+                                        ())
+                                       ())
+                                      []))
+                                    ())
+                                   ())
+                                  (:
+                                   (StmtExpr
+                                    (Call
+                                     (Dot
+                                      (Var (Ident "self" ()) ())
+                                      (Ident "assertEqual" ())
+                                      ())
+                                     (:
+                                      (ArgExpr
+                                       (Call
+                                        (Dot
+                                         (Dot
+                                          (Var (Ident "os" ()) ())
+                                          (Ident "path" ())
+                                          ())
+                                         (Ident "dirname" ())
+                                         ())
+                                        (:
+                                         (ArgExpr
+                                          (Var (Ident "name2" ()) ())
+                                          ())
+                                         [])
+                                        ())
+                                       ())
+                                      (:
+                                       (ArgExpr
+                                        (Dot
+                                         (Var (Ident "self" ()) ())
+                                         (Ident "root_path" ())
+                                         ())
+                                        ())
+                                       []))
+                                     ())
+                                    ())
+                                   (:
+                                    (StmtExpr
+                                     (Call
+                                      (Dot
+                                       (Var (Ident "self" ()) ())
+                                       (Ident "assertEqual" ())
+                                       ())
+                                      (:
+                                       (ArgExpr
+                                        (Call
+                                         (Dot
+                                          (Dot
+                                           (Var (Ident "os" ()) ())
+                                           (Ident "path" ())
+                                           ())
+                                          (Ident "dirname" ())
+                                          ())
+                                         (:
+                                          (ArgExpr
+                                           (Var (Ident "name3" ()) ())
+                                           ())
+                                          [])
+                                         ())
+                                        ())
+                                       (:
+                                        (ArgExpr
+                                         (Dot
+                                          (Var (Ident "self" ()) ())
+                                          (Ident "root_path" ())
+                                          ())
+                                         ())
+                                        []))
+                                      ())
+                                     ())
+                                    (:
+                                     (Assign
+                                      (: (Var (Ident "basename1" ()) ()) [])
+                                      (Call
+                                       (Dot
+                                        (Dot
+                                         (Var (Ident "os" ()) ())
+                                         (Ident "path" ())
+                                         ())
+                                        (Ident "basename" ())
+                                        ())
+                                       (:
+                                        (ArgExpr (Var (Ident "name2" ()) ()) ())
+                                        [])
+                                       ())
+                                      ())
+                                     (:
+                                      (StmtExpr
+                                       (Call
+                                        (Dot
+                                         (Var (Ident "self" ()) ())
+                                         (Ident "assertTrue" ())
+                                         ())
+                                        (:
+                                         (ArgExpr
+                                          (Call
+                                           (Dot
+                                            (Var (Ident "basename1" ()) ())
+                                            (Ident "endswith" ())
+                                            ())
+                                           (:
+                                            (ArgExpr
+                                             (Strings (: "\"foo.txt\"" []) ())
+                                             ())
+                                            [])
+                                           ())
+                                          ())
+                                         [])
+                                        ())
+                                       ())
+                                      (:
+                                       (Assign
+                                        (: (Var (Ident "basename2" ()) ()) [])
+                                        (Call
+                                         (Dot
+                                          (Dot
+                                           (Var (Ident "os" ()) ())
+                                           (Ident "path" ())
+                                           ())
+                                          (Ident "basename" ())
+                                          ())
+                                         (:
+                                          (ArgExpr
+                                           (Var (Ident "name2" ()) ())
+                                           ())
+                                          [])
+                                         ())
+                                        ())
+                                       (:
+                                        (StmtExpr
+                                         (Call
+                                          (Dot
+                                           (Var (Ident "self" ()) ())
+                                           (Ident "assertTrue" ())
+                                           ())
+                                          (:
+                                           (ArgExpr
+                                            (Call
+                                             (Dot
+                                              (Var (Ident "basename2" ()) ())
+                                              (Ident "endswith" ())
+                                              ())
+                                             (:
+                                              (ArgExpr
+                                               (Strings (: "\"foo.txt\"" []) ())
+                                               ())
+                                              [])
+                                             ())
+                                            ())
+                                           [])
+                                          ())
+                                         ())
+                                        (:
+                                         (Assign
+                                          (: (Var (Ident "basename3" ()) ()) [])
+                                          (Call
+                                           (Dot
+                                            (Dot
+                                             (Var (Ident "os" ()) ())
+                                             (Ident "path" ())
+                                             ())
+                                            (Ident "basename" ())
+                                            ())
+                                           (:
+                                            (ArgExpr
+                                             (Var (Ident "name3" ()) ())
+                                             ())
+                                            [])
+                                           ())
+                                          ())
+                                         (:
+                                          (StmtExpr
+                                           (Call
+                                            (Dot
+                                             (Var (Ident "self" ()) ())
+                                             (Ident "assertTrue" ())
+                                             ())
+                                            (:
+                                             (ArgExpr
+                                              (Call
+                                               (Dot
+                                                (Var (Ident "basename3" ()) ())
+                                                (Ident "endswith" ())
+                                                ())
+                                               (:
+                                                (ArgExpr
+                                                 (Strings
+                                                  (: "\"foo.txt\"" [])
+                                                  ())
+                                                 ())
+                                                [])
+                                               ())
+                                              ())
+                                             [])
+                                            ())
+                                           ())
+                                          [])))))))))))))))
+                           ())
+                          [])))))))
+                   ())
+                  (:
+                   (Class
+                    (Ident "UniqueLineageNameTest" ())
+                    (:
+                     (ArgExpr
+                      (Dot
+                       (Var (Ident "unittest" ()) ())
+                       (Ident "TestCase" ())
+                       ())
+                      ())
+                     [])
+                    (:
+                     (StmtExpr
+                      (Strings
+                       (:
+                        "\"\"\"Tests for certbot.le_util.unique_lineage_name.\"\"\""
+                        [])
+                       ())
+                      ())
+                     (:
+                      (Fun
+                       (Ident "setUp" ())
+                       (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                       Nothing
+                       (:
+                        (Assign
+                         (:
+                          (Dot
+                           (Var (Ident "self" ()) ())
+                           (Ident "root_path" ())
+                           ())
+                          [])
+                         (Call
+                          (Dot
+                           (Var (Ident "tempfile" ()) ())
+                           (Ident "mkdtemp" ())
+                           ())
+                          []
+                          ())
+                         ())
+                        [])
+                       ())
+                      (:
+                       (Fun
+                        (Ident "tearDown" ())
+                        (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                        Nothing
+                        (:
+                         (StmtExpr
+                          (Call
+                           (Dot
+                            (Var (Ident "shutil" ()) ())
+                            (Ident "rmtree" ())
+                            ())
+                           (:
+                            (ArgExpr
+                             (Dot
+                              (Var (Ident "self" ()) ())
+                              (Ident "root_path" ())
+                              ())
+                             ())
+                            (:
+                             (ArgKeyword
+                              (Ident "ignore_errors" ())
+                              (Bool True ())
+                              ())
+                             []))
+                           ())
+                          ())
+                         [])
+                        ())
+                       (:
+                        (Fun
+                         (Ident "_call" ())
+                         (:
+                          (Param (Ident "self" ()) Nothing Nothing ())
+                          (:
+                           (Param (Ident "filename" ()) Nothing Nothing ())
+                           (:
+                            (Param
+                             (Ident "mode" ())
+                             Nothing
+                             (Just (Int 511 "0o777" ()))
+                             ())
+                            [])))
+                         Nothing
+                         (:
+                          (FromImport
+                           (ImportRelative
+                            0
+                            (Just
+                             (:
+                              (Ident "certbot" ())
+                              (: (Ident "le_util" ()) [])))
+                            ())
+                           (FromItems
+                            (:
+                             (FromItem
+                              (Ident "unique_lineage_name" ())
+                              Nothing
+                              ())
+                             [])
+                            ())
+                           ())
+                          (:
+                           (Return
+                            (Just
+                             (Call
+                              (Var (Ident "unique_lineage_name" ()) ())
+                              (:
+                               (ArgExpr
+                                (Dot
+                                 (Var (Ident "self" ()) ())
+                                 (Ident "root_path" ())
+                                 ())
+                                ())
+                               (:
+                                (ArgExpr (Var (Ident "filename" ()) ()) ())
+                                (: (ArgExpr (Var (Ident "mode" ()) ()) ()) [])))
+                              ()))
+                            ())
+                           []))
+                         ())
+                        (:
+                         (Fun
+                          (Ident "test_basic" ())
+                          (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                          Nothing
+                          (:
+                           (Assign
+                            (:
+                             (Tuple
+                              (:
+                               (Var (Ident "f" ()) ())
+                               (: (Var (Ident "path" ()) ()) []))
+                              ())
+                             [])
+                            (Call
+                             (Dot
+                              (Var (Ident "self" ()) ())
+                              (Ident "_call" ())
+                              ())
+                             (: (ArgExpr (Strings (: "\"wow\"" []) ()) ()) [])
+                             ())
+                            ())
+                           (:
+                            (StmtExpr
+                             (Call
+                              (Dot
+                               (Var (Ident "self" ()) ())
+                               (Ident "assertTrue" ())
+                               ())
+                              (:
+                               (ArgExpr
+                                (Call
+                                 (Var (Ident "isinstance" ()) ())
+                                 (:
+                                  (ArgExpr (Var (Ident "f" ()) ()) ())
+                                  (:
+                                   (ArgExpr (Var (Ident "file" ()) ()) ())
+                                   []))
+                                 ())
+                                ())
+                               [])
+                              ())
+                             ())
+                            (:
+                             (StmtExpr
+                              (Call
+                               (Dot
+                                (Var (Ident "self" ()) ())
+                                (Ident "assertEqual" ())
+                                ())
+                               (:
+                                (ArgExpr
+                                 (Call
+                                  (Dot
+                                   (Dot
+                                    (Var (Ident "os" ()) ())
+                                    (Ident "path" ())
+                                    ())
+                                   (Ident "join" ())
+                                   ())
+                                  (:
+                                   (ArgExpr
+                                    (Dot
+                                     (Var (Ident "self" ()) ())
+                                     (Ident "root_path" ())
+                                     ())
+                                    ())
+                                   (:
+                                    (ArgExpr
+                                     (Strings (: "\"wow.conf\"" []) ())
+                                     ())
+                                    []))
+                                  ())
+                                 ())
+                                (: (ArgExpr (Var (Ident "path" ()) ()) ()) []))
+                               ())
+                              ())
+                             [])))
+                          ())
+                         (:
+                          (Fun
+                           (Ident "test_multiple" ())
+                           (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                           Nothing
+                           (:
+                            (For
+                             (: (Var (Ident "_" ()) ()) [])
+                             (Call
+                              (Var (Ident "xrange" ()) ())
+                              (: (ArgExpr (Int 10 "10" ()) ()) [])
+                              ())
+                             (:
+                              (Assign
+                               (:
+                                (Tuple
+                                 (:
+                                  (Var (Ident "f" ()) ())
+                                  (: (Var (Ident "name" ()) ()) []))
+                                 ())
+                                [])
+                               (Call
+                                (Dot
+                                 (Var (Ident "self" ()) ())
+                                 (Ident "_call" ())
+                                 ())
+                                (:
+                                 (ArgExpr (Strings (: "\"wow\"" []) ()) ())
+                                 [])
+                                ())
+                               ())
+                              [])
+                             []
+                             ())
+                            (:
+                             (StmtExpr
+                              (Call
+                               (Dot
+                                (Var (Ident "self" ()) ())
+                                (Ident "assertTrue" ())
+                                ())
+                               (:
+                                (ArgExpr
+                                 (Call
+                                  (Var (Ident "isinstance" ()) ())
+                                  (:
+                                   (ArgExpr (Var (Ident "f" ()) ()) ())
+                                   (:
+                                    (ArgExpr (Var (Ident "file" ()) ()) ())
+                                    []))
+                                  ())
+                                 ())
+                                [])
+                               ())
+                              ())
+                             (:
+                              (StmtExpr
+                               (Call
+                                (Dot
+                                 (Var (Ident "self" ()) ())
+                                 (Ident "assertTrue" ())
+                                 ())
+                                (:
+                                 (ArgExpr
+                                  (Call
+                                   (Var (Ident "isinstance" ()) ())
+                                   (:
+                                    (ArgExpr (Var (Ident "name" ()) ()) ())
+                                    (:
+                                     (ArgExpr (Var (Ident "str" ()) ()) ())
+                                     []))
+                                   ())
+                                  ())
+                                 [])
+                                ())
+                               ())
+                              (:
+                               (StmtExpr
+                                (Call
+                                 (Dot
+                                  (Var (Ident "self" ()) ())
+                                  (Ident "assertTrue" ())
+                                  ())
+                                 (:
+                                  (ArgExpr
+                                   (BinaryOp
+                                    (In ())
+                                    (Strings (: "\"wow-0009.conf\"" []) ())
+                                    (Var (Ident "name" ()) ())
+                                    ())
+                                   ())
+                                  [])
+                                 ())
+                                ())
+                               []))))
+                           ())
+                          (:
+                           (Decorated
+                            (:
+                             (Decorator
+                              (: (Ident "mock" ()) (: (Ident "patch" ()) []))
+                              (:
+                               (ArgExpr
+                                (Strings
+                                 (: "\"certbot.le_util.os.fdopen\"" [])
+                                 ())
+                                ())
+                               [])
+                              ())
+                             [])
+                            (Fun
+                             (Ident "test_failure" ())
+                             (:
+                              (Param (Ident "self" ()) Nothing Nothing ())
+                              (:
+                               (Param
+                                (Ident "mock_fdopen" ())
+                                Nothing
+                                Nothing
+                                ())
+                               []))
+                             Nothing
+                             (:
+                              (Assign
+                               (: (Var (Ident "err" ()) ()) [])
+                               (Call
+                                (Var (Ident "OSError" ()) ())
+                                (:
+                                 (ArgExpr (Strings (: "\"whoops\"" []) ()) ())
+                                 [])
+                                ())
+                               ())
+                              (:
+                               (Assign
+                                (:
+                                 (Dot
+                                  (Var (Ident "err" ()) ())
+                                  (Ident "errno" ())
+                                  ())
+                                 [])
+                                (Dot
+                                 (Var (Ident "errno" ()) ())
+                                 (Ident "EIO" ())
+                                 ())
+                                ())
+                               (:
+                                (Assign
+                                 (:
+                                  (Dot
+                                   (Var (Ident "mock_fdopen" ()) ())
+                                   (Ident "side_effect" ())
+                                   ())
+                                  [])
+                                 (Var (Ident "err" ()) ())
+                                 ())
+                                (:
+                                 (StmtExpr
+                                  (Call
+                                   (Dot
+                                    (Var (Ident "self" ()) ())
+                                    (Ident "assertRaises" ())
+                                    ())
+                                   (:
+                                    (ArgExpr (Var (Ident "OSError" ()) ()) ())
+                                    (:
+                                     (ArgExpr
+                                      (Dot
+                                       (Var (Ident "self" ()) ())
+                                       (Ident "_call" ())
+                                       ())
+                                      ())
+                                     (:
+                                      (ArgExpr (Strings (: "\"wow\"" []) ()) ())
+                                      [])))
+                                   ())
+                                  ())
+                                 []))))
+                             ())
+                            ())
+                           (:
+                            (Decorated
+                             (:
+                              (Decorator
+                               (: (Ident "mock" ()) (: (Ident "patch" ()) []))
+                               (:
+                                (ArgExpr
+                                 (Strings
+                                  (: "\"certbot.le_util.os.fdopen\"" [])
+                                  ())
+                                 ())
+                                [])
+                               ())
+                              [])
+                             (Fun
+                              (Ident "test_subsequent_failure" ())
+                              (:
+                               (Param (Ident "self" ()) Nothing Nothing ())
+                               (:
+                                (Param
+                                 (Ident "mock_fdopen" ())
+                                 Nothing
+                                 Nothing
+                                 ())
+                                []))
+                              Nothing
+                              (:
+                               (StmtExpr
+                                (Call
+                                 (Dot
+                                  (Var (Ident "self" ()) ())
+                                  (Ident "_call" ())
+                                  ())
+                                 (:
+                                  (ArgExpr (Strings (: "\"wow\"" []) ()) ())
+                                  [])
+                                 ())
+                                ())
+                               (:
+                                (Assign
+                                 (: (Var (Ident "err" ()) ()) [])
+                                 (Call
+                                  (Var (Ident "OSError" ()) ())
+                                  (:
+                                   (ArgExpr (Strings (: "\"whoops\"" []) ()) ())
+                                   [])
+                                  ())
+                                 ())
+                                (:
+                                 (Assign
+                                  (:
+                                   (Dot
+                                    (Var (Ident "err" ()) ())
+                                    (Ident "errno" ())
+                                    ())
+                                   [])
+                                  (Dot
+                                   (Var (Ident "errno" ()) ())
+                                   (Ident "EIO" ())
+                                   ())
+                                  ())
+                                 (:
+                                  (Assign
+                                   (:
+                                    (Dot
+                                     (Var (Ident "mock_fdopen" ()) ())
+                                     (Ident "side_effect" ())
+                                     ())
+                                    [])
+                                   (Var (Ident "err" ()) ())
+                                   ())
+                                  (:
+                                   (StmtExpr
+                                    (Call
+                                     (Dot
+                                      (Var (Ident "self" ()) ())
+                                      (Ident "assertRaises" ())
+                                      ())
+                                     (:
+                                      (ArgExpr (Var (Ident "OSError" ()) ()) ())
+                                      (:
+                                       (ArgExpr
+                                        (Dot
+                                         (Var (Ident "self" ()) ())
+                                         (Ident "_call" ())
+                                         ())
+                                        ())
+                                       (:
+                                        (ArgExpr
+                                         (Strings (: "\"wow\"" []) ())
+                                         ())
+                                        [])))
+                                     ())
+                                    ())
+                                   [])))))
+                              ())
+                             ())
+                            []))))))))
+                    ())
+                   (:
+                    (Class
+                     (Ident "SafelyRemoveTest" ())
+                     (:
+                      (ArgExpr
+                       (Dot
+                        (Var (Ident "unittest" ()) ())
+                        (Ident "TestCase" ())
+                        ())
+                       ())
+                      [])
+                     (:
+                      (StmtExpr
+                       (Strings
+                        (:
+                         "\"\"\"Tests for certbot.le_util.safely_remove.\"\"\""
+                         [])
+                        ())
+                       ())
+                      (:
+                       (Fun
+                        (Ident "setUp" ())
+                        (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                        Nothing
+                        (:
+                         (Assign
+                          (:
+                           (Dot (Var (Ident "self" ()) ()) (Ident "tmp" ()) ())
+                           [])
+                          (Call
+                           (Dot
+                            (Var (Ident "tempfile" ()) ())
+                            (Ident "mkdtemp" ())
+                            ())
+                           []
+                           ())
+                          ())
+                         (:
+                          (Assign
+                           (:
+                            (Dot
+                             (Var (Ident "self" ()) ())
+                             (Ident "path" ())
+                             ())
+                            [])
+                           (Call
+                            (Dot
+                             (Dot (Var (Ident "os" ()) ()) (Ident "path" ()) ())
+                             (Ident "join" ())
+                             ())
+                            (:
+                             (ArgExpr
+                              (Dot
+                               (Var (Ident "self" ()) ())
+                               (Ident "tmp" ())
+                               ())
+                              ())
+                             (: (ArgExpr (Strings (: "\"foo\"" []) ()) ()) []))
+                            ())
+                           ())
+                          []))
+                        ())
+                       (:
+                        (Fun
+                         (Ident "tearDown" ())
+                         (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                         Nothing
+                         (:
+                          (StmtExpr
+                           (Call
+                            (Dot
+                             (Var (Ident "shutil" ()) ())
+                             (Ident "rmtree" ())
+                             ())
+                            (:
+                             (ArgExpr
+                              (Dot
+                               (Var (Ident "self" ()) ())
+                               (Ident "tmp" ())
+                               ())
+                              ())
+                             [])
+                            ())
+                           ())
+                          [])
+                         ())
+                        (:
+                         (Fun
+                          (Ident "_call" ())
+                          (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                          Nothing
+                          (:
+                           (FromImport
+                            (ImportRelative
+                             0
+                             (Just
+                              (:
+                               (Ident "certbot" ())
+                               (: (Ident "le_util" ()) [])))
+                             ())
+                            (FromItems
+                             (:
+                              (FromItem (Ident "safely_remove" ()) Nothing ())
+                              [])
+                             ())
+                            ())
+                           (:
+                            (Return
+                             (Just
+                              (Call
+                               (Var (Ident "safely_remove" ()) ())
+                               (:
+                                (ArgExpr
+                                 (Dot
+                                  (Var (Ident "self" ()) ())
+                                  (Ident "path" ())
+                                  ())
+                                 ())
+                                [])
+                               ()))
+                             ())
+                            []))
+                          ())
+                         (:
+                          (Fun
+                           (Ident "test_exists" ())
+                           (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                           Nothing
+                           (:
+                            (With
+                             (:
+                              ((,)
+                               (Call
+                                (Var (Ident "open" ()) ())
+                                (:
+                                 (ArgExpr
+                                  (Dot
+                                   (Var (Ident "self" ()) ())
+                                   (Ident "path" ())
+                                   ())
+                                  ())
+                                 (:
+                                  (ArgExpr (Strings (: "\"w\"" []) ()) ())
+                                  []))
+                                ())
+                               Nothing)
+                              [])
+                             (: (Pass ()) [])
+                             ())
+                            (:
+                             (StmtExpr
+                              (Call
+                               (Dot
+                                (Var (Ident "self" ()) ())
+                                (Ident "_call" ())
+                                ())
+                               []
+                               ())
+                              ())
+                             (:
+                              (StmtExpr
+                               (Call
+                                (Dot
+                                 (Var (Ident "self" ()) ())
+                                 (Ident "assertFalse" ())
+                                 ())
+                                (:
+                                 (ArgExpr
+                                  (Call
+                                   (Dot
+                                    (Dot
+                                     (Var (Ident "os" ()) ())
+                                     (Ident "path" ())
+                                     ())
+                                    (Ident "exists" ())
+                                    ())
+                                   (:
+                                    (ArgExpr
+                                     (Dot
+                                      (Var (Ident "self" ()) ())
+                                      (Ident "path" ())
+                                      ())
+                                     ())
+                                    [])
+                                   ())
+                                  ())
+                                 [])
+                                ())
+                               ())
+                              [])))
+                           ())
+                          (:
+                           (Fun
+                            (Ident "test_missing" ())
+                            (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                            Nothing
+                            (:
+                             (StmtExpr
+                              (Call
+                               (Dot
+                                (Var (Ident "self" ()) ())
+                                (Ident "_call" ())
+                                ())
+                               []
+                               ())
+                              ())
+                             (:
+                              (StmtExpr
+                               (Call
+                                (Dot
+                                 (Var (Ident "self" ()) ())
+                                 (Ident "assertFalse" ())
+                                 ())
+                                (:
+                                 (ArgExpr
+                                  (Call
+                                   (Dot
+                                    (Dot
+                                     (Var (Ident "os" ()) ())
+                                     (Ident "path" ())
+                                     ())
+                                    (Ident "exists" ())
+                                    ())
+                                   (:
+                                    (ArgExpr
+                                     (Dot
+                                      (Var (Ident "self" ()) ())
+                                      (Ident "path" ())
+                                      ())
+                                     ())
+                                    [])
+                                   ())
+                                  ())
+                                 [])
+                                ())
+                               ())
+                              []))
+                            ())
+                           (:
+                            (Decorated
+                             (:
+                              (Decorator
+                               (: (Ident "mock" ()) (: (Ident "patch" ()) []))
+                               (:
+                                (ArgExpr
+                                 (Strings
+                                  (: "\"certbot.le_util.os.remove\"" [])
+                                  ())
+                                 ())
+                                [])
+                               ())
+                              [])
+                             (Fun
+                              (Ident "test_other_error_passthrough" ())
+                              (:
+                               (Param (Ident "self" ()) Nothing Nothing ())
+                               (:
+                                (Param
+                                 (Ident "mock_remove" ())
+                                 Nothing
+                                 Nothing
+                                 ())
+                                []))
+                              Nothing
+                              (:
+                               (Assign
+                                (:
+                                 (Dot
+                                  (Var (Ident "mock_remove" ()) ())
+                                  (Ident "side_effect" ())
+                                  ())
+                                 [])
+                                (Var (Ident "OSError" ()) ())
+                                ())
+                               (:
+                                (StmtExpr
+                                 (Call
+                                  (Dot
+                                   (Var (Ident "self" ()) ())
+                                   (Ident "assertRaises" ())
+                                   ())
+                                  (:
+                                   (ArgExpr (Var (Ident "OSError" ()) ()) ())
+                                   (:
+                                    (ArgExpr
+                                     (Dot
+                                      (Var (Ident "self" ()) ())
+                                      (Ident "_call" ())
+                                      ())
+                                     ())
+                                    []))
+                                  ())
+                                 ())
+                                []))
+                              ())
+                             ())
+                            [])))))))
+                     ())
+                    (:
+                     (Class
+                      (Ident "SafeEmailTest" ())
+                      (:
+                       (ArgExpr
+                        (Dot
+                         (Var (Ident "unittest" ()) ())
+                         (Ident "TestCase" ())
+                         ())
+                        ())
+                       [])
+                      (:
+                       (StmtExpr
+                        (Strings (: "\"\"\"Test safe_email.\"\"\"" []) ())
+                        ())
+                       (:
+                        (Decorated
+                         (:
+                          (Decorator (: (Ident "classmethod" ()) []) [] ())
+                          [])
+                         (Fun
+                          (Ident "_call" ())
+                          (:
+                           (Param (Ident "cls" ()) Nothing Nothing ())
+                           (: (Param (Ident "addr" ()) Nothing Nothing ()) []))
+                          Nothing
+                          (:
+                           (FromImport
+                            (ImportRelative
+                             0
+                             (Just
+                              (:
+                               (Ident "certbot" ())
+                               (: (Ident "le_util" ()) [])))
+                             ())
+                            (FromItems
+                             (:
+                              (FromItem (Ident "safe_email" ()) Nothing ())
+                              [])
+                             ())
+                            ())
+                           (:
+                            (Return
+                             (Just
+                              (Call
+                               (Var (Ident "safe_email" ()) ())
+                               (: (ArgExpr (Var (Ident "addr" ()) ()) ()) [])
+                               ()))
+                             ())
+                            []))
+                          ())
+                         ())
+                        (:
+                         (Fun
+                          (Ident "test_valid_emails" ())
+                          (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                          Nothing
+                          (:
+                           (Assign
+                            (: (Var (Ident "addrs" ()) ()) [])
+                            (List
+                             (:
+                              (Strings (: "\"certbot@certbot.org\"" []) ())
+                              (:
+                               (Strings (: "\"tbd.ade@gmail.com\"" []) ())
+                               (:
+                                (Strings
+                                 (: "\"abc_def.jdk@hotmail.museum\"" [])
+                                 ())
+                                [])))
+                             ())
+                            ())
+                           (:
+                            (For
+                             (: (Var (Ident "addr" ()) ()) [])
+                             (Var (Ident "addrs" ()) ())
+                             (:
+                              (StmtExpr
+                               (Call
+                                (Dot
+                                 (Var (Ident "self" ()) ())
+                                 (Ident "assertTrue" ())
+                                 ())
+                                (:
+                                 (ArgExpr
+                                  (Call
+                                   (Dot
+                                    (Var (Ident "self" ()) ())
+                                    (Ident "_call" ())
+                                    ())
+                                   (:
+                                    (ArgExpr (Var (Ident "addr" ()) ()) ())
+                                    [])
+                                   ())
+                                  ())
+                                 (:
+                                  (ArgExpr
+                                   (BinaryOp
+                                    (Modulo ())
+                                    (Strings (: "\"%s failed.\"" []) ())
+                                    (Var (Ident "addr" ()) ())
+                                    ())
+                                   ())
+                                  []))
+                                ())
+                               ())
+                              [])
+                             []
+                             ())
+                            []))
+                          ())
+                         (:
+                          (Fun
+                           (Ident "test_invalid_emails" ())
+                           (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                           Nothing
+                           (:
+                            (Assign
+                             (: (Var (Ident "addrs" ()) ()) [])
+                             (List
+                              (:
+                               (Strings (: "\"certbot@certbot..org\"" []) ())
+                               (:
+                                (Strings (: "\".tbd.ade@gmail.com\"" []) ())
+                                (:
+                                 (Strings
+                                  (: "\"~/abc_def.jdk@hotmail.museum\"" [])
+                                  ())
+                                 [])))
+                              ())
+                             ())
+                            (:
+                             (For
+                              (: (Var (Ident "addr" ()) ()) [])
+                              (Var (Ident "addrs" ()) ())
+                              (:
+                               (StmtExpr
+                                (Call
+                                 (Dot
+                                  (Var (Ident "self" ()) ())
+                                  (Ident "assertFalse" ())
+                                  ())
+                                 (:
+                                  (ArgExpr
+                                   (Call
+                                    (Dot
+                                     (Var (Ident "self" ()) ())
+                                     (Ident "_call" ())
+                                     ())
+                                    (:
+                                     (ArgExpr (Var (Ident "addr" ()) ()) ())
+                                     [])
+                                    ())
+                                   ())
+                                  (:
+                                   (ArgExpr
+                                    (BinaryOp
+                                     (Modulo ())
+                                     (Strings (: "\"%s failed.\"" []) ())
+                                     (Var (Ident "addr" ()) ())
+                                     ())
+                                    ())
+                                   []))
+                                 ())
+                                ())
+                               [])
+                              []
+                              ())
+                             []))
+                           ())
+                          []))))
+                      ())
+                     (:
+                      (Class
+                       (Ident "AddDeprecatedArgumentTest" ())
+                       (:
+                        (ArgExpr
+                         (Dot
+                          (Var (Ident "unittest" ()) ())
+                          (Ident "TestCase" ())
+                          ())
+                         ())
+                        [])
+                       (:
+                        (StmtExpr
+                         (Strings
+                          (: "\"\"\"Test add_deprecated_argument.\"\"\"" [])
+                          ())
+                         ())
+                        (:
+                         (Fun
+                          (Ident "setUp" ())
+                          (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                          Nothing
+                          (:
+                           (Assign
+                            (:
+                             (Dot
+                              (Var (Ident "self" ()) ())
+                              (Ident "parser" ())
+                              ())
+                             [])
+                            (Call
+                             (Dot
+                              (Var (Ident "argparse" ()) ())
+                              (Ident "ArgumentParser" ())
+                              ())
+                             []
+                             ())
+                            ())
+                           [])
+                          ())
+                         (:
+                          (Fun
+                           (Ident "_call" ())
+                           (:
+                            (Param (Ident "self" ()) Nothing Nothing ())
+                            (:
+                             (Param
+                              (Ident "argument_name" ())
+                              Nothing
+                              Nothing
+                              ())
+                             (:
+                              (Param (Ident "nargs" ()) Nothing Nothing ())
+                              [])))
+                           Nothing
+                           (:
+                            (FromImport
+                             (ImportRelative
+                              0
+                              (Just
+                               (:
+                                (Ident "certbot" ())
+                                (: (Ident "le_util" ()) [])))
+                              ())
+                             (FromItems
+                              (:
+                               (FromItem
+                                (Ident "add_deprecated_argument" ())
+                                Nothing
+                                ())
+                               [])
+                              ())
+                             ())
+                            (:
+                             (StmtExpr
+                              (Call
+                               (Var (Ident "add_deprecated_argument" ()) ())
+                               (:
+                                (ArgExpr
+                                 (Dot
+                                  (Dot
+                                   (Var (Ident "self" ()) ())
+                                   (Ident "parser" ())
+                                   ())
+                                  (Ident "add_argument" ())
+                                  ())
+                                 ())
+                                (:
+                                 (ArgExpr
+                                  (Var (Ident "argument_name" ()) ())
+                                  ())
+                                 (:
+                                  (ArgExpr (Var (Ident "nargs" ()) ()) ())
+                                  [])))
+                               ())
+                              ())
+                             []))
+                           ())
+                          (:
+                           (Fun
+                            (Ident "test_warning_no_arg" ())
+                            (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                            Nothing
+                            (:
+                             (StmtExpr
+                              (Call
+                               (Dot
+                                (Var (Ident "self" ()) ())
+                                (Ident "_call" ())
+                                ())
+                               (:
+                                (ArgExpr
+                                 (Strings (: "\"--old-option\"" []) ())
+                                 ())
+                                (: (ArgExpr (Int 0 "0" ()) ()) []))
+                               ())
+                              ())
+                             (:
+                              (Assign
+                               (: (Var (Ident "stderr" ()) ()) [])
+                               (Call
+                                (Dot
+                                 (Var (Ident "self" ()) ())
+                                 (Ident "_get_argparse_warnings" ())
+                                 ())
+                                (:
+                                 (ArgExpr
+                                  (List
+                                   (: (Strings (: "\"--old-option\"" []) ()) [])
+                                   ())
+                                  ())
+                                 [])
+                                ())
+                               ())
+                              (:
+                               (StmtExpr
+                                (Call
+                                 (Dot
+                                  (Var (Ident "self" ()) ())
+                                  (Ident "assertTrue" ())
+                                  ())
+                                 (:
+                                  (ArgExpr
+                                   (BinaryOp
+                                    (In ())
+                                    (Strings
+                                     (: "\"--old-option is deprecated\"" [])
+                                     ())
+                                    (Var (Ident "stderr" ()) ())
+                                    ())
+                                   ())
+                                  [])
+                                 ())
+                                ())
+                               [])))
+                            ())
+                           (:
+                            (Fun
+                             (Ident "test_warning_with_arg" ())
+                             (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                             Nothing
+                             (:
+                              (StmtExpr
+                               (Call
+                                (Dot
+                                 (Var (Ident "self" ()) ())
+                                 (Ident "_call" ())
+                                 ())
+                                (:
+                                 (ArgExpr
+                                  (Strings (: "\"--old-option\"" []) ())
+                                  ())
+                                 (: (ArgExpr (Int 1 "1" ()) ()) []))
+                                ())
+                               ())
+                              (:
+                               (Assign
+                                (: (Var (Ident "stderr" ()) ()) [])
+                                (Call
+                                 (Dot
+                                  (Var (Ident "self" ()) ())
+                                  (Ident "_get_argparse_warnings" ())
+                                  ())
+                                 (:
+                                  (ArgExpr
+                                   (List
+                                    (:
+                                     (Strings (: "\"--old-option\"" []) ())
+                                     (: (Strings (: "\"42\"" []) ()) []))
+                                    ())
+                                   ())
+                                  [])
+                                 ())
+                                ())
+                               (:
+                                (StmtExpr
+                                 (Call
+                                  (Dot
+                                   (Var (Ident "self" ()) ())
+                                   (Ident "assertTrue" ())
+                                   ())
+                                  (:
+                                   (ArgExpr
+                                    (BinaryOp
+                                     (In ())
+                                     (Strings
+                                      (: "\"--old-option is deprecated\"" [])
+                                      ())
+                                     (Var (Ident "stderr" ()) ())
+                                     ())
+                                    ())
+                                   [])
+                                  ())
+                                 ())
+                                [])))
+                             ())
+                            (:
+                             (Fun
+                              (Ident "_get_argparse_warnings" ())
+                              (:
+                               (Param (Ident "self" ()) Nothing Nothing ())
+                               (:
+                                (Param (Ident "args" ()) Nothing Nothing ())
+                                []))
+                              Nothing
+                              (:
+                               (Assign
+                                (: (Var (Ident "stderr" ()) ()) [])
+                                (Call
+                                 (Dot
+                                  (Var (Ident "six" ()) ())
+                                  (Ident "StringIO" ())
+                                  ())
+                                 []
+                                 ())
+                                ())
+                               (:
+                                (With
+                                 (:
+                                  ((,)
+                                   (Call
+                                    (Dot
+                                     (Var (Ident "mock" ()) ())
+                                     (Ident "patch" ())
+                                     ())
+                                    (:
+                                     (ArgExpr
+                                      (Strings
+                                       (: "\"certbot.le_util.sys.stderr\"" [])
+                                       ())
+                                      ())
+                                     (:
+                                      (ArgKeyword
+                                       (Ident "new" ())
+                                       (Var (Ident "stderr" ()) ())
+                                       ())
+                                      []))
+                                    ())
+                                   Nothing)
+                                  [])
+                                 (:
+                                  (StmtExpr
+                                   (Call
+                                    (Dot
+                                     (Dot
+                                      (Var (Ident "self" ()) ())
+                                      (Ident "parser" ())
+                                      ())
+                                     (Ident "parse_args" ())
+                                     ())
+                                    (:
+                                     (ArgExpr (Var (Ident "args" ()) ()) ())
+                                     [])
+                                    ())
+                                   ())
+                                  [])
+                                 ())
+                                (:
+                                 (Return
+                                  (Just
+                                   (Call
+                                    (Dot
+                                     (Var (Ident "stderr" ()) ())
+                                     (Ident "getvalue" ())
+                                     ())
+                                    []
+                                    ()))
+                                  ())
+                                 [])))
+                              ())
+                             (:
+                              (Fun
+                               (Ident "test_help" ())
+                               (:
+                                (Param (Ident "self" ()) Nothing Nothing ())
+                                [])
+                               Nothing
+                               (:
+                                (StmtExpr
+                                 (Call
+                                  (Dot
+                                   (Var (Ident "self" ()) ())
+                                   (Ident "_call" ())
+                                   ())
+                                  (:
+                                   (ArgExpr
+                                    (Strings (: "\"--old-option\"" []) ())
+                                    ())
+                                   (: (ArgExpr (Int 2 "2" ()) ()) []))
+                                  ())
+                                 ())
+                                (:
+                                 (Assign
+                                  (: (Var (Ident "stdout" ()) ()) [])
+                                  (Call
+                                   (Dot
+                                    (Var (Ident "six" ()) ())
+                                    (Ident "StringIO" ())
+                                    ())
+                                   []
+                                   ())
+                                  ())
+                                 (:
+                                  (With
+                                   (:
+                                    ((,)
+                                     (Call
+                                      (Dot
+                                       (Var (Ident "mock" ()) ())
+                                       (Ident "patch" ())
+                                       ())
+                                      (:
+                                       (ArgExpr
+                                        (Strings
+                                         (: "\"certbot.le_util.sys.stdout\"" [])
+                                         ())
+                                        ())
+                                       (:
+                                        (ArgKeyword
+                                         (Ident "new" ())
+                                         (Var (Ident "stdout" ()) ())
+                                         ())
+                                        []))
+                                      ())
+                                     Nothing)
+                                    [])
+                                   (:
+                                    (Try
+                                     (:
+                                      (StmtExpr
+                                       (Call
+                                        (Dot
+                                         (Dot
+                                          (Var (Ident "self" ()) ())
+                                          (Ident "parser" ())
+                                          ())
+                                         (Ident "parse_args" ())
+                                         ())
+                                        (:
+                                         (ArgExpr
+                                          (List
+                                           (: (Strings (: "\"-h\"" []) ()) [])
+                                           ())
+                                          ())
+                                         [])
+                                        ())
+                                       ())
+                                      [])
+                                     (:
+                                      (Handler
+                                       (ExceptClause
+                                        (Just
+                                         ((,)
+                                          (Var (Ident "SystemExit" ()) ())
+                                          Nothing))
+                                        ())
+                                       (: (Pass ()) [])
+                                       ())
+                                      [])
+                                     []
+                                     []
+                                     ())
+                                    [])
+                                   ())
+                                  (:
+                                   (StmtExpr
+                                    (Call
+                                     (Dot
+                                      (Var (Ident "self" ()) ())
+                                      (Ident "assertTrue" ())
+                                      ())
+                                     (:
+                                      (ArgExpr
+                                       (BinaryOp
+                                        (NotIn ())
+                                        (Strings (: "\"--old-option\"" []) ())
+                                        (Call
+                                         (Dot
+                                          (Var (Ident "stdout" ()) ())
+                                          (Ident "getvalue" ())
+                                          ())
+                                         []
+                                         ())
+                                        ())
+                                       ())
+                                      [])
+                                     ())
+                                    ())
+                                   []))))
+                               ())
+                              [])))))))
+                       ())
+                      (:
+                       (Class
+                        (Ident "EnforceDomainSanityTest" ())
+                        (:
+                         (ArgExpr
+                          (Dot
+                           (Var (Ident "unittest" ()) ())
+                           (Ident "TestCase" ())
+                           ())
+                          ())
+                         [])
+                        (:
+                         (StmtExpr
+                          (Strings
+                           (: "\"\"\"Test enforce_domain_sanity.\"\"\"" [])
+                           ())
+                          ())
+                         (:
+                          (Fun
+                           (Ident "_call" ())
+                           (:
+                            (Param (Ident "self" ()) Nothing Nothing ())
+                            (:
+                             (Param (Ident "domain" ()) Nothing Nothing ())
+                             []))
+                           Nothing
+                           (:
+                            (FromImport
+                             (ImportRelative
+                              0
+                              (Just
+                               (:
+                                (Ident "certbot" ())
+                                (: (Ident "le_util" ()) [])))
+                              ())
+                             (FromItems
+                              (:
+                               (FromItem
+                                (Ident "enforce_domain_sanity" ())
+                                Nothing
+                                ())
+                               [])
+                              ())
+                             ())
+                            (:
+                             (Return
+                              (Just
+                               (Call
+                                (Var (Ident "enforce_domain_sanity" ()) ())
+                                (: (ArgExpr (Var (Ident "domain" ()) ()) ()) [])
+                                ()))
+                              ())
+                             []))
+                           ())
+                          (:
+                           (Fun
+                            (Ident "test_nonascii_str" ())
+                            (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                            Nothing
+                            (:
+                             (StmtExpr
+                              (Call
+                               (Dot
+                                (Var (Ident "self" ()) ())
+                                (Ident "assertRaises" ())
+                                ())
+                               (:
+                                (ArgExpr
+                                 (Dot
+                                  (Var (Ident "errors" ()) ())
+                                  (Ident "ConfigurationError" ())
+                                  ())
+                                 ())
+                                (:
+                                 (ArgExpr
+                                  (Dot
+                                   (Var (Ident "self" ()) ())
+                                   (Ident "_call" ())
+                                   ())
+                                  ())
+                                 (:
+                                  (ArgExpr
+                                   (Call
+                                    (Dot
+                                     (UnicodeStrings
+                                      (:
+                                       "u\"eichh\\u00f6rnchen.example.com\""
+                                       [])
+                                      ())
+                                     (Ident "encode" ())
+                                     ())
+                                    (:
+                                     (ArgExpr
+                                      (Strings (: "\"utf-8\"" []) ())
+                                      ())
+                                     [])
+                                    ())
+                                   ())
+                                  [])))
+                               ())
+                              ())
+                             [])
+                            ())
+                           (:
+                            (Fun
+                             (Ident "test_nonascii_unicode" ())
+                             (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                             Nothing
+                             (:
+                              (StmtExpr
+                               (Call
+                                (Dot
+                                 (Var (Ident "self" ()) ())
+                                 (Ident "assertRaises" ())
+                                 ())
+                                (:
+                                 (ArgExpr
+                                  (Dot
+                                   (Var (Ident "errors" ()) ())
+                                   (Ident "ConfigurationError" ())
+                                   ())
+                                  ())
+                                 (:
+                                  (ArgExpr
+                                   (Dot
+                                    (Var (Ident "self" ()) ())
+                                    (Ident "_call" ())
+                                    ())
+                                   ())
+                                  (:
+                                   (ArgExpr
+                                    (UnicodeStrings
+                                     (:
+                                      "u\"eichh\\u00f6rnchen.example.com\""
+                                      [])
+                                     ())
+                                    ())
+                                   [])))
+                                ())
+                               ())
+                              [])
+                             ())
+                            []))))
+                        ())
+                       (:
+                        (Class
+                         (Ident "OsInfoTest" ())
+                         (:
+                          (ArgExpr
+                           (Dot
+                            (Var (Ident "unittest" ()) ())
+                            (Ident "TestCase" ())
+                            ())
+                           ())
+                          [])
+                         (:
+                          (StmtExpr
+                           (Strings
+                            (:
+                             "\"\"\"Test OS / distribution detection\"\"\""
+                             [])
+                            ())
+                           ())
+                          (:
+                           (Fun
+                            (Ident "test_systemd_os_release" ())
+                            (: (Param (Ident "self" ()) Nothing Nothing ()) [])
+                            Nothing
+                            (:
+                             (FromImport
+                              (ImportRelative
+                               0
+                               (Just
+                                (:
+                                 (Ident "letsencrypt" ())
+                                 (: (Ident "le_util" ()) [])))
+                               ())
+                              (FromItems
+                               (:
+                                (FromItem (Ident "get_os_info" ()) Nothing ())
+                                (:
+                                 (FromItem
+                                  (Ident "get_systemd_os_info" ())
+                                  Nothing
+                                  ())
+                                 []))
+                               ())
+                              ())
+                             (:
+                              (With
+                               (:
+                                ((,)
+                                 (Call
+                                  (Dot
+                                   (Var (Ident "mock" ()) ())
+                                   (Ident "patch" ())
+                                   ())
+                                  (:
+                                   (ArgExpr
+                                    (Strings (: "'os.path.isfile'" []) ())
+                                    ())
+                                   (:
+                                    (ArgKeyword
+                                     (Ident "return_value" ())
+                                     (Bool True ())
+                                     ())
+                                    []))
+                                  ())
+                                 Nothing)
+                                [])
+                               (:
+                                (StmtExpr
+                                 (Call
+                                  (Dot
+                                   (Var (Ident "self" ()) ())
+                                   (Ident "assertEqual" ())
+                                   ())
+                                  (:
+                                   (ArgExpr
+                                    (Subscript
+                                     (Call
+                                      (Var (Ident "get_os_info" ()) ())
+                                      (:
+                                       (ArgExpr
+                                        (Call
+                                         (Dot
+                                          (Var (Ident "test_util" ()) ())
+                                          (Ident "vector_path" ())
+                                          ())
+                                         (:
+                                          (ArgExpr
+                                           (Strings (: "\"os-release\"" []) ())
+                                           ())
+                                          [])
+                                         ())
+                                        ())
+                                       [])
+                                      ())
+                                     (Int 0 "0" ())
+                                     ())
+                                    ())
+                                   (:
+                                    (ArgExpr
+                                     (Strings (: "'systemdos'" []) ())
+                                     ())
+                                    []))
+                                  ())
+                                 ())
+                                (:
+                                 (StmtExpr
+                                  (Call
+                                   (Dot
+                                    (Var (Ident "self" ()) ())
+                                    (Ident "assertEqual" ())
+                                    ())
+                                   (:
+                                    (ArgExpr
+                                     (Subscript
+                                      (Call
+                                       (Var (Ident "get_os_info" ()) ())
+                                       (:
+                                        (ArgExpr
+                                         (Call
+                                          (Dot
+                                           (Var (Ident "test_util" ()) ())
+                                           (Ident "vector_path" ())
+                                           ())
+                                          (:
+                                           (ArgExpr
+                                            (Strings (: "\"os-release\"" []) ())
+                                            ())
+                                           [])
+                                          ())
+                                         ())
+                                        [])
+                                       ())
+                                      (Int 1 "1" ())
+                                      ())
+                                     ())
+                                    (:
+                                     (ArgExpr (Strings (: "'42'" []) ()) ())
+                                     []))
+                                   ())
+                                  ())
+                                 (:
+                                  (StmtExpr
+                                   (Call
+                                    (Dot
+                                     (Var (Ident "self" ()) ())
+                                     (Ident "assertEqual" ())
+                                     ())
+                                    (:
+                                     (ArgExpr
+                                      (Call
+                                       (Var (Ident "get_systemd_os_info" ()) ())
+                                       (:
+                                        (ArgExpr
+                                         (Strings (: "\"/dev/null\"" []) ())
+                                         ())
+                                        [])
+                                       ())
+                                      ())
+                                     (:
+                                      (ArgExpr
+                                       (Paren
+                                        (Tuple
+                                         (:
+                                          (Strings (: "\"\"" []) ())
+                                          (: (Strings (: "\"\"" []) ()) []))
+                                         ())
+                                        ())
+                                       ())
+                                      []))
+                                    ())
+                                   ())
+                                  [])))
+                               ())
+                              (:
+                               (With
+                                (:
+                                 ((,)
+                                  (Call
+                                   (Dot
+                                    (Var (Ident "mock" ()) ())
+                                    (Ident "patch" ())
+                                    ())
+                                   (:
+                                    (ArgExpr
+                                     (Strings (: "'os.path.isfile'" []) ())
+                                     ())
+                                    (:
+                                     (ArgKeyword
+                                      (Ident "return_value" ())
+                                      (Bool False ())
+                                      ())
+                                     []))
+                                   ())
+                                  Nothing)
+                                 [])
+                                (:
+                                 (StmtExpr
+                                  (Call
+                                   (Dot
+                                    (Var (Ident "self" ()) ())
+                                    (Ident "assertEqual" ())
+                                    ())
+                                   (:
+                                    (ArgExpr
+                                     (Call
+                                      (Var (Ident "get_systemd_os_info" ()) ())
+                                      []
+                                      ())
+                                     ())
+                                    (:
+                                     (ArgExpr
+                                      (Paren
+                                       (Tuple
+                                        (:
+                                         (Strings (: "\"\"" []) ())
+                                         (: (Strings (: "\"\"" []) ()) []))
+                                        ())
+                                       ())
+                                      ())
+                                     []))
+                                   ())
+                                  ())
+                                 [])
+                                ())
+                               [])))
+                            ())
+                           (:
+                            (Decorated
+                             (:
+                              (Decorator
+                               (: (Ident "mock" ()) (: (Ident "patch" ()) []))
+                               (:
+                                (ArgExpr
+                                 (Strings
+                                  (:
+                                   "\"letsencrypt.le_util.subprocess.Popen\""
+                                   [])
+                                  ())
+                                 ())
+                                [])
+                               ())
+                              [])
+                             (Fun
+                              (Ident "test_non_systemd_os_info" ())
+                              (:
+                               (Param (Ident "self" ()) Nothing Nothing ())
+                               (:
+                                (Param
+                                 (Ident "popen_mock" ())
+                                 Nothing
+                                 Nothing
+                                 ())
+                                []))
+                              Nothing
+                              (:
+                               (FromImport
+                                (ImportRelative
+                                 0
+                                 (Just
+                                  (:
+                                   (Ident "letsencrypt" ())
+                                   (: (Ident "le_util" ()) [])))
+                                 ())
+                                (FromItems
+                                 (:
+                                  (FromItem (Ident "get_os_info" ()) Nothing ())
+                                  (:
+                                   (FromItem
+                                    (Ident "get_python_os_info" ())
+                                    Nothing
+                                    ())
+                                   []))
+                                 ())
+                                ())
+                               (:
+                                (With
+                                 (:
+                                  ((,)
+                                   (Call
+                                    (Dot
+                                     (Var (Ident "mock" ()) ())
+                                     (Ident "patch" ())
+                                     ())
+                                    (:
+                                     (ArgExpr
+                                      (Strings (: "'os.path.isfile'" []) ())
+                                      ())
+                                     (:
+                                      (ArgKeyword
+                                       (Ident "return_value" ())
+                                       (Bool False ())
+                                       ())
+                                      []))
+                                    ())
+                                   Nothing)
+                                  [])
+                                 (:
+                                  (With
+                                   (:
+                                    ((,)
+                                     (Call
+                                      (Dot
+                                       (Var (Ident "mock" ()) ())
+                                       (Ident "patch" ())
+                                       ())
+                                      (:
+                                       (ArgExpr
+                                        (Strings
+                                         (: "'platform.system_alias'" [])
+                                         ())
+                                        ())
+                                       (:
+                                        (ArgKeyword
+                                         (Ident "return_value" ())
+                                         (Paren
+                                          (Tuple
+                                           (:
+                                            (Strings (: "'NonSystemD'" []) ())
+                                            (:
+                                             (Strings (: "'42'" []) ())
+                                             (: (Strings (: "'42'" []) ()) [])))
+                                           ())
+                                          ())
+                                         ())
+                                        []))
+                                      ())
+                                     Nothing)
+                                    [])
+                                   (:
+                                    (StmtExpr
+                                     (Call
+                                      (Dot
+                                       (Var (Ident "self" ()) ())
+                                       (Ident "assertEqual" ())
+                                       ())
+                                      (:
+                                       (ArgExpr
+                                        (Subscript
+                                         (Call
+                                          (Var (Ident "get_os_info" ()) ())
+                                          []
+                                          ())
+                                         (Int 0 "0" ())
+                                         ())
+                                        ())
+                                       (:
+                                        (ArgExpr
+                                         (Strings (: "'nonsystemd'" []) ())
+                                         ())
+                                        []))
+                                      ())
+                                     ())
+                                    [])
+                                   ())
+                                  (:
+                                   (With
+                                    (:
+                                     ((,)
+                                      (Call
+                                       (Dot
+                                        (Var (Ident "mock" ()) ())
+                                        (Ident "patch" ())
+                                        ())
+                                       (:
+                                        (ArgExpr
+                                         (Strings
+                                          (: "'platform.system_alias'" [])
+                                          ())
+                                         ())
+                                        (:
+                                         (ArgKeyword
+                                          (Ident "return_value" ())
+                                          (Paren
+                                           (Tuple
+                                            (:
+                                             (Strings (: "'darwin'" []) ())
+                                             (:
+                                              (Strings (: "''" []) ())
+                                              (: (Strings (: "''" []) ()) [])))
+                                            ())
+                                           ())
+                                          ())
+                                         []))
+                                       ())
+                                      Nothing)
+                                     [])
+                                    (:
+                                     (Assign
+                                      (: (Var (Ident "comm_mock" ()) ()) [])
+                                      (Call
+                                       (Dot
+                                        (Var (Ident "mock" ()) ())
+                                        (Ident "Mock" ())
+                                        ())
+                                       []
+                                       ())
+                                      ())
+                                     (:
+                                      (Assign
+                                       (: (Var (Ident "comm_attrs" ()) ()) [])
+                                       (Dictionary
+                                        (:
+                                         (DictMappingPair
+                                          (Strings
+                                           (: "'communicate.return_value'" [])
+                                           ())
+                                          (Paren
+                                           (Tuple
+                                            (:
+                                             (Strings (: "'42.42.42'" []) ())
+                                             (:
+                                              (Strings (: "'error'" []) ())
+                                              []))
+                                            ())
+                                           ()))
+                                         [])
+                                        ())
+                                       ())
+                                      (:
+                                       (StmtExpr
+                                        (Call
+                                         (Dot
+                                          (Var (Ident "comm_mock" ()) ())
+                                          (Ident "configure_mock" ())
+                                          ())
+                                         (:
+                                          (ArgVarArgsKeyword
+                                           (Var (Ident "comm_attrs" ()) ())
+                                           ())
+                                          [])
+                                         ())
+                                        ())
+                                       (:
+                                        (Assign
+                                         (:
+                                          (Dot
+                                           (Var (Ident "popen_mock" ()) ())
+                                           (Ident "return_value" ())
+                                           ())
+                                          [])
+                                         (Var (Ident "comm_mock" ()) ())
+                                         ())
+                                        (:
+                                         (StmtExpr
+                                          (Call
+                                           (Dot
+                                            (Var (Ident "self" ()) ())
+                                            (Ident "assertEqual" ())
+                                            ())
+                                           (:
+                                            (ArgExpr
+                                             (Subscript
+                                              (Call
+                                               (Var (Ident "get_os_info" ()) ())
+                                               []
+                                               ())
+                                              (Int 0 "0" ())
+                                              ())
+                                             ())
+                                            (:
+                                             (ArgExpr
+                                              (Strings (: "'darwin'" []) ())
+                                              ())
+                                             []))
+                                           ())
+                                          ())
+                                         (:
+                                          (StmtExpr
+                                           (Call
+                                            (Dot
+                                             (Var (Ident "self" ()) ())
+                                             (Ident "assertEqual" ())
+                                             ())
+                                            (:
+                                             (ArgExpr
+                                              (Subscript
+                                               (Call
+                                                (Var
+                                                 (Ident "get_os_info" ())
+                                                 ())
+                                                []
+                                                ())
+                                               (Int 1 "1" ())
+                                               ())
+                                              ())
+                                             (:
+                                              (ArgExpr
+                                               (Strings (: "'42.42.42'" []) ())
+                                               ())
+                                              []))
+                                            ())
+                                           ())
+                                          []))))))
+                                    ())
+                                   (:
+                                    (With
+                                     (:
+                                      ((,)
+                                       (Call
+                                        (Dot
+                                         (Var (Ident "mock" ()) ())
+                                         (Ident "patch" ())
+                                         ())
+                                        (:
+                                         (ArgExpr
+                                          (Strings
+                                           (: "'platform.system_alias'" [])
+                                           ())
+                                          ())
+                                         (:
+                                          (ArgKeyword
+                                           (Ident "return_value" ())
+                                           (Paren
+                                            (Tuple
+                                             (:
+                                              (Strings (: "'linux'" []) ())
+                                              (:
+                                               (Strings (: "''" []) ())
+                                               (: (Strings (: "''" []) ()) [])))
+                                             ())
+                                            ())
+                                           ())
+                                          []))
+                                        ())
+                                       Nothing)
+                                      [])
+                                     (:
+                                      (With
+                                       (:
+                                        ((,)
+                                         (Call
+                                          (Dot
+                                           (Var (Ident "mock" ()) ())
+                                           (Ident "patch" ())
+                                           ())
+                                          (:
+                                           (ArgExpr
+                                            (Strings
+                                             (:
+                                              "'platform.linux_distribution'"
+                                              [])
+                                             ())
+                                            ())
+                                           (:
+                                            (ArgKeyword
+                                             (Ident "return_value" ())
+                                             (Paren
+                                              (Tuple
+                                               (:
+                                                (Strings (: "''" []) ())
+                                                (:
+                                                 (Strings (: "''" []) ())
+                                                 (:
+                                                  (Strings (: "''" []) ())
+                                                  [])))
+                                               ())
+                                              ())
+                                             ())
+                                            []))
+                                          ())
+                                         Nothing)
+                                        [])
+                                       (:
+                                        (StmtExpr
+                                         (Call
+                                          (Dot
+                                           (Var (Ident "self" ()) ())
+                                           (Ident "assertEqual" ())
+                                           ())
+                                          (:
+                                           (ArgExpr
+                                            (Call
+                                             (Var
+                                              (Ident "get_python_os_info" ())
+                                              ())
+                                             []
+                                             ())
+                                            ())
+                                           (:
+                                            (ArgExpr
+                                             (Paren
+                                              (Tuple
+                                               (:
+                                                (Strings (: "\"linux\"" []) ())
+                                                (:
+                                                 (Strings (: "\"\"" []) ())
+                                                 []))
+                                               ())
+                                              ())
+                                             ())
+                                            []))
+                                          ())
+                                         ())
+                                        [])
+                                       ())
+                                      (:
+                                       (With
+                                        (:
+                                         ((,)
+                                          (Call
+                                           (Dot
+                                            (Var (Ident "mock" ()) ())
+                                            (Ident "patch" ())
+                                            ())
+                                           (:
+                                            (ArgExpr
+                                             (Strings
+                                              (:
+                                               "'platform.linux_distribution'"
+                                               [])
+                                              ())
+                                             ())
+                                            (:
+                                             (ArgKeyword
+                                              (Ident "return_value" ())
+                                              (Paren
+                                               (Tuple
+                                                (:
+                                                 (Strings
+                                                  (: "'testdist'" [])
+                                                  ())
+                                                 (:
+                                                  (Strings (: "'42'" []) ())
+                                                  (:
+                                                   (Strings (: "''" []) ())
+                                                   [])))
+                                                ())
+                                               ())
+                                              ())
+                                             []))
+                                           ())
+                                          Nothing)
+                                         [])
+                                        (:
+                                         (StmtExpr
+                                          (Call
+                                           (Dot
+                                            (Var (Ident "self" ()) ())
+                                            (Ident "assertEqual" ())
+                                            ())
+                                           (:
+                                            (ArgExpr
+                                             (Call
+                                              (Var
+                                               (Ident "get_python_os_info" ())
+                                               ())
+                                              []
+                                              ())
+                                             ())
+                                            (:
+                                             (ArgExpr
+                                              (Paren
+                                               (Tuple
+                                                (:
+                                                 (Strings
+                                                  (: "\"testdist\"" [])
+                                                  ())
+                                                 (:
+                                                  (Strings (: "\"42\"" []) ())
+                                                  []))
+                                                ())
+                                               ())
+                                              ())
+                                             []))
+                                           ())
+                                          ())
+                                         [])
+                                        ())
+                                       []))
+                                     ())
+                                    (:
+                                     (With
+                                      (:
+                                       ((,)
+                                        (Call
+                                         (Dot
+                                          (Var (Ident "mock" ()) ())
+                                          (Ident "patch" ())
+                                          ())
+                                         (:
+                                          (ArgExpr
+                                           (Strings
+                                            (: "'platform.system_alias'" [])
+                                            ())
+                                           ())
+                                          (:
+                                           (ArgKeyword
+                                            (Ident "return_value" ())
+                                            (Paren
+                                             (Tuple
+                                              (:
+                                               (Strings (: "'freebsd'" []) ())
+                                               (:
+                                                (Strings
+                                                 (: "'9.3-RC3-p1'" [])
+                                                 ())
+                                                (:
+                                                 (Strings (: "''" []) ())
+                                                 [])))
+                                              ())
+                                             ())
+                                            ())
+                                           []))
+                                         ())
+                                        Nothing)
+                                       [])
+                                      (:
+                                       (StmtExpr
+                                        (Call
+                                         (Dot
+                                          (Var (Ident "self" ()) ())
+                                          (Ident "assertEqual" ())
+                                          ())
+                                         (:
+                                          (ArgExpr
+                                           (Call
+                                            (Var
+                                             (Ident "get_python_os_info" ())
+                                             ())
+                                            []
+                                            ())
+                                           ())
+                                          (:
+                                           (ArgExpr
+                                            (Paren
+                                             (Tuple
+                                              (:
+                                               (Strings (: "\"freebsd\"" []) ())
+                                               (:
+                                                (Strings (: "\"9\"" []) ())
+                                                []))
+                                              ())
+                                             ())
+                                            ())
+                                           []))
+                                         ())
+                                        ())
+                                       [])
+                                      ())
+                                     (:
+                                      (With
+                                       (:
+                                        ((,)
+                                         (Call
+                                          (Dot
+                                           (Var (Ident "mock" ()) ())
+                                           (Ident "patch" ())
+                                           ())
+                                          (:
+                                           (ArgExpr
+                                            (Strings
+                                             (: "'platform.system_alias'" [])
+                                             ())
+                                            ())
+                                           (:
+                                            (ArgKeyword
+                                             (Ident "return_value" ())
+                                             (Paren
+                                              (Tuple
+                                               (:
+                                                (Strings (: "'windows'" []) ())
+                                                (:
+                                                 (Strings (: "''" []) ())
+                                                 (:
+                                                  (Strings (: "''" []) ())
+                                                  [])))
+                                               ())
+                                              ())
+                                             ())
+                                            []))
+                                          ())
+                                         Nothing)
+                                        [])
+                                       (:
+                                        (With
+                                         (:
+                                          ((,)
+                                           (Call
+                                            (Dot
+                                             (Var (Ident "mock" ()) ())
+                                             (Ident "patch" ())
+                                             ())
+                                            (:
+                                             (ArgExpr
+                                              (Strings
+                                               (: "'platform.win32_ver'" [])
+                                               ())
+                                              ())
+                                             (:
+                                              (ArgKeyword
+                                               (Ident "return_value" ())
+                                               (Paren
+                                                (Tuple
+                                                 (:
+                                                  (Strings (: "'4242'" []) ())
+                                                  (:
+                                                   (Strings (: "'95'" []) ())
+                                                   (:
+                                                    (Strings (: "'2'" []) ())
+                                                    (:
+                                                     (Strings (: "''" []) ())
+                                                     []))))
+                                                 ())
+                                                ())
+                                               ())
+                                              []))
+                                            ())
+                                           Nothing)
+                                          [])
+                                         (:
+                                          (StmtExpr
+                                           (Call
+                                            (Dot
+                                             (Var (Ident "self" ()) ())
+                                             (Ident "assertEqual" ())
+                                             ())
+                                            (:
+                                             (ArgExpr
+                                              (Call
+                                               (Var
+                                                (Ident "get_python_os_info" ())
+                                                ())
+                                               []
+                                               ())
+                                              ())
+                                             (:
+                                              (ArgExpr
+                                               (Paren
+                                                (Tuple
+                                                 (:
+                                                  (Strings
+                                                   (: "\"windows\"" [])
+                                                   ())
+                                                  (:
+                                                   (Strings (: "\"95\"" []) ())
+                                                   []))
+                                                 ())
+                                                ())
+                                               ())
+                                              []))
+                                            ())
+                                           ())
+                                          [])
+                                         ())
+                                        [])
+                                       ())
+                                      [])))))
+                                 ())
+                                []))
+                              ())
+                             ())
+                            [])))
+                         ())
+                        (:
+                         (Conditional
+                          (:
+                           ((,)
+                            (BinaryOp
+                             (Equality ())
+                             (Var (Ident "__name__" ()) ())
+                             (Strings (: "\"__main__\"" []) ())
+                             ())
+                            (:
+                             (StmtExpr
+                              (Call
+                               (Dot
+                                (Var (Ident "unittest" ()) ())
+                                (Ident "main" ())
+                                ())
+                               []
+                               ())
+                              ())
+                             []))
+                           [])
+                          []
+                          ())
+                         [])))))))))))))))))))))))))

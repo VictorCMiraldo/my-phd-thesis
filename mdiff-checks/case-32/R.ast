@@ -1,0 +1,321 @@
+(Block
+ (:
+  (LocalAssign
+   (: (Name "Migrations") [])
+   (Just
+    (:
+     (TableConst
+      (:
+       (Field
+        (TableConst
+         (:
+          (NamedField (Name "init") (Bool True))
+          (:
+           (NamedField (Name "name") (String "\"2015-01-12-175310_skeleton\""))
+           (:
+            (NamedField
+             (Name "up")
+             (EFunDef
+              (FunBody
+               (: (Name "options") (: (Name "dao_factory") []))
+               False
+               (Block
+                (:
+                 (LocalAssign
+                  (: (Name "keyspace_name") [])
+                  (Just
+                   (:
+                    (PrefixExp
+                     (PEVar
+                      (SelectName
+                       (PEVar (VarName (Name "options")))
+                       (Name "keyspace"))))
+                    [])))
+                 (:
+                  (LocalAssign
+                   (: (Name "strategy") (: (Name "strategy_properties") []))
+                   (Just
+                    (:
+                     (PrefixExp
+                      (PEVar
+                       (SelectName
+                        (PEVar (VarName (Name "options")))
+                        (Name "replication_strategy"))))
+                     (: (String "\"\"") []))))
+                  (:
+                   (If
+                    (:
+                     ((,)
+                      (Binop
+                       EQ
+                       (PrefixExp (PEVar (VarName (Name "strategy"))))
+                       (String "\"SimpleStrategy\""))
+                      (Block
+                       (:
+                        (Assign
+                         (: (VarName (Name "strategy_properties")) [])
+                         (:
+                          (PrefixExp
+                           (PEFunCall
+                            (NormalFunCall
+                             (PEVar
+                              (SelectName
+                               (PEVar (VarName (Name "string")))
+                               (Name "format")))
+                             (Args
+                              (:
+                               (String "\", 'replication_factor': %s\"")
+                               (:
+                                (PrefixExp
+                                 (PEVar
+                                  (SelectName
+                                   (PEVar (VarName (Name "options")))
+                                   (Name "replication_factor"))))
+                                []))))))
+                          []))
+                        [])
+                       Nothing))
+                     (:
+                      ((,)
+                       (Binop
+                        EQ
+                        (PrefixExp (PEVar (VarName (Name "strategy"))))
+                        (String "\"NetworkTopologyStrategy\""))
+                       (Block
+                        (:
+                         (LocalAssign
+                          (: (Name "dcs") [])
+                          (Just (: (TableConst []) [])))
+                         (:
+                          (ForIn
+                           (: (Name "dc_name") (: (Name "dc_repl") []))
+                           (:
+                            (PrefixExp
+                             (PEFunCall
+                              (NormalFunCall
+                               (PEVar (VarName (Name "pairs")))
+                               (Args
+                                (:
+                                 (PrefixExp
+                                  (PEVar
+                                   (SelectName
+                                    (PEVar (VarName (Name "options")))
+                                    (Name "data_centers"))))
+                                 [])))))
+                            [])
+                           (Block
+                            (:
+                             (FunCall
+                              (NormalFunCall
+                               (PEVar
+                                (SelectName
+                                 (PEVar (VarName (Name "table")))
+                                 (Name "insert")))
+                               (Args
+                                (:
+                                 (PrefixExp (PEVar (VarName (Name "dcs"))))
+                                 (:
+                                  (PrefixExp
+                                   (PEFunCall
+                                    (NormalFunCall
+                                     (PEVar
+                                      (SelectName
+                                       (PEVar (VarName (Name "string")))
+                                       (Name "format")))
+                                     (Args
+                                      (:
+                                       (String "\"'%s': %s\"")
+                                       (:
+                                        (PrefixExp
+                                         (PEVar (VarName (Name "dc_name"))))
+                                        (:
+                                         (PrefixExp
+                                          (PEVar (VarName (Name "dc_repl"))))
+                                         [])))))))
+                                  [])))))
+                             [])
+                            Nothing))
+                          (:
+                           (If
+                            (:
+                             ((,)
+                              (Binop
+                               GT
+                               (Unop
+                                Len
+                                (PrefixExp (PEVar (VarName (Name "dcs")))))
+                               (Number IntNum "0"))
+                              (Block
+                               (:
+                                (Assign
+                                 (: (VarName (Name "strategy_properties")) [])
+                                 (:
+                                  (PrefixExp
+                                   (PEFunCall
+                                    (NormalFunCall
+                                     (PEVar
+                                      (SelectName
+                                       (PEVar (VarName (Name "string")))
+                                       (Name "format")))
+                                     (Args
+                                      (:
+                                       (String "\", %s\"")
+                                       (:
+                                        (PrefixExp
+                                         (PEFunCall
+                                          (NormalFunCall
+                                           (PEVar
+                                            (SelectName
+                                             (PEVar (VarName (Name "table")))
+                                             (Name "concat")))
+                                           (Args
+                                            (:
+                                             (PrefixExp
+                                              (PEVar (VarName (Name "dcs"))))
+                                             (: (String "\", \"") []))))))
+                                        []))))))
+                                  []))
+                                [])
+                               Nothing))
+                             [])
+                            Nothing)
+                           [])))
+                        Nothing))
+                      []))
+                    (Just
+                     (Block
+                      []
+                      (Just
+                       (:
+                        Nil
+                        (:
+                         (String "\"invalid replication_strategy class\"")
+                         []))))))
+                   (:
+                    (LocalAssign
+                     (: (Name "keyspace_str") [])
+                     (Just
+                      (:
+                       (PrefixExp
+                        (PEFunCall
+                         (NormalFunCall
+                          (PEVar
+                           (SelectName
+                            (PEVar (VarName (Name "string")))
+                            (Name "format")))
+                          (Args
+                           (:
+                            (String
+                             "[[\n        CREATE KEYSPACE IF NOT EXISTS \"%s\"\n          WITH REPLICATION = {'class': '%s'%s};\n      ]]")
+                            (:
+                             (PrefixExp
+                              (PEVar (VarName (Name "keyspace_name"))))
+                             (:
+                              (PrefixExp (PEVar (VarName (Name "strategy"))))
+                              (:
+                               (PrefixExp
+                                (PEVar (VarName (Name "strategy_properties"))))
+                               []))))))))
+                       [])))
+                    []))))
+                (Just
+                 (:
+                  (PrefixExp
+                   (PEFunCall
+                    (MethodCall
+                     (PEVar (VarName (Name "dao_factory")))
+                     (Name "execute_queries")
+                     (Args
+                      (:
+                       (Binop
+                        Concat
+                        (PrefixExp (PEVar (VarName (Name "keyspace_str"))))
+                        (Binop
+                         Concat
+                         (String "[[\n        USE \"]]")
+                         (Binop
+                          Concat
+                          (PrefixExp (PEVar (VarName (Name "keyspace_name"))))
+                          (String
+                           "[[\";\n\n        CREATE TABLE IF NOT EXISTS schema_migrations(\n          id text PRIMARY KEY,\n          migrations list<text>\n        );\n      ]]"))))
+                       (: (Bool True) []))))))
+                  []))))))
+            (:
+             (NamedField
+              (Name "down")
+              (EFunDef
+               (FunBody
+                (: (Name "options") (: (Name "dao_factory") []))
+                False
+                (Block
+                 []
+                 (Just
+                  (:
+                   (Binop
+                    Concat
+                    (PrefixExp
+                     (PEFunCall
+                      (MethodCall
+                       (PEVar (VarName (Name "dao_factory")))
+                       (Name "execute_queries")
+                       (StringArg "[[\n        DROP KEYSPACE \"]]"))))
+                    (Binop
+                     Concat
+                     (PrefixExp
+                      (PEVar
+                       (SelectName
+                        (PEVar (VarName (Name "options")))
+                        (Name "keyspace"))))
+                     (String "[[\";\n      ]]")))
+                   []))))))
+             []))))))
+       (:
+        (Field
+         (TableConst
+          (:
+           (NamedField
+            (Name "name")
+            (String "\"2015-01-12-175310_init_schema\""))
+           (:
+            (NamedField
+             (Name "up")
+             (EFunDef
+              (FunBody
+               (: (Name "options") (: (Name "dao_factory") []))
+               False
+               (Block
+                []
+                (Just
+                 (:
+                  (PrefixExp
+                   (PEFunCall
+                    (MethodCall
+                     (PEVar (VarName (Name "dao_factory")))
+                     (Name "execute_queries")
+                     (StringArg
+                      "[[\n        CREATE TABLE IF NOT EXISTS consumers(\n          id uuid,\n          custom_id text,\n          username text,\n          created_at timestamp,\n          PRIMARY KEY (id)\n        );\n\n        CREATE INDEX IF NOT EXISTS ON consumers(custom_id);\n        CREATE INDEX IF NOT EXISTS ON consumers(username);\n\n        CREATE TABLE IF NOT EXISTS apis(\n          id uuid,\n          name text,\n          request_host text,\n          request_path text,\n          strip_request_path boolean,\n          upstream_url text,\n          preserve_host boolean,\n          created_at timestamp,\n          PRIMARY KEY (id)\n        );\n\n        CREATE INDEX IF NOT EXISTS ON apis(name);\n        CREATE INDEX IF NOT EXISTS ON apis(request_host);\n        CREATE INDEX IF NOT EXISTS ON apis(request_path);\n\n        CREATE TABLE IF NOT EXISTS plugins(\n          id uuid,\n          api_id uuid,\n          consumer_id uuid,\n          name text,\n          config text, -- serialized plugin configuration\n          enabled boolean,\n          created_at timestamp,\n          PRIMARY KEY (id, name)\n        );\n\n        CREATE INDEX IF NOT EXISTS ON plugins(name);\n        CREATE INDEX IF NOT EXISTS ON plugins(api_id);\n        CREATE INDEX IF NOT EXISTS ON plugins(consumer_id);\n      ]]"))))
+                  []))))))
+            (:
+             (NamedField
+              (Name "down")
+              (EFunDef
+               (FunBody
+                (: (Name "options") (: (Name "dao_factory") []))
+                False
+                (Block
+                 []
+                 (Just
+                  (:
+                   (PrefixExp
+                    (PEFunCall
+                     (MethodCall
+                      (PEVar (VarName (Name "dao_factory")))
+                      (Name "execute_queries")
+                      (StringArg
+                       "[[\n        DROP TABLE consumers;\n        DROP TABLE apis;\n        DROP TABLE plugins;\n      ]]"))))
+                   []))))))
+             [])))))
+        [])))
+     [])))
+  [])
+ (Just (: (PrefixExp (PEVar (VarName (Name "Migrations")))) [])))

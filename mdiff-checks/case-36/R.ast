@@ -1,0 +1,1487 @@
+(Block
+ (:
+  (FunCall
+   (NormalFunCall
+    (PEVar (VarName (Name "module")))
+    (Args
+     (:
+      Vararg
+      (:
+       (PrefixExp
+        (PEVar (SelectName (PEVar (VarName (Name "package"))) (Name "seeall"))))
+       [])))))
+  (:
+   (LocalAssign
+    (: (Name "S") [])
+    (Just
+     (:
+      (PrefixExp
+       (PEFunCall
+        (NormalFunCall
+         (PEVar (VarName (Name "require")))
+         (Args (: (String "\"syscall\"") [])))))
+      [])))
+   (:
+    (LocalAssign
+     (: (Name "pci") [])
+     (Just
+      (:
+       (PrefixExp
+        (PEFunCall
+         (NormalFunCall
+          (PEVar (VarName (Name "require")))
+          (Args (: (String "\"lib.hardware.pci\"") [])))))
+       [])))
+    (:
+     (LocalAssign (: (Name "bound_cpu") []) Nothing)
+     (:
+      (LocalAssign (: (Name "bound_numa_node") []) Nothing)
+      (:
+       (LocalAssign
+        (: (Name "node_path") [])
+        (Just (: (String "'/sys/devices/system/node/node'") [])))
+       (:
+        (LocalAssign
+         (: (Name "MAX_CPU") [])
+         (Just (: (Number IntNum "1023") [])))
+        (:
+         (FunAssign
+          (FunName (Name "cpu_get_numa_node") [] Nothing)
+          (FunBody
+           (: (Name "cpu") [])
+           False
+           (Block
+            (:
+             (LocalAssign
+              (: (Name "node") [])
+              (Just (: (Number IntNum "0") [])))
+             (:
+              (While
+               (Bool True)
+               (Block
+                (:
+                 (LocalAssign
+                  (: (Name "node_dir") [])
+                  (Just
+                   (:
+                    (PrefixExp
+                     (PEFunCall
+                      (NormalFunCall
+                       (PEVar
+                        (SelectName (PEVar (VarName (Name "S"))) (Name "open")))
+                       (Args
+                        (:
+                         (Binop
+                          Concat
+                          (PrefixExp (PEVar (VarName (Name "node_path"))))
+                          (PrefixExp (PEVar (VarName (Name "node")))))
+                         (: (String "'rdonly, directory'") []))))))
+                    [])))
+                 (:
+                  (If
+                   (:
+                    ((,)
+                     (Unop Not (PrefixExp (PEVar (VarName (Name "node_dir")))))
+                     (Block [] (Just (: (Number IntNum "0") []))))
+                    [])
+                   Nothing)
+                  (:
+                   (LocalAssign
+                    (: (Name "found") [])
+                    (Just
+                     (:
+                      (PrefixExp
+                       (PEFunCall
+                        (NormalFunCall
+                         (PEVar
+                          (SelectName
+                           (PEVar (VarName (Name "S")))
+                           (Name "readlinkat")))
+                         (Args
+                          (:
+                           (PrefixExp (PEVar (VarName (Name "node_dir"))))
+                           (:
+                            (Binop
+                             Concat
+                             (String "'cpu'")
+                             (PrefixExp (PEVar (VarName (Name "cpu")))))
+                            []))))))
+                      [])))
+                   (:
+                    (FunCall
+                     (MethodCall
+                      (PEVar (VarName (Name "node_dir")))
+                      (Name "close")
+                      (Args [])))
+                    (:
+                     (If
+                      (:
+                       ((,)
+                        (PrefixExp (PEVar (VarName (Name "found"))))
+                        (Block
+                         []
+                         (Just
+                          (: (PrefixExp (PEVar (VarName (Name "node")))) []))))
+                       [])
+                      Nothing)
+                     (:
+                      (Assign
+                       (: (VarName (Name "node")) [])
+                       (:
+                        (Binop
+                         Add
+                         (PrefixExp (PEVar (VarName (Name "node"))))
+                         (Number IntNum "1"))
+                        []))
+                      []))))))
+                Nothing))
+              []))
+            Nothing)))
+         (:
+          (LocalFunAssign
+           (Name "supports_numa")
+           (FunBody
+            []
+            False
+            (Block
+             (:
+              (LocalAssign
+               (: (Name "node0") [])
+               (Just
+                (:
+                 (PrefixExp
+                  (PEFunCall
+                   (NormalFunCall
+                    (PEVar
+                     (SelectName (PEVar (VarName (Name "S"))) (Name "open")))
+                    (Args
+                     (:
+                      (Binop
+                       Concat
+                       (PrefixExp (PEVar (VarName (Name "node_path"))))
+                       (PrefixExp
+                        (PEFunCall
+                         (NormalFunCall
+                          (PEVar (VarName (Name "tostring")))
+                          (Args (: (Number IntNum "0") []))))))
+                      (: (String "'rdonly, directory'") []))))))
+                 [])))
+              (:
+               (If
+                (:
+                 ((,)
+                  (Unop Not (PrefixExp (PEVar (VarName (Name "node0")))))
+                  (Block [] (Just (: (Bool False) []))))
+                 [])
+                Nothing)
+               (:
+                (FunCall
+                 (MethodCall
+                  (PEVar (VarName (Name "node0")))
+                  (Name "close")
+                  (Args [])))
+                [])))
+             (Just (: (Bool True) [])))))
+          (:
+           (FunAssign
+            (FunName (Name "has_numa") [] Nothing)
+            (FunBody
+             []
+             False
+             (Block
+              (:
+               (LocalAssign
+                (: (Name "node1") [])
+                (Just
+                 (:
+                  (PrefixExp
+                   (PEFunCall
+                    (NormalFunCall
+                     (PEVar
+                      (SelectName (PEVar (VarName (Name "S"))) (Name "open")))
+                     (Args
+                      (:
+                       (Binop
+                        Concat
+                        (PrefixExp (PEVar (VarName (Name "node_path"))))
+                        (PrefixExp
+                         (PEFunCall
+                          (NormalFunCall
+                           (PEVar (VarName (Name "tostring")))
+                           (Args (: (Number IntNum "1") []))))))
+                       (: (String "'rdonly, directory'") []))))))
+                  [])))
+               (:
+                (If
+                 (:
+                  ((,)
+                   (Unop Not (PrefixExp (PEVar (VarName (Name "node1")))))
+                   (Block [] (Just (: (Bool False) []))))
+                  [])
+                 Nothing)
+                (:
+                 (FunCall
+                  (MethodCall
+                   (PEVar (VarName (Name "node1")))
+                   (Name "close")
+                   (Args [])))
+                 [])))
+              (Just (: (Bool True) [])))))
+           (:
+            (FunAssign
+             (FunName (Name "pci_get_numa_node") [] Nothing)
+             (FunBody
+              (: (Name "addr") [])
+              False
+              (Block
+               (:
+                (Assign
+                 (: (VarName (Name "addr")) [])
+                 (:
+                  (PrefixExp
+                   (PEFunCall
+                    (NormalFunCall
+                     (PEVar
+                      (SelectName
+                       (PEVar (VarName (Name "pci")))
+                       (Name "qualified")))
+                     (Args
+                      (: (PrefixExp (PEVar (VarName (Name "addr")))) [])))))
+                  []))
+                (:
+                 (LocalAssign
+                  (: (Name "file") [])
+                  (Just
+                   (:
+                    (PrefixExp
+                     (PEFunCall
+                      (NormalFunCall
+                       (PEVar (VarName (Name "assert")))
+                       (Args
+                        (:
+                         (PrefixExp
+                          (PEFunCall
+                           (NormalFunCall
+                            (PEVar
+                             (SelectName
+                              (PEVar (VarName (Name "io")))
+                              (Name "open")))
+                            (Args
+                             (:
+                              (Binop
+                               Concat
+                               (String "'/sys/bus/pci/devices/'")
+                               (Binop
+                                Concat
+                                (PrefixExp (PEVar (VarName (Name "addr"))))
+                                (String "'/numa_node'")))
+                              [])))))
+                         [])))))
+                    [])))
+                 (:
+                  (LocalAssign
+                   (: (Name "node") [])
+                   (Just
+                    (:
+                     (PrefixExp
+                      (PEFunCall
+                       (NormalFunCall
+                        (PEVar (VarName (Name "assert")))
+                        (Args
+                         (:
+                          (PrefixExp
+                           (PEFunCall
+                            (NormalFunCall
+                             (PEVar (VarName (Name "tonumber")))
+                             (Args
+                              (:
+                               (PrefixExp
+                                (PEFunCall
+                                 (MethodCall
+                                  (PEVar (VarName (Name "file")))
+                                  (Name "read")
+                                  (Args []))))
+                               [])))))
+                          [])))))
+                     [])))
+                  [])))
+               (Just
+                (:
+                 (PrefixExp
+                  (PEFunCall
+                   (NormalFunCall
+                    (PEVar
+                     (SelectName (PEVar (VarName (Name "math"))) (Name "max")))
+                    (Args
+                     (:
+                      (Number IntNum "0")
+                      (: (PrefixExp (PEVar (VarName (Name "node")))) []))))))
+                 [])))))
+            (:
+             (FunAssign
+              (FunName (Name "choose_numa_node_for_pci_addresses") [] Nothing)
+              (FunBody
+               (: (Name "addrs") (: (Name "require_affinity") []))
+               False
+               (Block
+                (:
+                 (LocalAssign
+                  (:
+                   (Name "chosen_node")
+                   (: (Name "chosen_because_of_addr") []))
+                  Nothing)
+                 (:
+                  (ForIn
+                   (: (Name "_") (: (Name "addr") []))
+                   (:
+                    (PrefixExp
+                     (PEFunCall
+                      (NormalFunCall
+                       (PEVar (VarName (Name "ipairs")))
+                       (Args
+                        (: (PrefixExp (PEVar (VarName (Name "addrs")))) [])))))
+                    [])
+                   (Block
+                    (:
+                     (LocalAssign
+                      (: (Name "node") [])
+                      (Just
+                       (:
+                        (PrefixExp
+                         (PEFunCall
+                          (NormalFunCall
+                           (PEVar (VarName (Name "pci_get_numa_node")))
+                           (Args
+                            (:
+                             (PrefixExp (PEVar (VarName (Name "addr"))))
+                             [])))))
+                        [])))
+                     (:
+                      (If
+                       (:
+                        ((,)
+                         (Binop
+                          Or
+                          (Unop Not (PrefixExp (PEVar (VarName (Name "node")))))
+                          (Binop
+                           EQ
+                           (PrefixExp (PEVar (VarName (Name "node"))))
+                           (PrefixExp (PEVar (VarName (Name "chosen_node"))))))
+                         (Block [] Nothing))
+                        (:
+                         ((,)
+                          (Unop
+                           Not
+                           (PrefixExp (PEVar (VarName (Name "chosen_node")))))
+                          (Block
+                           (:
+                            (Assign
+                             (: (VarName (Name "chosen_node")) [])
+                             (: (PrefixExp (PEVar (VarName (Name "node")))) []))
+                            (:
+                             (Assign
+                              (: (VarName (Name "chosen_because_of_addr")) [])
+                              (:
+                               (PrefixExp (PEVar (VarName (Name "addr"))))
+                               []))
+                             []))
+                           Nothing))
+                         []))
+                       (Just
+                        (Block
+                         (:
+                          (LocalAssign
+                           (: (Name "msg") [])
+                           (Just
+                            (:
+                             (PrefixExp
+                              (PEFunCall
+                               (NormalFunCall
+                                (PEVar
+                                 (SelectName
+                                  (PEVar (VarName (Name "string")))
+                                  (Name "format")))
+                                (Args
+                                 (:
+                                  (String
+                                   "\"PCI devices %s and %s have different NUMA node affinities\"")
+                                  (:
+                                   (PrefixExp
+                                    (PEVar
+                                     (VarName (Name "chosen_because_of_addr"))))
+                                   (:
+                                    (PrefixExp (PEVar (VarName (Name "addr"))))
+                                    [])))))))
+                             [])))
+                          (:
+                           (If
+                            (:
+                             ((,)
+                              (PrefixExp
+                               (PEVar (VarName (Name "require_affinity"))))
+                              (Block
+                               (:
+                                (FunCall
+                                 (NormalFunCall
+                                  (PEVar (VarName (Name "error")))
+                                  (Args
+                                   (:
+                                    (PrefixExp (PEVar (VarName (Name "msg"))))
+                                    []))))
+                                [])
+                               Nothing))
+                             [])
+                            (Just
+                             (Block
+                              (:
+                               (FunCall
+                                (NormalFunCall
+                                 (PEVar (VarName (Name "print")))
+                                 (Args
+                                  (:
+                                   (Binop
+                                    Concat
+                                    (String "'Warning: '")
+                                    (PrefixExp (PEVar (VarName (Name "msg")))))
+                                   []))))
+                               [])
+                              Nothing)))
+                           []))
+                         Nothing)))
+                      []))
+                    Nothing))
+                  []))
+                (Just
+                 (: (PrefixExp (PEVar (VarName (Name "chosen_node")))) [])))))
+             (:
+              (FunAssign
+               (FunName (Name "check_affinity_for_pci_addresses") [] Nothing)
+               (FunBody
+                (: (Name "addrs") [])
+                False
+                (Block
+                 (:
+                  (LocalAssign
+                   (: (Name "policy") [])
+                   (Just
+                    (:
+                     (PrefixExp
+                      (PEFunCall
+                       (NormalFunCall
+                        (PEVar
+                         (SelectName
+                          (PEVar (VarName (Name "S")))
+                          (Name "get_mempolicy")))
+                        (Args []))))
+                     [])))
+                  (:
+                   (If
+                    (:
+                     ((,)
+                      (Binop
+                       EQ
+                       (PrefixExp
+                        (PEVar
+                         (SelectName
+                          (PEVar (VarName (Name "policy")))
+                          (Name "mode"))))
+                       (PrefixExp
+                        (PEVar
+                         (Select
+                          (PEVar
+                           (SelectName
+                            (PEVar
+                             (SelectName
+                              (PEVar (VarName (Name "S")))
+                              (Name "c")))
+                            (Name "MPOL_MODE")))
+                          (String "'default'")))))
+                      (Block
+                       (:
+                        (If
+                         (:
+                          ((,)
+                           (PrefixExp
+                            (PEFunCall
+                             (NormalFunCall
+                              (PEVar (VarName (Name "has_numa")))
+                              (Args []))))
+                           (Block
+                            (:
+                             (FunCall
+                              (NormalFunCall
+                               (PEVar (VarName (Name "print")))
+                               (Args
+                                (:
+                                 (String "'Warning: No NUMA memory affinity.'")
+                                 []))))
+                             (:
+                              (FunCall
+                               (NormalFunCall
+                                (PEVar (VarName (Name "print")))
+                                (Args
+                                 (:
+                                  (String
+                                   "'Pass --cpu to bind to a CPU and its NUMA node.'")
+                                  []))))
+                              []))
+                            Nothing))
+                          [])
+                         Nothing)
+                        [])
+                       Nothing))
+                     (:
+                      ((,)
+                       (Binop
+                        NEQ
+                        (PrefixExp
+                         (PEVar
+                          (SelectName
+                           (PEVar (VarName (Name "policy")))
+                           (Name "mode"))))
+                        (PrefixExp
+                         (PEVar
+                          (Select
+                           (PEVar
+                            (SelectName
+                             (PEVar
+                              (SelectName
+                               (PEVar (VarName (Name "S")))
+                               (Name "c")))
+                             (Name "MPOL_MODE")))
+                           (String "'bind'")))))
+                       (Block
+                        (:
+                         (FunCall
+                          (NormalFunCall
+                           (PEVar (VarName (Name "print")))
+                           (Args
+                            (:
+                             (String
+                              "\"Warning: NUMA memory policy already in effect, but it's not --membind.\"")
+                             []))))
+                         [])
+                        Nothing))
+                      []))
+                    (Just
+                     (Block
+                      (:
+                       (LocalAssign
+                        (: (Name "node") [])
+                        (Just
+                         (:
+                          (PrefixExp
+                           (PEVar
+                            (SelectName
+                             (PEFunCall
+                              (NormalFunCall
+                               (PEVar
+                                (SelectName
+                                 (PEVar (VarName (Name "S")))
+                                 (Name "getcpu")))
+                               (Args [])))
+                             (Name "node"))))
+                          [])))
+                       (:
+                        (LocalAssign
+                         (: (Name "node_for_pci") [])
+                         (Just
+                          (:
+                           (PrefixExp
+                            (PEFunCall
+                             (NormalFunCall
+                              (PEVar
+                               (VarName
+                                (Name "choose_numa_node_for_pci_addresses")))
+                              (Args
+                               (:
+                                (PrefixExp (PEVar (VarName (Name "addrs"))))
+                                [])))))
+                           [])))
+                        (:
+                         (If
+                          (:
+                           ((,)
+                            (Binop
+                             And
+                             (PrefixExp (PEVar (VarName (Name "node_for_pci"))))
+                             (Binop
+                              NEQ
+                              (PrefixExp (PEVar (VarName (Name "node"))))
+                              (PrefixExp
+                               (PEVar (VarName (Name "node_for_pci"))))))
+                            (Block
+                             (:
+                              (FunCall
+                               (NormalFunCall
+                                (PEVar (VarName (Name "print")))
+                                (Args
+                                 (:
+                                  (String
+                                   "\"Warning: Bound NUMA node does not have affinity with PCI devices.\"")
+                                  []))))
+                              [])
+                             Nothing))
+                           [])
+                          Nothing)
+                         [])))
+                      Nothing)))
+                   []))
+                 Nothing)))
+              (:
+               (FunAssign
+                (FunName (Name "unbind_cpu") [] Nothing)
+                (FunBody
+                 []
+                 False
+                 (Block
+                  (:
+                   (LocalAssign
+                    (: (Name "cpu_set") [])
+                    (Just
+                     (:
+                      (PrefixExp
+                       (PEFunCall
+                        (NormalFunCall
+                         (PEVar
+                          (SelectName
+                           (PEVar (VarName (Name "S")))
+                           (Name "sched_getaffinity")))
+                         (Args []))))
+                      [])))
+                   (:
+                    (FunCall
+                     (MethodCall
+                      (PEVar (VarName (Name "cpu_set")))
+                      (Name "zero")
+                      (Args [])))
+                    (:
+                     (ForRange
+                      (Name "i")
+                      (Number IntNum "0")
+                      (PrefixExp (PEVar (VarName (Name "MAX_CPU"))))
+                      Nothing
+                      (Block
+                       (:
+                        (FunCall
+                         (MethodCall
+                          (PEVar (VarName (Name "cpu_set")))
+                          (Name "set")
+                          (Args
+                           (: (PrefixExp (PEVar (VarName (Name "i")))) []))))
+                        [])
+                       Nothing))
+                     (:
+                      (FunCall
+                       (NormalFunCall
+                        (PEVar (VarName (Name "assert")))
+                        (Args
+                         (:
+                          (PrefixExp
+                           (PEFunCall
+                            (NormalFunCall
+                             (PEVar
+                              (SelectName
+                               (PEVar (VarName (Name "S")))
+                               (Name "sched_setaffinity")))
+                             (Args
+                              (:
+                               (Number IntNum "0")
+                               (:
+                                (PrefixExp (PEVar (VarName (Name "cpu_set"))))
+                                []))))))
+                          []))))
+                      (:
+                       (Assign (: (VarName (Name "bound_cpu")) []) (: Nil []))
+                       [])))))
+                  Nothing)))
+               (:
+                (FunAssign
+                 (FunName (Name "bind_to_cpu") [] Nothing)
+                 (FunBody
+                  (: (Name "cpu") [])
+                  False
+                  (Block
+                   (:
+                    (If
+                     (:
+                      ((,)
+                       (Binop
+                        EQ
+                        (PrefixExp (PEVar (VarName (Name "cpu"))))
+                        (PrefixExp (PEVar (VarName (Name "bound_cpu")))))
+                       (Block [] (Just [])))
+                      [])
+                     Nothing)
+                    (:
+                     (If
+                      (:
+                       ((,)
+                        (Unop Not (PrefixExp (PEVar (VarName (Name "cpu")))))
+                        (Block
+                         []
+                         (Just
+                          (:
+                           (PrefixExp
+                            (PEFunCall
+                             (NormalFunCall
+                              (PEVar (VarName (Name "unbind_cpu")))
+                              (Args []))))
+                           []))))
+                       [])
+                      Nothing)
+                     (:
+                      (FunCall
+                       (NormalFunCall
+                        (PEVar (VarName (Name "assert")))
+                        (Args
+                         (:
+                          (Unop
+                           Not
+                           (PrefixExp (PEVar (VarName (Name "bound_cpu")))))
+                          (: (String "\"already bound\"") [])))))
+                      (:
+                       (FunCall
+                        (NormalFunCall
+                         (PEVar (VarName (Name "assert")))
+                         (Args
+                          (:
+                           (PrefixExp
+                            (PEFunCall
+                             (NormalFunCall
+                              (PEVar
+                               (SelectName
+                                (PEVar (VarName (Name "S")))
+                                (Name "sched_setaffinity")))
+                              (Args
+                               (:
+                                (Number IntNum "0")
+                                (:
+                                 (PrefixExp (PEVar (VarName (Name "cpu"))))
+                                 []))))))
+                           (:
+                            (PrefixExp
+                             (PEFunCall
+                              (MethodCall
+                               (Paren
+                                (String "\"Couldn't set affinity for cpu %s\""))
+                               (Name "format")
+                               (Args
+                                (:
+                                 (PrefixExp (PEVar (VarName (Name "cpu"))))
+                                 [])))))
+                            [])))))
+                       (:
+                        (LocalAssign
+                         (: (Name "cpu_and_node") [])
+                         (Just
+                          (:
+                           (PrefixExp
+                            (PEFunCall
+                             (NormalFunCall
+                              (PEVar
+                               (SelectName
+                                (PEVar (VarName (Name "S")))
+                                (Name "getcpu")))
+                              (Args []))))
+                           [])))
+                        (:
+                         (FunCall
+                          (NormalFunCall
+                           (PEVar (VarName (Name "assert")))
+                           (Args
+                            (:
+                             (Binop
+                              EQ
+                              (PrefixExp
+                               (PEVar
+                                (SelectName
+                                 (PEVar (VarName (Name "cpu_and_node")))
+                                 (Name "cpu"))))
+                              (PrefixExp (PEVar (VarName (Name "cpu")))))
+                             []))))
+                         (:
+                          (Assign
+                           (: (VarName (Name "bound_cpu")) [])
+                           (: (PrefixExp (PEVar (VarName (Name "cpu")))) []))
+                          (:
+                           (FunCall
+                            (NormalFunCall
+                             (PEVar (VarName (Name "bind_to_numa_node")))
+                             (Args
+                              (:
+                               (PrefixExp
+                                (PEVar
+                                 (SelectName
+                                  (PEVar (VarName (Name "cpu_and_node")))
+                                  (Name "node"))))
+                               []))))
+                           []))))))))
+                   Nothing)))
+                (:
+                 (FunAssign
+                  (FunName (Name "unbind_numa_node") [] Nothing)
+                  (FunBody
+                   []
+                   False
+                   (Block
+                    (:
+                     (If
+                      (:
+                       ((,)
+                        (PrefixExp
+                         (PEFunCall
+                          (NormalFunCall
+                           (PEVar (VarName (Name "supports_numa")))
+                           (Args []))))
+                        (Block
+                         (:
+                          (FunCall
+                           (NormalFunCall
+                            (PEVar (VarName (Name "assert")))
+                            (Args
+                             (:
+                              (PrefixExp
+                               (PEFunCall
+                                (NormalFunCall
+                                 (PEVar
+                                  (SelectName
+                                   (PEVar (VarName (Name "S")))
+                                   (Name "set_mempolicy")))
+                                 (Args (: (String "'default'") [])))))
+                              []))))
+                          [])
+                         Nothing))
+                       [])
+                      Nothing)
+                     (:
+                      (Assign
+                       (: (VarName (Name "bound_numa_node")) [])
+                       (: Nil []))
+                      []))
+                    Nothing)))
+                 (:
+                  (FunAssign
+                   (FunName (Name "bind_to_numa_node") [] Nothing)
+                   (FunBody
+                    (: (Name "node") (: (Name "policy") []))
+                    False
+                    (Block
+                     (:
+                      (If
+                       (:
+                        ((,)
+                         (Binop
+                          EQ
+                          (PrefixExp (PEVar (VarName (Name "node"))))
+                          (PrefixExp
+                           (PEVar (VarName (Name "bound_numa_node")))))
+                         (Block [] (Just [])))
+                        [])
+                       Nothing)
+                      (:
+                       (If
+                        (:
+                         ((,)
+                          (Unop Not (PrefixExp (PEVar (VarName (Name "node")))))
+                          (Block
+                           []
+                           (Just
+                            (:
+                             (PrefixExp
+                              (PEFunCall
+                               (NormalFunCall
+                                (PEVar (VarName (Name "unbind_numa_node")))
+                                (Args []))))
+                             []))))
+                         [])
+                        Nothing)
+                       (:
+                        (FunCall
+                         (NormalFunCall
+                          (PEVar (VarName (Name "assert")))
+                          (Args
+                           (:
+                            (Unop
+                             Not
+                             (PrefixExp
+                              (PEVar (VarName (Name "bound_numa_node")))))
+                            (: (String "\"already bound\"") [])))))
+                        (:
+                         (If
+                          (:
+                           ((,)
+                            (PrefixExp
+                             (PEFunCall
+                              (NormalFunCall
+                               (PEVar (VarName (Name "supports_numa")))
+                               (Args []))))
+                            (Block
+                             (:
+                              (FunCall
+                               (NormalFunCall
+                                (PEVar (VarName (Name "assert")))
+                                (Args
+                                 (:
+                                  (PrefixExp
+                                   (PEFunCall
+                                    (NormalFunCall
+                                     (PEVar
+                                      (SelectName
+                                       (PEVar (VarName (Name "S")))
+                                       (Name "set_mempolicy")))
+                                     (Args
+                                      (:
+                                       (Binop
+                                        Or
+                                        (PrefixExp
+                                         (PEVar (VarName (Name "policy"))))
+                                        (String "'preferred'"))
+                                       (:
+                                        (PrefixExp
+                                         (PEVar (VarName (Name "node"))))
+                                        []))))))
+                                  []))))
+                              (:
+                               (LocalAssign
+                                (: (Name "from_mask") [])
+                                (Just
+                                 (:
+                                  (PrefixExp
+                                   (PEVar
+                                    (SelectName
+                                     (PEFunCall
+                                      (NormalFunCall
+                                       (PEVar (VarName (Name "assert")))
+                                       (Args
+                                        (:
+                                         (PrefixExp
+                                          (PEFunCall
+                                           (NormalFunCall
+                                            (PEVar
+                                             (SelectName
+                                              (PEVar (VarName (Name "S")))
+                                              (Name "get_mempolicy")))
+                                            (Args
+                                             (:
+                                              Nil
+                                              (:
+                                               Nil
+                                               (:
+                                                Nil
+                                                (:
+                                                 (String "'mems_allowed'")
+                                                 []))))))))
+                                         []))))
+                                     (Name "mask"))))
+                                  [])))
+                               (:
+                                (LocalAssign
+                                 (: (Name "ok") (: (Name "err") []))
+                                 (Just
+                                  (:
+                                   (PrefixExp
+                                    (PEFunCall
+                                     (NormalFunCall
+                                      (PEVar
+                                       (SelectName
+                                        (PEVar (VarName (Name "S")))
+                                        (Name "migrate_pages")))
+                                      (Args
+                                       (:
+                                        (Number IntNum "0")
+                                        (:
+                                         (PrefixExp
+                                          (PEVar (VarName (Name "from_mask"))))
+                                         (:
+                                          (PrefixExp
+                                           (PEVar (VarName (Name "node"))))
+                                          [])))))))
+                                   [])))
+                                [])))
+                             Nothing))
+                           [])
+                          Nothing)
+                         (:
+                          (If
+                           (:
+                            ((,)
+                             (Unop
+                              Not
+                              (PrefixExp (PEVar (VarName (Name "ok")))))
+                             (Block
+                              (:
+                               (FunCall
+                                (MethodCall
+                                 (PEVar
+                                  (SelectName
+                                   (PEVar (VarName (Name "io")))
+                                   (Name "stderr")))
+                                 (Name "write")
+                                 (Args
+                                  (:
+                                   (PrefixExp
+                                    (PEFunCall
+                                     (NormalFunCall
+                                      (PEVar
+                                       (SelectName
+                                        (PEVar (VarName (Name "string")))
+                                        (Name "format")))
+                                      (Args
+                                       (:
+                                        (String
+                                         "\"Warning: Failed to migrate pages to NUMA node %d: %s\\n\"")
+                                        (:
+                                         (PrefixExp
+                                          (PEVar (VarName (Name "node"))))
+                                         (:
+                                          (PrefixExp
+                                           (PEFunCall
+                                            (NormalFunCall
+                                             (PEVar (VarName (Name "tostring")))
+                                             (Args
+                                              (:
+                                               (PrefixExp
+                                                (PEVar (VarName (Name "err"))))
+                                               [])))))
+                                          [])))))))
+                                   []))))
+                               [])
+                              Nothing))
+                            [])
+                           Nothing)
+                          (:
+                           (Assign
+                            (: (VarName (Name "bound_numa_node")) [])
+                            (: (PrefixExp (PEVar (VarName (Name "node")))) []))
+                           []))))))
+                     Nothing)))
+                  (:
+                   (FunAssign
+                    (FunName (Name "prevent_preemption") [] Nothing)
+                    (FunBody
+                     (: (Name "priority") [])
+                     False
+                     (Block
+                      (:
+                       (FunCall
+                        (NormalFunCall
+                         (PEVar (VarName (Name "assert")))
+                         (Args
+                          (:
+                           (PrefixExp
+                            (PEFunCall
+                             (NormalFunCall
+                              (PEVar
+                               (SelectName
+                                (PEVar (VarName (Name "S")))
+                                (Name "sched_setscheduler")))
+                              (Args
+                               (:
+                                (Number IntNum "0")
+                                (:
+                                 (String "\"fifo\"")
+                                 (:
+                                  (Binop
+                                   Or
+                                   (PrefixExp
+                                    (PEVar (VarName (Name "priority"))))
+                                   (Number IntNum "1"))
+                                  [])))))))
+                           (:
+                            (String
+                             "'Failed to enable real-time scheduling.  Try running as root.'")
+                            [])))))
+                       [])
+                      Nothing)))
+                   (:
+                    (FunAssign
+                     (FunName (Name "selftest") [] Nothing)
+                     (FunBody
+                      []
+                      False
+                      (Block
+                       (:
+                        (FunAssign
+                         (FunName (Name "test_cpu") [] Nothing)
+                         (FunBody
+                          (: (Name "cpu") [])
+                          False
+                          (Block
+                           (:
+                            (LocalAssign
+                             (: (Name "node") [])
+                             (Just
+                              (:
+                               (PrefixExp
+                                (PEFunCall
+                                 (NormalFunCall
+                                  (PEVar (VarName (Name "cpu_get_numa_node")))
+                                  (Args
+                                   (:
+                                    (PrefixExp (PEVar (VarName (Name "cpu"))))
+                                    [])))))
+                               [])))
+                            (:
+                             (FunCall
+                              (NormalFunCall
+                               (PEVar (VarName (Name "bind_to_cpu")))
+                               (Args
+                                (:
+                                 (PrefixExp (PEVar (VarName (Name "cpu"))))
+                                 []))))
+                             (:
+                              (FunCall
+                               (NormalFunCall
+                                (PEVar (VarName (Name "assert")))
+                                (Args
+                                 (:
+                                  (Binop
+                                   EQ
+                                   (PrefixExp
+                                    (PEVar (VarName (Name "bound_cpu"))))
+                                   (PrefixExp (PEVar (VarName (Name "cpu")))))
+                                  []))))
+                              (:
+                               (FunCall
+                                (NormalFunCall
+                                 (PEVar (VarName (Name "assert")))
+                                 (Args
+                                  (:
+                                   (Binop
+                                    EQ
+                                    (PrefixExp
+                                     (PEVar (VarName (Name "bound_numa_node"))))
+                                    (PrefixExp (PEVar (VarName (Name "node")))))
+                                   []))))
+                               (:
+                                (FunCall
+                                 (NormalFunCall
+                                  (PEVar (VarName (Name "assert")))
+                                  (Args
+                                   (:
+                                    (Binop
+                                     EQ
+                                     (PrefixExp
+                                      (PEVar
+                                       (SelectName
+                                        (PEFunCall
+                                         (NormalFunCall
+                                          (PEVar
+                                           (SelectName
+                                            (PEVar (VarName (Name "S")))
+                                            (Name "getcpu")))
+                                          (Args [])))
+                                        (Name "cpu"))))
+                                     (PrefixExp (PEVar (VarName (Name "cpu")))))
+                                    []))))
+                                (:
+                                 (FunCall
+                                  (NormalFunCall
+                                   (PEVar (VarName (Name "assert")))
+                                   (Args
+                                    (:
+                                     (Binop
+                                      EQ
+                                      (PrefixExp
+                                       (PEVar
+                                        (SelectName
+                                         (PEFunCall
+                                          (NormalFunCall
+                                           (PEVar
+                                            (SelectName
+                                             (PEVar (VarName (Name "S")))
+                                             (Name "getcpu")))
+                                           (Args [])))
+                                         (Name "node"))))
+                                      (PrefixExp
+                                       (PEVar (VarName (Name "node")))))
+                                     []))))
+                                 (:
+                                  (FunCall
+                                   (NormalFunCall
+                                    (PEVar (VarName (Name "bind_to_cpu")))
+                                    (Args (: Nil []))))
+                                  (:
+                                   (FunCall
+                                    (NormalFunCall
+                                     (PEVar (VarName (Name "assert")))
+                                     (Args
+                                      (:
+                                       (Binop
+                                        EQ
+                                        (PrefixExp
+                                         (PEVar (VarName (Name "bound_cpu"))))
+                                        Nil)
+                                       []))))
+                                   (:
+                                    (FunCall
+                                     (NormalFunCall
+                                      (PEVar (VarName (Name "assert")))
+                                      (Args
+                                       (:
+                                        (Binop
+                                         EQ
+                                         (PrefixExp
+                                          (PEVar
+                                           (VarName (Name "bound_numa_node"))))
+                                         (PrefixExp
+                                          (PEVar (VarName (Name "node")))))
+                                        []))))
+                                    (:
+                                     (FunCall
+                                      (NormalFunCall
+                                       (PEVar (VarName (Name "assert")))
+                                       (Args
+                                        (:
+                                         (Binop
+                                          EQ
+                                          (PrefixExp
+                                           (PEVar
+                                            (SelectName
+                                             (PEFunCall
+                                              (NormalFunCall
+                                               (PEVar
+                                                (SelectName
+                                                 (PEVar (VarName (Name "S")))
+                                                 (Name "getcpu")))
+                                               (Args [])))
+                                             (Name "node"))))
+                                          (PrefixExp
+                                           (PEVar (VarName (Name "node")))))
+                                         []))))
+                                     (:
+                                      (FunCall
+                                       (NormalFunCall
+                                        (PEVar
+                                         (VarName (Name "bind_to_numa_node")))
+                                        (Args (: Nil []))))
+                                      (:
+                                       (FunCall
+                                        (NormalFunCall
+                                         (PEVar (VarName (Name "assert")))
+                                         (Args
+                                          (:
+                                           (Binop
+                                            EQ
+                                            (PrefixExp
+                                             (PEVar
+                                              (VarName (Name "bound_cpu"))))
+                                            Nil)
+                                           []))))
+                                       (:
+                                        (FunCall
+                                         (NormalFunCall
+                                          (PEVar (VarName (Name "assert")))
+                                          (Args
+                                           (:
+                                            (Binop
+                                             EQ
+                                             (PrefixExp
+                                              (PEVar
+                                               (VarName
+                                                (Name "bound_numa_node"))))
+                                             Nil)
+                                            []))))
+                                        [])))))))))))))
+                           Nothing)))
+                        (:
+                         (FunAssign
+                          (FunName (Name "test_pci_affinity") [] Nothing)
+                          (FunBody
+                           (: (Name "pciaddr") [])
+                           False
+                           (Block
+                            (:
+                             (FunCall
+                              (NormalFunCall
+                               (PEVar
+                                (VarName
+                                 (Name "check_affinity_for_pci_addresses")))
+                               (Args
+                                (:
+                                 (TableConst
+                                  (:
+                                   (Field
+                                    (PrefixExp
+                                     (PEVar (VarName (Name "pciaddr")))))
+                                   []))
+                                 []))))
+                             (:
+                              (LocalAssign
+                               (: (Name "node") [])
+                               (Just
+                                (:
+                                 (PrefixExp
+                                  (PEFunCall
+                                   (NormalFunCall
+                                    (PEVar
+                                     (VarName
+                                      (Name
+                                       "choose_numa_node_for_pci_addresses")))
+                                    (Args
+                                     (:
+                                      (TableConst
+                                       (:
+                                        (Field
+                                         (PrefixExp
+                                          (PEVar (VarName (Name "pciaddr")))))
+                                        []))
+                                      (: (Bool True) []))))))
+                                 [])))
+                              (:
+                               (FunCall
+                                (NormalFunCall
+                                 (PEVar (VarName (Name "bind_to_numa_node")))
+                                 (Args
+                                  (:
+                                   (PrefixExp (PEVar (VarName (Name "node"))))
+                                   []))))
+                               (:
+                                (FunCall
+                                 (NormalFunCall
+                                  (PEVar (VarName (Name "assert")))
+                                  (Args
+                                   (:
+                                    (Binop
+                                     EQ
+                                     (PrefixExp
+                                      (PEVar
+                                       (VarName (Name "bound_numa_node"))))
+                                     (PrefixExp
+                                      (PEVar (VarName (Name "node")))))
+                                    []))))
+                                (:
+                                 (FunCall
+                                  (NormalFunCall
+                                   (PEVar
+                                    (VarName
+                                     (Name "check_affinity_for_pci_addresses")))
+                                   (Args
+                                    (:
+                                     (TableConst
+                                      (:
+                                       (Field
+                                        (PrefixExp
+                                         (PEVar (VarName (Name "pciaddr")))))
+                                       []))
+                                     []))))
+                                 (:
+                                  (FunCall
+                                   (NormalFunCall
+                                    (PEVar (VarName (Name "bind_to_numa_node")))
+                                    (Args (: Nil []))))
+                                  (:
+                                   (FunCall
+                                    (NormalFunCall
+                                     (PEVar (VarName (Name "assert")))
+                                     (Args
+                                      (:
+                                       (Binop
+                                        EQ
+                                        (PrefixExp
+                                         (PEVar
+                                          (VarName (Name "bound_numa_node"))))
+                                        Nil)
+                                       []))))
+                                   [])))))))
+                            Nothing)))
+                         (:
+                          (FunCall
+                           (NormalFunCall
+                            (PEVar (VarName (Name "print")))
+                            (Args (: (String "'selftest: numa'") []))))
+                          (:
+                           (LocalAssign
+                            (: (Name "cpu_set") [])
+                            (Just
+                             (:
+                              (PrefixExp
+                               (PEFunCall
+                                (NormalFunCall
+                                 (PEVar
+                                  (SelectName
+                                   (PEVar (VarName (Name "S")))
+                                   (Name "sched_getaffinity")))
+                                 (Args []))))
+                              [])))
+                           (:
+                            (ForRange
+                             (Name "cpuid")
+                             (Number IntNum "0")
+                             (PrefixExp (PEVar (VarName (Name "MAX_CPU"))))
+                             Nothing
+                             (Block
+                              (:
+                               (If
+                                (:
+                                 ((,)
+                                  (PrefixExp
+                                   (PEFunCall
+                                    (MethodCall
+                                     (PEVar (VarName (Name "cpu_set")))
+                                     (Name "get")
+                                     (Args
+                                      (:
+                                       (PrefixExp
+                                        (PEVar (VarName (Name "cpuid"))))
+                                       [])))))
+                                  (Block
+                                   (:
+                                    (FunCall
+                                     (NormalFunCall
+                                      (PEVar (VarName (Name "test_cpu")))
+                                      (Args
+                                       (:
+                                        (PrefixExp
+                                         (PEVar (VarName (Name "cpuid"))))
+                                        []))))
+                                    [])
+                                   Nothing))
+                                 [])
+                                Nothing)
+                               [])
+                              Nothing))
+                            (:
+                             (LocalAssign
+                              (: (Name "pciaddr") [])
+                              (Just
+                               (:
+                                (PrefixExp
+                                 (PEFunCall
+                                  (NormalFunCall
+                                   (PEVar
+                                    (SelectName
+                                     (PEVar (VarName (Name "os")))
+                                     (Name "getenv")))
+                                   (Args (: (String "\"SNABB_PCI0\"") [])))))
+                                [])))
+                             (:
+                              (If
+                               (:
+                                ((,)
+                                 (PrefixExp (PEVar (VarName (Name "pciaddr"))))
+                                 (Block
+                                  (:
+                                   (FunCall
+                                    (NormalFunCall
+                                     (PEVar
+                                      (VarName (Name "test_pci_affinity")))
+                                     (Args
+                                      (:
+                                       (PrefixExp
+                                        (PEVar (VarName (Name "pciaddr"))))
+                                       []))))
+                                   [])
+                                  Nothing))
+                                [])
+                               Nothing)
+                              (:
+                               (FunCall
+                                (NormalFunCall
+                                 (PEVar (VarName (Name "print")))
+                                 (Args (: (String "'selftest: numa: ok'") []))))
+                               []))))))))
+                       Nothing)))
+                    [])))))))))))))))))))
+ Nothing)

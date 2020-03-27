@@ -1,0 +1,1811 @@
+(Script
+ ()
+ (:
+  (ExprStmt
+   ()
+   (CallExpr
+    ()
+    (VarRef () (Id () "define"))
+    (:
+     (FuncExpr
+      ()
+      Nothing
+      (: (Id () "require") (: (Id () "exports") (: (Id () "module") [])))
+      (:
+       (ExprStmt () (StringLit () "use strict"))
+       (:
+        (VarDeclStmt
+         ()
+         (:
+          (VarDecl () (Id () "SCROLL_SHADOW_HEIGHT") (Just (IntLit () 5)))
+          []))
+        (:
+         (VarDeclStmt
+          ()
+          (: (VarDecl () (Id () "_resizeHandlers") (Just (ArrayLit () []))) []))
+         (:
+          (FunctionStmt
+           ()
+           (Id () "updateChildrenToParentScrollwidth")
+           (: (Id () "$parent") [])
+           (:
+            (VarDeclStmt
+             ()
+             (:
+              (VarDecl
+               ()
+               (Id () "$children")
+               (Just
+                (CallExpr
+                 ()
+                 (DotRef () (VarRef () (Id () "$parent")) (Id () "children"))
+                 [])))
+              []))
+            (:
+             (ExprStmt
+              ()
+              (CallExpr
+               ()
+               (DotRef () (VarRef () (Id () "$children")) (Id () "width"))
+               (: (StringLit () "") [])))
+             (:
+              (VarDeclStmt
+               ()
+               (:
+                (VarDecl
+                 ()
+                 (Id () "targetWidth")
+                 (Just
+                  (InfixExpr
+                   ()
+                   OpSub
+                   (InfixExpr
+                    ()
+                    OpSub
+                    (DotRef
+                     ()
+                     (BracketRef () (VarRef () (Id () "$parent")) (IntLit () 0))
+                     (Id () "scrollWidth"))
+                    (CallExpr
+                     ()
+                     (VarRef () (Id () "parseInt"))
+                     (:
+                      (CallExpr
+                       ()
+                       (DotRef () (VarRef () (Id () "$parent")) (Id () "css"))
+                       (: (StringLit () "paddingLeft") []))
+                      (: (IntLit () 10) []))))
+                   (CallExpr
+                    ()
+                    (VarRef () (Id () "parseInt"))
+                    (:
+                     (CallExpr
+                      ()
+                      (DotRef () (VarRef () (Id () "$parent")) (Id () "css"))
+                      (: (StringLit () "paddingRight") []))
+                     (: (IntLit () 10) []))))))
+                []))
+              (:
+               (ExprStmt
+                ()
+                (CallExpr
+                 ()
+                 (DotRef () (VarRef () (Id () "$children")) (Id () "width"))
+                 (: (VarRef () (Id () "targetWidth")) [])))
+               [])))))
+          (:
+           (FunctionStmt
+            ()
+            (Id () "_updateScrollerShadow")
+            (:
+             (Id () "$displayElement")
+             (:
+              (Id () "$scrollElement")
+              (:
+               (Id () "$shadowTop")
+               (: (Id () "$shadowBottom") (: (Id () "isPositionFixed") [])))))
+            (:
+             (VarDeclStmt
+              ()
+              (:
+               (VarDecl () (Id () "offsetTop") (Just (IntLit () 0)))
+               (:
+                (VarDecl
+                 ()
+                 (Id () "scrollElement")
+                 (Just
+                  (CallExpr
+                   ()
+                   (DotRef
+                    ()
+                    (VarRef () (Id () "$scrollElement"))
+                    (Id () "get"))
+                   (: (IntLit () 0) []))))
+                (:
+                 (VarDecl
+                  ()
+                  (Id () "scrollTop")
+                  (Just
+                   (DotRef
+                    ()
+                    (VarRef () (Id () "scrollElement"))
+                    (Id () "scrollTop"))))
+                 (:
+                  (VarDecl
+                   ()
+                   (Id () "topShadowOffset")
+                   (Just
+                    (CallExpr
+                     ()
+                     (DotRef () (VarRef () (Id () "Math")) (Id () "min"))
+                     (:
+                      (InfixExpr
+                       ()
+                       OpSub
+                       (VarRef () (Id () "scrollTop"))
+                       (VarRef () (Id () "SCROLL_SHADOW_HEIGHT")))
+                      (: (IntLit () 0) [])))))
+                  (:
+                   (VarDecl
+                    ()
+                    (Id () "sidebarWidth")
+                    (Just
+                     (CallExpr
+                      ()
+                      (VarRef () (Id () "parseInt"))
+                      (:
+                       (CallExpr
+                        ()
+                        (DotRef
+                         ()
+                         (CallExpr
+                          ()
+                          (VarRef () (Id () "$"))
+                          (: (StringLit () ".sidebar") []))
+                         (Id () "width"))
+                        [])
+                       (: (IntLit () 10) [])))))
+                   []))))))
+             (:
+              (IfSingleStmt
+               ()
+               (VarRef () (Id () "$shadowTop"))
+               (BlockStmt
+                ()
+                (:
+                 (ExprStmt
+                  ()
+                  (CallExpr
+                   ()
+                   (DotRef () (VarRef () (Id () "$shadowTop")) (Id () "css"))
+                   (:
+                    (StringLit () "background-position")
+                    (:
+                     (InfixExpr
+                      ()
+                      OpAdd
+                      (InfixExpr
+                       ()
+                       OpAdd
+                       (StringLit () "0px ")
+                       (VarRef () (Id () "topShadowOffset")))
+                      (StringLit () "px"))
+                     []))))
+                 (:
+                  (IfSingleStmt
+                   ()
+                   (VarRef () (Id () "isPositionFixed"))
+                   (BlockStmt
+                    ()
+                    (:
+                     (ExprStmt
+                      ()
+                      (AssignExpr
+                       ()
+                       OpAssign
+                       (LVar () "offsetTop")
+                       (DotRef
+                        ()
+                        (CallExpr
+                         ()
+                         (DotRef
+                          ()
+                          (VarRef () (Id () "$displayElement"))
+                          (Id () "offset"))
+                         [])
+                        (Id () "top"))))
+                     (:
+                      (ExprStmt
+                       ()
+                       (CallExpr
+                        ()
+                        (DotRef
+                         ()
+                         (VarRef () (Id () "$shadowTop"))
+                         (Id () "css"))
+                        (:
+                         (StringLit () "top")
+                         (: (VarRef () (Id () "offsetTop")) []))))
+                      (:
+                       (ExprStmt
+                        ()
+                        (CallExpr
+                         ()
+                         (DotRef
+                          ()
+                          (VarRef () (Id () "$shadowTop"))
+                          (Id () "css"))
+                         (:
+                          (StringLit () "width")
+                          (: (VarRef () (Id () "sidebarWidth")) []))))
+                       [])))))
+                  []))))
+              (:
+               (IfSingleStmt
+                ()
+                (VarRef () (Id () "$shadowBottom"))
+                (BlockStmt
+                 ()
+                 (:
+                  (VarDeclStmt
+                   ()
+                   (:
+                    (VarDecl
+                     ()
+                     (Id () "clientHeight")
+                     (Just
+                      (DotRef
+                       ()
+                       (VarRef () (Id () "scrollElement"))
+                       (Id () "clientHeight"))))
+                    (:
+                     (VarDecl
+                      ()
+                      (Id () "outerHeight")
+                      (Just
+                       (CallExpr
+                        ()
+                        (DotRef
+                         ()
+                         (VarRef () (Id () "$displayElement"))
+                         (Id () "outerHeight"))
+                        [])))
+                     (:
+                      (VarDecl
+                       ()
+                       (Id () "scrollHeight")
+                       (Just
+                        (DotRef
+                         ()
+                         (VarRef () (Id () "scrollElement"))
+                         (Id () "scrollHeight"))))
+                      (:
+                       (VarDecl
+                        ()
+                        (Id () "bottomOffset")
+                        (Just
+                         (InfixExpr
+                          ()
+                          OpSub
+                          (VarRef () (Id () "outerHeight"))
+                          (VarRef () (Id () "clientHeight")))))
+                       (:
+                        (VarDecl
+                         ()
+                         (Id () "bottomShadowOffset")
+                         (Just (VarRef () (Id () "SCROLL_SHADOW_HEIGHT"))))
+                        []))))))
+                  (:
+                   (IfSingleStmt
+                    ()
+                    (InfixExpr
+                     ()
+                     OpGT
+                     (VarRef () (Id () "scrollHeight"))
+                     (VarRef () (Id () "clientHeight")))
+                    (BlockStmt
+                     ()
+                     (:
+                      (ExprStmt
+                       ()
+                       (AssignExpr
+                        ()
+                        OpAssignSub
+                        (LVar () "bottomShadowOffset")
+                        (CallExpr
+                         ()
+                         (DotRef () (VarRef () (Id () "Math")) (Id () "min"))
+                         (:
+                          (VarRef () (Id () "SCROLL_SHADOW_HEIGHT"))
+                          (:
+                           (InfixExpr
+                            ()
+                            OpSub
+                            (VarRef () (Id () "scrollHeight"))
+                            (InfixExpr
+                             ()
+                             OpAdd
+                             (VarRef () (Id () "scrollTop"))
+                             (VarRef () (Id () "clientHeight"))))
+                           [])))))
+                      [])))
+                   (:
+                    (ExprStmt
+                     ()
+                     (CallExpr
+                      ()
+                      (DotRef
+                       ()
+                       (VarRef () (Id () "$shadowBottom"))
+                       (Id () "css"))
+                      (:
+                       (StringLit () "background-position")
+                       (:
+                        (InfixExpr
+                         ()
+                         OpAdd
+                         (InfixExpr
+                          ()
+                          OpAdd
+                          (StringLit () "0px ")
+                          (VarRef () (Id () "bottomShadowOffset")))
+                         (StringLit () "px"))
+                        []))))
+                    (:
+                     (ExprStmt
+                      ()
+                      (CallExpr
+                       ()
+                       (DotRef
+                        ()
+                        (VarRef () (Id () "$shadowBottom"))
+                        (Id () "css"))
+                       (:
+                        (StringLit () "top")
+                        (:
+                         (InfixExpr
+                          ()
+                          OpSub
+                          (InfixExpr
+                           ()
+                           OpAdd
+                           (VarRef () (Id () "offsetTop"))
+                           (VarRef () (Id () "outerHeight")))
+                          (VarRef () (Id () "SCROLL_SHADOW_HEIGHT")))
+                         []))))
+                     (:
+                      (ExprStmt
+                       ()
+                       (CallExpr
+                        ()
+                        (DotRef
+                         ()
+                         (VarRef () (Id () "$shadowBottom"))
+                         (Id () "css"))
+                        (:
+                         (StringLit () "width")
+                         (: (VarRef () (Id () "sidebarWidth")) []))))
+                      [])))))))
+               []))))
+           (:
+            (FunctionStmt
+             ()
+             (Id () "getOrCreateShadow")
+             (:
+              (Id () "$displayElement")
+              (: (Id () "position") (: (Id () "isPositionFixed") [])))
+             (:
+              (VarDeclStmt
+               ()
+               (:
+                (VarDecl
+                 ()
+                 (Id () "$findShadow")
+                 (Just
+                  (CallExpr
+                   ()
+                   (DotRef
+                    ()
+                    (VarRef () (Id () "$displayElement"))
+                    (Id () "find"))
+                   (:
+                    (InfixExpr
+                     ()
+                     OpAdd
+                     (StringLit () ".scrollerShadow.")
+                     (VarRef () (Id () "position")))
+                    []))))
+                []))
+              (:
+               (IfSingleStmt
+                ()
+                (InfixExpr
+                 ()
+                 OpStrictEq
+                 (DotRef () (VarRef () (Id () "$findShadow")) (Id () "length"))
+                 (IntLit () 0))
+                (BlockStmt
+                 ()
+                 (:
+                  (ExprStmt
+                   ()
+                   (AssignExpr
+                    ()
+                    OpAssign
+                    (LVar () "$findShadow")
+                    (CallExpr
+                     ()
+                     (DotRef
+                      ()
+                      (CallExpr
+                       ()
+                       (VarRef () (Id () "$"))
+                       (:
+                        (CallExpr
+                         ()
+                         (DotRef
+                          ()
+                          (DotRef
+                           ()
+                           (VarRef () (Id () "window"))
+                           (Id () "document"))
+                          (Id () "createElement"))
+                         (: (StringLit () "div") []))
+                        []))
+                      (Id () "addClass"))
+                     (:
+                      (InfixExpr
+                       ()
+                       OpAdd
+                       (StringLit () "scrollerShadow ")
+                       (VarRef () (Id () "position")))
+                      []))))
+                  (:
+                   (ExprStmt
+                    ()
+                    (CallExpr
+                     ()
+                     (DotRef
+                      ()
+                      (VarRef () (Id () "$displayElement"))
+                      (Id () "append"))
+                     (: (VarRef () (Id () "$findShadow")) [])))
+                   []))))
+               (:
+                (IfSingleStmt
+                 ()
+                 (PrefixExpr
+                  ()
+                  PrefixLNot
+                  (VarRef () (Id () "isPositionFixed")))
+                 (BlockStmt
+                  ()
+                  (:
+                   (ExprStmt
+                    ()
+                    (CallExpr
+                     ()
+                     (DotRef () (VarRef () (Id () "$findShadow")) (Id () "css"))
+                     (:
+                      (StringLit () "position")
+                      (: (StringLit () "absolute") []))))
+                   (:
+                    (ExprStmt
+                     ()
+                     (CallExpr
+                      ()
+                      (DotRef
+                       ()
+                       (VarRef () (Id () "$findShadow"))
+                       (Id () "css"))
+                      (:
+                       (VarRef () (Id () "position"))
+                       (: (StringLit () "0") []))))
+                    []))))
+                (:
+                 (ReturnStmt () (Just (VarRef () (Id () "$findShadow"))))
+                 [])))))
+            (:
+             (FunctionStmt
+              ()
+              (Id () "addScrollerShadow")
+              (:
+               (Id () "displayElement")
+               (: (Id () "scrollElement") (: (Id () "showBottom") [])))
+              (:
+               (VarDeclStmt
+                ()
+                (:
+                 (VarDecl
+                  ()
+                  (Id () "isPositionFixed")
+                  (Just (BoolLit () False)))
+                 []))
+               (:
+                (IfSingleStmt
+                 ()
+                 (PrefixExpr () PrefixLNot (VarRef () (Id () "scrollElement")))
+                 (BlockStmt
+                  ()
+                  (:
+                   (ExprStmt
+                    ()
+                    (AssignExpr
+                     ()
+                     OpAssign
+                     (LVar () "scrollElement")
+                     (VarRef () (Id () "displayElement"))))
+                   (:
+                    (ExprStmt
+                     ()
+                     (AssignExpr
+                      ()
+                      OpAssign
+                      (LVar () "isPositionFixed")
+                      (BoolLit () True)))
+                    []))))
+                (:
+                 (VarDeclStmt
+                  ()
+                  (:
+                   (VarDecl
+                    ()
+                    (Id () "$displayElement")
+                    (Just
+                     (CallExpr
+                      ()
+                      (VarRef () (Id () "$"))
+                      (: (VarRef () (Id () "displayElement")) []))))
+                   (:
+                    (VarDecl
+                     ()
+                     (Id () "$scrollElement")
+                     (Just
+                      (CallExpr
+                       ()
+                       (VarRef () (Id () "$"))
+                       (: (VarRef () (Id () "scrollElement")) []))))
+                    [])))
+                 (:
+                  (VarDeclStmt
+                   ()
+                   (:
+                    (VarDecl
+                     ()
+                     (Id () "$shadowTop")
+                     (Just
+                      (CallExpr
+                       ()
+                       (VarRef () (Id () "getOrCreateShadow"))
+                       (:
+                        (VarRef () (Id () "$displayElement"))
+                        (:
+                         (StringLit () "top")
+                         (: (VarRef () (Id () "isPositionFixed")) []))))))
+                    []))
+                  (:
+                   (VarDeclStmt
+                    ()
+                    (:
+                     (VarDecl
+                      ()
+                      (Id () "$shadowBottom")
+                      (Just
+                       (CondExpr
+                        ()
+                        (VarRef () (Id () "showBottom"))
+                        (CallExpr
+                         ()
+                         (VarRef () (Id () "getOrCreateShadow"))
+                         (:
+                          (VarRef () (Id () "$displayElement"))
+                          (:
+                           (StringLit () "bottom")
+                           (: (VarRef () (Id () "isPositionFixed")) []))))
+                        (NullLit ()))))
+                     []))
+                   (:
+                    (VarDeclStmt
+                     ()
+                     (:
+                      (VarDecl
+                       ()
+                       (Id () "doUpdate")
+                       (Just
+                        (FuncExpr
+                         ()
+                         Nothing
+                         []
+                         (:
+                          (ExprStmt
+                           ()
+                           (CallExpr
+                            ()
+                            (VarRef () (Id () "_updateScrollerShadow"))
+                            (:
+                             (VarRef () (Id () "$displayElement"))
+                             (:
+                              (VarRef () (Id () "$scrollElement"))
+                              (:
+                               (VarRef () (Id () "$shadowTop"))
+                               (:
+                                (VarRef () (Id () "$shadowBottom"))
+                                (:
+                                 (VarRef () (Id () "isPositionFixed"))
+                                 [])))))))
+                          []))))
+                      []))
+                    (:
+                     (ExprStmt
+                      ()
+                      (CallExpr
+                       ()
+                       (DotRef
+                        ()
+                        (VarRef () (Id () "$scrollElement"))
+                        (Id () "on"))
+                       (:
+                        (StringLit () "scroll.scrollerShadow")
+                        (: (VarRef () (Id () "doUpdate")) []))))
+                     (:
+                      (ExprStmt
+                       ()
+                       (CallExpr
+                        ()
+                        (DotRef
+                         ()
+                         (VarRef () (Id () "$displayElement"))
+                         (Id () "on"))
+                        (:
+                         (StringLit () "contentChanged.scrollerShadow")
+                         (: (VarRef () (Id () "doUpdate")) []))))
+                      (:
+                       (ExprStmt
+                        ()
+                        (CallExpr () (VarRef () (Id () "doUpdate")) []))
+                       []))))))))))
+             (:
+              (FunctionStmt
+               ()
+               (Id () "removeScrollerShadow")
+               (: (Id () "displayElement") (: (Id () "scrollElement") []))
+               (:
+                (IfSingleStmt
+                 ()
+                 (PrefixExpr () PrefixLNot (VarRef () (Id () "scrollElement")))
+                 (BlockStmt
+                  ()
+                  (:
+                   (ExprStmt
+                    ()
+                    (AssignExpr
+                     ()
+                     OpAssign
+                     (LVar () "scrollElement")
+                     (VarRef () (Id () "displayElement"))))
+                   [])))
+                (:
+                 (VarDeclStmt
+                  ()
+                  (:
+                   (VarDecl
+                    ()
+                    (Id () "$displayElement")
+                    (Just
+                     (CallExpr
+                      ()
+                      (VarRef () (Id () "$"))
+                      (: (VarRef () (Id () "displayElement")) []))))
+                   (:
+                    (VarDecl
+                     ()
+                     (Id () "$scrollElement")
+                     (Just
+                      (CallExpr
+                       ()
+                       (VarRef () (Id () "$"))
+                       (: (VarRef () (Id () "scrollElement")) []))))
+                    [])))
+                 (:
+                  (ExprStmt
+                   ()
+                   (CallExpr
+                    ()
+                    (DotRef
+                     ()
+                     (CallExpr
+                      ()
+                      (DotRef
+                       ()
+                       (CallExpr
+                        ()
+                        (VarRef () (Id () "$"))
+                        (: (VarRef () (Id () "displayElement")) []))
+                       (Id () "find"))
+                      (: (StringLit () ".scrollerShadow.top") []))
+                     (Id () "remove"))
+                    []))
+                  (:
+                   (ExprStmt
+                    ()
+                    (CallExpr
+                     ()
+                     (DotRef
+                      ()
+                      (CallExpr
+                       ()
+                       (DotRef
+                        ()
+                        (CallExpr
+                         ()
+                         (VarRef () (Id () "$"))
+                         (: (VarRef () (Id () "displayElement")) []))
+                        (Id () "find"))
+                       (: (StringLit () ".scrollerShadow.bottom") []))
+                      (Id () "remove"))
+                     []))
+                   (:
+                    (ExprStmt
+                     ()
+                     (CallExpr
+                      ()
+                      (DotRef
+                       ()
+                       (VarRef () (Id () "$scrollElement"))
+                       (Id () "off"))
+                      (: (StringLit () "scroll.scrollerShadow") [])))
+                    (:
+                     (ExprStmt
+                      ()
+                      (CallExpr
+                       ()
+                       (DotRef
+                        ()
+                        (VarRef () (Id () "$displayElement"))
+                        (Id () "off"))
+                       (: (StringLit () "contentChanged.scrollerShadow") [])))
+                     [])))))))
+              (:
+               (FunctionStmt
+                ()
+                (Id () "sidebarList")
+                (:
+                 (Id () "$scrollerElement")
+                 (: (Id () "selectedClassName") (: (Id () "leafClassName") [])))
+                (:
+                 (VarDeclStmt
+                  ()
+                  (:
+                   (VarDecl
+                    ()
+                    (Id () "$listElement")
+                    (Just
+                     (CallExpr
+                      ()
+                      (DotRef
+                       ()
+                       (VarRef () (Id () "$scrollerElement"))
+                       (Id () "find"))
+                      (: (StringLit () "ul") []))))
+                   (:
+                    (VarDecl () (Id () "$selectionMarker") Nothing)
+                    (:
+                     (VarDecl () (Id () "$selectionTriangle") Nothing)
+                     (:
+                      (VarDecl
+                       ()
+                       (Id () "$fileSection")
+                       (Just
+                        (CallExpr
+                         ()
+                         (VarRef () (Id () "$"))
+                         (: (StringLit () "#file-section") []))))
+                      (:
+                       (VarDecl
+                        ()
+                        (Id () "showTriangle")
+                        (Just (BoolLit () True)))
+                       []))))))
+                 (:
+                  (ExprStmt
+                   ()
+                   (AssignExpr
+                    ()
+                    OpAssign
+                    (LVar () "$selectionMarker")
+                    (CallExpr
+                     ()
+                     (DotRef
+                      ()
+                      (CallExpr
+                       ()
+                       (VarRef () (Id () "$"))
+                       (:
+                        (CallExpr
+                         ()
+                         (DotRef
+                          ()
+                          (DotRef
+                           ()
+                           (VarRef () (Id () "window"))
+                           (Id () "document"))
+                          (Id () "createElement"))
+                         (: (StringLit () "div") []))
+                        []))
+                      (Id () "addClass"))
+                     (: (StringLit () "sidebarSelection") []))))
+                  (:
+                   (ExprStmt
+                    ()
+                    (CallExpr
+                     ()
+                     (DotRef
+                      ()
+                      (VarRef () (Id () "$scrollerElement"))
+                      (Id () "prepend"))
+                     (: (VarRef () (Id () "$selectionMarker")) [])))
+                   (:
+                    (ExprStmt
+                     ()
+                     (CallExpr
+                      ()
+                      (DotRef
+                       ()
+                       (VarRef () (Id () "$scrollerElement"))
+                       (Id () "css"))
+                      (:
+                       (StringLit () "overflow")
+                       (: (StringLit () "auto") []))))
+                    (:
+                     (ExprStmt
+                      ()
+                      (CallExpr
+                       ()
+                       (DotRef
+                        ()
+                        (VarRef () (Id () "$scrollerElement"))
+                        (Id () "css"))
+                       (:
+                        (StringLit () "position")
+                        (: (StringLit () "relative") []))))
+                     (:
+                      (ExprStmt
+                       ()
+                       (AssignExpr
+                        ()
+                        OpAssign
+                        (LVar () "$selectionTriangle")
+                        (CallExpr
+                         ()
+                         (DotRef
+                          ()
+                          (CallExpr
+                           ()
+                           (VarRef () (Id () "$"))
+                           (:
+                            (CallExpr
+                             ()
+                             (DotRef
+                              ()
+                              (DotRef
+                               ()
+                               (VarRef () (Id () "window"))
+                               (Id () "document"))
+                              (Id () "createElement"))
+                             (: (StringLit () "div") []))
+                            []))
+                          (Id () "addClass"))
+                         (: (StringLit () "sidebarSelectionTriangle") []))))
+                      (:
+                       (ExprStmt
+                        ()
+                        (CallExpr
+                         ()
+                         (DotRef
+                          ()
+                          (VarRef () (Id () "$fileSection"))
+                          (Id () "append"))
+                         (: (VarRef () (Id () "$selectionTriangle")) [])))
+                       (:
+                        (ExprStmt
+                         ()
+                         (AssignExpr
+                          ()
+                          OpAssign
+                          (LVar () "selectedClassName")
+                          (InfixExpr
+                           ()
+                           OpAdd
+                           (StringLit () ".")
+                           (InfixExpr
+                            ()
+                            OpLOr
+                            (VarRef () (Id () "selectedClassName"))
+                            (StringLit () "selected")))))
+                        (:
+                         (VarDeclStmt
+                          ()
+                          (:
+                           (VarDecl
+                            ()
+                            (Id () "updateSelectionTriangle")
+                            (Just
+                             (FuncExpr
+                              ()
+                              Nothing
+                              []
+                              (:
+                               (VarDeclStmt
+                                ()
+                                (:
+                                 (VarDecl
+                                  ()
+                                  (Id () "selectionMarkerHeight")
+                                  (Just
+                                   (CallExpr
+                                    ()
+                                    (DotRef
+                                     ()
+                                     (VarRef () (Id () "$selectionMarker"))
+                                     (Id () "height"))
+                                    [])))
+                                 (:
+                                  (VarDecl
+                                   ()
+                                   (Id () "selectionMarkerOffset")
+                                   (Just
+                                    (CallExpr
+                                     ()
+                                     (DotRef
+                                      ()
+                                      (VarRef () (Id () "$selectionMarker"))
+                                      (Id () "offset"))
+                                     [])))
+                                  (:
+                                   (VarDecl
+                                    ()
+                                    (Id () "scrollerOffset")
+                                    (Just
+                                     (CallExpr
+                                      ()
+                                      (DotRef
+                                       ()
+                                       (VarRef () (Id () "$scrollerElement"))
+                                       (Id () "offset"))
+                                      [])))
+                                   (:
+                                    (VarDecl
+                                     ()
+                                     (Id () "triangleHeight")
+                                     (Just
+                                      (CallExpr
+                                       ()
+                                       (DotRef
+                                        ()
+                                        (VarRef () (Id () "$selectionTriangle"))
+                                        (Id () "outerHeight"))
+                                       [])))
+                                    (:
+                                     (VarDecl
+                                      ()
+                                      (Id () "scrollerTop")
+                                      (Just
+                                       (DotRef
+                                        ()
+                                        (VarRef () (Id () "scrollerOffset"))
+                                        (Id () "top"))))
+                                     (:
+                                      (VarDecl
+                                       ()
+                                       (Id () "scrollerBottom")
+                                       (Just
+                                        (InfixExpr
+                                         ()
+                                         OpAdd
+                                         (VarRef () (Id () "scrollerTop"))
+                                         (CallExpr
+                                          ()
+                                          (DotRef
+                                           ()
+                                           (VarRef
+                                            ()
+                                            (Id () "$scrollerElement"))
+                                           (Id () "outerHeight"))
+                                          []))))
+                                      (:
+                                       (VarDecl
+                                        ()
+                                        (Id () "scrollerLeft")
+                                        (Just
+                                         (DotRef
+                                          ()
+                                          (VarRef () (Id () "scrollerOffset"))
+                                          (Id () "left"))))
+                                       (:
+                                        (VarDecl
+                                         ()
+                                         (Id () "triangleTop")
+                                         (Just
+                                          (DotRef
+                                           ()
+                                           (VarRef
+                                            ()
+                                            (Id () "selectionMarkerOffset"))
+                                           (Id () "top"))))
+                                        [])))))))))
+                               (:
+                                (ExprStmt
+                                 ()
+                                 (CallExpr
+                                  ()
+                                  (DotRef
+                                   ()
+                                   (VarRef () (Id () "$selectionTriangle"))
+                                   (Id () "css"))
+                                  (:
+                                   (StringLit () "top")
+                                   (: (VarRef () (Id () "triangleTop")) []))))
+                                (:
+                                 (ExprStmt
+                                  ()
+                                  (CallExpr
+                                   ()
+                                   (DotRef
+                                    ()
+                                    (VarRef () (Id () "$selectionTriangle"))
+                                    (Id () "css"))
+                                   (:
+                                    (StringLit () "left")
+                                    (:
+                                     (InfixExpr
+                                      ()
+                                      OpSub
+                                      (CallExpr
+                                       ()
+                                       (DotRef
+                                        ()
+                                        (VarRef () (Id () "$fileSection"))
+                                        (Id () "width"))
+                                       [])
+                                      (CallExpr
+                                       ()
+                                       (DotRef
+                                        ()
+                                        (VarRef () (Id () "$selectionTriangle"))
+                                        (Id () "outerWidth"))
+                                       []))
+                                     []))))
+                                 (:
+                                  (ExprStmt
+                                   ()
+                                   (CallExpr
+                                    ()
+                                    (DotRef
+                                     ()
+                                     (VarRef () (Id () "$selectionTriangle"))
+                                     (Id () "toggleClass"))
+                                    (:
+                                     (StringLit () "triangleVisible")
+                                     (:
+                                      (VarRef () (Id () "showTriangle"))
+                                      []))))
+                                  (:
+                                   (IfSingleStmt
+                                    ()
+                                    (VarRef () (Id () "showTriangle"))
+                                    (BlockStmt
+                                     ()
+                                     (:
+                                      (VarDeclStmt
+                                       ()
+                                       (:
+                                        (VarDecl
+                                         ()
+                                         (Id () "triangleClipOffsetYBy")
+                                         (Just
+                                          (CallExpr
+                                           ()
+                                           (DotRef
+                                            ()
+                                            (VarRef () (Id () "Math"))
+                                            (Id () "floor"))
+                                           (:
+                                            (InfixExpr
+                                             ()
+                                             OpDiv
+                                             (InfixExpr
+                                              ()
+                                              OpSub
+                                              (VarRef
+                                               ()
+                                               (Id () "selectionMarkerHeight"))
+                                              (VarRef
+                                               ()
+                                               (Id () "triangleHeight")))
+                                             (IntLit () 2))
+                                            []))))
+                                        (:
+                                         (VarDecl
+                                          ()
+                                          (Id () "triangleBottom")
+                                          (Just
+                                           (InfixExpr
+                                            ()
+                                            OpAdd
+                                            (InfixExpr
+                                             ()
+                                             OpAdd
+                                             (VarRef () (Id () "triangleTop"))
+                                             (VarRef
+                                              ()
+                                              (Id () "triangleHeight")))
+                                            (VarRef
+                                             ()
+                                             (Id () "triangleClipOffsetYBy")))))
+                                         [])))
+                                      (:
+                                       (IfStmt
+                                        ()
+                                        (InfixExpr
+                                         ()
+                                         OpLOr
+                                         (InfixExpr
+                                          ()
+                                          OpLT
+                                          (VarRef () (Id () "triangleTop"))
+                                          (VarRef () (Id () "scrollerTop")))
+                                         (InfixExpr
+                                          ()
+                                          OpGT
+                                          (VarRef () (Id () "triangleBottom"))
+                                          (VarRef () (Id () "scrollerBottom"))))
+                                        (BlockStmt
+                                         ()
+                                         (:
+                                          (ExprStmt
+                                           ()
+                                           (CallExpr
+                                            ()
+                                            (DotRef
+                                             ()
+                                             (VarRef
+                                              ()
+                                              (Id () "$selectionTriangle"))
+                                             (Id () "css"))
+                                            (:
+                                             (StringLit () "clip")
+                                             (:
+                                              (InfixExpr
+                                               ()
+                                               OpAdd
+                                               (InfixExpr
+                                                ()
+                                                OpAdd
+                                                (InfixExpr
+                                                 ()
+                                                 OpAdd
+                                                 (InfixExpr
+                                                  ()
+                                                  OpAdd
+                                                  (StringLit () "rect(")
+                                                  (CallExpr
+                                                   ()
+                                                   (DotRef
+                                                    ()
+                                                    (VarRef () (Id () "Math"))
+                                                    (Id () "max"))
+                                                   (:
+                                                    (InfixExpr
+                                                     ()
+                                                     OpSub
+                                                     (InfixExpr
+                                                      ()
+                                                      OpSub
+                                                      (VarRef
+                                                       ()
+                                                       (Id () "scrollerTop"))
+                                                      (VarRef
+                                                       ()
+                                                       (Id () "triangleTop")))
+                                                     (VarRef
+                                                      ()
+                                                      (Id
+                                                       ()
+                                                       "triangleClipOffsetYBy")))
+                                                    (: (IntLit () 0) []))))
+                                                 (StringLit () "px, auto, "))
+                                                (InfixExpr
+                                                 ()
+                                                 OpSub
+                                                 (VarRef
+                                                  ()
+                                                  (Id () "triangleHeight"))
+                                                 (CallExpr
+                                                  ()
+                                                  (DotRef
+                                                   ()
+                                                   (VarRef () (Id () "Math"))
+                                                   (Id () "max"))
+                                                  (:
+                                                   (InfixExpr
+                                                    ()
+                                                    OpSub
+                                                    (VarRef
+                                                     ()
+                                                     (Id () "triangleBottom"))
+                                                    (VarRef
+                                                     ()
+                                                     (Id () "scrollerBottom")))
+                                                   (: (IntLit () 0) [])))))
+                                               (StringLit () "px, auto)"))
+                                              []))))
+                                          []))
+                                        (BlockStmt
+                                         ()
+                                         (:
+                                          (ExprStmt
+                                           ()
+                                           (CallExpr
+                                            ()
+                                            (DotRef
+                                             ()
+                                             (VarRef
+                                              ()
+                                              (Id () "$selectionTriangle"))
+                                             (Id () "css"))
+                                            (:
+                                             (StringLit () "clip")
+                                             (: (StringLit () "") []))))
+                                          [])))
+                                       []))))
+                                   []))))))))
+                           []))
+                         (:
+                          (VarDeclStmt
+                           ()
+                           (:
+                            (VarDecl
+                             ()
+                             (Id () "updateSelectionMarker")
+                             (Just
+                              (FuncExpr
+                               ()
+                               Nothing
+                               []
+                               (:
+                                (VarDeclStmt
+                                 ()
+                                 (:
+                                  (VarDecl
+                                   ()
+                                   (Id () "$listItem")
+                                   (Just
+                                    (CallExpr
+                                     ()
+                                     (DotRef
+                                      ()
+                                      (CallExpr
+                                       ()
+                                       (DotRef
+                                        ()
+                                        (VarRef () (Id () "$listElement"))
+                                        (Id () "find"))
+                                       (:
+                                        (VarRef () (Id () "selectedClassName"))
+                                        []))
+                                      (Id () "closest"))
+                                     (: (StringLit () "li") []))))
+                                  []))
+                                (:
+                                 (IfSingleStmt
+                                  ()
+                                  (VarRef () (Id () "leafClassName"))
+                                  (BlockStmt
+                                   ()
+                                   (:
+                                    (ExprStmt
+                                     ()
+                                     (AssignExpr
+                                      ()
+                                      OpAssign
+                                      (LVar () "showTriangle")
+                                      (CallExpr
+                                       ()
+                                       (DotRef
+                                        ()
+                                        (VarRef () (Id () "$listItem"))
+                                        (Id () "hasClass"))
+                                       (:
+                                        (VarRef () (Id () "leafClassName"))
+                                        []))))
+                                    [])))
+                                 (:
+                                  (ExprStmt
+                                   ()
+                                   (CallExpr
+                                    ()
+                                    (DotRef
+                                     ()
+                                     (VarRef () (Id () "$selectionTriangle"))
+                                     (Id () "hide"))
+                                    []))
+                                  (:
+                                   (ExprStmt
+                                    ()
+                                    (CallExpr
+                                     ()
+                                     (DotRef
+                                      ()
+                                      (VarRef () (Id () "$selectionMarker"))
+                                      (Id () "hide"))
+                                     []))
+                                   (:
+                                    (IfSingleStmt
+                                     ()
+                                     (InfixExpr
+                                      ()
+                                      OpStrictEq
+                                      (DotRef
+                                       ()
+                                       (VarRef () (Id () "$listItem"))
+                                       (Id () "length"))
+                                      (IntLit () 1))
+                                     (BlockStmt
+                                      ()
+                                      (:
+                                       (VarDeclStmt
+                                        ()
+                                        (:
+                                         (VarDecl
+                                          ()
+                                          (Id () "selectionMarkerTop")
+                                          (Just
+                                           (InfixExpr
+                                            ()
+                                            OpAdd
+                                            (InfixExpr
+                                             ()
+                                             OpSub
+                                             (DotRef
+                                              ()
+                                              (CallExpr
+                                               ()
+                                               (DotRef
+                                                ()
+                                                (VarRef () (Id () "$listItem"))
+                                                (Id () "offset"))
+                                               [])
+                                              (Id () "top"))
+                                             (DotRef
+                                              ()
+                                              (CallExpr
+                                               ()
+                                               (DotRef
+                                                ()
+                                                (VarRef
+                                                 ()
+                                                 (Id () "$scrollerElement"))
+                                                (Id () "offset"))
+                                               [])
+                                              (Id () "top")))
+                                            (DotRef
+                                             ()
+                                             (CallExpr
+                                              ()
+                                              (DotRef
+                                               ()
+                                               (VarRef
+                                                ()
+                                                (Id () "$scrollerElement"))
+                                               (Id () "get"))
+                                              (: (IntLit () 0) []))
+                                             (Id () "scrollTop")))))
+                                         []))
+                                       (:
+                                        (ExprStmt
+                                         ()
+                                         (CallExpr
+                                          ()
+                                          (DotRef
+                                           ()
+                                           (VarRef
+                                            ()
+                                            (Id () "$selectionMarker"))
+                                           (Id () "width"))
+                                          (:
+                                           (DotRef
+                                            ()
+                                            (CallExpr
+                                             ()
+                                             (DotRef
+                                              ()
+                                              (VarRef
+                                               ()
+                                               (Id () "$scrollerElement"))
+                                              (Id () "get"))
+                                             (: (IntLit () 0) []))
+                                            (Id () "scrollWidth"))
+                                           [])))
+                                        (:
+                                         (ExprStmt
+                                          ()
+                                          (CallExpr
+                                           ()
+                                           (DotRef
+                                            ()
+                                            (VarRef
+                                             ()
+                                             (Id () "$selectionMarker"))
+                                            (Id () "css"))
+                                           (:
+                                            (StringLit () "top")
+                                            (:
+                                             (VarRef
+                                              ()
+                                              (Id () "selectionMarkerTop"))
+                                             []))))
+                                         (:
+                                          (ExprStmt
+                                           ()
+                                           (CallExpr
+                                            ()
+                                            (DotRef
+                                             ()
+                                             (VarRef
+                                              ()
+                                              (Id () "$selectionMarker"))
+                                             (Id () "show"))
+                                            []))
+                                          (:
+                                           (ExprStmt
+                                            ()
+                                            (CallExpr
+                                             ()
+                                             (VarRef
+                                              ()
+                                              (Id () "updateSelectionTriangle"))
+                                             []))
+                                           (:
+                                            (ExprStmt
+                                             ()
+                                             (CallExpr
+                                              ()
+                                              (DotRef
+                                               ()
+                                               (VarRef
+                                                ()
+                                                (Id () "$selectionTriangle"))
+                                               (Id () "show"))
+                                              []))
+                                            (:
+                                             (VarDeclStmt
+                                              ()
+                                              (:
+                                               (VarDecl
+                                                ()
+                                                (Id () "scrollerElement")
+                                                (Just
+                                                 (CallExpr
+                                                  ()
+                                                  (DotRef
+                                                   ()
+                                                   (VarRef
+                                                    ()
+                                                    (Id () "$scrollerElement"))
+                                                   (Id () "get"))
+                                                  (: (IntLit () 0) []))))
+                                               (:
+                                                (VarDecl
+                                                 ()
+                                                 (Id () "scrollerHeight")
+                                                 (Just
+                                                  (DotRef
+                                                   ()
+                                                   (VarRef
+                                                    ()
+                                                    (Id () "scrollerElement"))
+                                                   (Id () "clientHeight"))))
+                                                (:
+                                                 (VarDecl
+                                                  ()
+                                                  (Id
+                                                   ()
+                                                   "selectionMarkerHeight")
+                                                  (Just
+                                                   (CallExpr
+                                                    ()
+                                                    (DotRef
+                                                     ()
+                                                     (VarRef
+                                                      ()
+                                                      (Id
+                                                       ()
+                                                       "$selectionMarker"))
+                                                     (Id () "height"))
+                                                    [])))
+                                                 (:
+                                                  (VarDecl
+                                                   ()
+                                                   (Id
+                                                    ()
+                                                    "selectionMarkerBottom")
+                                                   (Just
+                                                    (InfixExpr
+                                                     ()
+                                                     OpAdd
+                                                     (VarRef
+                                                      ()
+                                                      (Id
+                                                       ()
+                                                       "selectionMarkerTop"))
+                                                     (VarRef
+                                                      ()
+                                                      (Id
+                                                       ()
+                                                       "selectionMarkerHeight")))))
+                                                  (:
+                                                   (VarDecl
+                                                    ()
+                                                    (Id
+                                                     ()
+                                                     "currentScrollBottom")
+                                                    (Just
+                                                     (InfixExpr
+                                                      ()
+                                                      OpAdd
+                                                      (DotRef
+                                                       ()
+                                                       (VarRef
+                                                        ()
+                                                        (Id
+                                                         ()
+                                                         "scrollerElement"))
+                                                       (Id () "scrollTop"))
+                                                      (VarRef
+                                                       ()
+                                                       (Id
+                                                        ()
+                                                        "scrollerHeight")))))
+                                                   []))))))
+                                             (:
+                                              (IfStmt
+                                               ()
+                                               (InfixExpr
+                                                ()
+                                                OpGEq
+                                                (VarRef
+                                                 ()
+                                                 (Id () "selectionMarkerTop"))
+                                                (VarRef
+                                                 ()
+                                                 (Id () "currentScrollBottom")))
+                                               (BlockStmt
+                                                ()
+                                                (:
+                                                 (ExprStmt
+                                                  ()
+                                                  (AssignExpr
+                                                   ()
+                                                   OpAssign
+                                                   (LDot
+                                                    ()
+                                                    (VarRef
+                                                     ()
+                                                     (Id () "scrollerElement"))
+                                                    "scrollTop")
+                                                   (CallExpr
+                                                    ()
+                                                    (DotRef
+                                                     ()
+                                                     (VarRef () (Id () "Math"))
+                                                     (Id () "max"))
+                                                    (:
+                                                     (IntLit () 0)
+                                                     (:
+                                                      (InfixExpr
+                                                       ()
+                                                       OpSub
+                                                       (InfixExpr
+                                                        ()
+                                                        OpAdd
+                                                        (VarRef
+                                                         ()
+                                                         (Id
+                                                          ()
+                                                          "selectionMarkerTop"))
+                                                        (VarRef
+                                                         ()
+                                                         (Id
+                                                          ()
+                                                          "selectionMarkerHeight")))
+                                                       (VarRef
+                                                        ()
+                                                        (Id
+                                                         ()
+                                                         "scrollerHeight")))
+                                                      [])))))
+                                                 []))
+                                               (IfSingleStmt
+                                                ()
+                                                (InfixExpr
+                                                 ()
+                                                 OpLEq
+                                                 (VarRef
+                                                  ()
+                                                  (Id
+                                                   ()
+                                                   "selectionMarkerBottom"))
+                                                 (DotRef
+                                                  ()
+                                                  (VarRef
+                                                   ()
+                                                   (Id () "scrollerElement"))
+                                                  (Id () "scrollTop")))
+                                                (BlockStmt
+                                                 ()
+                                                 (:
+                                                  (ExprStmt
+                                                   ()
+                                                   (AssignExpr
+                                                    ()
+                                                    OpAssign
+                                                    (LDot
+                                                     ()
+                                                     (VarRef
+                                                      ()
+                                                      (Id () "scrollerElement"))
+                                                     "scrollTop")
+                                                    (VarRef
+                                                     ()
+                                                     (Id
+                                                      ()
+                                                      "selectionMarkerTop"))))
+                                                  []))))
+                                              []))))))))))
+                                    []))))))))
+                            []))
+                          (:
+                           (ExprStmt
+                            ()
+                            (CallExpr
+                             ()
+                             (DotRef
+                              ()
+                              (VarRef () (Id () "$listElement"))
+                              (Id () "on"))
+                             (:
+                              (StringLit () "selectionChanged")
+                              (:
+                               (VarRef () (Id () "updateSelectionMarker"))
+                               []))))
+                           (:
+                            (ExprStmt
+                             ()
+                             (CallExpr
+                              ()
+                              (DotRef
+                               ()
+                               (VarRef () (Id () "$scrollerElement"))
+                               (Id () "on"))
+                              (:
+                               (StringLit () "scroll")
+                               (:
+                                (VarRef () (Id () "updateSelectionTriangle"))
+                                []))))
+                            (:
+                             (ExprStmt
+                              ()
+                              (CallExpr
+                               ()
+                               (VarRef () (Id () "updateSelectionMarker"))
+                               []))
+                             (:
+                              (ExprStmt
+                               ()
+                               (CallExpr
+                                ()
+                                (DotRef
+                                 ()
+                                 (VarRef () (Id () "_resizeHandlers"))
+                                 (Id () "push"))
+                                (:
+                                 (VarRef () (Id () "updateSelectionTriangle"))
+                                 [])))
+                              [])))))))))))))))
+               (:
+                (FunctionStmt
+                 ()
+                 (Id () "handleResize")
+                 []
+                 (:
+                  (ExprStmt
+                   ()
+                   (CallExpr
+                    ()
+                    (DotRef
+                     ()
+                     (VarRef () (Id () "_resizeHandlers"))
+                     (Id () "forEach"))
+                    (:
+                     (FuncExpr
+                      ()
+                      Nothing
+                      (: (Id () "f") [])
+                      (:
+                       (ExprStmt
+                        ()
+                        (CallExpr
+                         ()
+                         (DotRef () (VarRef () (Id () "f")) (Id () "apply"))
+                         []))
+                       []))
+                     [])))
+                  []))
+                (:
+                 (ExprStmt
+                  ()
+                  (CallExpr
+                   ()
+                   (DotRef
+                    ()
+                    (CallExpr
+                     ()
+                     (VarRef () (Id () "$"))
+                     (: (VarRef () (Id () "window")) []))
+                    (Id () "resize"))
+                   (: (VarRef () (Id () "handleResize")) [])))
+                 (:
+                  (ExprStmt
+                   ()
+                   (AssignExpr
+                    ()
+                    OpAssign
+                    (LDot
+                     ()
+                     (VarRef () (Id () "exports"))
+                     "SCROLL_SHADOW_HEIGHT")
+                    (VarRef () (Id () "SCROLL_SHADOW_HEIGHT"))))
+                  (:
+                   (ExprStmt
+                    ()
+                    (AssignExpr
+                     ()
+                     OpAssign
+                     (LDot
+                      ()
+                      (VarRef () (Id () "exports"))
+                      "updateChildrenToParentScrollwidth")
+                     (VarRef () (Id () "updateChildrenToParentScrollwidth"))))
+                   (:
+                    (ExprStmt
+                     ()
+                     (AssignExpr
+                      ()
+                      OpAssign
+                      (LDot
+                       ()
+                       (VarRef () (Id () "exports"))
+                       "addScrollerShadow")
+                      (VarRef () (Id () "addScrollerShadow"))))
+                    (:
+                     (ExprStmt
+                      ()
+                      (AssignExpr
+                       ()
+                       OpAssign
+                       (LDot
+                        ()
+                        (VarRef () (Id () "exports"))
+                        "removeScrollerShadow")
+                       (VarRef () (Id () "removeScrollerShadow"))))
+                     (:
+                      (ExprStmt
+                       ()
+                       (AssignExpr
+                        ()
+                        OpAssign
+                        (LDot () (VarRef () (Id () "exports")) "sidebarList")
+                        (VarRef () (Id () "sidebarList"))))
+                      [])))))))))))))))))
+     [])))
+  []))

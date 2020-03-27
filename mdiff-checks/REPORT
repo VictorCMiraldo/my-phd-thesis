@@ -1,0 +1,76 @@
+# 00 extra-ops
+
+M.clj performed extra operations by refactoring imports;
+hdiff did produce a correct merge, but it read:
+
+```clojure
+(ns metabase.driver.generic-sql
+  (:require ...
+            [metabase.sync-database.analyze :as analyze]
+            [metabase.util.honeysql-extensions :as hx]
+            [metabase.util.ssh :as ssh])
+  ... )
+```
+
+Whereas the committed file reads:
+
+```clojure
+(ns metabase.driver.generic-sql
+  (:require ...
+            [metabase.util
+             [honeysql-extensions :as hx]
+             [ssh :as ssh]])
+  ... )
+```
+
+## 01 extra-ops
+
+Again, M.py performed more actions. The committed resolution introduced
+an equality operator:
+
+```py
+...
+if holes and default is not None:
+    int_expr.extend(holes)
+    if targetcond == True:
+        return [(h[0], h[1], None) for h in holes]
+...
+```
+
+whereas hdiff produced the expected result:
+
+```py
+if holes and default is not None:
+    int_expr.extend(holes)
+    if targetcond is True:
+        return [(h[0], h[1], None) for h in holes]
+...
+```
+
+## 02 insertion-order
+
+This one is weird; the human produced M.java makes sense, the hdiff result
+is correct but I can't explain. Hdiff inserted functions in a different order.
+
+## 03 ignoring-change
+
+This is interesting; the human merge did /not/ include a change.
+
+         A.py                          O.py                       B.py
+...                         | ...                         | ...                         |
+MINOR_VERSION = 89          | MINOR_VERSION = 88          | MINOR_VERSION = 88          |
+PATCH_VERSION = '0.dev0'    | PATCH_VERSION = '0.dev0'    | PATCH_VERSION = '0'         |
+
+Yet, M.py is equal to A.py, showing that the developer ignored
+the change to PATCH_VERSION; either on purpose or not, but hdiff did produce
+the expected result.
+
+## 04 exrta-ops
+
+Once again, M.clj ignored an insertion from A.clj; namelly,
+
+```clj
+(assoc-in [:task-name->id (:id args)] (:task-name->id args))
+```
+
+Did not get inserted in the final merge; hdiff did consider this insertion.

@@ -1,0 +1,521 @@
+(CompilationUnit
+ (Just
+  (PackageDecl
+   (Name
+    (:
+     (Ident "jadx")
+     (: (Ident "tests") (: (Ident "integration") (: (Ident "trycatch") [])))))))
+ (:
+  (ImportDecl
+   False
+   (Name
+    (:
+     (Ident "org")
+     (:
+      (Ident "junit")
+      (: (Ident "jupiter") (: (Ident "api") (: (Ident "Test") []))))))
+   False)
+  (:
+   (ImportDecl
+    False
+    (Name
+     (:
+      (Ident "jadx")
+      (:
+       (Ident "core")
+       (: (Ident "dex") (: (Ident "nodes") (: (Ident "ClassNode") []))))))
+    False)
+   (:
+    (ImportDecl
+     False
+     (Name
+      (:
+       (Ident "jadx")
+       (: (Ident "tests") (: (Ident "api") (: (Ident "IntegrationTest") [])))))
+     False)
+    (:
+     (ImportDecl
+      True
+      (Name
+       (:
+        (Ident "jadx")
+        (:
+         (Ident "tests")
+         (:
+          (Ident "api")
+          (:
+           (Ident "utils")
+           (: (Ident "JadxMatchers") (: (Ident "containsOne") [])))))))
+      False)
+     (:
+      (ImportDecl
+       True
+       (Name
+        (:
+         (Ident "org")
+         (:
+          (Ident "hamcrest")
+          (: (Ident "MatcherAssert") (: (Ident "assertThat") [])))))
+       False)
+      (:
+       (ImportDecl
+        True
+        (Name
+         (:
+          (Ident "org")
+          (:
+           (Ident "hamcrest")
+           (: (Ident "Matchers") (: (Ident "containsString") [])))))
+        False)
+       (:
+        (ImportDecl
+         True
+         (Name
+          (:
+           (Ident "org")
+           (: (Ident "hamcrest") (: (Ident "Matchers") (: (Ident "not") [])))))
+         False)
+        (:
+         (ImportDecl
+          True
+          (Name
+           (:
+            (Ident "org")
+            (:
+             (Ident "junit")
+             (:
+              (Ident "jupiter")
+              (:
+               (Ident "api")
+               (: (Ident "Assertions") (: (Ident "assertEquals") [])))))))
+          False)
+         []))))))))
+ (:
+  (ClassTypeDecl
+   (ClassDecl
+    (: Public [])
+    (Ident "TestFinallyExtract")
+    []
+    (Just (ClassRefType (ClassType (: ((,) (Ident "IntegrationTest") []) []))))
+    []
+    (ClassBody
+     (:
+      (MemberDecl
+       (MemberClassDecl
+        (ClassDecl
+         (: Public (: Static []))
+         (Ident "TestCls")
+         []
+         Nothing
+         []
+         (ClassBody
+          (:
+           (MemberDecl
+            (FieldDecl
+             (: Private [])
+             (PrimType IntT)
+             (:
+              (VarDecl (VarId (Ident "result")) (Just (InitExp (Lit (Int 0)))))
+              [])))
+           (:
+            (MemberDecl
+             (MethodDecl
+              (: Public [])
+              []
+              (Just
+               (RefType
+                (ClassRefType (ClassType (: ((,) (Ident "String") []) [])))))
+              (Ident "test")
+              []
+              []
+              Nothing
+              (MethodBody
+               (Just
+                (Block
+                 (:
+                  (LocalVars
+                   []
+                   (PrimType BooleanT)
+                   (:
+                    (VarDecl
+                     (VarId (Ident "success"))
+                     (Just (InitExp (Lit (Boolean False)))))
+                    []))
+                  (:
+                   (BlockStmt
+                    (Try
+                     (Block
+                      (:
+                       (LocalVars
+                        []
+                        (RefType
+                         (ClassRefType
+                          (ClassType (: ((,) (Ident "String") []) []))))
+                        (:
+                         (VarDecl
+                          (VarId (Ident "value"))
+                          (Just
+                           (InitExp
+                            (MethodInv
+                             (MethodCall (Name (: (Ident "call") [])) [])))))
+                         []))
+                       (:
+                        (BlockStmt
+                         (ExpStmt
+                          (PostIncrement
+                           (ExpName (Name (: (Ident "result") []))))))
+                        (:
+                         (BlockStmt
+                          (ExpStmt
+                           (Assign
+                            (NameLhs (Name (: (Ident "success") [])))
+                            EqualA
+                            (Lit (Boolean True)))))
+                         (:
+                          (BlockStmt
+                           (Return
+                            (Just (ExpName (Name (: (Ident "value") []))))))
+                          [])))))
+                     []
+                     (Just
+                      (Block
+                       (:
+                        (BlockStmt
+                         (IfThen
+                          (PreNot (ExpName (Name (: (Ident "success") []))))
+                          (StmtBlock
+                           (Block
+                            (:
+                             (BlockStmt
+                              (ExpStmt
+                               (Assign
+                                (NameLhs (Name (: (Ident "result") [])))
+                                SubA
+                                (Lit (Int 2)))))
+                             [])))))
+                        [])))))
+                   [])))))))
+            (:
+             (MemberDecl
+              (MethodDecl
+               (: Private [])
+               []
+               (Just
+                (RefType
+                 (ClassRefType (ClassType (: ((,) (Ident "String") []) [])))))
+               (Ident "call")
+               []
+               []
+               Nothing
+               (MethodBody
+                (Just
+                 (Block
+                  (: (BlockStmt (Return (Just (Lit (String "call"))))) []))))))
+             (:
+              (MemberDecl
+               (MethodDecl
+                (: Public [])
+                []
+                Nothing
+                (Ident "check")
+                []
+                []
+                Nothing
+                (MethodBody
+                 (Just
+                  (Block
+                   (:
+                    (BlockStmt
+                     (ExpStmt
+                      (MethodInv (MethodCall (Name (: (Ident "test") [])) []))))
+                    (:
+                     (BlockStmt
+                      (ExpStmt
+                       (MethodInv
+                        (MethodCall
+                         (Name (: (Ident "assertEquals") []))
+                         (:
+                          (ExpName (Name (: (Ident "result") [])))
+                          (: (Lit (Int 1)) []))))))
+                     [])))))))
+              []))))))))
+      (:
+       (MemberDecl
+        (MethodDecl
+         (:
+          (Annotation (MarkerAnnotation (Name (: (Ident "Test") []))))
+          (: Public []))
+         []
+         Nothing
+         (Ident "test")
+         []
+         []
+         Nothing
+         (MethodBody
+          (Just
+           (Block
+            (:
+             (LocalVars
+              []
+              (RefType
+               (ClassRefType (ClassType (: ((,) (Ident "ClassNode") []) []))))
+              (:
+               (VarDecl
+                (VarId (Ident "cls"))
+                (Just
+                 (InitExp
+                  (MethodInv
+                   (MethodCall
+                    (Name (: (Ident "getClassNode") []))
+                    (:
+                     (ClassLit
+                      (Just
+                       (RefType
+                        (ClassRefType
+                         (ClassType (: ((,) (Ident "TestCls") []) []))))))
+                     []))))))
+               []))
+             (:
+              (LocalVars
+               []
+               (RefType
+                (ClassRefType (ClassType (: ((,) (Ident "String") []) []))))
+               (:
+                (VarDecl
+                 (VarId (Ident "code"))
+                 (Just
+                  (InitExp
+                   (MethodInv
+                    (PrimaryMethodCall
+                     (MethodInv
+                      (MethodCall
+                       (Name (: (Ident "cls") (: (Ident "getCode") [])))
+                       []))
+                     []
+                     (Ident "toString")
+                     [])))))
+                []))
+              (:
+               (BlockStmt
+                (ExpStmt
+                 (MethodInv
+                  (MethodCall
+                   (Name (: (Ident "assertThat") []))
+                   (:
+                    (ExpName (Name (: (Ident "code") [])))
+                    (:
+                     (MethodInv
+                      (MethodCall
+                       (Name (: (Ident "not") []))
+                       (:
+                        (MethodInv
+                         (MethodCall
+                          (Name (: (Ident "containsString") []))
+                          (: (Lit (String "if (0 == 0) {")) [])))
+                        [])))
+                     []))))))
+               (:
+                (BlockStmt
+                 (ExpStmt
+                  (MethodInv
+                   (MethodCall
+                    (Name (: (Ident "assertThat") []))
+                    (:
+                     (ExpName (Name (: (Ident "code") [])))
+                     (:
+                      (MethodInv
+                       (MethodCall
+                        (Name (: (Ident "containsOne") []))
+                        (: (Lit (String "boolean success = false;")) [])))
+                      []))))))
+                (:
+                 (BlockStmt
+                  (ExpStmt
+                   (MethodInv
+                    (MethodCall
+                     (Name (: (Ident "assertThat") []))
+                     (:
+                      (ExpName (Name (: (Ident "code") [])))
+                      (:
+                       (MethodInv
+                        (MethodCall
+                         (Name (: (Ident "containsOne") []))
+                         (: (Lit (String "try {")) [])))
+                       []))))))
+                 (:
+                  (BlockStmt
+                   (ExpStmt
+                    (MethodInv
+                     (MethodCall
+                      (Name (: (Ident "assertThat") []))
+                      (:
+                       (ExpName (Name (: (Ident "code") [])))
+                       (:
+                        (MethodInv
+                         (MethodCall
+                          (Name (: (Ident "containsOne") []))
+                          (: (Lit (String "success = true;")) [])))
+                        []))))))
+                  (:
+                   (BlockStmt
+                    (ExpStmt
+                     (MethodInv
+                      (MethodCall
+                       (Name (: (Ident "assertThat") []))
+                       (:
+                        (ExpName (Name (: (Ident "code") [])))
+                        (:
+                         (MethodInv
+                          (MethodCall
+                           (Name (: (Ident "containsOne") []))
+                           (: (Lit (String "return value;")) [])))
+                         []))))))
+                   (:
+                    (BlockStmt
+                     (ExpStmt
+                      (MethodInv
+                       (MethodCall
+                        (Name (: (Ident "assertThat") []))
+                        (:
+                         (ExpName (Name (: (Ident "code") [])))
+                         (:
+                          (MethodInv
+                           (MethodCall
+                            (Name (: (Ident "containsOne") []))
+                            (: (Lit (String "} finally {")) [])))
+                          []))))))
+                    (:
+                     (BlockStmt
+                      (ExpStmt
+                       (MethodInv
+                        (MethodCall
+                         (Name (: (Ident "assertThat") []))
+                         (:
+                          (ExpName (Name (: (Ident "code") [])))
+                          (:
+                           (MethodInv
+                            (MethodCall
+                             (Name (: (Ident "containsOne") []))
+                             (: (Lit (String "if (!success) {")) [])))
+                           []))))))
+                     []))))))))))))))
+       (:
+        (MemberDecl
+         (MethodDecl
+          (:
+           (Annotation (MarkerAnnotation (Name (: (Ident "Test") []))))
+           (: Public []))
+          []
+          Nothing
+          (Ident "testNoDebug")
+          []
+          []
+          Nothing
+          (MethodBody
+           (Just
+            (Block
+             (:
+              (BlockStmt
+               (ExpStmt
+                (MethodInv
+                 (MethodCall (Name (: (Ident "noDebugInfo") [])) []))))
+              (:
+               (LocalVars
+                []
+                (RefType
+                 (ClassRefType (ClassType (: ((,) (Ident "ClassNode") []) []))))
+                (:
+                 (VarDecl
+                  (VarId (Ident "cls"))
+                  (Just
+                   (InitExp
+                    (MethodInv
+                     (MethodCall
+                      (Name (: (Ident "getClassNode") []))
+                      (:
+                       (ClassLit
+                        (Just
+                         (RefType
+                          (ClassRefType
+                           (ClassType (: ((,) (Ident "TestCls") []) []))))))
+                       []))))))
+                 []))
+               (:
+                (LocalVars
+                 []
+                 (RefType
+                  (ClassRefType (ClassType (: ((,) (Ident "String") []) []))))
+                 (:
+                  (VarDecl
+                   (VarId (Ident "code"))
+                   (Just
+                    (InitExp
+                     (MethodInv
+                      (PrimaryMethodCall
+                       (MethodInv
+                        (MethodCall
+                         (Name (: (Ident "cls") (: (Ident "getCode") [])))
+                         []))
+                       []
+                       (Ident "toString")
+                       [])))))
+                  []))
+                (:
+                 (BlockStmt
+                  (ExpStmt
+                   (MethodInv
+                    (MethodCall
+                     (Name (: (Ident "assertThat") []))
+                     (:
+                      (ExpName (Name (: (Ident "code") [])))
+                      (:
+                       (MethodInv
+                        (MethodCall
+                         (Name (: (Ident "containsOne") []))
+                         (: (Lit (String "this.result++;")) [])))
+                       []))))))
+                 (:
+                  (BlockStmt
+                   (ExpStmt
+                    (MethodInv
+                     (MethodCall
+                      (Name (: (Ident "assertThat") []))
+                      (:
+                       (ExpName (Name (: (Ident "code") [])))
+                       (:
+                        (MethodInv
+                         (MethodCall
+                          (Name (: (Ident "containsOne") []))
+                          (: (Lit (String "} catch (Throwable th) {")) [])))
+                        []))))))
+                  (:
+                   (BlockStmt
+                    (ExpStmt
+                     (MethodInv
+                      (MethodCall
+                       (Name (: (Ident "assertThat") []))
+                       (:
+                        (ExpName (Name (: (Ident "code") [])))
+                        (:
+                         (MethodInv
+                          (MethodCall
+                           (Name (: (Ident "containsOne") []))
+                           (: (Lit (String "this.result -= 2;")) [])))
+                         []))))))
+                   (:
+                    (BlockStmt
+                     (ExpStmt
+                      (MethodInv
+                       (MethodCall
+                        (Name (: (Ident "assertThat") []))
+                        (:
+                         (ExpName (Name (: (Ident "code") [])))
+                         (:
+                          (MethodInv
+                           (MethodCall
+                            (Name (: (Ident "containsOne") []))
+                            (: (Lit (String "throw th;")) [])))
+                          []))))))
+                    []))))))))))))
+        []))))))
+  []))

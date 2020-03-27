@@ -1,0 +1,328 @@
+(Script
+ ()
+ (:
+  (VarDeclStmt
+   ()
+   (:
+    (VarDecl
+     ()
+     (Id () "path")
+     (Just
+      (CallExpr () (VarRef () (Id () "require")) (: (StringLit () "path") []))))
+    (:
+     (VarDecl
+      ()
+      (Id () "posix")
+      (Just
+       (CallExpr
+        ()
+        (VarRef () (Id () "require"))
+        (: (StringLit () "posix") []))))
+     [])))
+  (:
+   (ExprStmt
+    ()
+    (AssignExpr
+     ()
+     OpAssign
+     (LVar () "InvalidPathError")
+     (CallExpr
+      ()
+      (DotRef () (VarRef () (Id () "ExpressError")) (Id () "extend"))
+      (:
+       (ObjectLit
+        ()
+        (:
+         ((,) (PropId () (Id () "name")) (StringLit () "InvalidPathError"))
+         (:
+          ((,)
+           (PropId () (Id () "init"))
+           (FuncExpr
+            ()
+            Nothing
+            (: (Id () "path") [])
+            (:
+             (ExprStmt
+              ()
+              (AssignExpr
+               ()
+               OpAssign
+               (LDot () (ThisRef ()) "message")
+               (InfixExpr
+                ()
+                OpAdd
+                (InfixExpr
+                 ()
+                 OpAdd
+                 (StringLit () "`")
+                 (VarRef () (Id () "path")))
+                (StringLit () "' is not a valid path"))))
+             [])))
+          [])))
+       []))))
+   (:
+    (ExprStmt
+     ()
+     (AssignExpr
+      ()
+      OpAssign
+      (LDot () (VarRef () (Id () "exports")) "File")
+      (CallExpr
+       ()
+       (VarRef () (Id () "Class"))
+       (:
+        (ObjectLit
+         ()
+         (:
+          ((,)
+           (PropId () (Id () "init"))
+           (FuncExpr
+            ()
+            Nothing
+            (: (Id () "path") [])
+            (:
+             (ExprStmt
+              ()
+              (AssignExpr
+               ()
+               OpAssign
+               (LDot () (ThisRef ()) "path")
+               (VarRef () (Id () "path"))))
+             (:
+              (IfSingleStmt
+               ()
+               (InfixExpr
+                ()
+                OpNEq
+                (CallExpr
+                 ()
+                 (DotRef () (VarRef () (Id () "path")) (Id () "indexOf"))
+                 (: (StringLit () "..") []))
+                (PrefixExpr () PrefixMinus (IntLit () 1)))
+               (ThrowStmt
+                ()
+                (NewExpr
+                 ()
+                 (VarRef () (Id () "InvalidPathError"))
+                 (: (VarRef () (Id () "path")) []))))
+              []))))
+          (:
+           ((,)
+            (PropId () (Id () "send"))
+            (FuncExpr
+             ()
+             Nothing
+             (: (Id () "request") [])
+             (:
+              (VarDeclStmt
+               ()
+               (:
+                (VarDecl () (Id () "cache") Nothing)
+                (:
+                 (VarDecl
+                  ()
+                  (Id () "file")
+                  (Just (DotRef () (ThisRef ()) (Id () "path"))))
+                 [])))
+              (:
+               (IfSingleStmt
+                ()
+                (InfixExpr
+                 ()
+                 OpLAnd
+                 (CallExpr
+                  ()
+                  (VarRef () (Id () "set"))
+                  (: (StringLit () "cache static files") []))
+                 (AssignExpr
+                  ()
+                  OpAssign
+                  (LVar () "cache")
+                  (CallExpr
+                   ()
+                   (DotRef
+                    ()
+                    (DotRef () (VarRef () (Id () "request")) (Id () "cache"))
+                    (Id () "get"))
+                   (: (VarRef () (Id () "file")) []))))
+                (ExprStmt
+                 ()
+                 (ListExpr
+                  ()
+                  (:
+                   (CallExpr
+                    ()
+                    (DotRef
+                     ()
+                     (VarRef () (Id () "request"))
+                     (Id () "contentType"))
+                    (:
+                     (DotRef () (VarRef () (Id () "cache")) (Id () "type"))
+                     []))
+                   (:
+                    (CallExpr
+                     ()
+                     (DotRef () (VarRef () (Id () "request")) (Id () "halt"))
+                     (:
+                      (IntLit () 200)
+                      (:
+                       (DotRef () (VarRef () (Id () "cache")) (Id () "content"))
+                       [])))
+                    [])))))
+               (:
+                (ExprStmt
+                 ()
+                 (CallExpr
+                  ()
+                  (DotRef () (VarRef () (Id () "path")) (Id () "exists"))
+                  (:
+                   (VarRef () (Id () "file"))
+                   (:
+                    (FuncExpr
+                     ()
+                     Nothing
+                     (: (Id () "exists") [])
+                     (:
+                      (IfSingleStmt
+                       ()
+                       (PrefixExpr () PrefixLNot (VarRef () (Id () "exists")))
+                       (ExprStmt
+                        ()
+                        (CallExpr
+                         ()
+                         (DotRef
+                          ()
+                          (VarRef () (Id () "request"))
+                          (Id () "halt"))
+                         [])))
+                      (:
+                       (ExprStmt
+                        ()
+                        (CallExpr
+                         ()
+                         (DotRef
+                          ()
+                          (CallExpr
+                           ()
+                           (DotRef
+                            ()
+                            (VarRef () (Id () "posix"))
+                            (Id () "stat"))
+                           (: (VarRef () (Id () "file")) []))
+                          (Id () "addCallback"))
+                         (:
+                          (FuncExpr
+                           ()
+                           Nothing
+                           (: (Id () "stats") [])
+                           (:
+                            (IfSingleStmt
+                             ()
+                             (PrefixExpr
+                              ()
+                              PrefixLNot
+                              (CallExpr
+                               ()
+                               (DotRef
+                                ()
+                                (VarRef () (Id () "stats"))
+                                (Id () "isFile"))
+                               []))
+                             (ExprStmt
+                              ()
+                              (CallExpr
+                               ()
+                               (DotRef
+                                ()
+                                (VarRef () (Id () "request"))
+                                (Id () "halt"))
+                               [])))
+                            (:
+                             (ExprStmt
+                              ()
+                              (CallExpr
+                               ()
+                               (DotRef
+                                ()
+                                (CallExpr
+                                 ()
+                                 (DotRef
+                                  ()
+                                  (VarRef () (Id () "posix"))
+                                  (Id () "cat"))
+                                 (:
+                                  (VarRef () (Id () "file"))
+                                  (: (StringLit () "binary") [])))
+                                (Id () "addCallback"))
+                               (:
+                                (FuncExpr
+                                 ()
+                                 Nothing
+                                 (: (Id () "content") [])
+                                 (:
+                                  (ExprStmt
+                                   ()
+                                   (CallExpr
+                                    ()
+                                    (DotRef
+                                     ()
+                                     (VarRef () (Id () "request"))
+                                     (Id () "contentType"))
+                                    (: (VarRef () (Id () "file")) [])))
+                                  (:
+                                   (IfSingleStmt
+                                    ()
+                                    (CallExpr
+                                     ()
+                                     (VarRef () (Id () "set"))
+                                     (: (StringLit () "cache static files") []))
+                                    (ExprStmt
+                                     ()
+                                     (CallExpr
+                                      ()
+                                      (DotRef
+                                       ()
+                                       (DotRef
+                                        ()
+                                        (VarRef () (Id () "request"))
+                                        (Id () "cache"))
+                                       (Id () "set"))
+                                      (:
+                                       (VarRef () (Id () "file"))
+                                       (:
+                                        (ObjectLit
+                                         ()
+                                         (:
+                                          ((,)
+                                           (PropId () (Id () "type"))
+                                           (VarRef () (Id () "file")))
+                                          (:
+                                           ((,)
+                                            (PropId () (Id () "content"))
+                                            (VarRef () (Id () "content")))
+                                           [])))
+                                        [])))))
+                                   (:
+                                    (ExprStmt
+                                     ()
+                                     (CallExpr
+                                      ()
+                                      (DotRef
+                                       ()
+                                       (VarRef () (Id () "request"))
+                                       (Id () "halt"))
+                                      (:
+                                       (IntLit () 200)
+                                       (:
+                                        (VarRef () (Id () "content"))
+                                        (: (StringLit () "binary") [])))))
+                                    []))))
+                                [])))
+                             [])))
+                          [])))
+                       [])))
+                    []))))
+                [])))))
+           [])))
+        []))))
+    []))))

@@ -1,0 +1,553 @@
+(Script
+ ()
+ (:
+  (VarDeclStmt
+   ()
+   (:
+    (VarDecl
+     ()
+     (Id () "mime")
+     (Just
+      (DotRef
+       ()
+       (CallExpr () (VarRef () (Id () "require")) (: (StringLit () "send") []))
+       (Id () "mime"))))
+    []))
+  (:
+   (VarDeclStmt
+    ()
+    (:
+     (VarDecl
+      ()
+      (Id () "deprecate")
+      (Just
+       (DotRef
+        ()
+        (CallExpr () (VarRef () (Id () "require")) (: (StringLit () "util") []))
+        (Id () "deprecate"))))
+     (:
+      (VarDecl
+       ()
+       (Id () "crc32")
+       (Just
+        (CallExpr
+         ()
+         (VarRef () (Id () "require"))
+         (: (StringLit () "buffer-crc32") []))))
+      [])))
+   (:
+    (VarDeclStmt
+     ()
+     (:
+      (VarDecl
+       ()
+       (Id () "basename")
+       (Just
+        (DotRef
+         ()
+         (CallExpr
+          ()
+          (VarRef () (Id () "require"))
+          (: (StringLit () "path") []))
+         (Id () "basename"))))
+      []))
+    (:
+     (ExprStmt
+      ()
+      (AssignExpr
+       ()
+       OpAssign
+       (LDot () (VarRef () (Id () "exports")) "deprecate")
+       (FuncExpr
+        ()
+        Nothing
+        (: (Id () "fn") (: (Id () "msg") []))
+        (:
+         (ReturnStmt
+          ()
+          (Just
+           (CondExpr
+            ()
+            (InfixExpr
+             ()
+             OpStrictNEq
+             (StringLit () "test")
+             (DotRef
+              ()
+              (DotRef () (VarRef () (Id () "process")) (Id () "env"))
+              (Id () "NODE_ENV")))
+            (CallExpr
+             ()
+             (VarRef () (Id () "deprecate"))
+             (:
+              (VarRef () (Id () "fn"))
+              (:
+               (InfixExpr
+                ()
+                OpAdd
+                (StringLit () "express: ")
+                (VarRef () (Id () "msg")))
+               [])))
+            (VarRef () (Id () "fn")))))
+         []))))
+     (:
+      (ExprStmt
+       ()
+       (AssignExpr
+        ()
+        OpAssign
+        (LDot () (VarRef () (Id () "exports")) "etag")
+        (FuncExpr
+         ()
+         Nothing
+         (: (Id () "body") [])
+         (:
+          (ReturnStmt
+           ()
+           (Just
+            (InfixExpr
+             ()
+             OpAdd
+             (InfixExpr
+              ()
+              OpAdd
+              (StringLit () "\"")
+              (CallExpr
+               ()
+               (DotRef () (VarRef () (Id () "crc32")) (Id () "signed"))
+               (: (VarRef () (Id () "body")) [])))
+             (StringLit () "\""))))
+          []))))
+      (:
+       (ExprStmt
+        ()
+        (AssignExpr
+         ()
+         OpAssign
+         (LDot () (VarRef () (Id () "exports")) "isAbsolute")
+         (FuncExpr
+          ()
+          Nothing
+          (: (Id () "path") [])
+          (:
+           (IfSingleStmt
+            ()
+            (InfixExpr
+             ()
+             OpEq
+             (StringLit () "/")
+             (BracketRef () (VarRef () (Id () "path")) (IntLit () 0)))
+            (ReturnStmt () (Just (BoolLit () True))))
+           (:
+            (IfSingleStmt
+             ()
+             (InfixExpr
+              ()
+              OpLAnd
+              (InfixExpr
+               ()
+               OpEq
+               (StringLit () ":")
+               (BracketRef () (VarRef () (Id () "path")) (IntLit () 1)))
+              (InfixExpr
+               ()
+               OpEq
+               (StringLit () "\\")
+               (BracketRef () (VarRef () (Id () "path")) (IntLit () 2))))
+             (ReturnStmt () (Just (BoolLit () True))))
+            (:
+             (IfSingleStmt
+              ()
+              (InfixExpr
+               ()
+               OpEq
+               (StringLit () "\\\\")
+               (CallExpr
+                ()
+                (DotRef () (VarRef () (Id () "path")) (Id () "substring"))
+                (: (IntLit () 0) (: (IntLit () 2) []))))
+              (ReturnStmt () (Just (BoolLit () True))))
+             []))))))
+       (:
+        (ExprStmt
+         ()
+         (AssignExpr
+          ()
+          OpAssign
+          (LDot () (VarRef () (Id () "exports")) "flatten")
+          (FuncExpr
+           ()
+           Nothing
+           (: (Id () "arr") (: (Id () "ret") []))
+           (:
+            (ExprStmt
+             ()
+             (AssignExpr
+              ()
+              OpAssign
+              (LVar () "ret")
+              (InfixExpr () OpLOr (VarRef () (Id () "ret")) (ArrayLit () []))))
+            (:
+             (VarDeclStmt
+              ()
+              (:
+               (VarDecl
+                ()
+                (Id () "len")
+                (Just (DotRef () (VarRef () (Id () "arr")) (Id () "length"))))
+               []))
+             (:
+              (ForStmt
+               ()
+               (VarInit (: (VarDecl () (Id () "i") (Just (IntLit () 0))) []))
+               (Just
+                (InfixExpr
+                 ()
+                 OpLT
+                 (VarRef () (Id () "i"))
+                 (VarRef () (Id () "len"))))
+               (Just (UnaryAssignExpr () PrefixInc (LVar () "i")))
+               (BlockStmt
+                ()
+                (:
+                 (IfStmt
+                  ()
+                  (CallExpr
+                   ()
+                   (DotRef () (VarRef () (Id () "Array")) (Id () "isArray"))
+                   (:
+                    (BracketRef
+                     ()
+                     (VarRef () (Id () "arr"))
+                     (VarRef () (Id () "i")))
+                    []))
+                  (BlockStmt
+                   ()
+                   (:
+                    (ExprStmt
+                     ()
+                     (CallExpr
+                      ()
+                      (DotRef
+                       ()
+                       (VarRef () (Id () "exports"))
+                       (Id () "flatten"))
+                      (:
+                       (BracketRef
+                        ()
+                        (VarRef () (Id () "arr"))
+                        (VarRef () (Id () "i")))
+                       (: (VarRef () (Id () "ret")) []))))
+                    []))
+                  (BlockStmt
+                   ()
+                   (:
+                    (ExprStmt
+                     ()
+                     (CallExpr
+                      ()
+                      (DotRef () (VarRef () (Id () "ret")) (Id () "push"))
+                      (:
+                       (BracketRef
+                        ()
+                        (VarRef () (Id () "arr"))
+                        (VarRef () (Id () "i")))
+                       [])))
+                    [])))
+                 [])))
+              (: (ReturnStmt () (Just (VarRef () (Id () "ret")))) [])))))))
+        (:
+         (ExprStmt
+          ()
+          (AssignExpr
+           ()
+           OpAssign
+           (LDot () (VarRef () (Id () "exports")) "normalizeType")
+           (FuncExpr
+            ()
+            Nothing
+            (: (Id () "type") [])
+            (:
+             (ReturnStmt
+              ()
+              (Just
+               (CondExpr
+                ()
+                (PrefixExpr
+                 ()
+                 PrefixBNot
+                 (CallExpr
+                  ()
+                  (DotRef () (VarRef () (Id () "type")) (Id () "indexOf"))
+                  (: (StringLit () "/") [])))
+                (CallExpr
+                 ()
+                 (VarRef () (Id () "acceptParams"))
+                 (: (VarRef () (Id () "type")) []))
+                (ObjectLit
+                 ()
+                 (:
+                  ((,)
+                   (PropId () (Id () "value"))
+                   (CallExpr
+                    ()
+                    (DotRef () (VarRef () (Id () "mime")) (Id () "lookup"))
+                    (: (VarRef () (Id () "type")) [])))
+                  (:
+                   ((,) (PropId () (Id () "params")) (ObjectLit () []))
+                   []))))))
+             []))))
+         (:
+          (ExprStmt
+           ()
+           (AssignExpr
+            ()
+            OpAssign
+            (LDot () (VarRef () (Id () "exports")) "normalizeTypes")
+            (FuncExpr
+             ()
+             Nothing
+             (: (Id () "types") [])
+             (:
+              (VarDeclStmt
+               ()
+               (: (VarDecl () (Id () "ret") (Just (ArrayLit () []))) []))
+              (:
+               (ForStmt
+                ()
+                (VarInit (: (VarDecl () (Id () "i") (Just (IntLit () 0))) []))
+                (Just
+                 (InfixExpr
+                  ()
+                  OpLT
+                  (VarRef () (Id () "i"))
+                  (DotRef () (VarRef () (Id () "types")) (Id () "length"))))
+                (Just (UnaryAssignExpr () PrefixInc (LVar () "i")))
+                (BlockStmt
+                 ()
+                 (:
+                  (ExprStmt
+                   ()
+                   (CallExpr
+                    ()
+                    (DotRef () (VarRef () (Id () "ret")) (Id () "push"))
+                    (:
+                     (CallExpr
+                      ()
+                      (DotRef
+                       ()
+                       (VarRef () (Id () "exports"))
+                       (Id () "normalizeType"))
+                      (:
+                       (BracketRef
+                        ()
+                        (VarRef () (Id () "types"))
+                        (VarRef () (Id () "i")))
+                       []))
+                     [])))
+                  [])))
+               (: (ReturnStmt () (Just (VarRef () (Id () "ret")))) []))))))
+          (:
+           (ExprStmt
+            ()
+            (AssignExpr
+             ()
+             OpAssign
+             (LDot () (VarRef () (Id () "exports")) "contentDisposition")
+             (FuncExpr
+              ()
+              Nothing
+              (: (Id () "filename") [])
+              (:
+               (VarDeclStmt
+                ()
+                (:
+                 (VarDecl () (Id () "ret") (Just (StringLit () "attachment")))
+                 []))
+               (:
+                (IfSingleStmt
+                 ()
+                 (VarRef () (Id () "filename"))
+                 (BlockStmt
+                  ()
+                  (:
+                   (ExprStmt
+                    ()
+                    (AssignExpr
+                     ()
+                     OpAssign
+                     (LVar () "filename")
+                     (CallExpr
+                      ()
+                      (VarRef () (Id () "basename"))
+                      (: (VarRef () (Id () "filename")) []))))
+                   (:
+                    (ExprStmt
+                     ()
+                     (AssignExpr
+                      ()
+                      OpAssign
+                      (LVar () "ret")
+                      (CondExpr
+                       ()
+                       (CallExpr
+                        ()
+                        (DotRef
+                         ()
+                         (RegexpLit () "[^\\040-\\176]" False False)
+                         (Id () "test"))
+                        (: (VarRef () (Id () "filename")) []))
+                       (InfixExpr
+                        ()
+                        OpAdd
+                        (InfixExpr
+                         ()
+                         OpAdd
+                         (InfixExpr
+                          ()
+                          OpAdd
+                          (StringLit () "attachment; filename=")
+                          (CallExpr
+                           ()
+                           (VarRef () (Id () "encodeURI"))
+                           (: (VarRef () (Id () "filename")) [])))
+                         (StringLit () "; filename*=UTF-8''"))
+                        (CallExpr
+                         ()
+                         (VarRef () (Id () "encodeURI"))
+                         (: (VarRef () (Id () "filename")) [])))
+                       (InfixExpr
+                        ()
+                        OpAdd
+                        (InfixExpr
+                         ()
+                         OpAdd
+                         (StringLit () "attachment; filename=\"")
+                         (VarRef () (Id () "filename")))
+                        (StringLit () "\"")))))
+                    []))))
+                (: (ReturnStmt () (Just (VarRef () (Id () "ret")))) []))))))
+           (:
+            (FunctionStmt
+             ()
+             (Id () "acceptParams")
+             (: (Id () "str") (: (Id () "index") []))
+             (:
+              (VarDeclStmt
+               ()
+               (:
+                (VarDecl
+                 ()
+                 (Id () "parts")
+                 (Just
+                  (CallExpr
+                   ()
+                   (DotRef () (VarRef () (Id () "str")) (Id () "split"))
+                   (: (RegexpLit () " *; *" False False) []))))
+                []))
+              (:
+               (VarDeclStmt
+                ()
+                (:
+                 (VarDecl
+                  ()
+                  (Id () "ret")
+                  (Just
+                   (ObjectLit
+                    ()
+                    (:
+                     ((,)
+                      (PropId () (Id () "value"))
+                      (BracketRef () (VarRef () (Id () "parts")) (IntLit () 0)))
+                     (:
+                      ((,) (PropId () (Id () "quality")) (IntLit () 1))
+                      (:
+                       ((,) (PropId () (Id () "params")) (ObjectLit () []))
+                       (:
+                        ((,)
+                         (PropId () (Id () "originalIndex"))
+                         (VarRef () (Id () "index")))
+                        [])))))))
+                 []))
+               (:
+                (ForStmt
+                 ()
+                 (VarInit (: (VarDecl () (Id () "i") (Just (IntLit () 1))) []))
+                 (Just
+                  (InfixExpr
+                   ()
+                   OpLT
+                   (VarRef () (Id () "i"))
+                   (DotRef () (VarRef () (Id () "parts")) (Id () "length"))))
+                 (Just (UnaryAssignExpr () PrefixInc (LVar () "i")))
+                 (BlockStmt
+                  ()
+                  (:
+                   (VarDeclStmt
+                    ()
+                    (:
+                     (VarDecl
+                      ()
+                      (Id () "pms")
+                      (Just
+                       (CallExpr
+                        ()
+                        (DotRef
+                         ()
+                         (BracketRef
+                          ()
+                          (VarRef () (Id () "parts"))
+                          (VarRef () (Id () "i")))
+                         (Id () "split"))
+                        (: (RegexpLit () " *= *" False False) []))))
+                     []))
+                   (:
+                    (IfStmt
+                     ()
+                     (InfixExpr
+                      ()
+                      OpEq
+                      (StringLit () "q")
+                      (BracketRef () (VarRef () (Id () "pms")) (IntLit () 0)))
+                     (BlockStmt
+                      ()
+                      (:
+                       (ExprStmt
+                        ()
+                        (AssignExpr
+                         ()
+                         OpAssign
+                         (LDot () (VarRef () (Id () "ret")) "quality")
+                         (CallExpr
+                          ()
+                          (VarRef () (Id () "parseFloat"))
+                          (:
+                           (BracketRef
+                            ()
+                            (VarRef () (Id () "pms"))
+                            (IntLit () 1))
+                           []))))
+                       []))
+                     (BlockStmt
+                      ()
+                      (:
+                       (ExprStmt
+                        ()
+                        (AssignExpr
+                         ()
+                         OpAssign
+                         (LBracket
+                          ()
+                          (DotRef () (VarRef () (Id () "ret")) (Id () "params"))
+                          (BracketRef
+                           ()
+                           (VarRef () (Id () "pms"))
+                           (IntLit () 0)))
+                         (BracketRef
+                          ()
+                          (VarRef () (Id () "pms"))
+                          (IntLit () 1))))
+                       [])))
+                    []))))
+                (: (ReturnStmt () (Just (VarRef () (Id () "ret")))) [])))))
+            []))))))))))))
