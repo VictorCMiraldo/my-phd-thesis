@@ -1,0 +1,352 @@
+(CompilationUnit
+ {-# [Cpy #644 ] #-}
+ (:
+  {-# [Cpy #284 ] #-}
+  (:
+   {-# [Cpy #344 ] #-}
+   (:
+    {-# [Cpy #263 ] #-}
+    (:
+     {-# [Cpy #551 ] #-}
+     (:
+      {-# [Cpy #74 ] #-}
+      (:
+       {-# [Cpy #188 ] #-}
+       (:
+        {-# [Cpy #290 ] #-}
+        (:
+         {-# [Cpy #167 ] #-}
+         {-#
+         [+
+         (:
+          (ImportDecl
+           False
+           (Name
+            (:
+             (Ident "org")
+             (:
+              (Ident "elasticsearch")
+              (: (Ident "threadpool") (: (Ident "TestThreadPool") [])))))
+           False)
+          [#])
+         +]
+         # = [Cpy #90 ]
+         #-}))))))))
+ (:
+  (ClassTypeDecl
+   {-#
+   (ClassDecl
+    {{- #661 -} {+ #661 +}}
+    (Ident [Cpy #662 ])
+    []
+    [Cpy #298 ]
+    []
+    (ClassBody
+     (:
+      [Cpy #458 ]
+      (:
+       [Cpy #178 ]
+       (:
+        [Cpy #185 ]
+        (:
+         [Cpy #413 ]
+         (:
+          [Cpy #406 ]
+          (:
+           (MemberDecl
+            (MethodDecl
+             [Cpy #465 ]
+             []
+             Nothing
+             (Ident [Cpy #663 ])
+             []
+             []
+             Nothing
+             (MethodBody
+              (Just
+               (Block
+                (:
+                 (BlockStmt
+                  (ExpStmt
+                   (Assign
+                    [Cpy #231 ]
+                    EqualA
+                    (InstanceCreation
+                     []
+                     (TypeDeclSpecifier
+                      (ClassType
+                       (:
+                        ((,)
+                         (Ident {{- "ThreadPool" -} {+ "TestThreadPool" +}})
+                         [])
+                        [])))
+                     [Cpy #444 ]
+                     Nothing))))
+                 []))))))
+           (:
+            [Cpy #645 ]
+            (:
+             [Cpy #504 ]
+             (:
+              (MemberDecl
+               (MethodDecl
+                [Cpy #613 ]
+                []
+                Nothing
+                (Ident [Cpy #664 ])
+                []
+                []
+                Nothing
+                (MethodBody
+                 (Just
+                  (Block
+                   (:
+                    (BlockStmt
+                     (ExpStmt
+                      (Assign
+                       [Cpy #98 ]
+                       EqualA
+                       (MethodInv
+                        (MethodCall
+                         [Cpy #170 ]
+                         (:
+                          [Cpy #506 ]
+                          (:
+                           {{- #289 -} {+ #289 +}}
+                           (:
+                            [Cpy #210 ]
+                            {{- (:
+                             (ExpName
+                              (Name
+                               (:
+                                (Ident "ClusterName")
+                                (: (Ident "DEFAULT") []))))
+                             []) -}
+                            {+ [] +}}))))))))
+                    []))))))
+              (:
+               [Cpy #529 ]
+               (:
+                [Cpy #626 ]
+                (:
+                 (MemberDecl
+                  (MethodDecl
+                   [Cpy #472 ]
+                   []
+                   [Cpy #324 ]
+                   (Ident [Cpy #665 ])
+                   [Cpy #158 ]
+                   []
+                   Nothing
+                   (MethodBody
+                    (Just
+                     (Block
+                      (:
+                       (LocalVars
+                        []
+                        [Cpy #95 ]
+                        (:
+                         (VarDecl
+                          [Cpy #75 ]
+                          (Just
+                           (InitExp
+                            (InstanceCreation
+                             []
+                             [Cpy #26 ]
+                             (:
+                              [Cpy #45 ]
+                              (:
+                               [Cpy #560 ]
+                               (:
+                                [Cpy #3 ]
+                                (: [Cpy #419 ] {{- (: #289 []) -} {+ [] +}}))))
+                             Nothing))))
+                         []))
+                       [Cpy #314 ]))))))
+                 (:
+                  [Cpy #282 ]
+                  (:
+                   [Cpy #607 ]
+                   (:
+                    [Cpy #641 ]
+                    (:
+                     [Cpy #545 ]
+                     (:
+                      [Cpy #66 ]
+                      (:
+                       [Cpy #621 ]
+                       (:
+                        [Cpy #540 ]
+                        (:
+                         [Cpy #177 ]
+                         (:
+                          [Cpy #476 ]
+                          (:
+                           [Cpy #38 ]
+                           (:
+                            [Cpy #297 ]
+                            (:
+                             [Cpy #637 ]
+                             {{- [] -}
+                             {+ (:
+                              (MemberDecl
+                               (MethodDecl
+                                #661
+                                []
+                                Nothing
+                                (Ident "testNoRegionReturnsEmptyList")
+                                []
+                                []
+                                Nothing
+                                (MethodBody
+                                 (Just
+                                  (Block
+                                   (:
+                                    (LocalVars
+                                     []
+                                     (RefType
+                                      (ClassRefType
+                                       (ClassType
+                                        (: ((,) (Ident "Settings") []) []))))
+                                     (:
+                                      (VarDecl
+                                       (VarId (Ident "nodeSettings"))
+                                       (Just
+                                        (InitExp
+                                         (MethodInv
+                                          (PrimaryMethodCall
+                                           (MethodInv
+                                            (PrimaryMethodCall
+                                             (MethodInv
+                                              (PrimaryMethodCall
+                                               (MethodInv
+                                                (MethodCall
+                                                 (Name
+                                                  (:
+                                                   (Ident "Settings")
+                                                   (: (Ident "builder") [])))
+                                                 []))
+                                               []
+                                               (Ident "put")
+                                               (:
+                                                (MethodInv
+                                                 (MethodCall
+                                                  (Name
+                                                   (:
+                                                    (Ident "GceComputeService")
+                                                    (:
+                                                     (Ident "PROJECT_SETTING")
+                                                     (: (Ident "getKey") []))))
+                                                  []))
+                                                (:
+                                                 (ExpName
+                                                  (Name
+                                                   (:
+                                                    (Ident "projectName")
+                                                    [])))
+                                                 []))))
+                                             []
+                                             (Ident "putArray")
+                                             (:
+                                              (MethodInv
+                                               (MethodCall
+                                                (Name
+                                                 (:
+                                                  (Ident "GceComputeService")
+                                                  (:
+                                                   (Ident "ZONE_SETTING")
+                                                   (: (Ident "getKey") []))))
+                                                []))
+                                              (:
+                                               (Lit (String "europe-west1-b"))
+                                               (:
+                                                (Lit (String "us-central1-a"))
+                                                [])))))
+                                           []
+                                           (Ident "build")
+                                           [])))))
+                                      []))
+                                    (:
+                                     (BlockStmt
+                                      (ExpStmt
+                                       (Assign
+                                        (NameLhs (Name (: (Ident "mock") [])))
+                                        EqualA
+                                        (InstanceCreation
+                                         []
+                                         (TypeDeclSpecifier
+                                          (ClassType
+                                           (:
+                                            ((,)
+                                             (Ident "GceComputeServiceMock")
+                                             [])
+                                            [])))
+                                         (:
+                                          (ExpName
+                                           (Name (: (Ident "nodeSettings") [])))
+                                          (:
+                                           (ExpName
+                                            (Name
+                                             (: (Ident "networkService") [])))
+                                           []))
+                                         Nothing))))
+                                     (:
+                                      (LocalVars
+                                       []
+                                       (RefType
+                                        (ClassRefType
+                                         (ClassType
+                                          (:
+                                           ((,)
+                                            (Ident "List")
+                                            (:
+                                             (ActualType
+                                              (ClassRefType
+                                               (ClassType
+                                                (:
+                                                 ((,)
+                                                  (Ident "DiscoveryNode")
+                                                  [])
+                                                 []))))
+                                             []))
+                                           []))))
+                                       (:
+                                        (VarDecl
+                                         (VarId (Ident "discoveryNodes"))
+                                         (Just
+                                          (InitExp
+                                           (MethodInv
+                                            (MethodCall
+                                             (Name
+                                              (:
+                                               (Ident "buildDynamicNodes")
+                                               []))
+                                             (:
+                                              (ExpName
+                                               (Name (: (Ident "mock") [])))
+                                              (:
+                                               (ExpName
+                                                (Name
+                                                 (: (Ident "nodeSettings") [])))
+                                               [])))))))
+                                        []))
+                                      (:
+                                       (BlockStmt
+                                        (ExpStmt
+                                         (MethodInv
+                                          (MethodCall
+                                           (Name (: (Ident "assertThat") []))
+                                           (:
+                                            (ExpName
+                                             (Name
+                                              (: (Ident "discoveryNodes") [])))
+                                            (:
+                                             (MethodInv
+                                              (MethodCall
+                                               (Name (: (Ident "hasSize") []))
+                                               (: (Lit (Int 1)) [])))
+                                             []))))))
+                                       [])))))))))
+                              []) +}}))))))))))))))))))))))))))
+   #-})
+  []))

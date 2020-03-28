@@ -1,0 +1,40 @@
+(CompilationUnit
+ {-# [Cpy #107 ] #-}
+ {-# [Cpy #230 ] #-}
+ (:
+  (ClassTypeDecl
+   (ClassDecl
+    (: Public (: Final []))
+    (Ident {-# [Cpy #244 ] #-})
+    []
+    Nothing
+    []
+    (ClassBody
+     (:
+      {-# [Cpy #131 ] #-}
+      (:
+       {-# [Cpy #70 ] #-}
+       (:
+        {-# [Cpy #10 ] #-}
+        (:
+         {-# [Cpy #132 ] #-}
+         (:
+          (MemberDecl
+           (MethodDecl
+            (:
+             Public
+             {-#
+             {{- [] -}
+             {+ (:
+              (Annotation (MarkerAnnotation (Name (: (Ident "Nullable") []))))
+              []) +}}
+             #-})
+            []
+            {-# [Cpy #135 ] #-}
+            (Ident {-# [Cpy #245 ] #-})
+            {-# [Cpy #69 ] #-}
+            []
+            Nothing
+            {-# [Cpy #192 ] #-}))
+          {-# [Cpy #168 ] #-}))))))))
+  []))

@@ -1,0 +1,375 @@
+(CompilationUnit
+ (Just
+  (PackageDecl
+   (Name
+    (:
+     (Ident "com")
+     (:
+      (Ident "baomidou")
+      (: (Ident "mybatisplus") (: (Ident "test") (: (Ident "mysql") []))))))))
+ (:
+  (ImportDecl
+   False
+   (Name
+    (:
+     (Ident "com")
+     (:
+      (Ident "baomidou")
+      (:
+       (Ident "mybatisplus")
+       (:
+        (Ident "core")
+        (:
+         (Ident "conditions")
+         (: (Ident "query") (: (Ident "QueryWrapper") []))))))))
+   False)
+  (:
+   (ImportDecl
+    False
+    (Name
+     (:
+      (Ident "com")
+      (:
+       (Ident "baomidou")
+       (:
+        (Ident "mybatisplus")
+        (:
+         (Ident "test")
+         (: (Ident "base") (: (Ident "entity") (: (Ident "TestData") []))))))))
+    False)
+   (:
+    (ImportDecl
+     False
+     (Name
+      (:
+       (Ident "com")
+       (:
+        (Ident "baomidou")
+        (:
+         (Ident "mybatisplus")
+         (:
+          (Ident "test")
+          (:
+           (Ident "base")
+           (: (Ident "mapper") (: (Ident "TestDataMapper") []))))))))
+     False)
+    (:
+     (ImportDecl
+      False
+      (Name
+       (:
+        (Ident "com")
+        (:
+         (Ident "baomidou")
+         (:
+          (Ident "mybatisplus")
+          (: (Ident "test") (: (Ident "h2") (: (Ident "BaseTest") [])))))))
+      False)
+     (:
+      (ImportDecl
+       False
+       (Name (: (Ident "org") (: (Ident "junit") (: (Ident "Test") []))))
+       False)
+      (:
+       (ImportDecl
+        False
+        (Name
+         (:
+          (Ident "org")
+          (: (Ident "junit") (: (Ident "runner") (: (Ident "RunWith") [])))))
+        False)
+       (:
+        (ImportDecl
+         False
+         (Name
+          (:
+           (Ident "org")
+           (:
+            (Ident "springframework")
+            (:
+             (Ident "test")
+             (: (Ident "context") (: (Ident "ContextConfiguration") []))))))
+         False)
+        (:
+         (ImportDecl
+          False
+          (Name
+           (:
+            (Ident "org")
+            (:
+             (Ident "springframework")
+             (:
+              (Ident "test")
+              (:
+               (Ident "context")
+               (:
+                (Ident "junit4")
+                (: (Ident "SpringJUnit4ClassRunner") [])))))))
+          False)
+         (:
+          (ImportDecl
+           False
+           (Name
+            (:
+             (Ident "javax")
+             (: (Ident "annotation") (: (Ident "Resource") []))))
+           False)
+          (:
+           (ImportDecl
+            False
+            (Name (: (Ident "java") (: (Ident "util") (: (Ident "List") []))))
+            False)
+           []))))))))))
+ (:
+  (ClassTypeDecl
+   (ClassDecl
+    (:
+     (Annotation
+      (SingleElementAnnotation
+       (Name (: (Ident "RunWith") []))
+       (EVVal
+        (InitExp
+         (ClassLit
+          (Just
+           (RefType
+            (ClassRefType
+             (ClassType
+              (: ((,) (Ident "SpringJUnit4ClassRunner") []) []))))))))))
+     (:
+      (Annotation
+       (NormalAnnotation
+        (Name (: (Ident "ContextConfiguration") []))
+        (:
+         ((,)
+          (Ident "locations")
+          (EVVal
+           (InitArray
+            (ArrayInit
+             (:
+              (InitExp (Lit (String "classpath:mysql/spring-test-mysql.xml")))
+              [])))))
+         [])))
+      (: Public [])))
+    (Ident "MysqlTestDataMapperTest")
+    []
+    (Just (ClassRefType (ClassType (: ((,) (Ident "BaseTest") []) []))))
+    []
+    (ClassBody
+     (:
+      (MemberDecl
+       (FieldDecl
+        (:
+         (Annotation (MarkerAnnotation (Name (: (Ident "Resource") []))))
+         (: Protected []))
+        (RefType
+         (ClassRefType (ClassType (: ((,) (Ident "TestDataMapper") []) []))))
+        (: (VarDecl (VarId (Ident "testDataMapper")) Nothing) [])))
+      (:
+       (MemberDecl
+        (MethodDecl
+         (:
+          (Annotation (MarkerAnnotation (Name (: (Ident "Test") []))))
+          (: Public []))
+         []
+         Nothing
+         (Ident "selectById")
+         []
+         []
+         Nothing
+         (MethodBody
+          (Just
+           (Block
+            (:
+             (BlockStmt
+              (ExpStmt
+               (MethodInv
+                (MethodCall
+                 (Name
+                  (:
+                   (Ident "System")
+                   (: (Ident "out") (: (Ident "println") []))))
+                 (:
+                  (MethodInv
+                   (MethodCall
+                    (Name
+                     (: (Ident "testDataMapper") (: (Ident "selectById") [])))
+                    (: (Lit (Word 1)) [])))
+                  [])))))
+             []))))))
+       (:
+        (MemberDecl
+         (MethodDecl
+          (:
+           (Annotation (MarkerAnnotation (Name (: (Ident "Test") []))))
+           (: Public []))
+          []
+          Nothing
+          (Ident "commonSelectList")
+          []
+          []
+          Nothing
+          (MethodBody
+           (Just
+            (Block
+             (:
+              (BlockStmt
+               (ExpStmt
+                (MethodInv
+                 (MethodCall
+                  (Name (: (Ident "println") []))
+                  (:
+                   (MethodInv
+                    (MethodCall
+                     (Name (: (Ident "println") []))
+                     (:
+                      (MethodInv
+                       (PrimaryMethodCall
+                        (MethodInv
+                         (PrimaryMethodCall
+                          (MethodInv
+                           (PrimaryMethodCall
+                            (InstanceCreation
+                             []
+                             (TypeDeclSpecifier
+                              (ClassType
+                               (:
+                                ((,)
+                                 (Ident "QueryWrapper")
+                                 (:
+                                  (ActualType
+                                   (ClassRefType
+                                    (ClassType
+                                     (: ((,) (Ident "TestData") []) []))))
+                                  []))
+                                [])))
+                             []
+                             Nothing)
+                            []
+                            (Ident "eq")
+                            (: (Lit (String "id")) (: (Lit (Word 1)) []))))
+                          []
+                          (Ident "and")
+                          []))
+                        []
+                        (Ident "like")
+                        (: (Lit (String "test_str")) (: (Lit (Int 1)) []))))
+                      [])))
+                   [])))))
+              []))))))
+        (:
+         (MemberDecl
+          (MethodDecl
+           (:
+            (Annotation (MarkerAnnotation (Name (: (Ident "Test") []))))
+            (: Public []))
+           []
+           Nothing
+           (Ident "specialSelectList")
+           []
+           []
+           Nothing
+           (MethodBody
+            (Just
+             (Block
+              (:
+               (BlockStmt
+                (ExpStmt
+                 (MethodInv
+                  (MethodCall
+                   (Name (: (Ident "println") []))
+                   (:
+                    (MethodInv
+                     (MethodCall
+                      (Name (: (Ident "println") []))
+                      (:
+                       (MethodInv
+                        (PrimaryMethodCall
+                         (MethodInv
+                          (PrimaryMethodCall
+                           (MethodInv
+                            (PrimaryMethodCall
+                             (MethodInv
+                              (PrimaryMethodCall
+                               (InstanceCreation
+                                []
+                                (TypeDeclSpecifier
+                                 (ClassType
+                                  (:
+                                   ((,)
+                                    (Ident "QueryWrapper")
+                                    (:
+                                     (ActualType
+                                      (ClassRefType
+                                       (ClassType
+                                        (: ((,) (Ident "TestData") []) []))))
+                                     []))
+                                   [])))
+                                []
+                                Nothing)
+                               []
+                               (Ident "lambda")
+                               []))
+                             []
+                             (Ident "eq")
+                             (:
+                              (MethodRef
+                               (Name (: (Ident "TestData") []))
+                               (Ident "getId"))
+                              (: (Lit (Word 1)) []))))
+                           []
+                           (Ident "and")
+                           []))
+                         []
+                         (Ident "eq")
+                         (:
+                          (MethodRef
+                           (Name (: (Ident "TestData") []))
+                           (Ident "getTestInt"))
+                          (: (Lit (Int 1)) []))))
+                       [])))
+                    [])))))
+               []))))))
+         (:
+          (MemberDecl
+           (MethodDecl
+            (: Private [])
+            []
+            Nothing
+            (Ident "println")
+            (:
+             (FormalParam
+              []
+              (RefType
+               (ClassRefType
+                (ClassType
+                 (:
+                  ((,)
+                   (Ident "List")
+                   (:
+                    (ActualType
+                     (ClassRefType
+                      (ClassType (: ((,) (Ident "TestData") []) []))))
+                    []))
+                  []))))
+              False
+              (VarId (Ident "list")))
+             [])
+            []
+            Nothing
+            (MethodBody
+             (Just
+              (Block
+               (:
+                (BlockStmt
+                 (ExpStmt
+                  (MethodInv
+                   (MethodCall
+                    (Name (: (Ident "list") (: (Ident "forEach") [])))
+                    (:
+                     (MethodRef
+                      (Name (: (Ident "System") (: (Ident "out") [])))
+                      (Ident "println"))
+                     [])))))
+                []))))))
+          []))))))))
+  []))

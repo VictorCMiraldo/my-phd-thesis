@@ -1,0 +1,99 @@
+(CompilationUnit
+ (Just
+  (PackageDecl
+   (Name
+    (:
+     (Ident "org")
+     (:
+      (Ident "jasig")
+      (: (Ident "cas") (: (Ident "web") (: (Ident "support") []))))))))
+ (:
+  (ImportDecl
+   False
+   (Name
+    (:
+     (Ident "javax")
+     (:
+      (Ident "servlet")
+      (: (Ident "http") (: (Ident "HttpServletRequest") [])))))
+   False)
+  (:
+   (ImportDecl
+    False
+    (Name
+     (:
+      (Ident "org")
+      (:
+       (Ident "jasig")
+       (:
+        (Ident "cas")
+        (:
+         (Ident "authentication")
+         (:
+          (Ident "principal")
+          (: (Ident "SimpleWebApplicationServiceImpl") [])))))))
+    False)
+   (:
+    (ImportDecl
+     False
+     (Name
+      (:
+       (Ident "org")
+       (:
+        (Ident "jasig")
+        (:
+         (Ident "cas")
+         (:
+          (Ident "authentication")
+          (: (Ident "principal") (: (Ident "WebApplicationService") [])))))))
+     False)
+    [])))
+ (:
+  (ClassTypeDecl
+   (ClassDecl
+    (: Public (: Final []))
+    (Ident "CasArgumentExtractor")
+    []
+    (Just
+     (ClassRefType
+      (ClassType (: ((,) (Ident "AbstractArgumentExtractor") []) []))))
+    []
+    (ClassBody
+     (:
+      (MemberDecl
+       (MethodDecl
+        (: Public [])
+        []
+        (Just
+         (RefType
+          (ClassRefType
+           (ClassType (: ((,) (Ident "WebApplicationService") []) [])))))
+        (Ident "extractServiceInternal")
+        (:
+         (FormalParam
+          (: Final [])
+          (RefType
+           (ClassRefType
+            (ClassType (: ((,) (Ident "HttpServletRequest") []) []))))
+          False
+          (VarId (Ident "request")))
+         [])
+        []
+        Nothing
+        (MethodBody
+         (Just
+          (Block
+           (:
+            (BlockStmt
+             (Return
+              (Just
+               (MethodInv
+                (MethodCall
+                 (Name
+                  (:
+                   (Ident "SimpleWebApplicationServiceImpl")
+                   (: (Ident "createServiceFrom") [])))
+                 (: (ExpName (Name (: (Ident "request") []))) []))))))
+            []))))))
+      []))))
+  []))

@@ -1,0 +1,2955 @@
+(CompilationUnit
+ (Just
+  (PackageDecl
+   (Name
+    (:
+     (Ident "org")
+     (:
+      (Ident "jasig")
+      (:
+       (Ident "cas")
+       (:
+        (Ident "ticket")
+        (: (Ident "registry") (: (Ident "support") [])))))))))
+ (:
+  (ImportDecl
+   False
+   (Name (: (Ident "org") (: (Ident "junit") (: (Ident "Test") []))))
+   False)
+  (:
+   (ImportDecl
+    False
+    (Name
+     (:
+      (Ident "org")
+      (: (Ident "junit") (: (Ident "runner") (: (Ident "RunWith") [])))))
+    False)
+   (:
+    (ImportDecl
+     False
+     (Name (: (Ident "org") (: (Ident "slf4j") (: (Ident "Logger") []))))
+     False)
+    (:
+     (ImportDecl
+      False
+      (Name
+       (: (Ident "org") (: (Ident "slf4j") (: (Ident "LoggerFactory") []))))
+      False)
+     (:
+      (ImportDecl
+       False
+       (Name
+        (:
+         (Ident "org")
+         (:
+          (Ident "springframework")
+          (:
+           (Ident "beans")
+           (: (Ident "factory") (: (Ident "InitializingBean") []))))))
+       False)
+      (:
+       (ImportDecl
+        False
+        (Name
+         (:
+          (Ident "org")
+          (:
+           (Ident "springframework")
+           (:
+            (Ident "beans")
+            (:
+             (Ident "factory")
+             (: (Ident "annotation") (: (Ident "Autowired") [])))))))
+        False)
+       (:
+        (ImportDecl
+         False
+         (Name
+          (:
+           (Ident "org")
+           (:
+            (Ident "springframework")
+            (:
+             (Ident "jdbc")
+             (: (Ident "core") (: (Ident "JdbcTemplate") []))))))
+         False)
+        (:
+         (ImportDecl
+          False
+          (Name
+           (:
+            (Ident "org")
+            (:
+             (Ident "springframework")
+             (:
+              (Ident "orm")
+              (: (Ident "jpa") (: (Ident "SharedEntityManagerCreator") []))))))
+          False)
+         (:
+          (ImportDecl
+           False
+           (Name
+            (:
+             (Ident "org")
+             (:
+              (Ident "springframework")
+              (:
+               (Ident "test")
+               (: (Ident "annotation") (: (Ident "IfProfileValue") []))))))
+           False)
+          (:
+           (ImportDecl
+            False
+            (Name
+             (:
+              (Ident "org")
+              (:
+               (Ident "springframework")
+               (:
+                (Ident "test")
+                (:
+                 (Ident "annotation")
+                 (: (Ident "ProfileValueSourceConfiguration") []))))))
+            False)
+           (:
+            (ImportDecl
+             False
+             (Name
+              (:
+               (Ident "org")
+               (:
+                (Ident "springframework")
+                (:
+                 (Ident "test")
+                 (:
+                  (Ident "annotation")
+                  (: (Ident "SystemProfileValueSource") []))))))
+             False)
+            (:
+             (ImportDecl
+              False
+              (Name
+               (:
+                (Ident "org")
+                (:
+                 (Ident "springframework")
+                 (:
+                  (Ident "test")
+                  (:
+                   (Ident "context")
+                   (: (Ident "ContextConfiguration") []))))))
+              False)
+             (:
+              (ImportDecl
+               False
+               (Name
+                (:
+                 (Ident "org")
+                 (:
+                  (Ident "springframework")
+                  (:
+                   (Ident "test")
+                   (:
+                    (Ident "context")
+                    (:
+                     (Ident "junit4")
+                     (: (Ident "SpringJUnit4ClassRunner") [])))))))
+               False)
+              (:
+               (ImportDecl
+                False
+                (Name
+                 (:
+                  (Ident "org")
+                  (:
+                   (Ident "springframework")
+                   (:
+                    (Ident "test")
+                    (: (Ident "jdbc") (: (Ident "JdbcTestUtils") []))))))
+                False)
+               (:
+                (ImportDecl
+                 False
+                 (Name
+                  (:
+                   (Ident "org")
+                   (:
+                    (Ident "springframework")
+                    (:
+                     (Ident "transaction")
+                     (: (Ident "PlatformTransactionManager") [])))))
+                 False)
+                (:
+                 (ImportDecl
+                  False
+                  (Name
+                   (:
+                    (Ident "org")
+                    (:
+                     (Ident "springframework")
+                     (:
+                      (Ident "transaction")
+                      (: (Ident "TransactionStatus") [])))))
+                  False)
+                 (:
+                  (ImportDecl
+                   False
+                   (Name
+                    (:
+                     (Ident "org")
+                     (:
+                      (Ident "springframework")
+                      (:
+                       (Ident "transaction")
+                       (:
+                        (Ident "support")
+                        (: (Ident "TransactionCallback") []))))))
+                   False)
+                  (:
+                   (ImportDecl
+                    False
+                    (Name
+                     (:
+                      (Ident "org")
+                      (:
+                       (Ident "springframework")
+                       (:
+                        (Ident "transaction")
+                        (:
+                         (Ident "support")
+                         (: (Ident "TransactionTemplate") []))))))
+                    False)
+                   (:
+                    (ImportDecl
+                     False
+                     (Name
+                      (:
+                       (Ident "javax")
+                       (:
+                        (Ident "persistence")
+                        (: (Ident "EntityManagerFactory") []))))
+                     False)
+                    (:
+                     (ImportDecl
+                      False
+                      (Name
+                       (:
+                        (Ident "javax")
+                        (: (Ident "sql") (: (Ident "DataSource") []))))
+                      False)
+                     (:
+                      (ImportDecl
+                       False
+                       (Name
+                        (:
+                         (Ident "java")
+                         (:
+                          (Ident "lang")
+                          (:
+                           (Ident "reflect")
+                           (: (Ident "InvocationHandler") [])))))
+                       False)
+                      (:
+                       (ImportDecl
+                        False
+                        (Name
+                         (:
+                          (Ident "java")
+                          (:
+                           (Ident "lang")
+                           (: (Ident "reflect") (: (Ident "Method") [])))))
+                        False)
+                       (:
+                        (ImportDecl
+                         False
+                         (Name
+                          (:
+                           (Ident "java")
+                           (:
+                            (Ident "lang")
+                            (: (Ident "reflect") (: (Ident "Proxy") [])))))
+                         False)
+                        (:
+                         (ImportDecl
+                          False
+                          (Name
+                           (:
+                            (Ident "java")
+                            (: (Ident "util") (: (Ident "ArrayList") []))))
+                          False)
+                         (:
+                          (ImportDecl
+                           False
+                           (Name
+                            (:
+                             (Ident "java")
+                             (: (Ident "util") (: (Ident "List") []))))
+                           False)
+                          (:
+                           (ImportDecl
+                            False
+                            (Name
+                             (:
+                              (Ident "java")
+                              (: (Ident "util") (: (Ident "Map") []))))
+                            False)
+                           (:
+                            (ImportDecl
+                             False
+                             (Name
+                              (:
+                               (Ident "java")
+                               (:
+                                (Ident "util")
+                                (:
+                                 (Ident "concurrent")
+                                 (: (Ident "Callable") [])))))
+                             False)
+                            (:
+                             (ImportDecl
+                              False
+                              (Name
+                               (:
+                                (Ident "java")
+                                (:
+                                 (Ident "util")
+                                 (:
+                                  (Ident "concurrent")
+                                  (: (Ident "ExecutorService") [])))))
+                              False)
+                             (:
+                              (ImportDecl
+                               False
+                               (Name
+                                (:
+                                 (Ident "java")
+                                 (:
+                                  (Ident "util")
+                                  (:
+                                   (Ident "concurrent")
+                                   (: (Ident "Executors") [])))))
+                               False)
+                              (:
+                               (ImportDecl
+                                False
+                                (Name
+                                 (:
+                                  (Ident "java")
+                                  (:
+                                   (Ident "util")
+                                   (:
+                                    (Ident "concurrent")
+                                    (: (Ident "Future") [])))))
+                                False)
+                               (:
+                                (ImportDecl
+                                 True
+                                 (Name
+                                  (:
+                                   (Ident "org")
+                                   (: (Ident "junit") (: (Ident "Assert") []))))
+                                 True)
+                                [])))))))))))))))))))))))))))))))
+ (:
+  (ClassTypeDecl
+   (ClassDecl
+    (:
+     (Annotation
+      (SingleElementAnnotation
+       (Name (: (Ident "RunWith") []))
+       (EVVal
+        (InitExp
+         (ClassLit
+          (Just
+           (RefType
+            (ClassRefType
+             (ClassType
+              (: ((,) (Ident "SpringJUnit4ClassRunner") []) []))))))))))
+     (:
+      (Annotation
+       (SingleElementAnnotation
+        (Name (: (Ident "ContextConfiguration") []))
+        (EVVal
+         (InitExp (Lit (String "classpath:jpaTestApplicationContext.xml"))))))
+      (:
+       (Annotation
+        (SingleElementAnnotation
+         (Name (: (Ident "ProfileValueSourceConfiguration") []))
+         (EVVal
+          (InitExp
+           (ClassLit
+            (Just
+             (RefType
+              (ClassRefType
+               (ClassType
+                (: ((,) (Ident "SystemProfileValueSource") []) []))))))))))
+       (: Public []))))
+    (Ident "JpaLockingStrategyTests")
+    []
+    Nothing
+    (: (ClassRefType (ClassType (: ((,) (Ident "InitializingBean") []) []))) [])
+    (ClassBody
+     (:
+      (MemberDecl
+       (FieldDecl
+        (: Private (: Static (: Final [])))
+        (PrimType IntT)
+        (:
+         (VarDecl
+          (VarId (Ident "CONCURRENT_SIZE"))
+          (Just (InitExp (Lit (Int 13)))))
+         [])))
+      (:
+       (MemberDecl
+        (FieldDecl
+         (: Private (: Final []))
+         (RefType (ClassRefType (ClassType (: ((,) (Ident "Logger") []) []))))
+         (:
+          (VarDecl
+           (VarId (Ident "logger"))
+           (Just
+            (InitExp
+             (MethodInv
+              (MethodCall
+               (Name (: (Ident "LoggerFactory") (: (Ident "getLogger") [])))
+               (:
+                (MethodInv (MethodCall (Name (: (Ident "getClass") [])) []))
+                []))))))
+          [])))
+       (:
+        (MemberDecl
+         (FieldDecl
+          (:
+           (Annotation (MarkerAnnotation (Name (: (Ident "Autowired") []))))
+           (: Private []))
+          (RefType
+           (ClassRefType
+            (ClassType (: ((,) (Ident "PlatformTransactionManager") []) []))))
+          (: (VarDecl (VarId (Ident "txManager")) Nothing) [])))
+        (:
+         (MemberDecl
+          (FieldDecl
+           (:
+            (Annotation (MarkerAnnotation (Name (: (Ident "Autowired") []))))
+            (: Private []))
+           (RefType
+            (ClassRefType
+             (ClassType (: ((,) (Ident "EntityManagerFactory") []) []))))
+           (: (VarDecl (VarId (Ident "factory")) Nothing) [])))
+         (:
+          (MemberDecl
+           (FieldDecl
+            (: Private [])
+            (RefType
+             (ClassRefType (ClassType (: ((,) (Ident "JdbcTemplate") []) []))))
+            (: (VarDecl (VarId (Ident "simpleJdbcTemplate")) Nothing) [])))
+          (:
+           (MemberDecl
+            (MethodDecl
+             (:
+              (Annotation (MarkerAnnotation (Name (: (Ident "Autowired") []))))
+              (: Public []))
+             []
+             Nothing
+             (Ident "setDataSource")
+             (:
+              (FormalParam
+               (: Final [])
+               (RefType
+                (ClassRefType (ClassType (: ((,) (Ident "DataSource") []) []))))
+               False
+               (VarId (Ident "dataSource")))
+              [])
+             []
+             Nothing
+             (MethodBody
+              (Just
+               (Block
+                (:
+                 (BlockStmt
+                  (ExpStmt
+                   (Assign
+                    (FieldLhs
+                     (PrimaryFieldAccess This (Ident "simpleJdbcTemplate")))
+                    EqualA
+                    (InstanceCreation
+                     []
+                     (TypeDeclSpecifier
+                      (ClassType (: ((,) (Ident "JdbcTemplate") []) [])))
+                     (: (ExpName (Name (: (Ident "dataSource") []))) [])
+                     Nothing))))
+                 []))))))
+           (:
+            (MemberDecl
+             (MethodDecl
+              (: Public [])
+              []
+              Nothing
+              (Ident "afterPropertiesSet")
+              []
+              (:
+               (ClassRefType (ClassType (: ((,) (Ident "Exception") []) [])))
+               [])
+              Nothing
+              (MethodBody
+               (Just
+                (Block
+                 (:
+                  (BlockStmt
+                   (ExpStmt
+                    (MethodInv
+                     (MethodCall
+                      (Name
+                       (:
+                        (Ident "JdbcTestUtils")
+                        (: (Ident "deleteFromTables") [])))
+                      (:
+                       (ExpName (Name (: (Ident "simpleJdbcTemplate") [])))
+                       (: (Lit (String "locks")) []))))))
+                  []))))))
+            (:
+             (MemberDecl
+              (MethodDecl
+               (:
+                (Annotation (MarkerAnnotation (Name (: (Ident "Test") []))))
+                (: Public []))
+               []
+               Nothing
+               (Ident "verifyAcquireAndRelease")
+               []
+               (:
+                (ClassRefType (ClassType (: ((,) (Ident "Exception") []) [])))
+                [])
+               Nothing
+               (MethodBody
+                (Just
+                 (Block
+                  (:
+                   (LocalVars
+                    (: Final [])
+                    (RefType
+                     (ClassRefType
+                      (ClassType (: ((,) (Ident "String") []) []))))
+                    (:
+                     (VarDecl
+                      (VarId (Ident "appId"))
+                      (Just (InitExp (Lit (String "basic")))))
+                     []))
+                   (:
+                    (LocalVars
+                     (: Final [])
+                     (RefType
+                      (ClassRefType
+                       (ClassType (: ((,) (Ident "String") []) []))))
+                     (:
+                      (VarDecl
+                       (VarId (Ident "uniqueId"))
+                       (Just
+                        (InitExp
+                         (BinOp
+                          (ExpName (Name (: (Ident "appId") [])))
+                          Add
+                          (Lit (String "-1"))))))
+                      []))
+                    (:
+                     (LocalVars
+                      (: Final [])
+                      (RefType
+                       (ClassRefType
+                        (ClassType (: ((,) (Ident "LockingStrategy") []) []))))
+                      (:
+                       (VarDecl
+                        (VarId (Ident "lock"))
+                        (Just
+                         (InitExp
+                          (MethodInv
+                           (MethodCall
+                            (Name (: (Ident "newLockTxProxy") []))
+                            (:
+                             (ExpName (Name (: (Ident "appId") [])))
+                             (:
+                              (ExpName (Name (: (Ident "uniqueId") [])))
+                              (:
+                               (ExpName
+                                (Name
+                                 (:
+                                  (Ident "JpaLockingStrategy")
+                                  (: (Ident "DEFAULT_LOCK_TIMEOUT") []))))
+                               []))))))))
+                       []))
+                     (:
+                      (BlockStmt
+                       (Try
+                        (Block
+                         (:
+                          (BlockStmt
+                           (ExpStmt
+                            (MethodInv
+                             (MethodCall
+                              (Name (: (Ident "assertTrue") []))
+                              (:
+                               (MethodInv
+                                (MethodCall
+                                 (Name
+                                  (: (Ident "lock") (: (Ident "acquire") [])))
+                                 []))
+                               [])))))
+                          (:
+                           (BlockStmt
+                            (ExpStmt
+                             (MethodInv
+                              (MethodCall
+                               (Name (: (Ident "assertEquals") []))
+                               (:
+                                (ExpName (Name (: (Ident "uniqueId") [])))
+                                (:
+                                 (MethodInv
+                                  (MethodCall
+                                   (Name (: (Ident "getOwner") []))
+                                   (:
+                                    (ExpName (Name (: (Ident "appId") [])))
+                                    [])))
+                                 []))))))
+                           (:
+                            (BlockStmt
+                             (ExpStmt
+                              (MethodInv
+                               (MethodCall
+                                (Name
+                                 (: (Ident "lock") (: (Ident "release") [])))
+                                []))))
+                            (:
+                             (BlockStmt
+                              (ExpStmt
+                               (MethodInv
+                                (MethodCall
+                                 (Name (: (Ident "assertNull") []))
+                                 (:
+                                  (MethodInv
+                                   (MethodCall
+                                    (Name (: (Ident "getOwner") []))
+                                    (:
+                                     (ExpName (Name (: (Ident "appId") [])))
+                                     [])))
+                                  [])))))
+                             [])))))
+                        (:
+                         (Catch
+                          (FormalParam
+                           (: Final [])
+                           (RefType
+                            (ClassRefType
+                             (ClassType (: ((,) (Ident "Exception") []) []))))
+                           False
+                           (VarId (Ident "e")))
+                          (Block
+                           (:
+                            (BlockStmt
+                             (ExpStmt
+                              (MethodInv
+                               (MethodCall
+                                (Name
+                                 (: (Ident "logger") (: (Ident "debug") [])))
+                                (:
+                                 (Lit
+                                  (String
+                                   "testAcquireAndRelease produced an error"))
+                                 (: (ExpName (Name (: (Ident "e") []))) []))))))
+                            (:
+                             (BlockStmt
+                              (ExpStmt
+                               (MethodInv
+                                (MethodCall
+                                 (Name (: (Ident "fail") []))
+                                 (:
+                                  (Lit (String "testAcquireAndRelease failed"))
+                                  [])))))
+                             []))))
+                         [])
+                        Nothing))
+                      [])))))))))
+             (:
+              (MemberDecl
+               (MethodDecl
+                (:
+                 (Annotation (MarkerAnnotation (Name (: (Ident "Test") []))))
+                 (: Public []))
+                []
+                Nothing
+                (Ident "verifyLockExpiration")
+                []
+                (:
+                 (ClassRefType (ClassType (: ((,) (Ident "Exception") []) [])))
+                 [])
+                Nothing
+                (MethodBody
+                 (Just
+                  (Block
+                   (:
+                    (LocalVars
+                     (: Final [])
+                     (RefType
+                      (ClassRefType
+                       (ClassType (: ((,) (Ident "String") []) []))))
+                     (:
+                      (VarDecl
+                       (VarId (Ident "appId"))
+                       (Just (InitExp (Lit (String "expquick")))))
+                      []))
+                    (:
+                     (LocalVars
+                      (: Final [])
+                      (RefType
+                       (ClassRefType
+                        (ClassType (: ((,) (Ident "String") []) []))))
+                      (:
+                       (VarDecl
+                        (VarId (Ident "uniqueId"))
+                        (Just
+                         (InitExp
+                          (BinOp
+                           (ExpName (Name (: (Ident "appId") [])))
+                           Add
+                           (Lit (String "-1"))))))
+                       []))
+                     (:
+                      (LocalVars
+                       (: Final [])
+                       (RefType
+                        (ClassRefType
+                         (ClassType (: ((,) (Ident "LockingStrategy") []) []))))
+                       (:
+                        (VarDecl
+                         (VarId (Ident "lock"))
+                         (Just
+                          (InitExp
+                           (MethodInv
+                            (MethodCall
+                             (Name (: (Ident "newLockTxProxy") []))
+                             (:
+                              (ExpName (Name (: (Ident "appId") [])))
+                              (:
+                               (ExpName (Name (: (Ident "uniqueId") [])))
+                               (: (Lit (Int 1)) []))))))))
+                        []))
+                      (:
+                       (BlockStmt
+                        (Try
+                         (Block
+                          (:
+                           (BlockStmt
+                            (ExpStmt
+                             (MethodInv
+                              (MethodCall
+                               (Name (: (Ident "assertTrue") []))
+                               (:
+                                (MethodInv
+                                 (MethodCall
+                                  (Name
+                                   (: (Ident "lock") (: (Ident "acquire") [])))
+                                  []))
+                                [])))))
+                           (:
+                            (BlockStmt
+                             (ExpStmt
+                              (MethodInv
+                               (MethodCall
+                                (Name (: (Ident "assertEquals") []))
+                                (:
+                                 (ExpName (Name (: (Ident "uniqueId") [])))
+                                 (:
+                                  (MethodInv
+                                   (MethodCall
+                                    (Name (: (Ident "getOwner") []))
+                                    (:
+                                     (ExpName (Name (: (Ident "appId") [])))
+                                     [])))
+                                  []))))))
+                            (:
+                             (BlockStmt
+                              (ExpStmt
+                               (MethodInv
+                                (MethodCall
+                                 (Name (: (Ident "assertFalse") []))
+                                 (:
+                                  (MethodInv
+                                   (MethodCall
+                                    (Name
+                                     (:
+                                      (Ident "lock")
+                                      (: (Ident "acquire") [])))
+                                    []))
+                                  [])))))
+                             (:
+                              (BlockStmt
+                               (ExpStmt
+                                (MethodInv
+                                 (MethodCall
+                                  (Name
+                                   (: (Ident "Thread") (: (Ident "sleep") [])))
+                                  (: (Lit (Int 1500)) [])))))
+                              (:
+                               (BlockStmt
+                                (ExpStmt
+                                 (MethodInv
+                                  (MethodCall
+                                   (Name (: (Ident "assertTrue") []))
+                                   (:
+                                    (MethodInv
+                                     (MethodCall
+                                      (Name
+                                       (:
+                                        (Ident "lock")
+                                        (: (Ident "acquire") [])))
+                                      []))
+                                    [])))))
+                               (:
+                                (BlockStmt
+                                 (ExpStmt
+                                  (MethodInv
+                                   (MethodCall
+                                    (Name (: (Ident "assertEquals") []))
+                                    (:
+                                     (ExpName (Name (: (Ident "uniqueId") [])))
+                                     (:
+                                      (MethodInv
+                                       (MethodCall
+                                        (Name (: (Ident "getOwner") []))
+                                        (:
+                                         (ExpName (Name (: (Ident "appId") [])))
+                                         [])))
+                                      []))))))
+                                (:
+                                 (BlockStmt
+                                  (ExpStmt
+                                   (MethodInv
+                                    (MethodCall
+                                     (Name
+                                      (:
+                                       (Ident "lock")
+                                       (: (Ident "release") [])))
+                                     []))))
+                                 (:
+                                  (BlockStmt
+                                   (ExpStmt
+                                    (MethodInv
+                                     (MethodCall
+                                      (Name (: (Ident "assertNull") []))
+                                      (:
+                                       (MethodInv
+                                        (MethodCall
+                                         (Name (: (Ident "getOwner") []))
+                                         (:
+                                          (ExpName
+                                           (Name (: (Ident "appId") [])))
+                                          [])))
+                                       [])))))
+                                  [])))))))))
+                         (:
+                          (Catch
+                           (FormalParam
+                            (: Final [])
+                            (RefType
+                             (ClassRefType
+                              (ClassType (: ((,) (Ident "Exception") []) []))))
+                            False
+                            (VarId (Ident "e")))
+                           (Block
+                            (:
+                             (BlockStmt
+                              (ExpStmt
+                               (MethodInv
+                                (MethodCall
+                                 (Name
+                                  (: (Ident "logger") (: (Ident "debug") [])))
+                                 (:
+                                  (Lit
+                                   (String
+                                    "testLockExpiration produced an error"))
+                                  (:
+                                   (ExpName (Name (: (Ident "e") [])))
+                                   []))))))
+                             (:
+                              (BlockStmt
+                               (ExpStmt
+                                (MethodInv
+                                 (MethodCall
+                                  (Name (: (Ident "fail") []))
+                                  (:
+                                   (Lit (String "testLockExpiration failed"))
+                                   [])))))
+                              []))))
+                          [])
+                         Nothing))
+                       [])))))))))
+              (:
+               (MemberDecl
+                (MethodDecl
+                 (:
+                  (Annotation (MarkerAnnotation (Name (: (Ident "Test") []))))
+                  (: Public []))
+                 []
+                 Nothing
+                 (Ident "verifyNonReentrantBehavior")
+                 []
+                 []
+                 Nothing
+                 (MethodBody
+                  (Just
+                   (Block
+                    (:
+                     (LocalVars
+                      (: Final [])
+                      (RefType
+                       (ClassRefType
+                        (ClassType (: ((,) (Ident "String") []) []))))
+                      (:
+                       (VarDecl
+                        (VarId (Ident "appId"))
+                        (Just (InitExp (Lit (String "reentrant")))))
+                       []))
+                     (:
+                      (LocalVars
+                       (: Final [])
+                       (RefType
+                        (ClassRefType
+                         (ClassType (: ((,) (Ident "String") []) []))))
+                       (:
+                        (VarDecl
+                         (VarId (Ident "uniqueId"))
+                         (Just
+                          (InitExp
+                           (BinOp
+                            (ExpName (Name (: (Ident "appId") [])))
+                            Add
+                            (Lit (String "-1"))))))
+                        []))
+                      (:
+                       (LocalVars
+                        (: Final [])
+                        (RefType
+                         (ClassRefType
+                          (ClassType
+                           (: ((,) (Ident "LockingStrategy") []) []))))
+                        (:
+                         (VarDecl
+                          (VarId (Ident "lock"))
+                          (Just
+                           (InitExp
+                            (MethodInv
+                             (MethodCall
+                              (Name (: (Ident "newLockTxProxy") []))
+                              (:
+                               (ExpName (Name (: (Ident "appId") [])))
+                               (:
+                                (ExpName (Name (: (Ident "uniqueId") [])))
+                                (:
+                                 (ExpName
+                                  (Name
+                                   (:
+                                    (Ident "JpaLockingStrategy")
+                                    (: (Ident "DEFAULT_LOCK_TIMEOUT") []))))
+                                 []))))))))
+                         []))
+                       (:
+                        (BlockStmt
+                         (Try
+                          (Block
+                           (:
+                            (BlockStmt
+                             (ExpStmt
+                              (MethodInv
+                               (MethodCall
+                                (Name (: (Ident "assertTrue") []))
+                                (:
+                                 (MethodInv
+                                  (MethodCall
+                                   (Name
+                                    (: (Ident "lock") (: (Ident "acquire") [])))
+                                   []))
+                                 [])))))
+                            (:
+                             (BlockStmt
+                              (ExpStmt
+                               (MethodInv
+                                (MethodCall
+                                 (Name (: (Ident "assertEquals") []))
+                                 (:
+                                  (ExpName (Name (: (Ident "uniqueId") [])))
+                                  (:
+                                   (MethodInv
+                                    (MethodCall
+                                     (Name (: (Ident "getOwner") []))
+                                     (:
+                                      (ExpName (Name (: (Ident "appId") [])))
+                                      [])))
+                                   []))))))
+                             (:
+                              (BlockStmt
+                               (ExpStmt
+                                (MethodInv
+                                 (MethodCall
+                                  (Name (: (Ident "assertFalse") []))
+                                  (:
+                                   (MethodInv
+                                    (MethodCall
+                                     (Name
+                                      (:
+                                       (Ident "lock")
+                                       (: (Ident "acquire") [])))
+                                     []))
+                                   [])))))
+                              (:
+                               (BlockStmt
+                                (ExpStmt
+                                 (MethodInv
+                                  (MethodCall
+                                   (Name
+                                    (: (Ident "lock") (: (Ident "release") [])))
+                                   []))))
+                               (:
+                                (BlockStmt
+                                 (ExpStmt
+                                  (MethodInv
+                                   (MethodCall
+                                    (Name (: (Ident "assertNull") []))
+                                    (:
+                                     (MethodInv
+                                      (MethodCall
+                                       (Name (: (Ident "getOwner") []))
+                                       (:
+                                        (ExpName (Name (: (Ident "appId") [])))
+                                        [])))
+                                     [])))))
+                                []))))))
+                          (:
+                           (Catch
+                            (FormalParam
+                             (: Final [])
+                             (RefType
+                              (ClassRefType
+                               (ClassType (: ((,) (Ident "Exception") []) []))))
+                             False
+                             (VarId (Ident "e")))
+                            (Block
+                             (:
+                              (BlockStmt
+                               (ExpStmt
+                                (MethodInv
+                                 (MethodCall
+                                  (Name
+                                   (: (Ident "logger") (: (Ident "debug") [])))
+                                  (:
+                                   (Lit
+                                    (String
+                                     "testNonReentrantBehavior produced an error"))
+                                   (:
+                                    (ExpName (Name (: (Ident "e") [])))
+                                    []))))))
+                              (:
+                               (BlockStmt
+                                (ExpStmt
+                                 (MethodInv
+                                  (MethodCall
+                                   (Name (: (Ident "fail") []))
+                                   (:
+                                    (Lit
+                                     (String
+                                      "testNonReentrantBehavior failed."))
+                                    [])))))
+                               []))))
+                           [])
+                          Nothing))
+                        [])))))))))
+               (:
+                (MemberDecl
+                 (MethodDecl
+                  (:
+                   (Annotation (MarkerAnnotation (Name (: (Ident "Test") []))))
+                   (:
+                    (Annotation
+                     (NormalAnnotation
+                      (Name (: (Ident "IfProfileValue") []))
+                      (:
+                       ((,)
+                        (Ident "name")
+                        (EVVal (InitExp (Lit (String "cas.jpa.concurrent")))))
+                       (:
+                        ((,)
+                         (Ident "value")
+                         (EVVal (InitExp (Lit (String "true")))))
+                        []))))
+                    (: Public [])))
+                  []
+                  Nothing
+                  (Ident "verifyConcurrentAcquireAndRelease")
+                  []
+                  (:
+                   (ClassRefType
+                    (ClassType (: ((,) (Ident "Exception") []) [])))
+                   [])
+                  Nothing
+                  (MethodBody
+                   (Just
+                    (Block
+                     (:
+                      (LocalVars
+                       (: Final [])
+                       (RefType
+                        (ClassRefType
+                         (ClassType (: ((,) (Ident "ExecutorService") []) []))))
+                       (:
+                        (VarDecl
+                         (VarId (Ident "executor"))
+                         (Just
+                          (InitExp
+                           (MethodInv
+                            (MethodCall
+                             (Name
+                              (:
+                               (Ident "Executors")
+                               (: (Ident "newFixedThreadPool") [])))
+                             (:
+                              (ExpName (Name (: (Ident "CONCURRENT_SIZE") [])))
+                              []))))))
+                        []))
+                      (:
+                       (BlockStmt
+                        (Try
+                         (Block
+                          (:
+                           (BlockStmt
+                            (ExpStmt
+                             (MethodInv
+                              (MethodCall
+                               (Name (: (Ident "testConcurrency") []))
+                               (:
+                                (ExpName (Name (: (Ident "executor") [])))
+                                (:
+                                 (MethodInv
+                                  (MethodCall
+                                   (Name (: (Ident "getConcurrentLocks") []))
+                                   (: (Lit (String "concurrent-new")) [])))
+                                 []))))))
+                           []))
+                         (:
+                          (Catch
+                           (FormalParam
+                            (: Final [])
+                            (RefType
+                             (ClassRefType
+                              (ClassType (: ((,) (Ident "Exception") []) []))))
+                            False
+                            (VarId (Ident "e")))
+                           (Block
+                            (:
+                             (BlockStmt
+                              (ExpStmt
+                               (MethodInv
+                                (MethodCall
+                                 (Name
+                                  (: (Ident "logger") (: (Ident "debug") [])))
+                                 (:
+                                  (Lit
+                                   (String
+                                    "testConcurrentAcquireAndRelease produced an error"))
+                                  (:
+                                   (ExpName (Name (: (Ident "e") [])))
+                                   []))))))
+                             (:
+                              (BlockStmt
+                               (ExpStmt
+                                (MethodInv
+                                 (MethodCall
+                                  (Name (: (Ident "fail") []))
+                                  (:
+                                   (Lit
+                                    (String
+                                     "testConcurrentAcquireAndRelease failed."))
+                                   [])))))
+                              []))))
+                          [])
+                         (Just
+                          (Block
+                           (:
+                            (BlockStmt
+                             (ExpStmt
+                              (MethodInv
+                               (MethodCall
+                                (Name
+                                 (:
+                                  (Ident "executor")
+                                  (: (Ident "shutdownNow") [])))
+                                []))))
+                            [])))))
+                       [])))))))
+                (:
+                 (MemberDecl
+                  (MethodDecl
+                   (:
+                    (Annotation (MarkerAnnotation (Name (: (Ident "Test") []))))
+                    (:
+                     (Annotation
+                      (NormalAnnotation
+                       (Name (: (Ident "IfProfileValue") []))
+                       (:
+                        ((,)
+                         (Ident "name")
+                         (EVVal (InitExp (Lit (String "cas.jpa.concurrent")))))
+                        (:
+                         ((,)
+                          (Ident "value")
+                          (EVVal (InitExp (Lit (String "true")))))
+                         []))))
+                     (: Public [])))
+                   []
+                   Nothing
+                   (Ident "verifyConcurrentAcquireAndReleaseOnExistingLock")
+                   []
+                   (:
+                    (ClassRefType
+                     (ClassType (: ((,) (Ident "Exception") []) [])))
+                    [])
+                   Nothing
+                   (MethodBody
+                    (Just
+                     (Block
+                      (:
+                       (LocalVars
+                        (: Final [])
+                        (RefType
+                         (ArrayType
+                          (RefType
+                           (ClassRefType
+                            (ClassType
+                             (: ((,) (Ident "LockingStrategy") []) []))))))
+                        (:
+                         (VarDecl
+                          (VarId (Ident "locks"))
+                          (Just
+                           (InitExp
+                            (MethodInv
+                             (MethodCall
+                              (Name (: (Ident "getConcurrentLocks") []))
+                              (: (Lit (String "concurrent-exists")) []))))))
+                         []))
+                       (:
+                        (BlockStmt
+                         (ExpStmt
+                          (MethodInv
+                           (PrimaryMethodCall
+                            (ArrayAccess
+                             (ArrayIndex
+                              (ExpName (Name (: (Ident "locks") [])))
+                              (: (Lit (Int 0)) [])))
+                            []
+                            (Ident "acquire")
+                            []))))
+                        (:
+                         (BlockStmt
+                          (ExpStmt
+                           (MethodInv
+                            (PrimaryMethodCall
+                             (ArrayAccess
+                              (ArrayIndex
+                               (ExpName (Name (: (Ident "locks") [])))
+                               (: (Lit (Int 0)) [])))
+                             []
+                             (Ident "release")
+                             []))))
+                         (:
+                          (LocalVars
+                           (: Final [])
+                           (RefType
+                            (ClassRefType
+                             (ClassType
+                              (: ((,) (Ident "ExecutorService") []) []))))
+                           (:
+                            (VarDecl
+                             (VarId (Ident "executor"))
+                             (Just
+                              (InitExp
+                               (MethodInv
+                                (MethodCall
+                                 (Name
+                                  (:
+                                   (Ident "Executors")
+                                   (: (Ident "newFixedThreadPool") [])))
+                                 (:
+                                  (ExpName
+                                   (Name (: (Ident "CONCURRENT_SIZE") [])))
+                                  []))))))
+                            []))
+                          (:
+                           (BlockStmt
+                            (Try
+                             (Block
+                              (:
+                               (BlockStmt
+                                (ExpStmt
+                                 (MethodInv
+                                  (MethodCall
+                                   (Name (: (Ident "testConcurrency") []))
+                                   (:
+                                    (ExpName (Name (: (Ident "executor") [])))
+                                    (:
+                                     (ExpName (Name (: (Ident "locks") [])))
+                                     []))))))
+                               []))
+                             (:
+                              (Catch
+                               (FormalParam
+                                (: Final [])
+                                (RefType
+                                 (ClassRefType
+                                  (ClassType
+                                   (: ((,) (Ident "Exception") []) []))))
+                                False
+                                (VarId (Ident "e")))
+                               (Block
+                                (:
+                                 (BlockStmt
+                                  (ExpStmt
+                                   (MethodInv
+                                    (MethodCall
+                                     (Name
+                                      (:
+                                       (Ident "logger")
+                                       (: (Ident "debug") [])))
+                                     (:
+                                      (Lit
+                                       (String
+                                        "testConcurrentAcquireAndReleaseOnExistingLock produced an error"))
+                                      (:
+                                       (ExpName (Name (: (Ident "e") [])))
+                                       []))))))
+                                 (:
+                                  (BlockStmt
+                                   (ExpStmt
+                                    (MethodInv
+                                     (MethodCall
+                                      (Name (: (Ident "fail") []))
+                                      (:
+                                       (Lit
+                                        (String
+                                         "testConcurrentAcquireAndReleaseOnExistingLock failed."))
+                                       [])))))
+                                  []))))
+                              [])
+                             (Just
+                              (Block
+                               (:
+                                (BlockStmt
+                                 (ExpStmt
+                                  (MethodInv
+                                   (MethodCall
+                                    (Name
+                                     (:
+                                      (Ident "executor")
+                                      (: (Ident "shutdownNow") [])))
+                                    []))))
+                                [])))))
+                           []))))))))))
+                 (:
+                  (MemberDecl
+                   (MethodDecl
+                    (: Private [])
+                    []
+                    (Just
+                     (RefType
+                      (ArrayType
+                       (RefType
+                        (ClassRefType
+                         (ClassType
+                          (: ((,) (Ident "LockingStrategy") []) [])))))))
+                    (Ident "getConcurrentLocks")
+                    (:
+                     (FormalParam
+                      (: Final [])
+                      (RefType
+                       (ClassRefType
+                        (ClassType (: ((,) (Ident "String") []) []))))
+                      False
+                      (VarId (Ident "appId")))
+                     [])
+                    []
+                    Nothing
+                    (MethodBody
+                     (Just
+                      (Block
+                       (:
+                        (LocalVars
+                         (: Final [])
+                         (RefType
+                          (ArrayType
+                           (RefType
+                            (ClassRefType
+                             (ClassType
+                              (: ((,) (Ident "LockingStrategy") []) []))))))
+                         (:
+                          (VarDecl
+                           (VarId (Ident "locks"))
+                           (Just
+                            (InitExp
+                             (ArrayCreate
+                              (RefType
+                               (ClassRefType
+                                (ClassType
+                                 (: ((,) (Ident "LockingStrategy") []) []))))
+                              (:
+                               (ExpName (Name (: (Ident "CONCURRENT_SIZE") [])))
+                               [])
+                              0))))
+                          []))
+                        (:
+                         (BlockStmt
+                          (BasicFor
+                           (Just
+                            (ForLocalVars
+                             []
+                             (PrimType IntT)
+                             (:
+                              (VarDecl
+                               (VarId (Ident "i"))
+                               (Just (InitExp (Lit (Int 1)))))
+                              [])))
+                           (Just
+                            (BinOp
+                             (ExpName (Name (: (Ident "i") [])))
+                             LThanE
+                             (ExpName
+                              (Name
+                               (: (Ident "locks") (: (Ident "length") []))))))
+                           (Just
+                            (:
+                             (PostIncrement (ExpName (Name (: (Ident "i") []))))
+                             []))
+                           (StmtBlock
+                            (Block
+                             (:
+                              (BlockStmt
+                               (ExpStmt
+                                (Assign
+                                 (ArrayLhs
+                                  (ArrayIndex
+                                   (ExpName (Name (: (Ident "locks") [])))
+                                   (:
+                                    (BinOp
+                                     (ExpName (Name (: (Ident "i") [])))
+                                     Sub
+                                     (Lit (Int 1)))
+                                    [])))
+                                 EqualA
+                                 (MethodInv
+                                  (MethodCall
+                                   (Name (: (Ident "newLockTxProxy") []))
+                                   (:
+                                    (ExpName (Name (: (Ident "appId") [])))
+                                    (:
+                                     (BinOp
+                                      (BinOp
+                                       (ExpName (Name (: (Ident "appId") [])))
+                                       Add
+                                       (Lit (String "-")))
+                                      Add
+                                      (ExpName (Name (: (Ident "i") []))))
+                                     (:
+                                      (ExpName
+                                       (Name
+                                        (:
+                                         (Ident "JpaLockingStrategy")
+                                         (:
+                                          (Ident "DEFAULT_LOCK_TIMEOUT")
+                                          []))))
+                                      []))))))))
+                              [])))))
+                         (:
+                          (BlockStmt
+                           (Return
+                            (Just (ExpName (Name (: (Ident "locks") []))))))
+                          []))))))))
+                  (:
+                   (MemberDecl
+                    (MethodDecl
+                     (: Private (: Final []))
+                     []
+                     (Just
+                      (RefType
+                       (ClassRefType
+                        (ClassType (: ((,) (Ident "LockingStrategy") []) [])))))
+                     (Ident "newLockTxProxy")
+                     (:
+                      (FormalParam
+                       (: Final [])
+                       (RefType
+                        (ClassRefType
+                         (ClassType (: ((,) (Ident "String") []) []))))
+                       False
+                       (VarId (Ident "appId")))
+                      (:
+                       (FormalParam
+                        (: Final [])
+                        (RefType
+                         (ClassRefType
+                          (ClassType (: ((,) (Ident "String") []) []))))
+                        False
+                        (VarId (Ident "uniqueId")))
+                       (:
+                        (FormalParam
+                         (: Final [])
+                         (PrimType IntT)
+                         False
+                         (VarId (Ident "ttl")))
+                        [])))
+                     []
+                     Nothing
+                     (MethodBody
+                      (Just
+                       (Block
+                        (:
+                         (LocalVars
+                          (: Final [])
+                          (RefType
+                           (ClassRefType
+                            (ClassType
+                             (: ((,) (Ident "JpaLockingStrategy") []) []))))
+                          (:
+                           (VarDecl
+                            (VarId (Ident "lock"))
+                            (Just
+                             (InitExp
+                              (InstanceCreation
+                               []
+                               (TypeDeclSpecifier
+                                (ClassType
+                                 (: ((,) (Ident "JpaLockingStrategy") []) [])))
+                               []
+                               Nothing))))
+                           []))
+                         (:
+                          (BlockStmt
+                           (ExpStmt
+                            (Assign
+                             (NameLhs
+                              (Name
+                               (:
+                                (Ident "lock")
+                                (: (Ident "entityManager") []))))
+                             EqualA
+                             (MethodInv
+                              (MethodCall
+                               (Name
+                                (:
+                                 (Ident "SharedEntityManagerCreator")
+                                 (: (Ident "createSharedEntityManager") [])))
+                               (:
+                                (ExpName (Name (: (Ident "factory") [])))
+                                []))))))
+                          (:
+                           (BlockStmt
+                            (ExpStmt
+                             (MethodInv
+                              (MethodCall
+                               (Name
+                                (:
+                                 (Ident "lock")
+                                 (: (Ident "setApplicationId") [])))
+                               (:
+                                (ExpName (Name (: (Ident "appId") [])))
+                                [])))))
+                           (:
+                            (BlockStmt
+                             (ExpStmt
+                              (MethodInv
+                               (MethodCall
+                                (Name
+                                 (:
+                                  (Ident "lock")
+                                  (: (Ident "setUniqueId") [])))
+                                (:
+                                 (ExpName (Name (: (Ident "uniqueId") [])))
+                                 [])))))
+                            (:
+                             (BlockStmt
+                              (ExpStmt
+                               (MethodInv
+                                (MethodCall
+                                 (Name
+                                  (:
+                                   (Ident "lock")
+                                   (: (Ident "setLockTimeout") [])))
+                                 (:
+                                  (ExpName (Name (: (Ident "ttl") [])))
+                                  [])))))
+                             (:
+                              (BlockStmt
+                               (Return
+                                (Just
+                                 (Cast
+                                  (RefType
+                                   (ClassRefType
+                                    (ClassType
+                                     (:
+                                      ((,) (Ident "LockingStrategy") [])
+                                      []))))
+                                  (MethodInv
+                                   (MethodCall
+                                    (Name
+                                     (:
+                                      (Ident "Proxy")
+                                      (: (Ident "newProxyInstance") [])))
+                                    (:
+                                     (MethodInv
+                                      (PrimaryMethodCall
+                                       (ClassLit
+                                        (Just
+                                         (RefType
+                                          (ClassRefType
+                                           (ClassType
+                                            (:
+                                             ((,)
+                                              (Ident "JpaLockingStrategy")
+                                              [])
+                                             []))))))
+                                       []
+                                       (Ident "getClassLoader")
+                                       []))
+                                     (:
+                                      (ArrayCreateInit
+                                       (RefType
+                                        (ClassRefType
+                                         (ClassType
+                                          (: ((,) (Ident "Class") []) []))))
+                                       1
+                                       (ArrayInit
+                                        (:
+                                         (InitExp
+                                          (ClassLit
+                                           (Just
+                                            (RefType
+                                             (ClassRefType
+                                              (ClassType
+                                               (:
+                                                ((,)
+                                                 (Ident "LockingStrategy")
+                                                 [])
+                                                [])))))))
+                                         [])))
+                                      (:
+                                       (InstanceCreation
+                                        []
+                                        (TypeDeclSpecifier
+                                         (ClassType
+                                          (:
+                                           ((,)
+                                            (Ident
+                                             "TransactionalLockInvocationHandler")
+                                            [])
+                                           [])))
+                                        (:
+                                         (ExpName (Name (: (Ident "lock") [])))
+                                         (:
+                                          (FieldAccess
+                                           (PrimaryFieldAccess
+                                            This
+                                            (Ident "txManager")))
+                                          []))
+                                        Nothing)
+                                       [])))))))))
+                              [])))))))))))
+                   (:
+                    (MemberDecl
+                     (MethodDecl
+                      (: Private [])
+                      []
+                      (Just
+                       (RefType
+                        (ClassRefType
+                         (ClassType (: ((,) (Ident "String") []) [])))))
+                      (Ident "getOwner")
+                      (:
+                       (FormalParam
+                        (: Final [])
+                        (RefType
+                         (ClassRefType
+                          (ClassType (: ((,) (Ident "String") []) []))))
+                        False
+                        (VarId (Ident "appId")))
+                       [])
+                      []
+                      Nothing
+                      (MethodBody
+                       (Just
+                        (Block
+                         (:
+                          (LocalVars
+                           (: Final [])
+                           (RefType
+                            (ClassRefType
+                             (ClassType
+                              (:
+                               ((,)
+                                (Ident "List")
+                                (:
+                                 (ActualType
+                                  (ClassRefType
+                                   (ClassType
+                                    (:
+                                     ((,)
+                                      (Ident "Map")
+                                      (:
+                                       (ActualType
+                                        (ClassRefType
+                                         (ClassType
+                                          (: ((,) (Ident "String") []) []))))
+                                       (:
+                                        (ActualType
+                                         (ClassRefType
+                                          (ClassType
+                                           (: ((,) (Ident "Object") []) []))))
+                                        [])))
+                                     []))))
+                                 []))
+                               []))))
+                           (:
+                            (VarDecl
+                             (VarId (Ident "results"))
+                             (Just
+                              (InitExp
+                               (MethodInv
+                                (MethodCall
+                                 (Name
+                                  (:
+                                   (Ident "simpleJdbcTemplate")
+                                   (: (Ident "queryForList") [])))
+                                 (:
+                                  (Lit
+                                   (String
+                                    "SELECT unique_id FROM locks WHERE application_id=?"))
+                                  (:
+                                   (ExpName (Name (: (Ident "appId") [])))
+                                   [])))))))
+                            []))
+                          (:
+                           (BlockStmt
+                            (IfThen
+                             (BinOp
+                              (MethodInv
+                               (MethodCall
+                                (Name
+                                 (: (Ident "results") (: (Ident "size") [])))
+                                []))
+                              Equal
+                              (Lit (Int 0)))
+                             (StmtBlock
+                              (Block
+                               (: (BlockStmt (Return (Just (Lit Null)))) [])))))
+                           (:
+                            (BlockStmt
+                             (Return
+                              (Just
+                               (Cast
+                                (RefType
+                                 (ClassRefType
+                                  (ClassType (: ((,) (Ident "String") []) []))))
+                                (MethodInv
+                                 (PrimaryMethodCall
+                                  (MethodInv
+                                   (MethodCall
+                                    (Name
+                                     (: (Ident "results") (: (Ident "get") [])))
+                                    (: (Lit (Int 0)) [])))
+                                  []
+                                  (Ident "get")
+                                  (: (Lit (String "unique_id")) [])))))))
+                            []))))))))
+                    (:
+                     (MemberDecl
+                      (MethodDecl
+                       (: Private [])
+                       []
+                       Nothing
+                       (Ident "testConcurrency")
+                       (:
+                        (FormalParam
+                         (: Final [])
+                         (RefType
+                          (ClassRefType
+                           (ClassType
+                            (: ((,) (Ident "ExecutorService") []) []))))
+                         False
+                         (VarId (Ident "executor")))
+                        (:
+                         (FormalParam
+                          (: Final [])
+                          (RefType
+                           (ArrayType
+                            (RefType
+                             (ClassRefType
+                              (ClassType
+                               (: ((,) (Ident "LockingStrategy") []) []))))))
+                          False
+                          (VarId (Ident "locks")))
+                         []))
+                       (:
+                        (ClassRefType
+                         (ClassType (: ((,) (Ident "Exception") []) [])))
+                        [])
+                       Nothing
+                       (MethodBody
+                        (Just
+                         (Block
+                          (:
+                           (LocalVars
+                            (: Final [])
+                            (RefType
+                             (ClassRefType
+                              (ClassType
+                               (:
+                                ((,)
+                                 (Ident "List")
+                                 (:
+                                  (ActualType
+                                   (ClassRefType
+                                    (ClassType
+                                     (: ((,) (Ident "Locker") []) []))))
+                                  []))
+                                []))))
+                            (:
+                             (VarDecl
+                              (VarId (Ident "lockers"))
+                              (Just
+                               (InitExp
+                                (InstanceCreation
+                                 []
+                                 (TypeDeclSpecifier
+                                  (ClassType
+                                   (:
+                                    ((,)
+                                     (Ident "ArrayList")
+                                     (:
+                                      (ActualType
+                                       (ClassRefType
+                                        (ClassType
+                                         (: ((,) (Ident "Locker") []) []))))
+                                      []))
+                                    [])))
+                                 (:
+                                  (ExpName
+                                   (Name
+                                    (:
+                                     (Ident "locks")
+                                     (: (Ident "length") []))))
+                                  [])
+                                 Nothing))))
+                             []))
+                           (:
+                            (BlockStmt
+                             (BasicFor
+                              (Just
+                               (ForLocalVars
+                                []
+                                (PrimType IntT)
+                                (:
+                                 (VarDecl
+                                  (VarId (Ident "i"))
+                                  (Just (InitExp (Lit (Int 0)))))
+                                 [])))
+                              (Just
+                               (BinOp
+                                (ExpName (Name (: (Ident "i") [])))
+                                LThan
+                                (ExpName
+                                 (Name
+                                  (:
+                                   (Ident "locks")
+                                   (: (Ident "length") []))))))
+                              (Just
+                               (:
+                                (PostIncrement
+                                 (ExpName (Name (: (Ident "i") []))))
+                                []))
+                              (StmtBlock
+                               (Block
+                                (:
+                                 (BlockStmt
+                                  (ExpStmt
+                                   (MethodInv
+                                    (MethodCall
+                                     (Name
+                                      (:
+                                       (Ident "lockers")
+                                       (: (Ident "add") [])))
+                                     (:
+                                      (InstanceCreation
+                                       []
+                                       (TypeDeclSpecifier
+                                        (ClassType
+                                         (: ((,) (Ident "Locker") []) [])))
+                                       (:
+                                        (ArrayAccess
+                                         (ArrayIndex
+                                          (ExpName
+                                           (Name (: (Ident "locks") [])))
+                                          (:
+                                           (ExpName (Name (: (Ident "i") [])))
+                                           [])))
+                                        [])
+                                       Nothing)
+                                      [])))))
+                                 [])))))
+                            (:
+                             (LocalVars
+                              []
+                              (PrimType IntT)
+                              (:
+                               (VarDecl
+                                (VarId (Ident "lockCount"))
+                                (Just (InitExp (Lit (Int 0)))))
+                               []))
+                             (:
+                              (BlockStmt
+                               (EnhancedFor
+                                []
+                                (RefType
+                                 (ClassRefType
+                                  (ClassType
+                                   (:
+                                    ((,)
+                                     (Ident "Future")
+                                     (:
+                                      (ActualType
+                                       (ClassRefType
+                                        (ClassType
+                                         (: ((,) (Ident "Boolean") []) []))))
+                                      []))
+                                    []))))
+                                (Ident "result")
+                                (MethodInv
+                                 (MethodCall
+                                  (Name
+                                   (:
+                                    (Ident "executor")
+                                    (: (Ident "invokeAll") [])))
+                                  (:
+                                   (ExpName (Name (: (Ident "lockers") [])))
+                                   [])))
+                                (StmtBlock
+                                 (Block
+                                  (:
+                                   (BlockStmt
+                                    (IfThen
+                                     (MethodInv
+                                      (MethodCall
+                                       (Name
+                                        (:
+                                         (Ident "result")
+                                         (: (Ident "get") [])))
+                                       []))
+                                     (StmtBlock
+                                      (Block
+                                       (:
+                                        (BlockStmt
+                                         (ExpStmt
+                                          (PostIncrement
+                                           (ExpName
+                                            (Name
+                                             (: (Ident "lockCount") []))))))
+                                        [])))))
+                                   [])))))
+                              (:
+                               (BlockStmt
+                                (ExpStmt
+                                 (MethodInv
+                                  (MethodCall
+                                   (Name (: (Ident "assertTrue") []))
+                                   (:
+                                    (BinOp
+                                     (Lit
+                                      (String
+                                       "Lock count should be <= 1 but was "))
+                                     Add
+                                     (ExpName
+                                      (Name (: (Ident "lockCount") []))))
+                                    (:
+                                     (BinOp
+                                      (ExpName
+                                       (Name (: (Ident "lockCount") [])))
+                                      LThanE
+                                      (Lit (Int 1)))
+                                     []))))))
+                               (:
+                                (LocalVars
+                                 (: Final [])
+                                 (RefType
+                                  (ClassRefType
+                                   (ClassType
+                                    (:
+                                     ((,)
+                                      (Ident "List")
+                                      (:
+                                       (ActualType
+                                        (ClassRefType
+                                         (ClassType
+                                          (: ((,) (Ident "Releaser") []) []))))
+                                       []))
+                                     []))))
+                                 (:
+                                  (VarDecl
+                                   (VarId (Ident "releasers"))
+                                   (Just
+                                    (InitExp
+                                     (InstanceCreation
+                                      []
+                                      (TypeDeclSpecifier
+                                       (ClassType
+                                        (:
+                                         ((,)
+                                          (Ident "ArrayList")
+                                          (:
+                                           (ActualType
+                                            (ClassRefType
+                                             (ClassType
+                                              (:
+                                               ((,) (Ident "Releaser") [])
+                                               []))))
+                                           []))
+                                         [])))
+                                      (:
+                                       (ExpName
+                                        (Name
+                                         (:
+                                          (Ident "locks")
+                                          (: (Ident "length") []))))
+                                       [])
+                                      Nothing))))
+                                  []))
+                                (:
+                                 (BlockStmt
+                                  (BasicFor
+                                   (Just
+                                    (ForLocalVars
+                                     []
+                                     (PrimType IntT)
+                                     (:
+                                      (VarDecl
+                                       (VarId (Ident "i"))
+                                       (Just (InitExp (Lit (Int 0)))))
+                                      [])))
+                                   (Just
+                                    (BinOp
+                                     (ExpName (Name (: (Ident "i") [])))
+                                     LThan
+                                     (ExpName
+                                      (Name
+                                       (:
+                                        (Ident "locks")
+                                        (: (Ident "length") []))))))
+                                   (Just
+                                    (:
+                                     (PostIncrement
+                                      (ExpName (Name (: (Ident "i") []))))
+                                     []))
+                                   (StmtBlock
+                                    (Block
+                                     (:
+                                      (BlockStmt
+                                       (ExpStmt
+                                        (MethodInv
+                                         (MethodCall
+                                          (Name
+                                           (:
+                                            (Ident "releasers")
+                                            (: (Ident "add") [])))
+                                          (:
+                                           (InstanceCreation
+                                            []
+                                            (TypeDeclSpecifier
+                                             (ClassType
+                                              (:
+                                               ((,) (Ident "Releaser") [])
+                                               [])))
+                                            (:
+                                             (ArrayAccess
+                                              (ArrayIndex
+                                               (ExpName
+                                                (Name (: (Ident "locks") [])))
+                                               (:
+                                                (ExpName
+                                                 (Name (: (Ident "i") [])))
+                                                [])))
+                                             [])
+                                            Nothing)
+                                           [])))))
+                                      [])))))
+                                 (:
+                                  (LocalVars
+                                   []
+                                   (PrimType IntT)
+                                   (:
+                                    (VarDecl
+                                     (VarId (Ident "releaseCount"))
+                                     (Just (InitExp (Lit (Int 0)))))
+                                    []))
+                                  (:
+                                   (BlockStmt
+                                    (EnhancedFor
+                                     []
+                                     (RefType
+                                      (ClassRefType
+                                       (ClassType
+                                        (:
+                                         ((,)
+                                          (Ident "Future")
+                                          (:
+                                           (ActualType
+                                            (ClassRefType
+                                             (ClassType
+                                              (:
+                                               ((,) (Ident "Boolean") [])
+                                               []))))
+                                           []))
+                                         []))))
+                                     (Ident "result")
+                                     (MethodInv
+                                      (MethodCall
+                                       (Name
+                                        (:
+                                         (Ident "executor")
+                                         (: (Ident "invokeAll") [])))
+                                       (:
+                                        (ExpName
+                                         (Name (: (Ident "lockers") [])))
+                                        [])))
+                                     (StmtBlock
+                                      (Block
+                                       (:
+                                        (BlockStmt
+                                         (IfThen
+                                          (MethodInv
+                                           (MethodCall
+                                            (Name
+                                             (:
+                                              (Ident "result")
+                                              (: (Ident "get") [])))
+                                            []))
+                                          (StmtBlock
+                                           (Block
+                                            (:
+                                             (BlockStmt
+                                              (ExpStmt
+                                               (PostIncrement
+                                                (ExpName
+                                                 (Name
+                                                  (:
+                                                   (Ident "releaseCount")
+                                                   []))))))
+                                             [])))))
+                                        [])))))
+                                   (:
+                                    (BlockStmt
+                                     (ExpStmt
+                                      (MethodInv
+                                       (MethodCall
+                                        (Name (: (Ident "assertTrue") []))
+                                        (:
+                                         (BinOp
+                                          (Lit
+                                           (String
+                                            "Release count should be <= 1 but was "))
+                                          Add
+                                          (ExpName
+                                           (Name
+                                            (: (Ident "releaseCount") []))))
+                                         (:
+                                          (BinOp
+                                           (ExpName
+                                            (Name
+                                             (: (Ident "releaseCount") [])))
+                                           LThanE
+                                           (Lit (Int 1)))
+                                          []))))))
+                                    [])))))))))))))))
+                     (:
+                      (MemberDecl
+                       (MemberClassDecl
+                        (ClassDecl
+                         (: Private (: Static []))
+                         (Ident "TransactionalLockInvocationHandler")
+                         []
+                         Nothing
+                         (:
+                          (ClassRefType
+                           (ClassType
+                            (: ((,) (Ident "InvocationHandler") []) [])))
+                          [])
+                         (ClassBody
+                          (:
+                           (MemberDecl
+                            (FieldDecl
+                             (: Private (: Final []))
+                             (RefType
+                              (ClassRefType
+                               (ClassType (: ((,) (Ident "Logger") []) []))))
+                             (:
+                              (VarDecl
+                               (VarId (Ident "logger"))
+                               (Just
+                                (InitExp
+                                 (MethodInv
+                                  (MethodCall
+                                   (Name
+                                    (:
+                                     (Ident "LoggerFactory")
+                                     (: (Ident "getLogger") [])))
+                                   (:
+                                    (MethodInv
+                                     (PrimaryMethodCall
+                                      This
+                                      []
+                                      (Ident "getClass")
+                                      []))
+                                    []))))))
+                              [])))
+                           (:
+                            (MemberDecl
+                             (FieldDecl
+                              (: Private (: Final []))
+                              (RefType
+                               (ClassRefType
+                                (ClassType
+                                 (: ((,) (Ident "JpaLockingStrategy") []) []))))
+                              (:
+                               (VarDecl (VarId (Ident "jpaLock")) Nothing)
+                               [])))
+                            (:
+                             (MemberDecl
+                              (FieldDecl
+                               (: Private (: Final []))
+                               (RefType
+                                (ClassRefType
+                                 (ClassType
+                                  (:
+                                   ((,) (Ident "PlatformTransactionManager") [])
+                                   []))))
+                               (:
+                                (VarDecl (VarId (Ident "txManager")) Nothing)
+                                [])))
+                             (:
+                              (MemberDecl
+                               (ConstructorDecl
+                                (: Public [])
+                                []
+                                (Ident "TransactionalLockInvocationHandler")
+                                (:
+                                 (FormalParam
+                                  (: Final [])
+                                  (RefType
+                                   (ClassRefType
+                                    (ClassType
+                                     (:
+                                      ((,) (Ident "JpaLockingStrategy") [])
+                                      []))))
+                                  False
+                                  (VarId (Ident "lock")))
+                                 (:
+                                  (FormalParam
+                                   (: Final [])
+                                   (RefType
+                                    (ClassRefType
+                                     (ClassType
+                                      (:
+                                       ((,)
+                                        (Ident "PlatformTransactionManager")
+                                        [])
+                                       []))))
+                                   False
+                                   (VarId (Ident "txManager")))
+                                  []))
+                                []
+                                (ConstructorBody
+                                 Nothing
+                                 (:
+                                  (BlockStmt
+                                   (ExpStmt
+                                    (Assign
+                                     (NameLhs (Name (: (Ident "jpaLock") [])))
+                                     EqualA
+                                     (ExpName (Name (: (Ident "lock") []))))))
+                                  (:
+                                   (BlockStmt
+                                    (ExpStmt
+                                     (Assign
+                                      (FieldLhs
+                                       (PrimaryFieldAccess
+                                        This
+                                        (Ident "txManager")))
+                                      EqualA
+                                      (ExpName
+                                       (Name (: (Ident "txManager") []))))))
+                                   [])))))
+                              (:
+                               (MemberDecl
+                                (MethodDecl
+                                 (: Public [])
+                                 []
+                                 (Just
+                                  (RefType
+                                   (ClassRefType
+                                    (ClassType
+                                     (:
+                                      ((,) (Ident "JpaLockingStrategy") [])
+                                      [])))))
+                                 (Ident "getLock")
+                                 []
+                                 []
+                                 Nothing
+                                 (MethodBody
+                                  (Just
+                                   (Block
+                                    (:
+                                     (BlockStmt
+                                      (Return
+                                       (Just
+                                        (ExpName
+                                         (Name (: (Ident "jpaLock") []))))))
+                                     []))))))
+                               (:
+                                (MemberDecl
+                                 (MethodDecl
+                                  (:
+                                   (Annotation
+                                    (MarkerAnnotation
+                                     (Name (: (Ident "Override") []))))
+                                   (: Public []))
+                                  []
+                                  (Just
+                                   (RefType
+                                    (ClassRefType
+                                     (ClassType
+                                      (: ((,) (Ident "Object") []) [])))))
+                                  (Ident "invoke")
+                                  (:
+                                   (FormalParam
+                                    (: Final [])
+                                    (RefType
+                                     (ClassRefType
+                                      (ClassType
+                                       (: ((,) (Ident "Object") []) []))))
+                                    False
+                                    (VarId (Ident "proxy")))
+                                   (:
+                                    (FormalParam
+                                     (: Final [])
+                                     (RefType
+                                      (ClassRefType
+                                       (ClassType
+                                        (: ((,) (Ident "Method") []) []))))
+                                     False
+                                     (VarId (Ident "method")))
+                                    (:
+                                     (FormalParam
+                                      (: Final [])
+                                      (RefType
+                                       (ArrayType
+                                        (RefType
+                                         (ClassRefType
+                                          (ClassType
+                                           (: ((,) (Ident "Object") []) []))))))
+                                      False
+                                      (VarId (Ident "args")))
+                                     [])))
+                                  (:
+                                   (ClassRefType
+                                    (ClassType
+                                     (: ((,) (Ident "Throwable") []) [])))
+                                   [])
+                                  Nothing
+                                  (MethodBody
+                                   (Just
+                                    (Block
+                                     (:
+                                      (BlockStmt
+                                       (Return
+                                        (Just
+                                         (MethodInv
+                                          (PrimaryMethodCall
+                                           (InstanceCreation
+                                            []
+                                            (TypeDeclSpecifier
+                                             (ClassType
+                                              (:
+                                               ((,)
+                                                (Ident "TransactionTemplate")
+                                                [])
+                                               [])))
+                                            (:
+                                             (ExpName
+                                              (Name (: (Ident "txManager") [])))
+                                             [])
+                                            Nothing)
+                                           []
+                                           (Ident "execute")
+                                           (:
+                                            (InstanceCreation
+                                             []
+                                             (TypeDeclSpecifier
+                                              (ClassType
+                                               (:
+                                                ((,)
+                                                 (Ident "TransactionCallback")
+                                                 (:
+                                                  (ActualType
+                                                   (ClassRefType
+                                                    (ClassType
+                                                     (:
+                                                      ((,) (Ident "Object") [])
+                                                      []))))
+                                                  []))
+                                                [])))
+                                             []
+                                             (Just
+                                              (ClassBody
+                                               (:
+                                                (MemberDecl
+                                                 (MethodDecl
+                                                  (: Public [])
+                                                  []
+                                                  (Just
+                                                   (RefType
+                                                    (ClassRefType
+                                                     (ClassType
+                                                      (:
+                                                       ((,) (Ident "Object") [])
+                                                       [])))))
+                                                  (Ident "doInTransaction")
+                                                  (:
+                                                   (FormalParam
+                                                    (: Final [])
+                                                    (RefType
+                                                     (ClassRefType
+                                                      (ClassType
+                                                       (:
+                                                        ((,)
+                                                         (Ident
+                                                          "TransactionStatus")
+                                                         [])
+                                                        []))))
+                                                    False
+                                                    (VarId (Ident "status")))
+                                                   [])
+                                                  []
+                                                  Nothing
+                                                  (MethodBody
+                                                   (Just
+                                                    (Block
+                                                     (:
+                                                      (BlockStmt
+                                                       (Try
+                                                        (Block
+                                                         (:
+                                                          (LocalVars
+                                                           (: Final [])
+                                                           (RefType
+                                                            (ClassRefType
+                                                             (ClassType
+                                                              (:
+                                                               ((,)
+                                                                (Ident "Object")
+                                                                [])
+                                                               []))))
+                                                           (:
+                                                            (VarDecl
+                                                             (VarId
+                                                              (Ident "result"))
+                                                             (Just
+                                                              (InitExp
+                                                               (MethodInv
+                                                                (MethodCall
+                                                                 (Name
+                                                                  (:
+                                                                   (Ident
+                                                                    "method")
+                                                                   (:
+                                                                    (Ident
+                                                                     "invoke")
+                                                                    [])))
+                                                                 (:
+                                                                  (ExpName
+                                                                   (Name
+                                                                    (:
+                                                                     (Ident
+                                                                      "jpaLock")
+                                                                     [])))
+                                                                  (:
+                                                                   (ExpName
+                                                                    (Name
+                                                                     (:
+                                                                      (Ident
+                                                                       "args")
+                                                                      [])))
+                                                                   [])))))))
+                                                            []))
+                                                          (:
+                                                           (BlockStmt
+                                                            (ExpStmt
+                                                             (MethodInv
+                                                              (MethodCall
+                                                               (Name
+                                                                (:
+                                                                 (Ident
+                                                                  "jpaLock")
+                                                                 (:
+                                                                  (Ident
+                                                                   "entityManager")
+                                                                  (:
+                                                                   (Ident
+                                                                    "flush")
+                                                                   []))))
+                                                               []))))
+                                                           (:
+                                                            (BlockStmt
+                                                             (ExpStmt
+                                                              (MethodInv
+                                                               (MethodCall
+                                                                (Name
+                                                                 (:
+                                                                  (Ident
+                                                                   "logger")
+                                                                  (:
+                                                                   (Ident
+                                                                    "debug")
+                                                                   [])))
+                                                                (:
+                                                                 (Lit
+                                                                  (String
+                                                                   "Performed {} on {}"))
+                                                                 (:
+                                                                  (MethodInv
+                                                                   (MethodCall
+                                                                    (Name
+                                                                     (:
+                                                                      (Ident
+                                                                       "method")
+                                                                      (:
+                                                                       (Ident
+                                                                        "getName")
+                                                                       [])))
+                                                                    []))
+                                                                  (:
+                                                                   (ExpName
+                                                                    (Name
+                                                                     (:
+                                                                      (Ident
+                                                                       "jpaLock")
+                                                                      [])))
+                                                                   [])))))))
+                                                            (:
+                                                             (BlockStmt
+                                                              (Return
+                                                               (Just
+                                                                (ExpName
+                                                                 (Name
+                                                                  (:
+                                                                   (Ident
+                                                                    "result")
+                                                                   []))))))
+                                                             [])))))
+                                                        (:
+                                                         (Catch
+                                                          (FormalParam
+                                                           (: Final [])
+                                                           (RefType
+                                                            (ClassRefType
+                                                             (ClassType
+                                                              (:
+                                                               ((,)
+                                                                (Ident
+                                                                 "Exception")
+                                                                [])
+                                                               []))))
+                                                           False
+                                                           (VarId (Ident "e")))
+                                                          (Block
+                                                           (:
+                                                            (BlockStmt
+                                                             (Throw
+                                                              (InstanceCreation
+                                                               []
+                                                               (TypeDeclSpecifier
+                                                                (ClassType
+                                                                 (:
+                                                                  ((,)
+                                                                   (Ident
+                                                                    "RuntimeException")
+                                                                   [])
+                                                                  [])))
+                                                               (:
+                                                                (Lit
+                                                                 (String
+                                                                  "Transactional method invocation failed."))
+                                                                (:
+                                                                 (ExpName
+                                                                  (Name
+                                                                   (:
+                                                                    (Ident "e")
+                                                                    [])))
+                                                                 []))
+                                                               Nothing)))
+                                                            [])))
+                                                         [])
+                                                        Nothing))
+                                                      []))))))
+                                                []))))
+                                            []))))))
+                                      []))))))
+                                []))))))))))
+                      (:
+                       (MemberDecl
+                        (MemberClassDecl
+                         (ClassDecl
+                          (: Private (: Static []))
+                          (Ident "Locker")
+                          []
+                          Nothing
+                          (:
+                           (ClassRefType
+                            (ClassType
+                             (:
+                              ((,)
+                               (Ident "Callable")
+                               (:
+                                (ActualType
+                                 (ClassRefType
+                                  (ClassType
+                                   (: ((,) (Ident "Boolean") []) []))))
+                                []))
+                              [])))
+                           [])
+                          (ClassBody
+                           (:
+                            (MemberDecl
+                             (FieldDecl
+                              (: Private (: Final []))
+                              (RefType
+                               (ClassRefType
+                                (ClassType (: ((,) (Ident "Logger") []) []))))
+                              (:
+                               (VarDecl
+                                (VarId (Ident "logger"))
+                                (Just
+                                 (InitExp
+                                  (MethodInv
+                                   (MethodCall
+                                    (Name
+                                     (:
+                                      (Ident "LoggerFactory")
+                                      (: (Ident "getLogger") [])))
+                                    (:
+                                     (MethodInv
+                                      (PrimaryMethodCall
+                                       This
+                                       []
+                                       (Ident "getClass")
+                                       []))
+                                     []))))))
+                               [])))
+                            (:
+                             (MemberDecl
+                              (FieldDecl
+                               (: Private (: Final []))
+                               (RefType
+                                (ClassRefType
+                                 (ClassType
+                                  (: ((,) (Ident "LockingStrategy") []) []))))
+                               (: (VarDecl (VarId (Ident "lock")) Nothing) [])))
+                             (:
+                              (MemberDecl
+                               (ConstructorDecl
+                                (: Public [])
+                                []
+                                (Ident "Locker")
+                                (:
+                                 (FormalParam
+                                  (: Final [])
+                                  (RefType
+                                   (ClassRefType
+                                    (ClassType
+                                     (:
+                                      ((,) (Ident "LockingStrategy") [])
+                                      []))))
+                                  False
+                                  (VarId (Ident "l")))
+                                 [])
+                                []
+                                (ConstructorBody
+                                 Nothing
+                                 (:
+                                  (BlockStmt
+                                   (ExpStmt
+                                    (Assign
+                                     (NameLhs (Name (: (Ident "lock") [])))
+                                     EqualA
+                                     (ExpName (Name (: (Ident "l") []))))))
+                                  []))))
+                              (:
+                               (MemberDecl
+                                (MethodDecl
+                                 (:
+                                  (Annotation
+                                   (MarkerAnnotation
+                                    (Name (: (Ident "Override") []))))
+                                  (: Public []))
+                                 []
+                                 (Just
+                                  (RefType
+                                   (ClassRefType
+                                    (ClassType
+                                     (: ((,) (Ident "Boolean") []) [])))))
+                                 (Ident "call")
+                                 []
+                                 (:
+                                  (ClassRefType
+                                   (ClassType
+                                    (: ((,) (Ident "Exception") []) [])))
+                                  [])
+                                 Nothing
+                                 (MethodBody
+                                  (Just
+                                   (Block
+                                    (:
+                                     (BlockStmt
+                                      (Try
+                                       (Block
+                                        (:
+                                         (BlockStmt
+                                          (Return
+                                           (Just
+                                            (MethodInv
+                                             (MethodCall
+                                              (Name
+                                               (:
+                                                (Ident "lock")
+                                                (: (Ident "acquire") [])))
+                                              [])))))
+                                         []))
+                                       (:
+                                        (Catch
+                                         (FormalParam
+                                          (: Final [])
+                                          (RefType
+                                           (ClassRefType
+                                            (ClassType
+                                             (:
+                                              ((,) (Ident "Exception") [])
+                                              []))))
+                                          False
+                                          (VarId (Ident "e")))
+                                         (Block
+                                          (:
+                                           (BlockStmt
+                                            (ExpStmt
+                                             (MethodInv
+                                              (MethodCall
+                                               (Name
+                                                (:
+                                                 (Ident "logger")
+                                                 (: (Ident "debug") [])))
+                                               (:
+                                                (Lit
+                                                 (String
+                                                  "{} failed to acquire lock"))
+                                                (:
+                                                 (ExpName
+                                                  (Name (: (Ident "lock") [])))
+                                                 (:
+                                                  (ExpName
+                                                   (Name (: (Ident "e") [])))
+                                                  [])))))))
+                                           (:
+                                            (BlockStmt
+                                             (Return
+                                              (Just (Lit (Boolean False)))))
+                                            []))))
+                                        [])
+                                       Nothing))
+                                     []))))))
+                               []))))))))
+                       (:
+                        (MemberDecl
+                         (MemberClassDecl
+                          (ClassDecl
+                           (: Private (: Static []))
+                           (Ident "Releaser")
+                           []
+                           Nothing
+                           (:
+                            (ClassRefType
+                             (ClassType
+                              (:
+                               ((,)
+                                (Ident "Callable")
+                                (:
+                                 (ActualType
+                                  (ClassRefType
+                                   (ClassType
+                                    (: ((,) (Ident "Boolean") []) []))))
+                                 []))
+                               [])))
+                            [])
+                           (ClassBody
+                            (:
+                             (MemberDecl
+                              (FieldDecl
+                               (: Private (: Final []))
+                               (RefType
+                                (ClassRefType
+                                 (ClassType (: ((,) (Ident "Logger") []) []))))
+                               (:
+                                (VarDecl
+                                 (VarId (Ident "logger"))
+                                 (Just
+                                  (InitExp
+                                   (MethodInv
+                                    (MethodCall
+                                     (Name
+                                      (:
+                                       (Ident "LoggerFactory")
+                                       (: (Ident "getLogger") [])))
+                                     (:
+                                      (MethodInv
+                                       (PrimaryMethodCall
+                                        This
+                                        []
+                                        (Ident "getClass")
+                                        []))
+                                      []))))))
+                                [])))
+                             (:
+                              (MemberDecl
+                               (FieldDecl
+                                (: Private (: Final []))
+                                (RefType
+                                 (ClassRefType
+                                  (ClassType
+                                   (: ((,) (Ident "LockingStrategy") []) []))))
+                                (:
+                                 (VarDecl (VarId (Ident "lock")) Nothing)
+                                 [])))
+                              (:
+                               (MemberDecl
+                                (ConstructorDecl
+                                 (: Public [])
+                                 []
+                                 (Ident "Releaser")
+                                 (:
+                                  (FormalParam
+                                   (: Final [])
+                                   (RefType
+                                    (ClassRefType
+                                     (ClassType
+                                      (:
+                                       ((,) (Ident "LockingStrategy") [])
+                                       []))))
+                                   False
+                                   (VarId (Ident "l")))
+                                  [])
+                                 []
+                                 (ConstructorBody
+                                  Nothing
+                                  (:
+                                   (BlockStmt
+                                    (ExpStmt
+                                     (Assign
+                                      (NameLhs (Name (: (Ident "lock") [])))
+                                      EqualA
+                                      (ExpName (Name (: (Ident "l") []))))))
+                                   []))))
+                               (:
+                                (MemberDecl
+                                 (MethodDecl
+                                  (:
+                                   (Annotation
+                                    (MarkerAnnotation
+                                     (Name (: (Ident "Override") []))))
+                                   (: Public []))
+                                  []
+                                  (Just
+                                   (RefType
+                                    (ClassRefType
+                                     (ClassType
+                                      (: ((,) (Ident "Boolean") []) [])))))
+                                  (Ident "call")
+                                  []
+                                  (:
+                                   (ClassRefType
+                                    (ClassType
+                                     (: ((,) (Ident "Exception") []) [])))
+                                   [])
+                                  Nothing
+                                  (MethodBody
+                                   (Just
+                                    (Block
+                                     (:
+                                      (BlockStmt
+                                       (Try
+                                        (Block
+                                         (:
+                                          (BlockStmt
+                                           (ExpStmt
+                                            (MethodInv
+                                             (MethodCall
+                                              (Name
+                                               (:
+                                                (Ident "lock")
+                                                (: (Ident "release") [])))
+                                              []))))
+                                          (:
+                                           (BlockStmt
+                                            (Return
+                                             (Just (Lit (Boolean True)))))
+                                           [])))
+                                        (:
+                                         (Catch
+                                          (FormalParam
+                                           (: Final [])
+                                           (RefType
+                                            (ClassRefType
+                                             (ClassType
+                                              (:
+                                               ((,) (Ident "Exception") [])
+                                               []))))
+                                           False
+                                           (VarId (Ident "e")))
+                                          (Block
+                                           (:
+                                            (BlockStmt
+                                             (ExpStmt
+                                              (MethodInv
+                                               (MethodCall
+                                                (Name
+                                                 (:
+                                                  (Ident "logger")
+                                                  (: (Ident "debug") [])))
+                                                (:
+                                                 (Lit
+                                                  (String
+                                                   "{} failed to release lock"))
+                                                 (:
+                                                  (ExpName
+                                                   (Name (: (Ident "lock") [])))
+                                                  (:
+                                                   (ExpName
+                                                    (Name (: (Ident "e") [])))
+                                                   [])))))))
+                                            (:
+                                             (BlockStmt
+                                              (Return
+                                               (Just (Lit (Boolean False)))))
+                                             []))))
+                                         [])
+                                        Nothing))
+                                      []))))))
+                                []))))))))
+                        []))))))))))))))))))))))
+  []))

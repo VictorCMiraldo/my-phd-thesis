@@ -1,0 +1,119 @@
+(CompilationUnit
+ {{- #344 -} {+ #344 +}}
+ {{- (: #127 (: #20 [])) -}
+ {+ (:
+  #127
+  (:
+   #20
+   (:
+    (ImportDecl
+     False
+     (Name
+      (:
+       (Ident "org")
+       (:
+        (Ident "checkerframework")
+        (:
+         (Ident "checker")
+         (:
+          (Ident "nullness")
+          (: (Ident "compatqual") (: (Ident "NullableType") [])))))))
+     False)
+    []))) +}}
+ (:
+  (ClassTypeDecl
+   (ClassDecl
+    {{- #406 -} {+ #406 +}}
+    (Ident {{- #481 -} {+ #481 +}})
+    []
+    Nothing
+    []
+    (ClassBody
+     (:
+      {{- #368 -} {+ #368 +}}
+      (:
+       {{- (MemberDecl (FieldDecl (: Private (: Final [])) #45 #210)) -}
+       {+ (MemberDecl
+        (FieldDecl
+         (:
+          Private
+          (:
+           Final
+           (:
+            (Annotation (MarkerAnnotation (Name (: (Ident "NullableType") []))))
+            [])))
+         #45
+         #210)) +}}
+       (:
+        {{- #247 -} {+ #247 +}}
+        {{- (:
+         (MemberDecl
+          (ConstructorDecl
+           (: Public [])
+           []
+           (Ident #233)
+           (: (FormalParam [] #205 #234 #95) [])
+           []
+           #211))
+         (:
+          (MemberDecl
+           (MethodDecl (: Public []) [] #372 (Ident #482) #306 [] Nothing #429))
+          (:
+           (MemberDecl
+            (MethodDecl (: Public []) [] #21 (Ident #236) [] [] Nothing #152))
+           #74))) -}
+        {+ (:
+         (MemberDecl
+          (ConstructorDecl
+           (:
+            Public
+            (:
+             (Annotation (MarkerAnnotation (Name (: (Ident "Nullable") []))))
+             []))
+           []
+           (Ident #233)
+           (:
+            (FormalParam
+             (:
+              (Annotation
+               (MarkerAnnotation (Name (: (Ident "NullableType") []))))
+              [])
+             #205
+             #234
+             #95)
+            [])
+           []
+           #211))
+         (:
+          (MemberDecl
+           (MethodDecl
+            (:
+             Public
+             (:
+              (Annotation (MarkerAnnotation (Name (: (Ident "Nullable") []))))
+              []))
+            []
+            #372
+            (Ident #482)
+            #306
+            []
+            Nothing
+            #429))
+          (:
+           (MemberDecl
+            (MethodDecl
+             (:
+              Public
+              (:
+               (Annotation
+                (MarkerAnnotation (Name (: (Ident "NullableType") []))))
+               []))
+             []
+             #21
+             (Ident #236)
+             []
+             []
+             Nothing
+             #152))
+           #74))) +}}))))))
+  []))

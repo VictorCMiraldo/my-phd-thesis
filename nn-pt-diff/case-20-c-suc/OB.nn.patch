@@ -1,0 +1,323 @@
+(CompilationUnit
+ {-# [Cpy #594 ] #-}
+ (:
+  {-# [Cpy #237 ] #-}
+  (:
+   {-# [Cpy #3359 ] #-}
+   (:
+    {-# [Cpy #613 ] #-}
+    (:
+     {-# [Cpy #1708 ] #-}
+     (:
+      {-# [Cpy #2783 ] #-}
+      (:
+       {-# [Cpy #2517 ] #-}
+       (:
+        {-# [Cpy #1969 ] #-}
+        (:
+         {-# [Cpy #856 ] #-}
+         (:
+          {-# [Cpy #3429 ] #-}
+          (:
+           {-# [Cpy #3448 ] #-}
+           (:
+            {-# [Cpy #2308 ] #-}
+            (:
+             {-# [Cpy #2054 ] #-}
+             (:
+              {-# [Cpy #762 ] #-}
+              (:
+               {-# [Cpy #3549 ] #-}
+               (:
+                {-# [Cpy #151 ] #-}
+                (:
+                 {-# [Cpy #1001 ] #-}
+                 (:
+                  {-# [Cpy #2009 ] #-}
+                  (:
+                   {-# [Cpy #3499 ] #-}
+                   (:
+                    {-# [Cpy #2838 ] #-}
+                    (:
+                     {-# [Cpy #3350 ] #-}
+                     (:
+                      {-# [Cpy #1471 ] #-}
+                      (:
+                       {-# [Cpy #3103 ] #-}
+                       (:
+                        {-# [Cpy #3196 ] #-}
+                        (:
+                         {-# [Cpy #2176 ] #-}
+                         (:
+                          {-# [Cpy #2074 ] #-}
+                          (:
+                           {-# [Cpy #64 ] #-}
+                           (:
+                            {-# [Cpy #1293 ] #-}
+                            (:
+                             {-# [Cpy #515 ] #-}
+                             (:
+                              {-# [Cpy #3044 ] #-}
+                              (:
+                               {-# [Cpy #1780 ] #-}
+                               (:
+                                {-# [Cpy #3071 ] #-}
+                                (:
+                                 {-# [Cpy #21 ] #-}
+                                 (:
+                                  {-# [Cpy #1166 ] #-}
+                                  (:
+                                   {-# [Cpy #2488 ] #-}
+                                   (:
+                                    {-# [Cpy #171 ] #-}
+                                    (:
+                                     {-# [Cpy #3458 ] #-}
+                                     (:
+                                      {-# [Cpy #66 ] #-}
+                                      (:
+                                       {-# [Cpy #3375 ] #-}
+                                       (:
+                                        {-# [Cpy #2989 ] #-}
+                                        (:
+                                         {-# [Cpy #3099 ] #-}
+                                         (:
+                                          {-# [Cpy #3454 ] #-}
+                                          {-#
+                                          [+
+                                          (:
+                                           (ImportDecl
+                                            False
+                                            (Name
+                                             (:
+                                              (Ident "java")
+                                              (:
+                                               (Ident "util")
+                                               (:
+                                                (Ident "concurrent")
+                                                (:
+                                                 (Ident "CopyOnWriteArrayList")
+                                                 [])))))
+                                            False)
+                                           [#])
+                                          +]
+                                          # = [Cpy #2401 ]
+                                          #-})))))))))))))))))))))))))))))))))))))))))
+ (:
+  (ClassTypeDecl
+   {-#
+   (ClassDecl
+    {{- #3384 -} {+ #3384 +}}
+    (Ident [Cpy #3550 ])
+    []
+    Nothing
+    [Cpy #1027 ]
+    (ClassBody
+     (:
+      [Cpy #2008 ]
+      (:
+       [Cpy #2329 ]
+       (:
+        [Cpy #1383 ]
+        (:
+         [Cpy #2862 ]
+         (:
+          [Cpy #25 ]
+          (:
+           [Cpy #1646 ]
+           (:
+            [Cpy #2995 ]
+            (:
+             [Cpy #1812 ]
+             [+
+             (:
+              (MemberDecl
+               (FieldDecl
+                (: Private (: Final []))
+                (RefType
+                 (ClassRefType
+                  (ClassType
+                   (:
+                    ((,)
+                     (Ident "List")
+                     (:
+                      (ActualType
+                       (ClassRefType
+                        (ClassType
+                         (:
+                          ((,)
+                           (Ident "Consumer")
+                           (:
+                            (ActualType
+                             (ClassRefType
+                              (ClassType
+                               (: ((,) (Ident "ClusterState") []) []))))
+                            []))
+                          []))))
+                      []))
+                    []))))
+                (:
+                 (VarDecl
+                  (VarId (Ident "ingestClusterStateListeners"))
+                  (Just
+                   (InitExp
+                    (InstanceCreation
+                     []
+                     (TypeDeclSpecifierUnqualifiedWithDiamond
+                      (Ident "CopyOnWriteArrayList")
+                      Diamond)
+                     []
+                     Nothing))))
+                 [])))
+              [#])
+             +]
+             # =
+             (:
+              [Cpy #1593 ]
+              (:
+               [Cpy #561 ]
+               (:
+                [Cpy #3316 ]
+                (:
+                 [Cpy #887 ]
+                 (:
+                  [Cpy #2284 ]
+                  (:
+                   [Cpy #1677 ]
+                   (:
+                    [Cpy #2280 ]
+                    (:
+                     [Cpy #1456 ]
+                     (:
+                      [Cpy #944 ]
+                      (:
+                       [Cpy #1673 ]
+                       (:
+                        [Cpy #396 ]
+                        (:
+                         [Cpy #1362 ]
+                         (:
+                          [Cpy #2377 ]
+                          (:
+                           [Cpy #656 ]
+                           (:
+                            [Cpy #626 ]
+                            (:
+                             [Cpy #280 ]
+                             (:
+                              [Cpy #2919 ]
+                              (:
+                               [Cpy #943 ]
+                               (:
+                                {{- #1442 -}
+                                {+ (MemberDecl
+                                 (MethodDecl
+                                  #3384
+                                  []
+                                  Nothing
+                                  (Ident "addIngestClusterStateListener")
+                                  (:
+                                   (FormalParam
+                                    []
+                                    (RefType
+                                     (ClassRefType
+                                      (ClassType
+                                       (:
+                                        ((,)
+                                         (Ident "Consumer")
+                                         (:
+                                          (ActualType
+                                           (ClassRefType
+                                            (ClassType
+                                             (:
+                                              ((,) (Ident "ClusterState") [])
+                                              []))))
+                                          []))
+                                        []))))
+                                    False
+                                    (VarId (Ident "listener")))
+                                   [])
+                                  []
+                                  Nothing
+                                  (MethodBody
+                                   (Just
+                                    (Block
+                                     (:
+                                      (BlockStmt
+                                       (ExpStmt
+                                        (MethodInv
+                                         (MethodCall
+                                          (Name
+                                           (:
+                                            (Ident
+                                             "ingestClusterStateListeners")
+                                            (: (Ident "add") [])))
+                                          (:
+                                           (ExpName
+                                            (Name (: (Ident "listener") [])))
+                                           [])))))
+                                      [])))))) +}}
+                                (:
+                                 [Prm #783 <=> #1442 ]
+                                 (:
+                                  {{- (MemberDecl
+                                   (MethodDecl
+                                    #1591
+                                    []
+                                    Nothing
+                                    (Ident "applyClusterState")
+                                    #312
+                                    []
+                                    Nothing
+                                    (MethodBody
+                                     (Just
+                                      (Block (: #2682 (: #3379 #2216))))))) -}
+                                  {+ #783 +}}
+                                  {{- #2117 -}
+                                  {+ (:
+                                   (MemberDecl
+                                    (MethodDecl
+                                     #1591
+                                     []
+                                     Nothing
+                                     (Ident "applyClusterState")
+                                     #312
+                                     []
+                                     Nothing
+                                     (MethodBody
+                                      (Just
+                                       (Block
+                                        (:
+                                         #2682
+                                         (:
+                                          #3379
+                                          (:
+                                           (BlockStmt
+                                            (ExpStmt
+                                             (MethodInv
+                                              (MethodCall
+                                               (Name
+                                                (:
+                                                 (Ident
+                                                  "ingestClusterStateListeners")
+                                                 (: (Ident "forEach") [])))
+                                               (:
+                                                (Lambda
+                                                 (LambdaSingleParam
+                                                  (Ident "consumer"))
+                                                 (LambdaExpression
+                                                  (MethodInv
+                                                   (MethodCall
+                                                    (Name
+                                                     (:
+                                                      (Ident "consumer")
+                                                      (: (Ident "accept") [])))
+                                                    (:
+                                                     (ExpName
+                                                      (Name
+                                                       (: (Ident "state") [])))
+                                                     [])))))
+                                                [])))))
+                                           #2216))))))))
+                                   #2117) +}})))))))))))))))))))))))))))))))
+   #-})
+  []))

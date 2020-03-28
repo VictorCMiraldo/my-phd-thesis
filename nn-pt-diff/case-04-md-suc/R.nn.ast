@@ -1,0 +1,998 @@
+(CompilationUnit
+ (Just
+  (PackageDecl
+   (Name
+    (:
+     (Ident "org")
+     (: (Ident "elasticsearch") (: (Ident "index") (: (Ident "query") [])))))))
+ (:
+  (ImportDecl
+   False
+   (Name
+    (:
+     (Ident "org")
+     (:
+      (Ident "elasticsearch")
+      (: (Ident "common") (: (Ident "ParseField") [])))))
+   False)
+  (:
+   (ImportDecl
+    False
+    (Name
+     (:
+      (Ident "org")
+      (:
+       (Ident "elasticsearch")
+       (: (Ident "common") (: (Ident "inject") (: (Ident "Inject") []))))))
+    False)
+   (:
+    (ImportDecl
+     False
+     (Name
+      (:
+       (Ident "org")
+       (:
+        (Ident "elasticsearch")
+        (:
+         (Ident "common")
+         (: (Ident "xcontent") (: (Ident "XContentParser") []))))))
+     False)
+    (:
+     (ImportDecl
+      False
+      (Name (: (Ident "java") (: (Ident "io") (: (Ident "IOException") []))))
+      False)
+     []))))
+ (:
+  (ClassTypeDecl
+   (ClassDecl
+    (: Public [])
+    (Ident "RegexpQueryParser")
+    []
+    (Just
+     (ClassRefType
+      (ClassType
+       (:
+        ((,)
+         (Ident "BaseQueryParser")
+         (:
+          (ActualType
+           (ClassRefType
+            (ClassType (: ((,) (Ident "RegexpQueryBuilder") []) []))))
+          []))
+        []))))
+    []
+    (ClassBody
+     (:
+      (MemberDecl
+       (ConstructorDecl
+        (:
+         (Annotation (MarkerAnnotation (Name (: (Ident "Inject") []))))
+         (: Public []))
+        []
+        (Ident "RegexpQueryParser")
+        []
+        []
+        (ConstructorBody Nothing [])))
+      (:
+       (MemberDecl
+        (MethodDecl
+         (:
+          (Annotation (MarkerAnnotation (Name (: (Ident "Override") []))))
+          (: Public []))
+         []
+         (Just
+          (RefType
+           (ArrayType
+            (RefType
+             (ClassRefType (ClassType (: ((,) (Ident "String") []) [])))))))
+         (Ident "names")
+         []
+         []
+         Nothing
+         (MethodBody
+          (Just
+           (Block
+            (:
+             (BlockStmt
+              (Return
+               (Just
+                (ArrayCreateInit
+                 (RefType
+                  (ClassRefType (ClassType (: ((,) (Ident "String") []) []))))
+                 1
+                 (ArrayInit
+                  (:
+                   (InitExp
+                    (ExpName
+                     (Name
+                      (: (Ident "RegexpQueryBuilder") (: (Ident "NAME") [])))))
+                   []))))))
+             []))))))
+       (:
+        (MemberDecl
+         (FieldDecl
+          (: Private (: Static (: Final [])))
+          (RefType
+           (ClassRefType (ClassType (: ((,) (Ident "ParseField") []) []))))
+          (:
+           (VarDecl
+            (VarId (Ident "NAME_FIELD"))
+            (Just
+             (InitExp
+              (MethodInv
+               (PrimaryMethodCall
+                (InstanceCreation
+                 []
+                 (TypeDeclSpecifier
+                  (ClassType (: ((,) (Ident "ParseField") []) [])))
+                 (: (Lit (String "_name")) [])
+                 Nothing)
+                []
+                (Ident "withAllDeprecated")
+                (:
+                 (Lit
+                  (String
+                   "query name is not supported in short version of regexp query"))
+                 []))))))
+           [])))
+        (:
+         (MemberDecl
+          (MethodDecl
+           (:
+            (Annotation (MarkerAnnotation (Name (: (Ident "Override") []))))
+            (: Public []))
+           []
+           (Just
+            (RefType
+             (ClassRefType
+              (ClassType (: ((,) (Ident "RegexpQueryBuilder") []) [])))))
+           (Ident "fromXContent")
+           (:
+            (FormalParam
+             []
+             (RefType
+              (ClassRefType
+               (ClassType (: ((,) (Ident "QueryParseContext") []) []))))
+             False
+             (VarId (Ident "parseContext")))
+            [])
+           (:
+            (ClassRefType (ClassType (: ((,) (Ident "IOException") []) [])))
+            (:
+             (ClassRefType
+              (ClassType (: ((,) (Ident "QueryParsingException") []) [])))
+             []))
+           Nothing
+           (MethodBody
+            (Just
+             (Block
+              (:
+               (LocalVars
+                []
+                (RefType
+                 (ClassRefType
+                  (ClassType (: ((,) (Ident "XContentParser") []) []))))
+                (:
+                 (VarDecl
+                  (VarId (Ident "parser"))
+                  (Just
+                   (InitExp
+                    (MethodInv
+                     (MethodCall
+                      (Name (: (Ident "parseContext") (: (Ident "parser") [])))
+                      [])))))
+                 []))
+               (:
+                (LocalVars
+                 []
+                 (RefType
+                  (ClassRefType (ClassType (: ((,) (Ident "String") []) []))))
+                 (:
+                  (VarDecl
+                   (VarId (Ident "fieldName"))
+                   (Just
+                    (InitExp
+                     (MethodInv
+                      (MethodCall
+                       (Name (: (Ident "parser") (: (Ident "currentName") [])))
+                       [])))))
+                  []))
+                (:
+                 (LocalVars
+                  []
+                  (RefType
+                   (ClassRefType (ClassType (: ((,) (Ident "String") []) []))))
+                  (:
+                   (VarDecl
+                    (VarId (Ident "rewrite"))
+                    (Just (InitExp (Lit Null))))
+                   []))
+                 (:
+                  (LocalVars
+                   []
+                   (RefType
+                    (ClassRefType (ClassType (: ((,) (Ident "String") []) []))))
+                   (:
+                    (VarDecl
+                     (VarId (Ident "value"))
+                     (Just (InitExp (Lit Null))))
+                    []))
+                  (:
+                   (LocalVars
+                    []
+                    (PrimType FloatT)
+                    (:
+                     (VarDecl
+                      (VarId (Ident "boost"))
+                      (Just
+                       (InitExp
+                        (ExpName
+                         (Name
+                          (:
+                           (Ident "AbstractQueryBuilder")
+                           (: (Ident "DEFAULT_BOOST") [])))))))
+                     []))
+                   (:
+                    (LocalVars
+                     []
+                     (PrimType IntT)
+                     (:
+                      (VarDecl
+                       (VarId (Ident "flagsValue"))
+                       (Just
+                        (InitExp
+                         (ExpName
+                          (Name
+                           (:
+                            (Ident "RegexpQueryBuilder")
+                            (: (Ident "DEFAULT_FLAGS_VALUE") [])))))))
+                      []))
+                    (:
+                     (LocalVars
+                      []
+                      (PrimType IntT)
+                      (:
+                       (VarDecl
+                        (VarId (Ident "maxDeterminizedStates"))
+                        (Just
+                         (InitExp
+                          (ExpName
+                           (Name
+                            (:
+                             (Ident "RegexpQueryBuilder")
+                             (:
+                              (Ident "DEFAULT_MAX_DETERMINIZED_STATES")
+                              [])))))))
+                       []))
+                     (:
+                      (LocalVars
+                       []
+                       (RefType
+                        (ClassRefType
+                         (ClassType (: ((,) (Ident "String") []) []))))
+                       (:
+                        (VarDecl
+                         (VarId (Ident "queryName"))
+                         (Just (InitExp (Lit Null))))
+                        []))
+                      (:
+                       (LocalVars
+                        []
+                        (RefType
+                         (ClassRefType
+                          (ClassType (: ((,) (Ident "String") []) []))))
+                        (:
+                         (VarDecl
+                          (VarId (Ident "currentFieldName"))
+                          (Just (InitExp (Lit Null))))
+                         []))
+                       (:
+                        (LocalVars
+                         []
+                         (RefType
+                          (ClassRefType
+                           (ClassType
+                            (:
+                             ((,) (Ident "XContentParser") [])
+                             (: ((,) (Ident "Token") []) [])))))
+                         (: (VarDecl (VarId (Ident "token")) Nothing) []))
+                        (:
+                         (BlockStmt
+                          (While
+                           (BinOp
+                            (Assign
+                             (NameLhs (Name (: (Ident "token") [])))
+                             EqualA
+                             (MethodInv
+                              (MethodCall
+                               (Name
+                                (: (Ident "parser") (: (Ident "nextToken") [])))
+                               [])))
+                            NotEq
+                            (ExpName
+                             (Name
+                              (:
+                               (Ident "XContentParser")
+                               (:
+                                (Ident "Token")
+                                (: (Ident "END_OBJECT") []))))))
+                           (StmtBlock
+                            (Block
+                             (:
+                              (BlockStmt
+                               (IfThenElse
+                                (BinOp
+                                 (ExpName (Name (: (Ident "token") [])))
+                                 Equal
+                                 (ExpName
+                                  (Name
+                                   (:
+                                    (Ident "XContentParser")
+                                    (:
+                                     (Ident "Token")
+                                     (: (Ident "FIELD_NAME") []))))))
+                                (StmtBlock
+                                 (Block
+                                  (:
+                                   (BlockStmt
+                                    (ExpStmt
+                                     (Assign
+                                      (NameLhs
+                                       (Name (: (Ident "currentFieldName") [])))
+                                      EqualA
+                                      (MethodInv
+                                       (MethodCall
+                                        (Name
+                                         (:
+                                          (Ident "parser")
+                                          (: (Ident "currentName") [])))
+                                        [])))))
+                                   [])))
+                                (IfThenElse
+                                 (MethodInv
+                                  (MethodCall
+                                   (Name
+                                    (:
+                                     (Ident "parseContext")
+                                     (: (Ident "isDeprecatedSetting") [])))
+                                   (:
+                                    (ExpName
+                                     (Name (: (Ident "currentFieldName") [])))
+                                    [])))
+                                 (StmtBlock (Block []))
+                                 (IfThenElse
+                                  (BinOp
+                                   (ExpName (Name (: (Ident "token") [])))
+                                   Equal
+                                   (ExpName
+                                    (Name
+                                     (:
+                                      (Ident "XContentParser")
+                                      (:
+                                       (Ident "Token")
+                                       (: (Ident "START_OBJECT") []))))))
+                                  (StmtBlock
+                                   (Block
+                                    (:
+                                     (BlockStmt
+                                      (ExpStmt
+                                       (Assign
+                                        (NameLhs
+                                         (Name (: (Ident "fieldName") [])))
+                                        EqualA
+                                        (ExpName
+                                         (Name
+                                          (: (Ident "currentFieldName") []))))))
+                                     (:
+                                      (BlockStmt
+                                       (While
+                                        (BinOp
+                                         (Assign
+                                          (NameLhs
+                                           (Name (: (Ident "token") [])))
+                                          EqualA
+                                          (MethodInv
+                                           (MethodCall
+                                            (Name
+                                             (:
+                                              (Ident "parser")
+                                              (: (Ident "nextToken") [])))
+                                            [])))
+                                         NotEq
+                                         (ExpName
+                                          (Name
+                                           (:
+                                            (Ident "XContentParser")
+                                            (:
+                                             (Ident "Token")
+                                             (: (Ident "END_OBJECT") []))))))
+                                        (StmtBlock
+                                         (Block
+                                          (:
+                                           (BlockStmt
+                                            (IfThenElse
+                                             (BinOp
+                                              (ExpName
+                                               (Name (: (Ident "token") [])))
+                                              Equal
+                                              (ExpName
+                                               (Name
+                                                (:
+                                                 (Ident "XContentParser")
+                                                 (:
+                                                  (Ident "Token")
+                                                  (:
+                                                   (Ident "FIELD_NAME")
+                                                   []))))))
+                                             (StmtBlock
+                                              (Block
+                                               (:
+                                                (BlockStmt
+                                                 (ExpStmt
+                                                  (Assign
+                                                   (NameLhs
+                                                    (Name
+                                                     (:
+                                                      (Ident "currentFieldName")
+                                                      [])))
+                                                   EqualA
+                                                   (MethodInv
+                                                    (MethodCall
+                                                     (Name
+                                                      (:
+                                                       (Ident "parser")
+                                                       (:
+                                                        (Ident "currentName")
+                                                        [])))
+                                                     [])))))
+                                                [])))
+                                             (StmtBlock
+                                              (Block
+                                               (:
+                                                (BlockStmt
+                                                 (IfThenElse
+                                                  (MethodInv
+                                                   (PrimaryMethodCall
+                                                    (Lit (String "value"))
+                                                    []
+                                                    (Ident "equals")
+                                                    (:
+                                                     (ExpName
+                                                      (Name
+                                                       (:
+                                                        (Ident
+                                                         "currentFieldName")
+                                                        [])))
+                                                     [])))
+                                                  (StmtBlock
+                                                   (Block
+                                                    (:
+                                                     (BlockStmt
+                                                      (ExpStmt
+                                                       (Assign
+                                                        (NameLhs
+                                                         (Name
+                                                          (:
+                                                           (Ident "value")
+                                                           [])))
+                                                        EqualA
+                                                        (MethodInv
+                                                         (MethodCall
+                                                          (Name
+                                                           (:
+                                                            (Ident "parser")
+                                                            (:
+                                                             (Ident
+                                                              "textOrNull")
+                                                             [])))
+                                                          [])))))
+                                                     [])))
+                                                  (IfThenElse
+                                                   (MethodInv
+                                                    (PrimaryMethodCall
+                                                     (Lit (String "boost"))
+                                                     []
+                                                     (Ident "equals")
+                                                     (:
+                                                      (ExpName
+                                                       (Name
+                                                        (:
+                                                         (Ident
+                                                          "currentFieldName")
+                                                         [])))
+                                                      [])))
+                                                   (StmtBlock
+                                                    (Block
+                                                     (:
+                                                      (BlockStmt
+                                                       (ExpStmt
+                                                        (Assign
+                                                         (NameLhs
+                                                          (Name
+                                                           (:
+                                                            (Ident "boost")
+                                                            [])))
+                                                         EqualA
+                                                         (MethodInv
+                                                          (MethodCall
+                                                           (Name
+                                                            (:
+                                                             (Ident "parser")
+                                                             (:
+                                                              (Ident
+                                                               "floatValue")
+                                                              [])))
+                                                           [])))))
+                                                      [])))
+                                                   (IfThenElse
+                                                    (MethodInv
+                                                     (PrimaryMethodCall
+                                                      (Lit (String "rewrite"))
+                                                      []
+                                                      (Ident "equals")
+                                                      (:
+                                                       (ExpName
+                                                        (Name
+                                                         (:
+                                                          (Ident
+                                                           "currentFieldName")
+                                                          [])))
+                                                       [])))
+                                                    (StmtBlock
+                                                     (Block
+                                                      (:
+                                                       (BlockStmt
+                                                        (ExpStmt
+                                                         (Assign
+                                                          (NameLhs
+                                                           (Name
+                                                            (:
+                                                             (Ident "rewrite")
+                                                             [])))
+                                                          EqualA
+                                                          (MethodInv
+                                                           (MethodCall
+                                                            (Name
+                                                             (:
+                                                              (Ident "parser")
+                                                              (:
+                                                               (Ident
+                                                                "textOrNull")
+                                                               [])))
+                                                            [])))))
+                                                       [])))
+                                                    (IfThenElse
+                                                     (MethodInv
+                                                      (PrimaryMethodCall
+                                                       (Lit (String "flags"))
+                                                       []
+                                                       (Ident "equals")
+                                                       (:
+                                                        (ExpName
+                                                         (Name
+                                                          (:
+                                                           (Ident
+                                                            "currentFieldName")
+                                                           [])))
+                                                        [])))
+                                                     (StmtBlock
+                                                      (Block
+                                                       (:
+                                                        (LocalVars
+                                                         []
+                                                         (RefType
+                                                          (ClassRefType
+                                                           (ClassType
+                                                            (:
+                                                             ((,)
+                                                              (Ident "String")
+                                                              [])
+                                                             []))))
+                                                         (:
+                                                          (VarDecl
+                                                           (VarId
+                                                            (Ident "flags"))
+                                                           (Just
+                                                            (InitExp
+                                                             (MethodInv
+                                                              (MethodCall
+                                                               (Name
+                                                                (:
+                                                                 (Ident
+                                                                  "parser")
+                                                                 (:
+                                                                  (Ident
+                                                                   "textOrNull")
+                                                                  [])))
+                                                               [])))))
+                                                          []))
+                                                        (:
+                                                         (BlockStmt
+                                                          (ExpStmt
+                                                           (Assign
+                                                            (NameLhs
+                                                             (Name
+                                                              (:
+                                                               (Ident
+                                                                "flagsValue")
+                                                               [])))
+                                                            EqualA
+                                                            (MethodInv
+                                                             (MethodCall
+                                                              (Name
+                                                               (:
+                                                                (Ident
+                                                                 "RegexpFlag")
+                                                                (:
+                                                                 (Ident
+                                                                  "resolveValue")
+                                                                 [])))
+                                                              (:
+                                                               (ExpName
+                                                                (Name
+                                                                 (:
+                                                                  (Ident
+                                                                   "flags")
+                                                                  [])))
+                                                               []))))))
+                                                         []))))
+                                                     (IfThenElse
+                                                      (MethodInv
+                                                       (PrimaryMethodCall
+                                                        (Lit
+                                                         (String
+                                                          "max_determinized_states"))
+                                                        []
+                                                        (Ident "equals")
+                                                        (:
+                                                         (ExpName
+                                                          (Name
+                                                           (:
+                                                            (Ident
+                                                             "currentFieldName")
+                                                            [])))
+                                                         [])))
+                                                      (StmtBlock
+                                                       (Block
+                                                        (:
+                                                         (BlockStmt
+                                                          (ExpStmt
+                                                           (Assign
+                                                            (NameLhs
+                                                             (Name
+                                                              (:
+                                                               (Ident
+                                                                "maxDeterminizedStates")
+                                                               [])))
+                                                            EqualA
+                                                            (MethodInv
+                                                             (MethodCall
+                                                              (Name
+                                                               (:
+                                                                (Ident "parser")
+                                                                (:
+                                                                 (Ident
+                                                                  "intValue")
+                                                                 [])))
+                                                              [])))))
+                                                         [])))
+                                                      (IfThenElse
+                                                       (MethodInv
+                                                        (PrimaryMethodCall
+                                                         (Lit
+                                                          (String
+                                                           "flags_value"))
+                                                         []
+                                                         (Ident "equals")
+                                                         (:
+                                                          (ExpName
+                                                           (Name
+                                                            (:
+                                                             (Ident
+                                                              "currentFieldName")
+                                                             [])))
+                                                          [])))
+                                                       (StmtBlock
+                                                        (Block
+                                                         (:
+                                                          (BlockStmt
+                                                           (ExpStmt
+                                                            (Assign
+                                                             (NameLhs
+                                                              (Name
+                                                               (:
+                                                                (Ident
+                                                                 "flagsValue")
+                                                                [])))
+                                                             EqualA
+                                                             (MethodInv
+                                                              (MethodCall
+                                                               (Name
+                                                                (:
+                                                                 (Ident
+                                                                  "parser")
+                                                                 (:
+                                                                  (Ident
+                                                                   "intValue")
+                                                                  [])))
+                                                               [])))))
+                                                          [])))
+                                                       (IfThenElse
+                                                        (MethodInv
+                                                         (PrimaryMethodCall
+                                                          (Lit (String "_name"))
+                                                          []
+                                                          (Ident "equals")
+                                                          (:
+                                                           (ExpName
+                                                            (Name
+                                                             (:
+                                                              (Ident
+                                                               "currentFieldName")
+                                                              [])))
+                                                           [])))
+                                                        (StmtBlock
+                                                         (Block
+                                                          (:
+                                                           (BlockStmt
+                                                            (ExpStmt
+                                                             (Assign
+                                                              (NameLhs
+                                                               (Name
+                                                                (:
+                                                                 (Ident
+                                                                  "queryName")
+                                                                 [])))
+                                                              EqualA
+                                                              (MethodInv
+                                                               (MethodCall
+                                                                (Name
+                                                                 (:
+                                                                  (Ident
+                                                                   "parser")
+                                                                  (:
+                                                                   (Ident
+                                                                    "text")
+                                                                   [])))
+                                                                [])))))
+                                                           [])))
+                                                        (StmtBlock
+                                                         (Block
+                                                          (:
+                                                           (BlockStmt
+                                                            (Throw
+                                                             (InstanceCreation
+                                                              []
+                                                              (TypeDeclSpecifier
+                                                               (ClassType
+                                                                (:
+                                                                 ((,)
+                                                                  (Ident
+                                                                   "QueryParsingException")
+                                                                  [])
+                                                                 [])))
+                                                              (:
+                                                               (ExpName
+                                                                (Name
+                                                                 (:
+                                                                  (Ident
+                                                                   "parseContext")
+                                                                  [])))
+                                                               (:
+                                                                (BinOp
+                                                                 (BinOp
+                                                                  (Lit
+                                                                   (String
+                                                                    "[regexp] query does not support ["))
+                                                                  Add
+                                                                  (ExpName
+                                                                   (Name
+                                                                    (:
+                                                                     (Ident
+                                                                      "currentFieldName")
+                                                                     []))))
+                                                                 Add
+                                                                 (Lit
+                                                                  (String "]")))
+                                                                []))
+                                                              Nothing)))
+                                                           [])))))))))))
+                                                [])))))
+                                           [])))))
+                                      []))))
+                                  (StmtBlock
+                                   (Block
+                                    (:
+                                     (BlockStmt
+                                      (IfThenElse
+                                       (MethodInv
+                                        (PrimaryMethodCall
+                                         (MethodInv
+                                          (MethodCall
+                                           (Name
+                                            (:
+                                             (Ident "parseContext")
+                                             (:
+                                              (Ident "parseFieldMatcher")
+                                              [])))
+                                           []))
+                                         []
+                                         (Ident "match")
+                                         (:
+                                          (ExpName
+                                           (Name
+                                            (: (Ident "currentFieldName") [])))
+                                          (:
+                                           (ExpName
+                                            (Name (: (Ident "NAME_FIELD") [])))
+                                           []))))
+                                       (StmtBlock
+                                        (Block
+                                         (:
+                                          (BlockStmt
+                                           (ExpStmt
+                                            (Assign
+                                             (NameLhs
+                                              (Name (: (Ident "queryName") [])))
+                                             EqualA
+                                             (MethodInv
+                                              (MethodCall
+                                               (Name
+                                                (:
+                                                 (Ident "parser")
+                                                 (: (Ident "text") [])))
+                                               [])))))
+                                          [])))
+                                       (StmtBlock
+                                        (Block
+                                         (:
+                                          (BlockStmt
+                                           (ExpStmt
+                                            (Assign
+                                             (NameLhs
+                                              (Name (: (Ident "fieldName") [])))
+                                             EqualA
+                                             (ExpName
+                                              (Name
+                                               (:
+                                                (Ident "currentFieldName")
+                                                []))))))
+                                          (:
+                                           (BlockStmt
+                                            (ExpStmt
+                                             (Assign
+                                              (NameLhs
+                                               (Name (: (Ident "value") [])))
+                                              EqualA
+                                              (MethodInv
+                                               (MethodCall
+                                                (Name
+                                                 (:
+                                                  (Ident "parser")
+                                                  (: (Ident "textOrNull") [])))
+                                                [])))))
+                                           []))))))
+                                     [])))))))
+                              [])))))
+                         (:
+                          (BlockStmt
+                           (IfThen
+                            (BinOp
+                             (ExpName (Name (: (Ident "value") [])))
+                             Equal
+                             (Lit Null))
+                            (StmtBlock
+                             (Block
+                              (:
+                               (BlockStmt
+                                (Throw
+                                 (InstanceCreation
+                                  []
+                                  (TypeDeclSpecifier
+                                   (ClassType
+                                    (:
+                                     ((,) (Ident "QueryParsingException") [])
+                                     [])))
+                                  (:
+                                   (ExpName
+                                    (Name (: (Ident "parseContext") [])))
+                                   (:
+                                    (Lit
+                                     (String
+                                      "No value specified for regexp query"))
+                                    []))
+                                  Nothing)))
+                               [])))))
+                          (:
+                           (BlockStmt
+                            (Return
+                             (Just
+                              (MethodInv
+                               (PrimaryMethodCall
+                                (MethodInv
+                                 (PrimaryMethodCall
+                                  (MethodInv
+                                   (PrimaryMethodCall
+                                    (MethodInv
+                                     (PrimaryMethodCall
+                                      (MethodInv
+                                       (PrimaryMethodCall
+                                        (InstanceCreation
+                                         []
+                                         (TypeDeclSpecifier
+                                          (ClassType
+                                           (:
+                                            ((,)
+                                             (Ident "RegexpQueryBuilder")
+                                             [])
+                                            [])))
+                                         (:
+                                          (ExpName
+                                           (Name (: (Ident "fieldName") [])))
+                                          (:
+                                           (ExpName
+                                            (Name (: (Ident "value") [])))
+                                           []))
+                                         Nothing)
+                                        []
+                                        (Ident "flags")
+                                        (:
+                                         (ExpName
+                                          (Name (: (Ident "flagsValue") [])))
+                                         [])))
+                                      []
+                                      (Ident "maxDeterminizedStates")
+                                      (:
+                                       (ExpName
+                                        (Name
+                                         (:
+                                          (Ident "maxDeterminizedStates")
+                                          [])))
+                                       [])))
+                                    []
+                                    (Ident "rewrite")
+                                    (:
+                                     (ExpName (Name (: (Ident "rewrite") [])))
+                                     [])))
+                                  []
+                                  (Ident "boost")
+                                  (:
+                                   (ExpName (Name (: (Ident "boost") [])))
+                                   [])))
+                                []
+                                (Ident "queryName")
+                                (:
+                                 (ExpName (Name (: (Ident "queryName") [])))
+                                 []))))))
+                           []))))))))))))))))))
+         (:
+          (MemberDecl
+           (MethodDecl
+            (:
+             (Annotation (MarkerAnnotation (Name (: (Ident "Override") []))))
+             (: Public []))
+            []
+            (Just
+             (RefType
+              (ClassRefType
+               (ClassType (: ((,) (Ident "RegexpQueryBuilder") []) [])))))
+            (Ident "getBuilderPrototype")
+            []
+            []
+            Nothing
+            (MethodBody
+             (Just
+              (Block
+               (:
+                (BlockStmt
+                 (Return
+                  (Just
+                   (ExpName
+                    (Name
+                     (:
+                      (Ident "RegexpQueryBuilder")
+                      (: (Ident "PROTOTYPE") [])))))))
+                []))))))
+          []))))))))
+  []))

@@ -1,0 +1,2071 @@
+(CompilationUnit
+ (Just
+  (PackageDecl
+   (Name (: (Ident "redis") (: (Ident "clients") (: (Ident "jedis") []))))))
+ (:
+  (ImportDecl
+   False
+   (Name (: (Ident "java") (: (Ident "io") (: (Ident "IOException") []))))
+   False)
+  (:
+   (ImportDecl
+    False
+    (Name
+     (: (Ident "java") (: (Ident "net") (: (Ident "InetSocketAddress") []))))
+    False)
+   (:
+    (ImportDecl
+     False
+     (Name (: (Ident "java") (: (Ident "net") (: (Ident "Socket") []))))
+     False)
+    (:
+     (ImportDecl
+      False
+      (Name
+       (: (Ident "java") (: (Ident "net") (: (Ident "SocketException") []))))
+      False)
+     (:
+      (ImportDecl
+       False
+       (Name (: (Ident "java") (: (Ident "util") (: (Ident "ArrayList") []))))
+       False)
+      (:
+       (ImportDecl
+        False
+        (Name (: (Ident "java") (: (Ident "util") (: (Ident "List") []))))
+        False)
+       (:
+        (ImportDecl
+         False
+         (Name
+          (:
+           (Ident "redis")
+           (:
+            (Ident "clients")
+            (:
+             (Ident "jedis")
+             (: (Ident "Protocol") (: (Ident "Command") []))))))
+         False)
+        (:
+         (ImportDecl
+          False
+          (Name
+           (:
+            (Ident "redis")
+            (:
+             (Ident "clients")
+             (:
+              (Ident "jedis")
+              (:
+               (Ident "exceptions")
+               (: (Ident "JedisConnectionException") []))))))
+          False)
+         (:
+          (ImportDecl
+           False
+           (Name
+            (:
+             (Ident "redis")
+             (:
+              (Ident "clients")
+              (:
+               (Ident "jedis")
+               (: (Ident "exceptions") (: (Ident "JedisException") []))))))
+           False)
+          (:
+           (ImportDecl
+            False
+            (Name
+             (:
+              (Ident "redis")
+              (:
+               (Ident "clients")
+               (: (Ident "util") (: (Ident "RedisInputStream") [])))))
+            False)
+           (:
+            (ImportDecl
+             False
+             (Name
+              (:
+               (Ident "redis")
+               (:
+                (Ident "clients")
+                (: (Ident "util") (: (Ident "RedisOutputStream") [])))))
+             False)
+            (:
+             (ImportDecl
+              False
+              (Name
+               (:
+                (Ident "redis")
+                (:
+                 (Ident "clients")
+                 (: (Ident "util") (: (Ident "SafeEncoder") [])))))
+              False)
+             []))))))))))))
+ (:
+  (ClassTypeDecl
+   (ClassDecl
+    (: Public [])
+    (Ident "Connection")
+    []
+    Nothing
+    []
+    (ClassBody
+     (:
+      (MemberDecl
+       (FieldDecl
+        (: Private [])
+        (RefType (ClassRefType (ClassType (: ((,) (Ident "String") []) []))))
+        (: (VarDecl (VarId (Ident "host")) Nothing) [])))
+      (:
+       (MemberDecl
+        (FieldDecl
+         (: Private [])
+         (PrimType IntT)
+         (:
+          (VarDecl
+           (VarId (Ident "port"))
+           (Just
+            (InitExp
+             (ExpName
+              (Name (: (Ident "Protocol") (: (Ident "DEFAULT_PORT") [])))))))
+          [])))
+       (:
+        (MemberDecl
+         (FieldDecl
+          (: Private [])
+          (RefType (ClassRefType (ClassType (: ((,) (Ident "Socket") []) []))))
+          (: (VarDecl (VarId (Ident "socket")) Nothing) [])))
+        (:
+         (MemberDecl
+          (FieldDecl
+           (: Private [])
+           (RefType
+            (ClassRefType (ClassType (: ((,) (Ident "Protocol") []) []))))
+           (:
+            (VarDecl
+             (VarId (Ident "protocol"))
+             (Just
+              (InitExp
+               (InstanceCreation
+                []
+                (TypeDeclSpecifier
+                 (ClassType (: ((,) (Ident "Protocol") []) [])))
+                []
+                Nothing))))
+            [])))
+         (:
+          (MemberDecl
+           (FieldDecl
+            (: Private [])
+            (RefType
+             (ClassRefType
+              (ClassType (: ((,) (Ident "RedisOutputStream") []) []))))
+            (: (VarDecl (VarId (Ident "outputStream")) Nothing) [])))
+          (:
+           (MemberDecl
+            (FieldDecl
+             (: Private [])
+             (RefType
+              (ClassRefType
+               (ClassType (: ((,) (Ident "RedisInputStream") []) []))))
+             (: (VarDecl (VarId (Ident "inputStream")) Nothing) [])))
+           (:
+            (MemberDecl
+             (FieldDecl
+              (: Private [])
+              (PrimType IntT)
+              (:
+               (VarDecl
+                (VarId (Ident "pipelinedCommands"))
+                (Just (InitExp (Lit (Int 0)))))
+               [])))
+            (:
+             (MemberDecl
+              (FieldDecl
+               (: Private [])
+               (PrimType IntT)
+               (:
+                (VarDecl
+                 (VarId (Ident "timeout"))
+                 (Just
+                  (InitExp
+                   (ExpName
+                    (Name
+                     (:
+                      (Ident "Protocol")
+                      (: (Ident "DEFAULT_TIMEOUT") [])))))))
+                [])))
+             (:
+              (MemberDecl
+               (MethodDecl
+                (: Public [])
+                []
+                (Just (PrimType IntT))
+                (Ident "getTimeout")
+                []
+                []
+                Nothing
+                (MethodBody
+                 (Just
+                  (Block
+                   (:
+                    (BlockStmt
+                     (Return (Just (ExpName (Name (: (Ident "timeout") []))))))
+                    []))))))
+              (:
+               (MemberDecl
+                (MethodDecl
+                 (: Public [])
+                 []
+                 Nothing
+                 (Ident "setTimeout")
+                 (:
+                  (FormalParam
+                   (: Final [])
+                   (PrimType IntT)
+                   False
+                   (VarId (Ident "timeout")))
+                  [])
+                 []
+                 Nothing
+                 (MethodBody
+                  (Just
+                   (Block
+                    (:
+                     (BlockStmt
+                      (ExpStmt
+                       (Assign
+                        (FieldLhs (PrimaryFieldAccess This (Ident "timeout")))
+                        EqualA
+                        (ExpName (Name (: (Ident "timeout") []))))))
+                     []))))))
+               (:
+                (MemberDecl
+                 (MethodDecl
+                  (: Public [])
+                  []
+                  Nothing
+                  (Ident "setTimeoutInfinite")
+                  []
+                  []
+                  Nothing
+                  (MethodBody
+                   (Just
+                    (Block
+                     (:
+                      (BlockStmt
+                       (Try
+                        (Block
+                         (:
+                          (BlockStmt
+                           (ExpStmt
+                            (MethodInv
+                             (MethodCall
+                              (Name
+                               (:
+                                (Ident "socket")
+                                (: (Ident "setSoTimeout") [])))
+                              (: (Lit (Int 0)) [])))))
+                          []))
+                        (:
+                         (Catch
+                          (FormalParam
+                           []
+                           (RefType
+                            (ClassRefType
+                             (ClassType
+                              (: ((,) (Ident "SocketException") []) []))))
+                           False
+                           (VarId (Ident "ex")))
+                          (Block
+                           (:
+                            (BlockStmt
+                             (Throw
+                              (InstanceCreation
+                               []
+                               (TypeDeclSpecifier
+                                (ClassType
+                                 (: ((,) (Ident "JedisException") []) [])))
+                               (: (ExpName (Name (: (Ident "ex") []))) [])
+                               Nothing)))
+                            [])))
+                         [])
+                        Nothing))
+                      []))))))
+                (:
+                 (MemberDecl
+                  (MethodDecl
+                   (: Public [])
+                   []
+                   Nothing
+                   (Ident "rollbackTimeout")
+                   []
+                   []
+                   Nothing
+                   (MethodBody
+                    (Just
+                     (Block
+                      (:
+                       (BlockStmt
+                        (Try
+                         (Block
+                          (:
+                           (BlockStmt
+                            (ExpStmt
+                             (MethodInv
+                              (MethodCall
+                               (Name
+                                (:
+                                 (Ident "socket")
+                                 (: (Ident "setSoTimeout") [])))
+                               (:
+                                (ExpName (Name (: (Ident "timeout") [])))
+                                [])))))
+                           []))
+                         (:
+                          (Catch
+                           (FormalParam
+                            []
+                            (RefType
+                             (ClassRefType
+                              (ClassType
+                               (: ((,) (Ident "SocketException") []) []))))
+                            False
+                            (VarId (Ident "ex")))
+                           (Block
+                            (:
+                             (BlockStmt
+                              (Throw
+                               (InstanceCreation
+                                []
+                                (TypeDeclSpecifier
+                                 (ClassType
+                                  (: ((,) (Ident "JedisException") []) [])))
+                                (: (ExpName (Name (: (Ident "ex") []))) [])
+                                Nothing)))
+                             [])))
+                          [])
+                         Nothing))
+                       []))))))
+                 (:
+                  (MemberDecl
+                   (ConstructorDecl
+                    (: Public [])
+                    []
+                    (Ident "Connection")
+                    (:
+                     (FormalParam
+                      (: Final [])
+                      (RefType
+                       (ClassRefType
+                        (ClassType (: ((,) (Ident "String") []) []))))
+                      False
+                      (VarId (Ident "host")))
+                     [])
+                    []
+                    (ConstructorBody
+                     (Just (SuperInvoke [] []))
+                     (:
+                      (BlockStmt
+                       (ExpStmt
+                        (Assign
+                         (FieldLhs (PrimaryFieldAccess This (Ident "host")))
+                         EqualA
+                         (ExpName (Name (: (Ident "host") []))))))
+                      []))))
+                  (:
+                   (MemberDecl
+                    (MethodDecl
+                     (: Protected [])
+                     []
+                     Nothing
+                     (Ident "flush")
+                     []
+                     []
+                     Nothing
+                     (MethodBody
+                      (Just
+                       (Block
+                        (:
+                         (BlockStmt
+                          (Try
+                           (Block
+                            (:
+                             (BlockStmt
+                              (ExpStmt
+                               (MethodInv
+                                (MethodCall
+                                 (Name
+                                  (:
+                                   (Ident "outputStream")
+                                   (: (Ident "flush") [])))
+                                 []))))
+                             []))
+                           (:
+                            (Catch
+                             (FormalParam
+                              []
+                              (RefType
+                               (ClassRefType
+                                (ClassType
+                                 (: ((,) (Ident "IOException") []) []))))
+                              False
+                              (VarId (Ident "e")))
+                             (Block
+                              (:
+                               (BlockStmt
+                                (Throw
+                                 (InstanceCreation
+                                  []
+                                  (TypeDeclSpecifier
+                                   (ClassType
+                                    (:
+                                     ((,) (Ident "JedisConnectionException") [])
+                                     [])))
+                                  (: (ExpName (Name (: (Ident "e") []))) [])
+                                  Nothing)))
+                               [])))
+                            [])
+                           Nothing))
+                         []))))))
+                   (:
+                    (MemberDecl
+                     (MethodDecl
+                      (: Protected [])
+                      []
+                      (Just
+                       (RefType
+                        (ClassRefType
+                         (ClassType (: ((,) (Ident "Connection") []) [])))))
+                      (Ident "sendCommand")
+                      (:
+                       (FormalParam
+                        (: Final [])
+                        (RefType
+                         (ClassRefType
+                          (ClassType (: ((,) (Ident "Command") []) []))))
+                        False
+                        (VarId (Ident "cmd")))
+                       (:
+                        (FormalParam
+                         (: Final [])
+                         (RefType
+                          (ClassRefType
+                           (ClassType (: ((,) (Ident "String") []) []))))
+                         True
+                         (VarId (Ident "args")))
+                        []))
+                      []
+                      Nothing
+                      (MethodBody
+                       (Just
+                        (Block
+                         (:
+                          (LocalVars
+                           (: Final [])
+                           (RefType
+                            (ArrayType (RefType (ArrayType (PrimType ByteT)))))
+                           (:
+                            (VarDecl
+                             (VarId (Ident "bargs"))
+                             (Just
+                              (InitExp
+                               (ArrayCreate
+                                (PrimType ByteT)
+                                (:
+                                 (ExpName
+                                  (Name
+                                   (: (Ident "args") (: (Ident "length") []))))
+                                 [])
+                                1))))
+                            []))
+                          (:
+                           (BlockStmt
+                            (BasicFor
+                             (Just
+                              (ForLocalVars
+                               []
+                               (PrimType IntT)
+                               (:
+                                (VarDecl
+                                 (VarId (Ident "i"))
+                                 (Just (InitExp (Lit (Int 0)))))
+                                [])))
+                             (Just
+                              (BinOp
+                               (ExpName (Name (: (Ident "i") [])))
+                               LThan
+                               (ExpName
+                                (Name
+                                 (: (Ident "args") (: (Ident "length") []))))))
+                             (Just
+                              (:
+                               (PostIncrement
+                                (ExpName (Name (: (Ident "i") []))))
+                               []))
+                             (StmtBlock
+                              (Block
+                               (:
+                                (BlockStmt
+                                 (ExpStmt
+                                  (Assign
+                                   (ArrayLhs
+                                    (ArrayIndex
+                                     (ExpName (Name (: (Ident "bargs") [])))
+                                     (:
+                                      (ExpName (Name (: (Ident "i") [])))
+                                      [])))
+                                   EqualA
+                                   (MethodInv
+                                    (MethodCall
+                                     (Name
+                                      (:
+                                       (Ident "SafeEncoder")
+                                       (: (Ident "encode") [])))
+                                     (:
+                                      (ArrayAccess
+                                       (ArrayIndex
+                                        (ExpName (Name (: (Ident "args") [])))
+                                        (:
+                                         (ExpName (Name (: (Ident "i") [])))
+                                         [])))
+                                      []))))))
+                                [])))))
+                           (:
+                            (BlockStmt
+                             (Return
+                              (Just
+                               (MethodInv
+                                (MethodCall
+                                 (Name (: (Ident "sendCommand") []))
+                                 (:
+                                  (ExpName (Name (: (Ident "cmd") [])))
+                                  (:
+                                   (ExpName (Name (: (Ident "bargs") [])))
+                                   [])))))))
+                            []))))))))
+                    (:
+                     (MemberDecl
+                      (MethodDecl
+                       (: Protected [])
+                       []
+                       (Just
+                        (RefType
+                         (ClassRefType
+                          (ClassType (: ((,) (Ident "Connection") []) [])))))
+                       (Ident "sendCommand")
+                       (:
+                        (FormalParam
+                         (: Final [])
+                         (RefType
+                          (ClassRefType
+                           (ClassType (: ((,) (Ident "Command") []) []))))
+                         False
+                         (VarId (Ident "cmd")))
+                        (:
+                         (FormalParam
+                          (: Final [])
+                          (RefType (ArrayType (PrimType ByteT)))
+                          True
+                          (VarId (Ident "args")))
+                         []))
+                       []
+                       Nothing
+                       (MethodBody
+                        (Just
+                         (Block
+                          (:
+                           (BlockStmt
+                            (ExpStmt
+                             (MethodInv
+                              (MethodCall (Name (: (Ident "connect") [])) []))))
+                           (:
+                            (BlockStmt
+                             (ExpStmt
+                              (MethodInv
+                               (MethodCall
+                                (Name
+                                 (:
+                                  (Ident "protocol")
+                                  (: (Ident "sendCommand") [])))
+                                (:
+                                 (ExpName (Name (: (Ident "outputStream") [])))
+                                 (:
+                                  (ExpName (Name (: (Ident "cmd") [])))
+                                  (:
+                                   (ExpName (Name (: (Ident "args") [])))
+                                   [])))))))
+                            (:
+                             (BlockStmt
+                              (ExpStmt
+                               (PostIncrement
+                                (ExpName
+                                 (Name (: (Ident "pipelinedCommands") []))))))
+                             (: (BlockStmt (Return (Just This))) [])))))))))
+                     (:
+                      (MemberDecl
+                       (MethodDecl
+                        (: Protected [])
+                        []
+                        (Just
+                         (RefType
+                          (ClassRefType
+                           (ClassType (: ((,) (Ident "Connection") []) [])))))
+                        (Ident "sendCommand")
+                        (:
+                         (FormalParam
+                          (: Final [])
+                          (RefType
+                           (ClassRefType
+                            (ClassType (: ((,) (Ident "Command") []) []))))
+                          False
+                          (VarId (Ident "cmd")))
+                         [])
+                        []
+                        Nothing
+                        (MethodBody
+                         (Just
+                          (Block
+                           (:
+                            (BlockStmt
+                             (ExpStmt
+                              (MethodInv
+                               (MethodCall
+                                (Name (: (Ident "connect") []))
+                                []))))
+                            (:
+                             (BlockStmt
+                              (ExpStmt
+                               (MethodInv
+                                (MethodCall
+                                 (Name
+                                  (:
+                                   (Ident "protocol")
+                                   (: (Ident "sendCommand") [])))
+                                 (:
+                                  (ExpName (Name (: (Ident "outputStream") [])))
+                                  (:
+                                   (ExpName (Name (: (Ident "cmd") [])))
+                                   (:
+                                    (ArrayCreate
+                                     (PrimType ByteT)
+                                     (: (Lit (Int 0)) [])
+                                     1)
+                                    [])))))))
+                             (:
+                              (BlockStmt
+                               (ExpStmt
+                                (PostIncrement
+                                 (ExpName
+                                  (Name (: (Ident "pipelinedCommands") []))))))
+                              (: (BlockStmt (Return (Just This))) [])))))))))
+                      (:
+                       (MemberDecl
+                        (ConstructorDecl
+                         (: Public [])
+                         []
+                         (Ident "Connection")
+                         (:
+                          (FormalParam
+                           (: Final [])
+                           (RefType
+                            (ClassRefType
+                             (ClassType (: ((,) (Ident "String") []) []))))
+                           False
+                           (VarId (Ident "host")))
+                          (:
+                           (FormalParam
+                            (: Final [])
+                            (PrimType IntT)
+                            False
+                            (VarId (Ident "port")))
+                           []))
+                         []
+                         (ConstructorBody
+                          (Just (SuperInvoke [] []))
+                          (:
+                           (BlockStmt
+                            (ExpStmt
+                             (Assign
+                              (FieldLhs
+                               (PrimaryFieldAccess This (Ident "host")))
+                              EqualA
+                              (ExpName (Name (: (Ident "host") []))))))
+                           (:
+                            (BlockStmt
+                             (ExpStmt
+                              (Assign
+                               (FieldLhs
+                                (PrimaryFieldAccess This (Ident "port")))
+                               EqualA
+                               (ExpName (Name (: (Ident "port") []))))))
+                            [])))))
+                       (:
+                        (MemberDecl
+                         (MethodDecl
+                          (: Public [])
+                          []
+                          (Just
+                           (RefType
+                            (ClassRefType
+                             (ClassType (: ((,) (Ident "String") []) [])))))
+                          (Ident "getHost")
+                          []
+                          []
+                          Nothing
+                          (MethodBody
+                           (Just
+                            (Block
+                             (:
+                              (BlockStmt
+                               (Return
+                                (Just (ExpName (Name (: (Ident "host") []))))))
+                              []))))))
+                        (:
+                         (MemberDecl
+                          (MethodDecl
+                           (: Public [])
+                           []
+                           Nothing
+                           (Ident "setHost")
+                           (:
+                            (FormalParam
+                             (: Final [])
+                             (RefType
+                              (ClassRefType
+                               (ClassType (: ((,) (Ident "String") []) []))))
+                             False
+                             (VarId (Ident "host")))
+                            [])
+                           []
+                           Nothing
+                           (MethodBody
+                            (Just
+                             (Block
+                              (:
+                               (BlockStmt
+                                (ExpStmt
+                                 (Assign
+                                  (FieldLhs
+                                   (PrimaryFieldAccess This (Ident "host")))
+                                  EqualA
+                                  (ExpName (Name (: (Ident "host") []))))))
+                               []))))))
+                         (:
+                          (MemberDecl
+                           (MethodDecl
+                            (: Public [])
+                            []
+                            (Just (PrimType IntT))
+                            (Ident "getPort")
+                            []
+                            []
+                            Nothing
+                            (MethodBody
+                             (Just
+                              (Block
+                               (:
+                                (BlockStmt
+                                 (Return
+                                  (Just
+                                   (ExpName (Name (: (Ident "port") []))))))
+                                []))))))
+                          (:
+                           (MemberDecl
+                            (MethodDecl
+                             (: Public [])
+                             []
+                             Nothing
+                             (Ident "setPort")
+                             (:
+                              (FormalParam
+                               (: Final [])
+                               (PrimType IntT)
+                               False
+                               (VarId (Ident "port")))
+                              [])
+                             []
+                             Nothing
+                             (MethodBody
+                              (Just
+                               (Block
+                                (:
+                                 (BlockStmt
+                                  (ExpStmt
+                                   (Assign
+                                    (FieldLhs
+                                     (PrimaryFieldAccess This (Ident "port")))
+                                    EqualA
+                                    (ExpName (Name (: (Ident "port") []))))))
+                                 []))))))
+                           (:
+                            (MemberDecl
+                             (ConstructorDecl
+                              (: Public [])
+                              []
+                              (Ident "Connection")
+                              []
+                              []
+                              (ConstructorBody Nothing [])))
+                            (:
+                             (MemberDecl
+                              (MethodDecl
+                               (: Public [])
+                               []
+                               Nothing
+                               (Ident "connect")
+                               []
+                               []
+                               Nothing
+                               (MethodBody
+                                (Just
+                                 (Block
+                                  (:
+                                   (BlockStmt
+                                    (IfThen
+                                     (PreNot
+                                      (MethodInv
+                                       (MethodCall
+                                        (Name (: (Ident "isConnected") []))
+                                        [])))
+                                     (StmtBlock
+                                      (Block
+                                       (:
+                                        (BlockStmt
+                                         (Try
+                                          (Block
+                                           (:
+                                            (BlockStmt
+                                             (ExpStmt
+                                              (Assign
+                                               (NameLhs
+                                                (Name (: (Ident "socket") [])))
+                                               EqualA
+                                               (InstanceCreation
+                                                []
+                                                (TypeDeclSpecifier
+                                                 (ClassType
+                                                  (:
+                                                   ((,) (Ident "Socket") [])
+                                                   [])))
+                                                []
+                                                Nothing))))
+                                            (:
+                                             (BlockStmt
+                                              (ExpStmt
+                                               (MethodInv
+                                                (MethodCall
+                                                 (Name
+                                                  (:
+                                                   (Ident "socket")
+                                                   (: (Ident "connect") [])))
+                                                 (:
+                                                  (InstanceCreation
+                                                   []
+                                                   (TypeDeclSpecifier
+                                                    (ClassType
+                                                     (:
+                                                      ((,)
+                                                       (Ident
+                                                        "InetSocketAddress")
+                                                       [])
+                                                      [])))
+                                                   (:
+                                                    (ExpName
+                                                     (Name
+                                                      (: (Ident "host") [])))
+                                                    (:
+                                                     (ExpName
+                                                      (Name
+                                                       (: (Ident "port") [])))
+                                                     []))
+                                                   Nothing)
+                                                  (:
+                                                   (ExpName
+                                                    (Name
+                                                     (: (Ident "timeout") [])))
+                                                   []))))))
+                                             (:
+                                              (BlockStmt
+                                               (ExpStmt
+                                                (MethodInv
+                                                 (MethodCall
+                                                  (Name
+                                                   (:
+                                                    (Ident "socket")
+                                                    (:
+                                                     (Ident "setSoTimeout")
+                                                     [])))
+                                                  (:
+                                                   (ExpName
+                                                    (Name
+                                                     (: (Ident "timeout") [])))
+                                                   [])))))
+                                              (:
+                                               (BlockStmt
+                                                (ExpStmt
+                                                 (Assign
+                                                  (NameLhs
+                                                   (Name
+                                                    (:
+                                                     (Ident "outputStream")
+                                                     [])))
+                                                  EqualA
+                                                  (InstanceCreation
+                                                   []
+                                                   (TypeDeclSpecifier
+                                                    (ClassType
+                                                     (:
+                                                      ((,)
+                                                       (Ident
+                                                        "RedisOutputStream")
+                                                       [])
+                                                      [])))
+                                                   (:
+                                                    (MethodInv
+                                                     (MethodCall
+                                                      (Name
+                                                       (:
+                                                        (Ident "socket")
+                                                        (:
+                                                         (Ident
+                                                          "getOutputStream")
+                                                         [])))
+                                                      []))
+                                                    [])
+                                                   Nothing))))
+                                               (:
+                                                (BlockStmt
+                                                 (ExpStmt
+                                                  (Assign
+                                                   (NameLhs
+                                                    (Name
+                                                     (:
+                                                      (Ident "inputStream")
+                                                      [])))
+                                                   EqualA
+                                                   (InstanceCreation
+                                                    []
+                                                    (TypeDeclSpecifier
+                                                     (ClassType
+                                                      (:
+                                                       ((,)
+                                                        (Ident
+                                                         "RedisInputStream")
+                                                        [])
+                                                       [])))
+                                                    (:
+                                                     (MethodInv
+                                                      (MethodCall
+                                                       (Name
+                                                        (:
+                                                         (Ident "socket")
+                                                         (:
+                                                          (Ident
+                                                           "getInputStream")
+                                                          [])))
+                                                       []))
+                                                     [])
+                                                    Nothing))))
+                                                []))))))
+                                          (:
+                                           (Catch
+                                            (FormalParam
+                                             []
+                                             (RefType
+                                              (ClassRefType
+                                               (ClassType
+                                                (:
+                                                 ((,) (Ident "IOException") [])
+                                                 []))))
+                                             False
+                                             (VarId (Ident "ex")))
+                                            (Block
+                                             (:
+                                              (BlockStmt
+                                               (Throw
+                                                (InstanceCreation
+                                                 []
+                                                 (TypeDeclSpecifier
+                                                  (ClassType
+                                                   (:
+                                                    ((,)
+                                                     (Ident
+                                                      "JedisConnectionException")
+                                                     [])
+                                                    [])))
+                                                 (:
+                                                  (ExpName
+                                                   (Name (: (Ident "ex") [])))
+                                                  [])
+                                                 Nothing)))
+                                              [])))
+                                           [])
+                                          Nothing))
+                                        [])))))
+                                   []))))))
+                             (:
+                              (MemberDecl
+                               (MethodDecl
+                                (: Public [])
+                                []
+                                Nothing
+                                (Ident "disconnect")
+                                []
+                                []
+                                Nothing
+                                (MethodBody
+                                 (Just
+                                  (Block
+                                   (:
+                                    (BlockStmt
+                                     (IfThen
+                                      (MethodInv
+                                       (MethodCall
+                                        (Name (: (Ident "isConnected") []))
+                                        []))
+                                      (StmtBlock
+                                       (Block
+                                        (:
+                                         (BlockStmt
+                                          (Try
+                                           (Block
+                                            (:
+                                             (BlockStmt
+                                              (ExpStmt
+                                               (MethodInv
+                                                (MethodCall
+                                                 (Name
+                                                  (:
+                                                   (Ident "inputStream")
+                                                   (: (Ident "close") [])))
+                                                 []))))
+                                             (:
+                                              (BlockStmt
+                                               (ExpStmt
+                                                (MethodInv
+                                                 (MethodCall
+                                                  (Name
+                                                   (:
+                                                    (Ident "outputStream")
+                                                    (: (Ident "close") [])))
+                                                  []))))
+                                              (:
+                                               (BlockStmt
+                                                (IfThen
+                                                 (PreNot
+                                                  (MethodInv
+                                                   (MethodCall
+                                                    (Name
+                                                     (:
+                                                      (Ident "socket")
+                                                      (:
+                                                       (Ident "isClosed")
+                                                       [])))
+                                                    [])))
+                                                 (StmtBlock
+                                                  (Block
+                                                   (:
+                                                    (BlockStmt
+                                                     (ExpStmt
+                                                      (MethodInv
+                                                       (MethodCall
+                                                        (Name
+                                                         (:
+                                                          (Ident "socket")
+                                                          (:
+                                                           (Ident "close")
+                                                           [])))
+                                                        []))))
+                                                    [])))))
+                                               []))))
+                                           (:
+                                            (Catch
+                                             (FormalParam
+                                              []
+                                              (RefType
+                                               (ClassRefType
+                                                (ClassType
+                                                 (:
+                                                  ((,) (Ident "IOException") [])
+                                                  []))))
+                                              False
+                                              (VarId (Ident "ex")))
+                                             (Block
+                                              (:
+                                               (BlockStmt
+                                                (Throw
+                                                 (InstanceCreation
+                                                  []
+                                                  (TypeDeclSpecifier
+                                                   (ClassType
+                                                    (:
+                                                     ((,)
+                                                      (Ident
+                                                       "JedisConnectionException")
+                                                      [])
+                                                     [])))
+                                                  (:
+                                                   (ExpName
+                                                    (Name (: (Ident "ex") [])))
+                                                   [])
+                                                  Nothing)))
+                                               [])))
+                                            [])
+                                           Nothing))
+                                         [])))))
+                                    []))))))
+                              (:
+                               (MemberDecl
+                                (MethodDecl
+                                 (: Public [])
+                                 []
+                                 (Just (PrimType BooleanT))
+                                 (Ident "isConnected")
+                                 []
+                                 []
+                                 Nothing
+                                 (MethodBody
+                                  (Just
+                                   (Block
+                                    (:
+                                     (BlockStmt
+                                      (Return
+                                       (Just
+                                        (BinOp
+                                         (BinOp
+                                          (ExpName
+                                           (Name (: (Ident "socket") [])))
+                                          NotEq
+                                          (Lit Null))
+                                         CAnd
+                                         (BinOp
+                                          (MethodInv
+                                           (MethodCall
+                                            (Name
+                                             (:
+                                              (Ident "socket")
+                                              (: (Ident "isBound") [])))
+                                            []))
+                                          CAnd
+                                          (BinOp
+                                           (PreNot
+                                            (MethodInv
+                                             (MethodCall
+                                              (Name
+                                               (:
+                                                (Ident "socket")
+                                                (: (Ident "isClosed") [])))
+                                              [])))
+                                           CAnd
+                                           (BinOp
+                                            (MethodInv
+                                             (MethodCall
+                                              (Name
+                                               (:
+                                                (Ident "socket")
+                                                (: (Ident "isConnected") [])))
+                                              []))
+                                            CAnd
+                                            (BinOp
+                                             (PreNot
+                                              (MethodInv
+                                               (MethodCall
+                                                (Name
+                                                 (:
+                                                  (Ident "socket")
+                                                  (:
+                                                   (Ident "isInputShutdown")
+                                                   [])))
+                                                [])))
+                                             CAnd
+                                             (PreNot
+                                              (MethodInv
+                                               (MethodCall
+                                                (Name
+                                                 (:
+                                                  (Ident "socket")
+                                                  (:
+                                                   (Ident "isOutputShutdown")
+                                                   [])))
+                                                [])))))))))))
+                                     []))))))
+                               (:
+                                (MemberDecl
+                                 (MethodDecl
+                                  (: Protected [])
+                                  []
+                                  (Just
+                                   (RefType
+                                    (ClassRefType
+                                     (ClassType
+                                      (: ((,) (Ident "String") []) [])))))
+                                  (Ident "getStatusCodeReply")
+                                  []
+                                  []
+                                  Nothing
+                                  (MethodBody
+                                   (Just
+                                    (Block
+                                     (:
+                                      (BlockStmt
+                                       (ExpStmt
+                                        (MethodInv
+                                         (MethodCall
+                                          (Name (: (Ident "flush") []))
+                                          []))))
+                                      (:
+                                       (BlockStmt
+                                        (ExpStmt
+                                         (PostDecrement
+                                          (ExpName
+                                           (Name
+                                            (:
+                                             (Ident "pipelinedCommands")
+                                             []))))))
+                                       (:
+                                        (LocalVars
+                                         (: Final [])
+                                         (RefType (ArrayType (PrimType ByteT)))
+                                         (:
+                                          (VarDecl
+                                           (VarId (Ident "resp"))
+                                           (Just
+                                            (InitExp
+                                             (Cast
+                                              (RefType
+                                               (ArrayType (PrimType ByteT)))
+                                              (MethodInv
+                                               (MethodCall
+                                                (Name
+                                                 (:
+                                                  (Ident "protocol")
+                                                  (: (Ident "read") [])))
+                                                (:
+                                                 (ExpName
+                                                  (Name
+                                                   (:
+                                                    (Ident "inputStream")
+                                                    [])))
+                                                 [])))))))
+                                          []))
+                                        (:
+                                         (BlockStmt
+                                          (IfThenElse
+                                           (BinOp
+                                            (Lit Null)
+                                            Equal
+                                            (ExpName
+                                             (Name (: (Ident "resp") []))))
+                                           (StmtBlock
+                                            (Block
+                                             (:
+                                              (BlockStmt
+                                               (Return (Just (Lit Null))))
+                                              [])))
+                                           (StmtBlock
+                                            (Block
+                                             (:
+                                              (BlockStmt
+                                               (Return
+                                                (Just
+                                                 (MethodInv
+                                                  (MethodCall
+                                                   (Name
+                                                    (:
+                                                     (Ident "SafeEncoder")
+                                                     (: (Ident "encode") [])))
+                                                   (:
+                                                    (ExpName
+                                                     (Name
+                                                      (: (Ident "resp") [])))
+                                                    []))))))
+                                              [])))))
+                                         [])))))))))
+                                (:
+                                 (MemberDecl
+                                  (MethodDecl
+                                   (: Public [])
+                                   []
+                                   (Just
+                                    (RefType
+                                     (ClassRefType
+                                      (ClassType
+                                       (: ((,) (Ident "String") []) [])))))
+                                   (Ident "getBulkReply")
+                                   []
+                                   []
+                                   Nothing
+                                   (MethodBody
+                                    (Just
+                                     (Block
+                                      (:
+                                       (LocalVars
+                                        (: Final [])
+                                        (RefType (ArrayType (PrimType ByteT)))
+                                        (:
+                                         (VarDecl
+                                          (VarId (Ident "result"))
+                                          (Just
+                                           (InitExp
+                                            (MethodInv
+                                             (MethodCall
+                                              (Name
+                                               (:
+                                                (Ident "getBinaryBulkReply")
+                                                []))
+                                              [])))))
+                                         []))
+                                       (:
+                                        (BlockStmt
+                                         (IfThenElse
+                                          (BinOp
+                                           (Lit Null)
+                                           NotEq
+                                           (ExpName
+                                            (Name (: (Ident "result") []))))
+                                          (StmtBlock
+                                           (Block
+                                            (:
+                                             (BlockStmt
+                                              (Return
+                                               (Just
+                                                (MethodInv
+                                                 (MethodCall
+                                                  (Name
+                                                   (:
+                                                    (Ident "SafeEncoder")
+                                                    (: (Ident "encode") [])))
+                                                  (:
+                                                   (ExpName
+                                                    (Name
+                                                     (: (Ident "result") [])))
+                                                   []))))))
+                                             [])))
+                                          (StmtBlock
+                                           (Block
+                                            (:
+                                             (BlockStmt
+                                              (Return (Just (Lit Null))))
+                                             [])))))
+                                        [])))))))
+                                 (:
+                                  (MemberDecl
+                                   (MethodDecl
+                                    (: Public [])
+                                    []
+                                    (Just
+                                     (RefType (ArrayType (PrimType ByteT))))
+                                    (Ident "getBinaryBulkReply")
+                                    []
+                                    []
+                                    Nothing
+                                    (MethodBody
+                                     (Just
+                                      (Block
+                                       (:
+                                        (BlockStmt
+                                         (ExpStmt
+                                          (MethodInv
+                                           (MethodCall
+                                            (Name (: (Ident "flush") []))
+                                            []))))
+                                        (:
+                                         (BlockStmt
+                                          (ExpStmt
+                                           (PostDecrement
+                                            (ExpName
+                                             (Name
+                                              (:
+                                               (Ident "pipelinedCommands")
+                                               []))))))
+                                         (:
+                                          (BlockStmt
+                                           (Return
+                                            (Just
+                                             (Cast
+                                              (RefType
+                                               (ArrayType (PrimType ByteT)))
+                                              (MethodInv
+                                               (MethodCall
+                                                (Name
+                                                 (:
+                                                  (Ident "protocol")
+                                                  (: (Ident "read") [])))
+                                                (:
+                                                 (ExpName
+                                                  (Name
+                                                   (:
+                                                    (Ident "inputStream")
+                                                    [])))
+                                                 [])))))))
+                                          []))))))))
+                                  (:
+                                   (MemberDecl
+                                    (MethodDecl
+                                     (: Public [])
+                                     []
+                                     (Just
+                                      (RefType
+                                       (ClassRefType
+                                        (ClassType
+                                         (: ((,) (Ident "Long") []) [])))))
+                                     (Ident "getIntegerReply")
+                                     []
+                                     []
+                                     Nothing
+                                     (MethodBody
+                                      (Just
+                                       (Block
+                                        (:
+                                         (BlockStmt
+                                          (ExpStmt
+                                           (MethodInv
+                                            (MethodCall
+                                             (Name (: (Ident "flush") []))
+                                             []))))
+                                         (:
+                                          (BlockStmt
+                                           (ExpStmt
+                                            (PostDecrement
+                                             (ExpName
+                                              (Name
+                                               (:
+                                                (Ident "pipelinedCommands")
+                                                []))))))
+                                          (:
+                                           (BlockStmt
+                                            (Return
+                                             (Just
+                                              (Cast
+                                               (RefType
+                                                (ClassRefType
+                                                 (ClassType
+                                                  (:
+                                                   ((,) (Ident "Long") [])
+                                                   []))))
+                                               (MethodInv
+                                                (MethodCall
+                                                 (Name
+                                                  (:
+                                                   (Ident "protocol")
+                                                   (: (Ident "read") [])))
+                                                 (:
+                                                  (ExpName
+                                                   (Name
+                                                    (:
+                                                     (Ident "inputStream")
+                                                     [])))
+                                                  [])))))))
+                                           []))))))))
+                                   (:
+                                    (MemberDecl
+                                     (MethodDecl
+                                      (: Public [])
+                                      []
+                                      (Just
+                                       (RefType
+                                        (ClassRefType
+                                         (ClassType
+                                          (:
+                                           ((,)
+                                            (Ident "List")
+                                            (:
+                                             (ActualType
+                                              (ClassRefType
+                                               (ClassType
+                                                (:
+                                                 ((,) (Ident "String") [])
+                                                 []))))
+                                             []))
+                                           [])))))
+                                      (Ident "getMultiBulkReply")
+                                      []
+                                      []
+                                      Nothing
+                                      (MethodBody
+                                       (Just
+                                        (Block
+                                         (:
+                                          (LocalVars
+                                           (: Final [])
+                                           (RefType
+                                            (ClassRefType
+                                             (ClassType
+                                              (:
+                                               ((,)
+                                                (Ident "List")
+                                                (:
+                                                 (ActualType
+                                                  (ArrayType (PrimType ByteT)))
+                                                 []))
+                                               []))))
+                                           (:
+                                            (VarDecl
+                                             (VarId (Ident "bresult"))
+                                             (Just
+                                              (InitExp
+                                               (MethodInv
+                                                (MethodCall
+                                                 (Name
+                                                  (:
+                                                   (Ident
+                                                    "getBinaryMultiBulkReply")
+                                                   []))
+                                                 [])))))
+                                            []))
+                                          (:
+                                           (BlockStmt
+                                            (IfThen
+                                             (BinOp
+                                              (Lit Null)
+                                              Equal
+                                              (ExpName
+                                               (Name (: (Ident "bresult") []))))
+                                             (StmtBlock
+                                              (Block
+                                               (:
+                                                (BlockStmt
+                                                 (Return (Just (Lit Null))))
+                                                [])))))
+                                           (:
+                                            (LocalVars
+                                             (: Final [])
+                                             (RefType
+                                              (ClassRefType
+                                               (ClassType
+                                                (:
+                                                 ((,)
+                                                  (Ident "ArrayList")
+                                                  (:
+                                                   (ActualType
+                                                    (ClassRefType
+                                                     (ClassType
+                                                      (:
+                                                       ((,) (Ident "String") [])
+                                                       []))))
+                                                   []))
+                                                 []))))
+                                             (:
+                                              (VarDecl
+                                               (VarId (Ident "result"))
+                                               (Just
+                                                (InitExp
+                                                 (InstanceCreation
+                                                  []
+                                                  (TypeDeclSpecifier
+                                                   (ClassType
+                                                    (:
+                                                     ((,)
+                                                      (Ident "ArrayList")
+                                                      (:
+                                                       (ActualType
+                                                        (ClassRefType
+                                                         (ClassType
+                                                          (:
+                                                           ((,)
+                                                            (Ident "String")
+                                                            [])
+                                                           []))))
+                                                       []))
+                                                     [])))
+                                                  (:
+                                                   (MethodInv
+                                                    (MethodCall
+                                                     (Name
+                                                      (:
+                                                       (Ident "bresult")
+                                                       (: (Ident "size") [])))
+                                                     []))
+                                                   [])
+                                                  Nothing))))
+                                              []))
+                                            (:
+                                             (BlockStmt
+                                              (EnhancedFor
+                                               (: Final [])
+                                               (RefType
+                                                (ArrayType (PrimType ByteT)))
+                                               (Ident "barray")
+                                               (ExpName
+                                                (Name (: (Ident "bresult") [])))
+                                               (StmtBlock
+                                                (Block
+                                                 (:
+                                                  (BlockStmt
+                                                   (IfThenElse
+                                                    (BinOp
+                                                     (ExpName
+                                                      (Name
+                                                       (: (Ident "barray") [])))
+                                                     Equal
+                                                     (Lit Null))
+                                                    (StmtBlock
+                                                     (Block
+                                                      (:
+                                                       (BlockStmt
+                                                        (ExpStmt
+                                                         (MethodInv
+                                                          (MethodCall
+                                                           (Name
+                                                            (:
+                                                             (Ident "result")
+                                                             (:
+                                                              (Ident "add")
+                                                              [])))
+                                                           (: (Lit Null) [])))))
+                                                       [])))
+                                                    (StmtBlock
+                                                     (Block
+                                                      (:
+                                                       (BlockStmt
+                                                        (ExpStmt
+                                                         (MethodInv
+                                                          (MethodCall
+                                                           (Name
+                                                            (:
+                                                             (Ident "result")
+                                                             (:
+                                                              (Ident "add")
+                                                              [])))
+                                                           (:
+                                                            (MethodInv
+                                                             (MethodCall
+                                                              (Name
+                                                               (:
+                                                                (Ident
+                                                                 "SafeEncoder")
+                                                                (:
+                                                                 (Ident
+                                                                  "encode")
+                                                                 [])))
+                                                              (:
+                                                               (ExpName
+                                                                (Name
+                                                                 (:
+                                                                  (Ident
+                                                                   "barray")
+                                                                  [])))
+                                                               [])))
+                                                            [])))))
+                                                       [])))))
+                                                  [])))))
+                                             (:
+                                              (BlockStmt
+                                               (Return
+                                                (Just
+                                                 (ExpName
+                                                  (Name
+                                                   (: (Ident "result") []))))))
+                                              []))))))))))
+                                    (:
+                                     (MemberDecl
+                                      (MethodDecl
+                                       (:
+                                        (Annotation
+                                         (SingleElementAnnotation
+                                          (Name
+                                           (: (Ident "SuppressWarnings") []))
+                                          (EVVal
+                                           (InitExp
+                                            (Lit (String "unchecked"))))))
+                                        (: Public []))
+                                       []
+                                       (Just
+                                        (RefType
+                                         (ClassRefType
+                                          (ClassType
+                                           (:
+                                            ((,)
+                                             (Ident "List")
+                                             (:
+                                              (ActualType
+                                               (ArrayType (PrimType ByteT)))
+                                              []))
+                                            [])))))
+                                       (Ident "getBinaryMultiBulkReply")
+                                       []
+                                       []
+                                       Nothing
+                                       (MethodBody
+                                        (Just
+                                         (Block
+                                          (:
+                                           (BlockStmt
+                                            (ExpStmt
+                                             (MethodInv
+                                              (MethodCall
+                                               (Name (: (Ident "flush") []))
+                                               []))))
+                                           (:
+                                            (BlockStmt
+                                             (ExpStmt
+                                              (PostDecrement
+                                               (ExpName
+                                                (Name
+                                                 (:
+                                                  (Ident "pipelinedCommands")
+                                                  []))))))
+                                            (:
+                                             (BlockStmt
+                                              (Return
+                                               (Just
+                                                (Cast
+                                                 (RefType
+                                                  (ClassRefType
+                                                   (ClassType
+                                                    (:
+                                                     ((,)
+                                                      (Ident "List")
+                                                      (:
+                                                       (ActualType
+                                                        (ArrayType
+                                                         (PrimType ByteT)))
+                                                       []))
+                                                     []))))
+                                                 (MethodInv
+                                                  (MethodCall
+                                                   (Name
+                                                    (:
+                                                     (Ident "protocol")
+                                                     (: (Ident "read") [])))
+                                                   (:
+                                                    (ExpName
+                                                     (Name
+                                                      (:
+                                                       (Ident "inputStream")
+                                                       [])))
+                                                    [])))))))
+                                             []))))))))
+                                     (:
+                                      (MemberDecl
+                                       (MethodDecl
+                                        (:
+                                         (Annotation
+                                          (SingleElementAnnotation
+                                           (Name
+                                            (: (Ident "SuppressWarnings") []))
+                                           (EVVal
+                                            (InitExp
+                                             (Lit (String "unchecked"))))))
+                                         (: Public []))
+                                        []
+                                        (Just
+                                         (RefType
+                                          (ClassRefType
+                                           (ClassType
+                                            (:
+                                             ((,)
+                                              (Ident "List")
+                                              (:
+                                               (ActualType
+                                                (ClassRefType
+                                                 (ClassType
+                                                  (:
+                                                   ((,) (Ident "Object") [])
+                                                   []))))
+                                               []))
+                                             [])))))
+                                        (Ident "getObjectMultiBulkReply")
+                                        []
+                                        []
+                                        Nothing
+                                        (MethodBody
+                                         (Just
+                                          (Block
+                                           (:
+                                            (BlockStmt
+                                             (ExpStmt
+                                              (MethodInv
+                                               (MethodCall
+                                                (Name (: (Ident "flush") []))
+                                                []))))
+                                            (:
+                                             (BlockStmt
+                                              (ExpStmt
+                                               (PostDecrement
+                                                (ExpName
+                                                 (Name
+                                                  (:
+                                                   (Ident "pipelinedCommands")
+                                                   []))))))
+                                             (:
+                                              (BlockStmt
+                                               (Return
+                                                (Just
+                                                 (Cast
+                                                  (RefType
+                                                   (ClassRefType
+                                                    (ClassType
+                                                     (:
+                                                      ((,)
+                                                       (Ident "List")
+                                                       (:
+                                                        (ActualType
+                                                         (ClassRefType
+                                                          (ClassType
+                                                           (:
+                                                            ((,)
+                                                             (Ident "Object")
+                                                             [])
+                                                            []))))
+                                                        []))
+                                                      []))))
+                                                  (MethodInv
+                                                   (MethodCall
+                                                    (Name
+                                                     (:
+                                                      (Ident "protocol")
+                                                      (: (Ident "read") [])))
+                                                    (:
+                                                     (ExpName
+                                                      (Name
+                                                       (:
+                                                        (Ident "inputStream")
+                                                        [])))
+                                                     [])))))))
+                                              []))))))))
+                                      (:
+                                       (MemberDecl
+                                        (MethodDecl
+                                         (: Public [])
+                                         []
+                                         (Just
+                                          (RefType
+                                           (ClassRefType
+                                            (ClassType
+                                             (:
+                                              ((,)
+                                               (Ident "List")
+                                               (:
+                                                (ActualType
+                                                 (ClassRefType
+                                                  (ClassType
+                                                   (:
+                                                    ((,) (Ident "Object") [])
+                                                    []))))
+                                                []))
+                                              [])))))
+                                         (Ident "getAll")
+                                         (:
+                                          (FormalParam
+                                           []
+                                           (PrimType IntT)
+                                           False
+                                           (VarId (Ident "except")))
+                                          [])
+                                         []
+                                         Nothing
+                                         (MethodBody
+                                          (Just
+                                           (Block
+                                            (:
+                                             (LocalVars
+                                              []
+                                              (RefType
+                                               (ClassRefType
+                                                (ClassType
+                                                 (:
+                                                  ((,)
+                                                   (Ident "List")
+                                                   (:
+                                                    (ActualType
+                                                     (ClassRefType
+                                                      (ClassType
+                                                       (:
+                                                        ((,)
+                                                         (Ident "Object")
+                                                         [])
+                                                        []))))
+                                                    []))
+                                                  []))))
+                                              (:
+                                               (VarDecl
+                                                (VarId (Ident "all"))
+                                                (Just
+                                                 (InitExp
+                                                  (InstanceCreation
+                                                   []
+                                                   (TypeDeclSpecifier
+                                                    (ClassType
+                                                     (:
+                                                      ((,)
+                                                       (Ident "ArrayList")
+                                                       (:
+                                                        (ActualType
+                                                         (ClassRefType
+                                                          (ClassType
+                                                           (:
+                                                            ((,)
+                                                             (Ident "Object")
+                                                             [])
+                                                            []))))
+                                                        []))
+                                                      [])))
+                                                   []
+                                                   Nothing))))
+                                               []))
+                                             (:
+                                              (BlockStmt
+                                               (While
+                                                (BinOp
+                                                 (ExpName
+                                                  (Name
+                                                   (:
+                                                    (Ident "pipelinedCommands")
+                                                    [])))
+                                                 GThan
+                                                 (ExpName
+                                                  (Name
+                                                   (: (Ident "except") []))))
+                                                (StmtBlock
+                                                 (Block
+                                                  (:
+                                                   (BlockStmt
+                                                    (ExpStmt
+                                                     (MethodInv
+                                                      (MethodCall
+                                                       (Name
+                                                        (:
+                                                         (Ident "all")
+                                                         (: (Ident "add") [])))
+                                                       (:
+                                                        (MethodInv
+                                                         (MethodCall
+                                                          (Name
+                                                           (:
+                                                            (Ident "protocol")
+                                                            (:
+                                                             (Ident "read")
+                                                             [])))
+                                                          (:
+                                                           (ExpName
+                                                            (Name
+                                                             (:
+                                                              (Ident
+                                                               "inputStream")
+                                                              [])))
+                                                           [])))
+                                                        [])))))
+                                                   (:
+                                                    (BlockStmt
+                                                     (ExpStmt
+                                                      (PostDecrement
+                                                       (ExpName
+                                                        (Name
+                                                         (:
+                                                          (Ident
+                                                           "pipelinedCommands")
+                                                          []))))))
+                                                    []))))))
+                                              (:
+                                               (BlockStmt
+                                                (Return
+                                                 (Just
+                                                  (ExpName
+                                                   (Name
+                                                    (: (Ident "all") []))))))
+                                               []))))))))
+                                       (:
+                                        (MemberDecl
+                                         (MethodDecl
+                                          (: Public [])
+                                          []
+                                          (Just
+                                           (RefType
+                                            (ClassRefType
+                                             (ClassType
+                                              (:
+                                               ((,)
+                                                (Ident "List")
+                                                (:
+                                                 (ActualType
+                                                  (ClassRefType
+                                                   (ClassType
+                                                    (:
+                                                     ((,) (Ident "Object") [])
+                                                     []))))
+                                                 []))
+                                               [])))))
+                                          (Ident "getAll")
+                                          []
+                                          []
+                                          Nothing
+                                          (MethodBody
+                                           (Just
+                                            (Block
+                                             (:
+                                              (BlockStmt
+                                               (Return
+                                                (Just
+                                                 (MethodInv
+                                                  (MethodCall
+                                                   (Name
+                                                    (: (Ident "getAll") []))
+                                                   (: (Lit (Int 0)) []))))))
+                                              (:
+                                               (BlockStmt
+                                                (ExpStmt
+                                                 (MethodInv
+                                                  (MethodCall
+                                                   (Name (: (Ident "flush") []))
+                                                   []))))
+                                               [])))))))
+                                        (:
+                                         (MemberDecl
+                                          (MethodDecl
+                                           (: Public [])
+                                           []
+                                           (Just
+                                            (RefType
+                                             (ClassRefType
+                                              (ClassType
+                                               (:
+                                                ((,) (Ident "Object") [])
+                                                [])))))
+                                           (Ident "getOne")
+                                           []
+                                           []
+                                           Nothing
+                                           (MethodBody
+                                            (Just
+                                             (Block
+                                              (:
+                                               (BlockStmt
+                                                (ExpStmt
+                                                 (MethodInv
+                                                  (MethodCall
+                                                   (Name (: (Ident "flush") []))
+                                                   []))))
+                                               (:
+                                                (BlockStmt
+                                                 (ExpStmt
+                                                  (PostDecrement
+                                                   (ExpName
+                                                    (Name
+                                                     (:
+                                                      (Ident
+                                                       "pipelinedCommands")
+                                                      []))))))
+                                                (:
+                                                 (BlockStmt
+                                                  (Return
+                                                   (Just
+                                                    (MethodInv
+                                                     (MethodCall
+                                                      (Name
+                                                       (:
+                                                        (Ident "protocol")
+                                                        (: (Ident "read") [])))
+                                                      (:
+                                                       (ExpName
+                                                        (Name
+                                                         (:
+                                                          (Ident "inputStream")
+                                                          [])))
+                                                       []))))))
+                                                 []))))))))
+                                         [])))))))))))))))))))))))))))))))))))))))
+  []))
