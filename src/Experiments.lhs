@@ -652,9 +652,9 @@ was commited in $c$ by a human, as \texttt{M.lang}.
 after the repository, commit and internal id of \texttt{O.lang}.
 \end{itemize}
 
-  The full process is not much more involved but out of
-the scope of this thesis. \victor{Do we refer the reader somewhere? I wouldn't mind
-pasting the entire shell script somewhere}
+  The full script is not much more involved but out of
+the scope of this thesis, we refer the reader to the full code
+for more details \victor{WHERE IS THE CODE?}.
 Overall, we acquired 12687 usable conflicts -- that is, we were able
 to parse the four files parse with the parsers available to us -- and
 2770 conflicts where at least one file yielded a parse error.
