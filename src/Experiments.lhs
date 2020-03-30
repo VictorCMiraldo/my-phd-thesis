@@ -436,8 +436,7 @@ reflects the sharing of the list of method modifiers.]%
     [\texttt{Method f} , s sep=3mm
       [,change [p,metavar] [p,metavar]]
       [,change [i,metavar] [i,metavar]]
-      [|Body|
-        [|dots|]
+      [|dots|
         [,change [x,metavar] [\texttt{*} [x,metavar] [\texttt{y}]]]]
     ]
     [|(:)|
@@ -566,9 +565,6 @@ class Class {
 }
 \end{verbatim}
 \end{minipage}\qquad}
-
-\victor{Should I also draw patches like in the prvious figure, here?}
-
 \caption{Example distilled from \texttt{spring-boot}, commit \texttt{0074e9},
 where |NoNested| merges with a true success but |Patience| merges
 with \emph{mdif} since it inserts the declaration of \texttt{X} in
@@ -599,6 +595,14 @@ algorihm. It is worth noting that just because Java does not order
 its declarations, this is not acceptable behavior since
 it could produce uncompilable code in a language like Agda, where
 the order of declarations matter.
+
+  The examples in \Cref{fig:eval:nn-pt-01,fig:eval:nn-pt-02} illustrate
+an inherent difficulty of using naive structured differencing over
+structures with complex semantics, such as source-code. On the one hand
+we have that sharing method modifiers triggers unwanted replication
+of a change. On the other, the lack of sharing of empty method bodies makes
+it difficult to place an insertion in its correct position.
+
 
 \subsection{Threats to Validity}
 
