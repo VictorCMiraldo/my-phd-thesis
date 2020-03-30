@@ -82,3 +82,50 @@ each other, apparently hdiff can swap orders. I think its because
 we swap the arguments on mergePhase1 on one of the deletion cases.
 Nevertheless, the patch produced by hdiff makes sense and moreover,
 the human did insert more statements on the merge commit.
+
+## 06 ignornig-change
+
+One replica reordered imports, the merge ignored this. We
+produced a correct merge with hdiff
+
+## 07 ignoring-change
+
+Human merge did /not/ insert a statement; hdiff again produced 
+an expected result.
+
+## 08 extra-ops
+
+This is a fun one! the merge looked something like:
+
+         A.lua                         O.lua                      B.lua
+...                         | ...                             | ...                         
+dict={name='A',sheet='a'    | dict={name='A',sheet='dir/a'    | dict={name='A',sheet='dir/a'  
+     ,name='B',sheet='b'    |      ,name='B',sheet='dir/b'    |      ,name='B',sheet='dir/b'  
+                            |                                 | +    ,name='C',sheet='dir/c'
+     ,name='D',sheet='d'}   |      ,name='D',sheet='dir/d'}   |      ,name='D',sheet='dir/d'} 
+
+Naturally, the human merge was:
+
+```lua
+dict={name='A',sheet='a' 
+     ,name='B',sheet='b' 
+     ,name='C',sheet='c'
+     ,name='D',sheet='d'}
+```
+
+But we had no way of doing that. Our merge was:
+
+
+```lua
+dict={name='A',sheet='a' 
+     ,name='B',sheet='b' 
+     ,name='C',sheet='dir/c'
+     ,name='D',sheet='d'}
+```
+
+I'd argue our mage still constitutes a correct result.
+
+## 09 extra-ops
+
+Import reordering; hdiff still produced a correct result. The human merge
+permuted the insertions.
