@@ -258,7 +258,7 @@ Language & Mode &  Local/Global & \emph{success} & \emph{mdif} & \emph{conf} \\ 
 the most success?}
 \end{table}
 
-  For the synchronization experiment we have run \texttt{hdiff}'s merge 
+  For the synchronization experiment we have run \texttt{hdiff}'s merge
 function over our dataset with various parameters. All combinations of
 extraction methods, local and global scope and minimum sharing height
 of $1, 3$ and $9$ where executed. \victor{TODO: actually run it, again! lol}
@@ -272,7 +272,8 @@ which conflicts we saw. \Cref{tbl:eval:hdiff-conflict-distr}
 shows the distribution of each conflict type throughout the
 dataset. Note that a patch resulting from a merge can have multiple
 conflicts. This information is useful for deciding which aspects of
-the merge algorithm can yield better rewards.  \victor{so what? ...}
+the merge algorithm can yield better rewards.  \victor{so what? Do I even want this
+informantion?}
 
 \begin{table}
 \centering
@@ -292,23 +293,18 @@ Percentile & 0.42 & 0.27 & 0.11 & 0.1 & 0.05 & 0.02 & 0.03 \\
 \label{tbl:eval:hdiff-conflict-distr}
 \end{table}
 
-  Varying true success rates are expected. Different
-parameters used with \texttt{hdiff} yield vastly different patches.
-
-
-  The cases where \texttt{hdiff} did produce a merge patch
-with \emph{no} conflicts, but it was different from what a human
-produced, are interesting.
-
- we have manually analyzed ??? randomly selected \emph{mdif} cases and
-seen that ??? of those \texttt{hdiff} behaved expectedtly.
-These, in fact, corresponds to cases analogous to \Cref{fig:eval:mdif-suc-01},
-where the human performed additional operations, or ignored certain
-changes from one replica.
+  The varying true success rates seen in \Cref{tbl:eval:merge-hdiff} are expected.
+Different parameters used with \texttt{hdiff} yield different patches, which
+might be easier or harder to merge. Out of the datapoints that resulted in \emph{mdif}
+we have manually analyzed ??? randomly selected cases. We
+witnessed that ??? of those \texttt{hdiff} behaved as we expect, and
+the \emph{mdif} result was attributed to the human performing more operations
+than a structural merge would have performed. \Cref{fig:eval:mdif-suc-01},
+illustrates one example, distilled from the manually analyzed cases.
 \victor{I've seen 13 so far, and 11 of them \texttt{hdiff} behaved
 expectedly. The other two are discussed in \Cref{sec:eval:diff-extr-methods}}
 \victor{Anyway... So what? What do we do with this info?}
-
+\victor{Should I list the cases I looked into?}
 
 \begin{figure}
 \footnotesize \centering
@@ -368,20 +364,241 @@ produce a correct merge, but this got classified as \texttt{mdif}.}
 \label{fig:eval:mdif-suc-01}
 \end{figure}
 
+  The cases where \emph{the same} datapoint yeilds a true success
+and a \emph{mdif}, depending on which extraction method was used,
+are interesting. Let us look at two complimentary examples (\Cref{fig:eval:nn-pt-01,fig:eval:nn-pt-02}) that were distilled from these contradicting
+cases.
 
-\subsubsection{Notes on Different Extraction Methods}
-\label{sec:eval:diff-extr-methods}
+\begin{figure}
+\centering
+\scriptsize
+\subfloat[\texttt{A.java}]{%
+\begin{minipage}[t]{\textwidth}
+\begin{verbatim}
+class Class {
+  public int f(int x)
+    { F(x*y); }
+  public int g(int x)
+    { G(x+2); }}
+\end{verbatim}
+\end{minipage}}\qquad%
+\subfloat[\texttt{O.java}]{%
+\begin{minipage}[t]{\textwidth}
+\begin{verbatim}
+class Class {
+  public int f(int x)
+    { F(x); }
+  public int g(int x)
+    { G(x+1); }}
+\end{verbatim}
+\end{minipage}}\qquad%
+\subfloat[\texttt{B.java}]{%
+\begin{minipage}[t]{\textwidth}
+\begin{verbatim}
+class Class {
+  public int f(int x)
+    { F(x); }
+  public static int g(int x)
+    { G(x+1); }}
+\end{verbatim}
+\end{minipage}}
 
-  Manual inspection of randomly selected cases where we have
-observed a \emph{mdif} result -- where \texttt{hdiff} produced a different result from
-the human -- concluded \texttt{hdiff} behaved expectedly and the human
-performed additional operations. But we also observed that certain
-datatpoints resulted in \emph{mdif} if merged with extraction mode |NoNested|
-but \emph{success} when merged with |Patience|. Those were particularly interesting
-and deserve special attention.
+\subfloat[Expected merge, computed with |Patience|]{%
+\qquad\quad
+\begin{minipage}[t]{\textwidth}
+\begin{verbatim}
+class Class {
+  public int f(int x)
+    { F(x*y); }
+  public static int g(int x)
+    { G(x+2); }}
+\end{verbatim}
+\end{minipage}\qquad\quad}\quad%
+\subfloat[Incorrect merge, computed with |NoNest|]{%
+\qquad
+\begin{minipage}[t]{\textwidth}
+\begin{verbatim}
+class Class {
+  public static int f(int x)
+    { F(x*y); }
+  public static int g(int x)
+    { G(x+2); }}
+\end{verbatim}
+\end{minipage}\qquad}
 
-  
-  
+\subfloat[Simplified illustration of patch computed with
+\texttt{hdiff -d nonest \{O,A\}.java}; The sharing of |metavar p|
+reflects the sharing of the list of method modifiers.]%
+{%
+\begin{myforest}
+[\texttt{class Class}
+  [|(:)| , alignmentSmall , s sep=3mm
+    [\texttt{Method f} , s sep=3mm
+      [,change [p,metavar] [p,metavar]]
+      [,change [i,metavar] [i,metavar]]
+      [|Body|
+        [|dots|]
+        [,change [x,metavar] [\texttt{*} [x,metavar] [\texttt{y}]]]]
+    ]
+    [|(:)|
+      [\texttt{Method g} , s sep=3mm
+        [,change [p,metavar] [p,metavar]]
+        [,change [i,metavar] [i,metavar]]
+        [|dots| [,change [|1|] [|2|]]]
+      ]
+      [|[]|]
+    ]
+  ]
+]
+\end{myforest}}
+
+\subfloat[Simplified illustration of patch computed with
+\texttt{hdiff -d nonest \{O,B\}.java}, note how each copy happens inside
+its own scope]%
+{%
+\begin{myforest}
+[\texttt{class Class}
+  [|(:)| , s sep=5mm
+    [|Cpy (metavar f)| , alignmentSmall]
+    [|(:)|
+      [\texttt{Method g} , s sep=10mm
+        [,change [|(:)| [p,metavar] [|[]|]]
+                 [|(:)| [p,metavar] [|(:)| [\texttt{static}] [|[]|]]]]
+        [|Cpy (metavar typ)| , alignmentSmall]
+        [|Cpy (metavar bdy)| , alignmentSmall]
+      ]
+      [|[]|]
+    ]
+  ]
+]
+\end{myforest}}
+\caption{Example distilled from \texttt{cas}, commit \texttt{035eae3},
+where |Patience| merges with a true success but |NoNest| merges
+with \emph{mdif}, and, in fact, replicates the \texttt{static}
+modifier incorrectly.}
+\label{fig:eval:nn-pt-01}
+\end{figure}
+
+
+  \Cref{fig:eval:nn-pt-01} shows an example where merging patches
+extracted with |Patience| returns the correct result, but
+merging patches extracted with |NoNest| does not. Because
+replica \texttt{A} modified the definition of \texttt{f},
+the entire declaration of \texttt{f} cannot be copied, and
+it is placed inside the same scope (alignment) as the definition
+of \texttt{g} since they share a name, \texttt{x}. They also share,
+however, the list of method modifiers, which in this case is \texttt{public}.
+When \texttt{B} modifies the list of modifiers of method \texttt{g}
+by appending \texttt{static}, the merge algorithm replicates this
+change to the list of modifiers of \texttt{f}, since the patch
+wrongly believes both lists represent \emph{the same list}.
+Merging with |Patience| does not witnes the problem since it will
+not share \texttt{x} not the modifier list, since these occur
+more than once in the deletion and insertion context of both
+\texttt{hdiff O A} and \texttt{hdiff O B}.
+
+\begin{figure}
+\centering
+\scriptsize
+\subfloat[\texttt{A.java}]{%
+\begin{minipage}[t]{\textwidth}
+\begin{verbatim}
+class Class {
+  String S = C.g();
+  void m ()
+    { return; }
+  void o (int l);
+  void p ();
+}
+\end{verbatim}
+\end{minipage}}\qquad%
+\subfloat[\texttt{O.java}]{%
+\begin{minipage}[t]{\textwidth}
+\begin{verbatim}
+class Class {
+  void m ()
+    { C.q.g(); return;	}
+  void n ();
+  void o ();
+  void p ();
+}
+\end{verbatim}
+\end{minipage}}\qquad%
+\subfloat[\texttt{B.java}]{%
+\begin{minipage}[t]{\textwidth}
+\begin{verbatim}
+class Class {
+  void m ()
+    { C.q.g(); return;	}
+  void n ();
+  void o ();
+  void X ();
+  void p ();
+}
+\end{verbatim}
+\end{minipage}}
+
+\subfloat[Expected merge, computed with |NoNested|]{%
+\qquad\quad
+\begin{minipage}[t]{\textwidth}
+\begin{verbatim}
+class Class {
+  String S = C.g();
+  void m ()
+    { return; }
+  void o (int l);
+  void X ();
+  void p ();
+}
+\end{verbatim}
+\end{minipage}\qquad\quad}\quad%
+\subfloat[Incorrect merge, computed with |Patience|]{%
+\qquad
+\begin{minipage}[t]{\textwidth}
+\begin{verbatim}
+class Class {
+  String S = C.g();
+  void X ();
+  void m ()
+    { return; }
+  void o (int l);
+  void p ();
+}
+\end{verbatim}
+\end{minipage}\qquad}
+
+\victor{Should I also draw patches like in the prvious figure, here?}
+
+\caption{Example distilled from \texttt{spring-boot}, commit \texttt{0074e9},
+where |NoNested| merges with a true success but |Patience| merges
+with \emph{mdif} since it inserts the declaration of \texttt{X} in
+the wrong place.}
+\label{fig:eval:nn-pt-02}
+\end{figure}
+
+  \Cref{fig:eval:nn-pt-02}, on the other hand, shows an example where
+merging patches extracted with |NoNested| succeeds, but |Patience|
+inserts a declaration in an unexpected location. Upon further
+inspection, however, the reason for the diverging behavior becomes
+clear.  When differencing \texttt{A} and \texttt{O} under |Patience|
+context extraction, the empty bodies (which are represented in the
+Java AST by |MethodBody Nothing|) of the declarations of \texttt{n}
+and \texttt{o} are not shared. Hence, the alignment mechanism
+wrongly identifies that \emph{both} \texttt{n} and \texttt{o}.
+Moreover, because \texttt{C.g()} is uniquely shared between
+the definition of \texttt{m} and \texttt{S}, the patch identifies that
+\texttt{void m...} became \texttt{String S...}. Finally, the merge
+algorithm then transforms \texttt{void m} into \texttt{String S},
+but then sees two deletions, which trigger the deletion of \texttt{n}
+and \texttt{o} from the spine. The next instruction is the
+insertion of \texttt{X}, resulting in the non-intuitive placement
+of \texttt{X} in the merge produced with |Patience|.
+When using |NoNested|, however, the empty bodies get all shared through
+the code and prevend the detection of a deletion by the alignment
+algorihm. It is worth noting that just because Java does not order
+its declarations, this is not acceptable behavior since
+it could produce uncompilable code in a language like Agda, where
+the order of declarations matter.
 
 \subsection{Threats to Validity}
 
