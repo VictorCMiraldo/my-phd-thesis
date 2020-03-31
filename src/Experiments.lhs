@@ -1,66 +1,85 @@
-  Throughout this thesis we have presented two
-approaches to structural differencing. In \Cref{chap:structural-patches}
-we saw \texttt{stdiff}, which served as a stepping stone
-by providing important insights into the representation and computation
-of patches. Next, we seen \texttt{hdiff}
-in \Cref{chap:pattern-expression-patches}, which
-intuitively improved upon the previous aproach with a
-more efficient algorithm and a better overall merge algorithm.
-On this section we would like to quantify how much
-\texttt{hdiff} improved over \texttt{stdiff}, and also
-understand the relationship of between the
-multitude of parameters that can be tweaked in \texttt{hdiff}: shall we
-share constants? If so, how? Should we prioritize small
-subtrees shared many times or bigger subtrees shared less often? etc.
-Finally, we would like to better understand
-the viability of structural differencing in source-code
-version control, and that can only be done by running algorithms
-over real data.
+  Throughout this thesis we have presented two approaches to
+structural differencing. In \Cref{chap:structural-patches} we saw
+\texttt{stdiff}, which albeit unpractical, provided us with important
+insights into the representation and computation of patches. These
+insights and experience led us to develop \texttt{hdiff},
+\Cref{chap:pattern-expression-patches}, which improved upon the
+previous aproach with a more efficient |diff| function at
+the expense of the simplicity of the merge algorithm: the
+|merge| function from \texttt{hdiff} is much more involved
+than that of \texttt{stdiff}.
 
-  The evaluation of our algorithms is divided in two separate
-experiments. First we look at performance of the |diff| function for
-the different approaches. Then we look at synchronization success rate,
-that is, how often can we solve conflicts that \texttt{git merge} failed to
-resolve. The data for this experiments have been taken from public
-\texttt{GitHub} repositories. Each datapoint consists in four files
-representing a merge conflict that was resolved by a human:
-\texttt{O.lang} is the common ancestor of a \texttt{git merge},
-\texttt{A.lang} and \texttt{B.lang} are the diverging replicas, which
-\texttt{git merge} could not automatically reconcile, and
-\texttt{M.lang} is the file that was produced by a human and
-commited as the resolved merge.
+  In this chapter we apply our algorithms to real-world
+conflicts extracted from \texttt{GitHub} and analyze
+the results. We are interested in performance measruments
+and synchronization success rates, which are central
+factors to the applicability of structural differencing
+in the context of software version control.
 
-  We have extracted a total of 12687 usable datapoints from \texttt{GitHub}. They
-have been obtained from large public repositories in Java, JavaScript, Python,
-Lua and Clojure. The choice of programming languages was motivated
-by the parsers that were readily available in Hackage,
-with the exception of Clojure, where we borrowed a parser from
-a MSc thesis~\cite{Garufi2018}. More detailed information about data
-collection is given in \Cref{sec:eval:collection}; \Cref{tbl:eval:summary-data}
-provides an overview of the gathered conflicts per programming language.
+  To conduct the aforementioned evaluation we have extracted a total
+of 12687 usable datapoints from \texttt{GitHub}. They have been
+obtained from large public repositories in Java, JavaScript, Python,
+Lua and Clojure. The choice of programming languages was motivated by
+the parsers that were readily available in Hackage, with the exception
+of Clojure, where we borrowed a parser from a MSc
+thesis~\cite{Garufi2018}. More detailed information about data
+collection is given in \Cref{sec:eval:collection};
 
-%   In \Cref{sec:eval:performance} we look at plots of the time it took
-% to compute patches with each approach. This strenghtens our analytical
-% intution about the temporal complexity of each algorithm and provides
-% empirical evidence for the scalability of \texttt{hdiff} and lack
-% there of from \texttt{stdiff}. \Cref{sec:eval:merging} looks at how many
-% conflicts could be correctly solved by each algorith. A correct solution
-% is when we can automatically produce a merge that equals to what a human has
-% done to reconcile the conflict, modulo parsing.
+   The evaluation of \texttt{stdiff} enjoys less
+datapoints than \texttt{hdiff} for the sole reason that \texttt{stdiff}
+requires the \texttt{generics-mrsop} library, which triggers a memory
+leak in GHC\footnote{\url{https://gitlab.haskell.org/ghc/ghc/issues/17223} and
+\url{https://gitlab.haskell.org/ghc/ghc/issues/14987}} when used with
+larger abstract syntax trees. Consequently, we could only evaluated
+\texttt{stdiff} over the Clojure and Lua subset of our dataset.
 
-  Unfortunately, the performance study for \texttt{stdiff} enjoys less datapoints than
-\texttt{hdiff}. The reason being that \texttt{stdiff} requires
-the \texttt{generics-mrsop} library, which triggers a memory leak
-in GHC\footnote{\victor{get mem leak info}} when instantiated
-for large abstract syntax trees. Consequently, we have only evaluated
-\texttt{stdiff} over the Clojure and Lua conflicts.
-Nevertheless, we reiterate that \texttt{stdiff} was abandoned
-due to its poor performance, which can be clearly observed in its performance 
-measurements, therefore, we ommit a detailed discussion of its
-synchronization experiment.
+\section{Data Collection}
+\label{sec:eval:collection}
 
-\victor{Do we have ``research questions''? IF so, we should mention
-them in the intro.}
+  Collecting files from \texttt{GitHub} is not too difficult and can
+be done with moderate amounds of bash scripting. The overal idea to
+extracting the merge conflicts from a given repository is listing all
+commits $c$ with more than two parents, recreating the repository at
+the state immediatly previous to $c$ then attempting to call
+\texttt{git merge} at that state.
+
+  Our script improves upon the script written
+by a master student~\cite{Garufi2018} by making sure to collect
+the file that a human committed as the resolution of the conflict,
+denoted \texttt{M.lang}. To collect conflicts from a repository, then,
+all we have to do is run the following commands at its root.
+
+\begin{itemize}
+  \item List each commit $c$ with at least two parents with
+\texttt{git rev-list --merges}.
+
+  \item For each commit $c$ as above, let its parents be $p, qs$;
+checkout the repository at $p$ and attempt to \texttt{git merge
+--no-commit qs}.  The \texttt{--no-commit} switch is important since
+it gives us a change to inspect the result of the merge.
+
+  \item Next we parse the output of \texttt{git ls-files --unmerged},
+which provides us the git three \emph{object-id} for each file that
+coud not be automatically merged: one identifier for the common ancestor
+and one identifier for each of the two diverging replicas.
+
+  \item Then we use \texttt{git cat-file} to get the files corresponding
+to each of the \emph{object-ids} gathered on the previous step. This yields
+us three files, \texttt{O.lang}, \texttt{A.lang} and \texttt{B.lang}.
+Lastly, we use \texttt{git show} to save the \texttt{M.lang} that
+was commited by a human, in $c$, resolving the conflict.
+\end{itemize}
+
+  After running the steps above for a number of repositories, we end
+up with a list of folders containing a merge conflict that was solved
+by a human. Each of these folders contain a span $A \leftarrow O
+\rightarrow B$ and a file $M$ that synchronizes $A$ and $B$.  We refer
+the reader to the full code for more details \victor{WHERE IS THE
+CODE?}.  Overall, we acquired 12687 usable conflicts -- that is, we
+were able to parse the four files parse with the parsers available to
+us -- and 2770 conflicts where at least one file yielded a parse
+error. \Cref{tbl:eval:summary-data} provides the distribution of datapoints
+per programming language.
 
 \begin{table}
 \centering
@@ -90,12 +109,13 @@ by a human to resolve the conflict.
 
 \begin{figure}
 \centering
-\subfloat[Runtimes from \texttt{stdiff} over 7000 datapoints.
-Both axis are in a log-scale and the displayed lines are for reference]{%
+\subfloat[Runtimes from \texttt{stdiff} shown in
+a log-log plot. The lines illustrate the behavior of \texttt{stdiff}
+being between linear and quadratic]{%
 \includegraphics[width=0.4\textwidth]{src/img/runtimes-stdiff.pdf}
 \label{fig:eval:perf:stdiff}}
 \quad
-\subfloat[Runtimes from \texttt{hdiff} over 14000 datapoints.]{%
+\subfloat[Runtimes from \texttt{hdiff} shown in a linear plot.]{%
 \includegraphics[width=0.4\textwidth]{src/img/runtimes-hdiff.pdf}
 \label{fig:eval:perf:hdiff}}
 \caption{Performance evaluation of \texttt{stdiff} and \texttt{hdiff}.}
@@ -105,8 +125,7 @@ Both axis are in a log-scale and the displayed lines are for reference]{%
   To measure the performance of the |diff| function in both approaches
 we computed four patches per datapoint, namelly \texttt{diff O A},
 \texttt{diff O B}, \texttt{diff O M} and \texttt{diff A B}.
-
-  Whilst computing patches we limited the memory usage
+Whilst computing patches we limited the memory usage
 to 8GB and overal time to 30s. If a call to |diff| used more than the
 enabled temporal and spacial resources it was automatically
 killed. We ran both \texttt{stdiff} and \texttt{hdiff} on the
@@ -137,10 +156,11 @@ than \texttt{stdiff}. We do see, however, that the \texttt{proper} context
 extraction is slightly slower than \texttt{nonest} or \texttt{patience}.
 Finally, only 14 calls timed-out and none used more than 8GB of memory.
 
-  Measuring performance of pure Haskell code is always nuanced
-and need some attention. We have used the |time| auxiliary function below, which is
-based on the \texttt{timeit} package but adapted to fully force the
-evaluation of the result of the action, with the |deepseq| method.
+  Measuring performance of pure Haskell code is nuanced and need some
+attention. We have used the |time| auxiliary function, below.  We
+based ourselves on the \texttt{timeit} package but adapted to fully
+force the evaluation of the result of the action, with the |deepseq|
+method.
 
 \begin{myhs}
 \begin{code}
@@ -630,34 +650,8 @@ our merging process, the final numbers would not inform us about how
 many code transformations are \emph{disjoint} and could be automatically
 merged.
 
-\section{Data Collection}
-\label{sec:eval:collection}
-
-  Collecting files from \texttt{GitHub} is not too difficult and can be done with
-moderate amounds of bash scripting. Our method is a variation of the
-script used by Giovani Garufi~\cite{Garufi2018}, summarized below.
-
-\begin{itemize}
-  \item For each commit $c$ in a given repository such that $c$ has
-two or more parents $p_0, \cdots, p_n$; checkout the repository at $c$
-and attempt to \texttt{git merge}.
-
-  \item For each file that git could not merge automatically --
-obtainable through \texttt{git}'s \texttt{ls-files --unmerged} command
--- collect the common ancestor as \texttt{O.lang}, the diverging
-versions as \texttt{A.lang} and \texttt{B.lang} and the merged file that
-was commited in $c$ by a human, as \texttt{M.lang}.
-
-  \item Each of these components is stored in a folder named
-after the repository, commit and internal id of \texttt{O.lang}.
-\end{itemize}
-
-  The full script is not much more involved but out of
-the scope of this thesis, we refer the reader to the full code
-for more details \victor{WHERE IS THE CODE?}.
-Overall, we acquired 12687 usable conflicts -- that is, we were able
-to parse the four files parse with the parsers available to us -- and
-2770 conflicts where at least one file yielded a parse error.
+\victor{We didn't look into rebases; argue this is not necessarily a threat to
+validity, it would have given us more datapoints though}
 
 
 \section{Discussion}

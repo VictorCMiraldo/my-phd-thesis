@@ -60,8 +60,10 @@ not employ.
 conceptual success. It enabled us to prototype and tweak the
 algorithms discussed in \Cref{chap:structural-patches} and
 \Cref{chap:pattern-expression-patches} with ease. Yet, a memory leak
-in the Glasgow Haskell Compiler\footnote{\victor{get bug report
-numbers}} made it unusable for encoding real programming languages
+in the Glasgow Haskell Compiler\footnote{
+\url{https://gitlab.haskell.org/ghc/ghc/issues/17223} and
+\url{https://gitlab.haskell.org/ghc/ghc/issues/14987}}
+made it unusable for encoding real programming languages
 such as those in the \texttt{language-python} or \texttt{language-java}
 packages. This frustrating outcome meant that a different approach --
 which did not rely as heavily on type families -- was necessary
@@ -1395,7 +1397,7 @@ to differencing.
 leak in the Haskell compiler itself when used for large
 mutually recursive families. The bugs have been reported
 in the GHC bug tracker\footnote{
-\url{https://gitlab.haskell.org/ghc/ghc/issues/17223} and 
+\url{https://gitlab.haskell.org/ghc/ghc/issues/17223} and
 \url{https://gitlab.haskell.org/ghc/ghc/issues/14987}}
 but at the time of writing of this thesis, have not been resolved.
 This means that if we wish to collect large scale real data
