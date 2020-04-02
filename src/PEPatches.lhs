@@ -11,29 +11,53 @@ connected to edit-scripts: subtrees could only be copied once and
 could not be permuted. This means we still suffered from ambiguous
 patches, and, consequently, a computationally expensive |diff|
 algorithm. Overcoming the drawback of ambiguity requires a shift in
-perspective and a thorough decoupling from edit-script based
-differencing algorithms. In this section we will explore the the
+perspective and abandoning edit-script based
+differencing algorithms. In this section we will explore the
 \texttt{hdiff} approach, where patches allow for trees to be
-arbitrarily permuted, duplicated or contracted -- contractions are
-dual to duplications.
+arbitrarily permuted, duplicated or contracted (contractions are
+dual to duplications).
 
-  Classical tree differencing algorithms start by computing a tree
+  Classical tree differencing algorithms start by computing tree
 matchings (\Cref{sec:background:tree-edit-distnace}), which identify
-which subtrees should be copied. These tree matchings, however, must
-be restricted to order-preserving partial injections in order to be
-efficiently translated to edit-scripts later on.  The \texttt{hdiff}
+the subtrees that should be copied. These tree matchings, however, must
+be restricted to order-preserving partial injections to be
+efficiently translated to edit-scripts later.  The \texttt{hdiff}
 approach never translates to edit-scripts, which means the tree
 matchings we compute are subject to \emph{no} restrictions.  In fact,
-\texttt{hdiff} uses these unrestricted tree matchings as \emph{the}
-patch, instead of translating them \emph{into the}
+\texttt{hdiff} uses these unrestricted tree matchings as \emph{the patch}, 
+instead of translating them \emph{into} a
 patch. Consequently, we do not need any of the classical restrictions
 imposed on tree matchings.
 
-  Suppose we want to write a change that modifies the left element
+  Suppose we want to describe a change that modifies the left element
 of a binary tree. If we had the full Haskell programming language available
-as the patch language, we could write something in the lines of:
+as the patch language, we could write something in the lines of
+\Cref{fig:pepatches:example-01:A}. Observing the function |c|
+in \Cref{fig:pepatches:example-01:A}, we see it has a clear domain -- a
+set of |Tree|s that when applied to |c| yields a |Just| -- which is
+specified by the pattern and guards. Then, for each tree in the domain
+we compute a corresponding tree in the codomain.  The new tree is obtained
+from the old tree by replacing the |10| by |42| in-place.  Closely
+inspecting this definition definition, we can interpret the matching of
+the pattern as a \emph{deletion} phase and the construction of the
+resulting tree as a \emph{insertion} phase.  The \texttt{hdiff}
+approach represents the change in |c| exactly as that: a pattern and a
+expression. Essentially, we write |c| as |chg (Bin (Leaf 10) y) (Bin
+(Leaf 42) y)| -- represented graphically as in
+\Cref{fig:pepatches:example-01:B}.
 
-\begin{myhs}
+% An important aspect here is that the
+% graphical notation makes it evident which constructors were copied
+% until we reach the point where a change must be made. The notation
+% $\digemFormatMetavar{\square}$ is used to indicate $\square$ is a
+% metavariable, that is, given a successful matching of the deletion
+% context against an element, $\digemFormatMetavar{\square}$ will be
+% given a value.
+
+\begin{figure}
+\centering
+\subfloat[Haskell function |c|]{%
+\begin{myhsFig}[0.4\textwidth]
 \begin{code}
 p :: Tree -> Maybe Tree
 p (Bin (Leaf x) y)
@@ -41,65 +65,828 @@ p (Bin (Leaf x) y)
   | otherwise  = Nothing
 p _            = Nothing
 \end{code}
-\end{myhs}
-
-  Observing the function |p|, above, we see it has a clear domain -- a
-set of |Tree|s that when applied to |p| yields a |Just| -- which is
-specified by the pattern and guards. Then, for each tree in the domain
-we assign a different tree in the codomain.  The new tree is obtained
-from the old tree by replacing the |10| by |42| in-place.  Taking a
-magnifying glass at that definition, we can interpret the matching of
-the pattern as a \emph{deletion} phase and the construction of the
-resulting tree as a \emph{insertion} phase.  The \texttt{hdiff}
-approach represents the change in |p| exactly as that: a pattern and a
-expression. Essentially, we write |p| as |patch (Bin (Leaf 10) y) (Bin
-(Leaf 42) y)| -- represented graphically as in
-\Cref{fig:pepatches:example-01}. An important aspect here is that the
-graphical notation makes it evident which constructors were copied
-until we reach the point where a change must be made. The notation
-$\digemFormatMetavar{\square}$ is used to indicate $\square$ is a
-metavariable, that is, given a successful matching of the deletion
-context against an element, $\digemFormatMetavar{\square}$ will be
-given a value.
-
-\begin{figure}
-\centering
+\end{myhsFig}\label{fig:pepatches:example-01:A}}\qquad\qquad
+\subfloat[|c| represented as a \emph{change}]{%
 \begin{myforest}
+[,change
 [|Bin|
-  [|Leaf| [,change [|10|] [|42|]]]
-  [,change [y,metavar] [y,metavar]]
+  [|Leaf| [|10|]]
+  [y,metavar]]
+[|Bin|
+  [|Leaf| [|42|]]
+  [y,metavar]]
 ]
-\end{myforest}
-\caption{Graphical representation of a patch that modifies the left
-children of a binary node}
+\end{myforest}\label{fig:pepatches:example-01:B}}
+\caption{Haskell function and its graphical representation as a change.
+The change here modifies the left child of a binary node. Notation |metavar y| is used to indicate |y| is
+a metavariable.}
 \label{fig:pepatches:example-01}
 \end{figure}
 
   With the added expressivity of referring to subtrees
 with metavariables we can represent more transformations
-than before. Take, for example, the patch that swaps two subtrees, which cannot
+than before. Take, for example, the chhange that swaps two subtrees, which cannot
 even be written using an edit-script based approach, here it is
-given by |patch (Bin x y) (Bin y x)|. Another helpful consequence of
+given by |chg (Bin x y) (Bin y x)|. Another helpful consequence of
 our design is that we effectively bypass the \emph{choice} phase of the
 algorithm. When computing the differences between |Bin Leaf Leaf|
 and |Leaf|, for example, we do not have to chose one |Leaf| to copy
 because we can copy both with the help of a contraction operation,
-with a patch such as: |patch (Bin x x) x|. This aspect is crucial
+with a change such as: |patch (Bin x x) x|. This aspect is crucial
 and enables us to write a linear |diff| algorithm.
 
   In this chapter we explore the representation and computation
 aspects of \texttt{hdiff}.  The big shift in paradigm of
 \texttt{hdiff} also requires a more careful look into the metatheory
-and nuances of the algorithm, which were not present in said
-paper. \digress{We first wrote our algorithm~\cite{Miraldo2019} using
-the \texttt{generics-mrsop} library even though \texttt{hdiff} does
-not require an explicit sums of products. This means we can port it to
-\genericssimpl{} and gather real-world data fort his approach. We
-present our code in this section on the \genericssimpl{} library.}
-The material in this chapter is a refinement from our ICFP'19
-publication~\cite{Miraldo2019}.
+and nuances of the algorithm, which were not present in our original
+paper~\cite{Miraldo2019}. The material in this chapter is a
+developed from our ICFP'19 publication~\cite{Miraldo2019}, shifting
+to the \genericssimpl{} library.
 
 \victor{Maybe we write another paper with Pierre about it?}
+
+
+\section{A Concrete Example}
+\label{sec:pepatches:concrete-changes}
+
+  Before exploring the generic implementation of our algorithm, let us
+look at a simple, concrete instance first, which will sets the stage
+for the the generic implementation. Throughout this section we will
+explore the central ideas from our algorithm instantiated for
+a type of 2-3-trees:
+
+\begin{myhs}
+\begin{code}
+data Tree  =  Leaf  Int
+           |  Bin   Tree  Tree
+           |  Tri   Tree  Tree  Tree
+\end{code}
+\end{myhs}
+
+  The central concept of our work is the encoding of a \emph{change}.
+Unlike previous work~\cite{Loh2009,Miraldo2017,Klein1998} which is
+based on tree-edit-distance~\cite{Bille2005} and hence, uses only
+insertions, deletions and copies of the constructors encountered
+during the preorder traversal of a tree (\Cref{fig:linear-patch}), we
+go a step further. We explicitly model permutations, duplications and
+contractions of subtrees within our notion of \emph{change}. Where
+contraction here denotes the partial inverse of a duplication. The
+representation of a \emph{change} between two values of type |Tree|,
+then, is given by identifying the bits and pieces that must be copied
+from source to destination making use of permutations and duplications
+where necessary.
+
+  A new datatype, |TreeC phi|, enables us to annotate a value of
+|Tree| with holes of type |phi|. Therefore, |TreeC MetaVar|
+represents the type of |Tree| with holes carrying metavariables.
+These metavariables correspond to arbitrary trees that are
+\emph{common subtrees} of both the source and destination of the
+change.  These are exactly the bits that are being copied from the
+source to the destination tree.  We refer to a value of |TreeC| as a
+\emph{context}.  For now, the metavariables will be simple |Int|
+values but later on we will need to carry additional information.
+
+\begin{myhs}
+\begin{code}
+type MetaVar = Int
+
+data TreeC phi  = Hole   phi
+                | LeafC  Int
+                | BinC   TreeC TreeC
+                | TriC   TreeC TreeC TreeC
+\end{code}
+\end{myhs}
+
+  A \emph{change} in this setting is a pair of such contexts. The first
+context defines a pattern that binds some metavariables, called the
+deletion context; the second, called the insertion context,
+corresponds to the tree annotated with the metavariables that are supposed
+to be instantiated by the bindings given by the deletion context.
+
+\begin{myhs}
+\begin{code}
+type Change phi = (TreeC phi , TreeC phi)
+\end{code}
+\end{myhs}
+
+\begin{figure}
+\centering
+\subfloat{%
+\begin{myforest}
+[,change [|Bin| [0,metavar] [1,metavar]]
+         [|Bin| [1,metavar] [0,metavar]]]
+\end{myforest}
+}\qquad
+\subfloat{%
+\begin{myforest}
+[,change [|Bin| [0,metavar]       [1,metavar]]
+         [|Tri| [0,metavar] [|a|] [1,metavar]]]
+\end{myforest}
+}
+\caption{Illustration of |diff (Bin t u) (Bin u t)| to the left and
+|diff (Bin t u) (Tri t a u)| on the right. Metavariables are denoted
+with |metavar x|.}
+\label{fig:pepatches:first-change}
+\end{figure}
+
+  The change that transforms |Bin t u| into |Bin u t| is then
+represented by a pair of |TreeC|, |(BinC (Hole 0) (Hole 1) ,
+BinC (Hole 1) (Hole 0))|, as seen in \Cref{fig:pepatches:first-change}.
+This change works on any tree built using the |Bin| constructor
+and swaps the children of the root. Note that it is impossible to define
+such swap operations in terms of insertions and deletions---as
+used by most diff algorithms.
+
+\subsection*{Applying Changes}
+
+  Applying a change is done by instantiating the
+metavariables in the deletion context and the insertion context:
+
+\begin{myhs}
+\begin{code}
+applyChange :: Change MetaVar -> Tree -> Maybe Tree
+applyChange (d , i) x = del d x >>= ins i
+\end{code}
+\end{myhs}
+
+  Naturally, if the term |x| and the deletion context |d| are
+\emph{incompatible}, this operation will fail. Contrary to regular
+pattern-matching we allow variables to appear more than once on both
+the deletion and insertion contexts. Their semantics are dual:
+duplicate variables in the deletion context must match equal trees,
+and are referred to as contractions, whereas duplicate variables in the
+insertion context will duplicate trees.  We use an auxiliary function
+within the definition of |del| to make this check easier to
+perform. Given a deletion context |ctx| and source |tree|, the |del|
+function tries to associate all the metavariables in the context with
+a subtree of the input |tree|.
+
+\begin{myhs}
+\begin{code}
+del :: TreeC MetaVar -> Tree -> Maybe (Map MetaVar Tree)
+del ctx tree = go ctx tree empty
+\end{code}
+\end{myhs}
+
+  The |go| function, defined below, closely follows the structure of trees and
+contexts. Only when we reach a |Hole|, do we check whether we have
+already instantiated the metavariable stored there or not. If we have
+encountered this metavariable before, we check that both occurrences
+of the metavariable correspond to the same tree; if this is the first
+time we have encountered this metavariable, we simply instantiate the
+metavariable with the current tree.
+
+\begin{myhs}
+\begin{code}
+go :: TreeC -> Tree -> Map MetaVar Tree -> Maybe (Map MetaVar Tree)
+go (LeafC n)     (Leaf n')    m = guard (n == n') >> return m
+go (BinC x y)    (Bin a b)    m = go x a m >>= go y b
+go (TriC x y z)  (Tri a b c)  m = go x a m >>= go y b >>= go z c
+go (Hole i)      t            m = case lookup i m of
+                                        Nothing  -> return (M.insert i t m)
+                                        Just t'  -> guard (t == t') >> return m
+go _             _            m = Nothing
+\end{code}
+\end{myhs}
+
+  We will refer to the result of |del ctx tree| as the \emph{valuation}
+that instantiates the metavariables of |ctx| with subtrees of |tree|.
+Once we have obtained a such valuation, we substitute the variables
+in the insertion context with their respective values, to obtain the
+final tree.  This phase fails when the change contains unbound
+variables. The |ins| function is defined below.
+
+\begin{myhs}
+\begin{code}
+ins :: TreeC MetaVar -> Map MetaVar Tree -> Maybe Tree
+ins (LeafC n)     m  = return (Leaf n)
+ins (BinC x y)    m  = Bin <$$> ins x m <*> ins y m
+ins (TriC x y z)  m  = Tri <$$> ins x m <*> ins y m <*> ins z m
+ins (Hole i)      m  = lookup i m
+\end{code}
+\end{myhs}
+
+\subsection*{Computing Changes}
+
+  Next, we explore how to produce a change from a source and a
+destination, defining a |changeTree| function. Intuitively, this function will
+try to exploit as many copy opportunities as possible. For now, we delegate
+the decision of whether a subtree should be copied or not to an
+oracle: assume we have access a function |wcs :: Tree -> Tree ->
+Tree -> Maybe MetaVar|, short for \emph{``which common subtree''}.  The
+call |wcs s d x| returns |Nothing| when |x| is \emph{not} a subtree of
+|s| and |d|; if |x| is a subtree of both |s| and |d|, it returns |Just
+i|, for some metavariable |i|.  The only condition we impose is
+injectivity of |wcs s d|: that is, if |wcs s d x == wcs s d y == Just
+j|, then |x == y|. In other words, equal metavariables correspond to
+equal subtrees.
+
+  There is an obvious inefficient implementation for |wcs|, that
+traverses both trees searching for shared subtrees---hence postulating
+the existence of such an oracle is not a particularly strong
+assumption to make.  In \Cref{sec:concreteoracle}, we provide an efficient
+implementation for |Tree|. For now, assuming the oracle exists allows for
+a clear separation of concerns.  The |changeTree| function merely
+has to compute the deletion and insertion contexts, using said
+oracle -- the inner workings of the oracle are abstracted away cleanly.
+
+\begin{myhs}
+\begin{code}
+chgTree :: Tree -> Tree -> Change MetaVar
+chgTree s d  = let f = wcs s d in (extract f s, extract f d)
+\end{code}
+\end{myhs}
+
+  The |extract| function receives an oracle and a tree.  It traverses
+its argument tree, looking for opportunities to copy subtrees. It
+repeatedly consults the oracle, to determine whether or not the
+current subtree should be shared across the source and destination.
+If that is the case, we want our change to \emph{copy} such
+subtree. That is, we return a |Hole| whenever the second argument of
+|extract| is a common subtree according to the oracle.  If the oracle
+returns |Nothing|, we move the topmost constructor to the context
+being computed and recurse over the remaining subtrees.
+
+\begin{myhs}
+\begin{code}
+extract :: (Tree -> Maybe MetaVar) -> Tree -> TreeC MetaVar
+extract o t = maybe (peel t) Hole (o t)
+  where  peel (Leaf n)     = LeafC n
+         peel (Bin a b)    = BinC (extract o a) (extract o b)
+         peel (Tri a b c)  = TriC (extract o a) (extract o b) (extract o c)
+\end{code}
+\end{myhs}
+
+  Note that had we used a version of |wcs| that only returns a boolean
+value we would not know what metavariable to use when a subtree is
+shared.  Returning a value that uniquely identifies a subtree allows
+us to keep the |extract| function linear in the number of constructors
+in |x| (disregarding the calls to our oracle for the moment).
+
+  This iteration of the |chgTree| function has a subtle bug, however.
+It does \emph{not} produce correct changes, that is,
+it is not the case that |apply (chg s d) s == Just d| for all |s| and |d|.
+The problem can be observed when we pass a source and
+a destination trees where a common subtree occurs
+by itself but also as a subtree of another common subtree.
+Such situation is illustrated in \Cref{fig:pepatches:extract-problem}.
+In particular, the patch shown in \Cref{fig:pepatches:extract-problem:res}
+cannot be applied since the deletion context does not instantiate
+the metavariable |metavar y|, required by the insertion context.
+
+\begin{figure}
+\subfloat[|s|]{%
+\begin{myforest}
+[|Bin| [|Bin| [t] [u]] [k]]
+\end{myforest}%
+}\hfill%
+\subfloat[|d|]{%
+\begin{myforest}
+[|Bin| [|Bin| [t] [u]] [t]]
+\end{myforest}
+}\hfill%
+\subfloat[Illustration of |wcs s d|]{%
+\begin{myhsFig}[.3\textwidth]%
+\begin{code}
+wcs s d (Bin t u)  = Just (metavar x)
+wcs s d t          = Just (metavar y)
+wcs s d u          = Just (metavar z)
+wcs _ _ _          = Nothing
+\end{code}
+\end{myhsFig}
+}\hfill%
+\subfloat[Result of |chg s d|]{%
+\begin{myforest}
+[,change
+  [|Bin| [x,metavar] [k]]
+  [|Bin| [x,metavar] [y,metavar]]
+]
+\end{myforest}
+\label{fig:pepatches:extract-problem:res}}%
+\caption{Context extraction must care to produce
+well-formed changes. The nested occurrence of |t| within |Bin t u|
+here yields a change with an undefined variable on its insertion
+context.}
+\label{fig:pepatches:extract-problem}
+\end{figure}
+
+\begin{figure}
+\centering
+\subfloat[Do not share nested common subtrees.]{%
+\begin{myforest}
+[,change
+  [|Bin| [x,metavar] [k]]
+  [|Bin| [x,metavar] [t]]
+]
+\end{myforest}
+\label{fig:pepatches:extract-sol-01:nonest}}%
+\qquad\qquad
+\subfloat[Expand metavariables pursuing all sharing opportunities]{%
+\begin{myforest}
+[,change
+  [|Bin| [|Bin| [y,metavar] [z,metavar]] [k]]
+  [|Bin| [|Bin| [y,metavar] [z,metavar]] [y,metavar]]
+]
+\end{myforest}
+\label{fig:pepatches:extract-sol-01:proper}}%
+\caption{Context extraction must care to produce
+well-formed changes. The nested occurrence of |t| within |Bin t u|
+here yields a change with an undefined variable on its insertion
+context.}
+\label{fig:pepatches:extract-sol-01}
+\end{figure}
+
+  There are many ways to solve the problem of
+\Cref{fig:pepatches:extract-problem}, the following two being
+the most intuitive ones.  We could replace |metavar y| by |t| and
+ignore the sharing or we could replace |metavar x| by |Bin (metavar y)
+(metavar z)|, pushing the metavariables to the leaves maximizing
+sharing. These would give rise to the changes shown in
+\Cref{fig:pepatches:extract-sol-01}. There is a clear dichotomy
+between wanting to maximize the spine but at the same time wanting to
+copy the larger trees, closer to the root. On the one hand, copies
+closer to the root are intuitively easier to merge and less sharing
+means it is easier to isolate changes to separate parts of the tree.
+On the other hand, sharing as much as possible might capture the
+change being represented more closely.
+
+  A third, perhaps less intuitive, solution to the problem in
+\Cref{fig:pepatches:extract-problem} is to only share uniquely
+occurring subtrees, effectively simulating the \unixdiff{} with the
+\texttt{--patience} option, which only copies uniquely occurring
+lines. In fact, to make this easy to experiment, we will parameterize
+our final |extract| with which of the.  \emph{context extraction
+methods} described above should be used to produce correct changes.
+
+\begin{myhs}
+\begin{code}
+data ExtractionMode  =  NoNested |  ProperShare |  Patience
+\end{code}
+\end{myhs}
+
+  The |NoNested| mode will forget sharing in favor of copying larger
+subtrees.  It would drop the sharing of |t| producing
+\Cref{fig:pepatches:extract-sol:nonest}.  The |ProperShare| mode is
+the opposite. It would produce
+\Cref{fig:pepatches:extract-sol:proper}. Finally, |Patience| only
+share subtrees that occur only once in the source and once in the
+destination. For the inputs in
+\Cref{fig:pepatches:extract-problem-01}, extracting contexts under
+|Patience| mode would produce the same result as |NoNested|, but they
+are not the same in general. In fact,
+\Cref{fig:pepatches:extraction-01} illustrates the changes that would
+be extracted following each |ExtractionMode| for the same source and
+destination.
+
+  We will be looking into the correct |extract| function when
+we get to its generic implementation. For the time being, we move on
+to computing the |wcs| function efficiently for the concrete
+case of the |Tree| datatype.
+
+
+\begin{figure}
+\victor{Find a better example... not sure this really illustrates
+the differences}
+
+\centering
+\subfloat[Source and Destination]{%
+\begin{myforest}
+[,phantom, for children={fit=band}
+  [|Tri|,name=r
+    [|Bin| [a] [b]]
+    [|Bin| [a] [b]]
+    [k]]
+  [|Tri|
+    [|Bin| [b] [a]]
+    [|Bin| [a] [b]]
+    [k]]
+]
+\node at ($ (r) - (1.0,0) $) {|extract m|};
+\end{myforest}}%
+\quad
+\subfloat[|m = Patience|]{%
+\begin{myforest}
+[,change
+  [|Tri| [|Bin| [a] [b]]
+         [|Bin| [a] [b]]
+         [z,metavar]]
+  [|Tri| [|Bin| [b] [a]]
+         [|Bin| [a] [b]]
+         [z,metavar]]
+]
+\end{myforest}
+\label{fig:pepatches:extraction-01:patience}}%
+
+\subfloat[|m = NoNest|]{%
+\begin{myforest}
+[,change
+  [|Tri| [x,metavar]     [x,metavar] [y,metavar]]
+  [|Tri| [|Bin| [b] [a]] [x,metavar] [y,metavar]]
+]
+\end{myforest}
+\label{fig:pepatches:extraction-01:nonest}}%
+\quad
+\subfloat[|m = ProperShare|]{%
+\begin{myforest}
+[,change
+  [|Tri| [|Bin| [x,metavar] [y,metavar]]
+         [|Bin| [x,metavar] [y,metavar]]
+         [z,metavar]]
+  [|Tri| [|Bin| [y,metavar] [x,metavar]]
+         [|Bin| [x,metavar] [y,metavar]]
+         [z,metavar]]
+]
+\end{myforest}
+\label{fig:pepatches:extraction-01:proper}}
+\quad
+\caption{Different extraction methods for the same pair or trees.}
+\label{fig:pepatches:extraction-01}
+\end{figure}
+
+%% 
+%% 
+%% \subsection{Minimizing Changes: Computing Patches}
+%% %todo I think I understand why you want to minimize these changes -- but
+%% %it's a quite subtle point. What problems do you run into if you *don't* minimize
+%% %changes?
+%% %
+%% %vcm: No real problem for now. Yet, the merging algorithm
+%% %     can only be written in 5 lines because of that.
+%% %     Another aspect is that it allows us to reuse changes
+%% %     in a much smoother way. For example, lets say we are
+%% %     trying to apply a patch to a tree, but the spine
+%% %     does not match. If the patch has only one change, we
+%% %     can pull a UNIX `patch` and apply that change regardless.
+%% 
+%%   The process of minimizing and isolating the changes starts by
+%% identifying the redundant part of the contexts. That is, the
+%% constructors that show up as a prefix in \emph{both} the deletion and
+%% the insertion context. They are essentially being copied over and we
+%% want to make this fact explicit by separating them into what we call
+%% the \emph{spine} of the patch. This step will help us reason about
+%% patches later on.  If a constructor is in the \emph{spine}, we know it has been
+%% copied, if it shows up in a change, we know it was either deleted or
+%% inserted.  The spine will then contain changes---pairs of
+%% an insertion and deletion context---in its leaves:
+%% 
+%% \begin{myhs}
+%% \begin{code}
+%% type Patch23 = TreeC (Change23 MetaVar)
+%% \end{code}
+%% \end{myhs}
+%% 
+%% \begin{figure}
+%% %\includegraphics[scale=0.3]{src/img/patch-example.pdf}
+%% oops
+%% \vspace{.4em}
+%% \begin{myhs}
+%% \begin{code}
+%% TriC  (Hole   (Hole 0 , Hole 0))
+%%         (Hole   (BinC (Hole 0) (Hole 1) , BinC (Hole 1) (Hole 0))
+%%         (BinC  (Hole  (tree23toC w, tree23toC w'))
+%%                  (Hole  (Hole 3, Hole 3)))
+%% \end{code}
+%% \end{myhs}
+%% \caption{Graphical and textual representation of the patch that %
+%% transforms the value |Tri t (Bin u v) (Bin w x)| into the %
+%% value |Tri t (Bin v u) (Bin w' x)|. The |tree23toC| function %
+%% converts a |Tree| into a |TreeC| in the canonical way.}
+%%  \label{fig:patch-example}
+%% \end{figure}
+%% 
+%%   A \emph{patch} consists in a spine with \emph{changes} inside of it. 
+%% \Cref{fig:patch-example} illustrates a value of type |Patch23|, where the
+%% \emph{changes} are visualized with a shaded background in the
+%% leaves of the spine. Note that the changes contains only the necessary
+%% constructors to make sure that all metavariables that are used in the insertion
+%% context are defined in the deletion context.
+%% This keeps changes small and isolated, making them easier to merge. 
+%% 
+%%   In this section we will discuss how to take the results of
+%% |changeTree| and transform them into a |Patch23|. The first step to
+%% compute a patch from a change is identifying its \emph{spine}. That
+%% is, the constructors that are present in both the deletion and
+%% insertion contexts.  We are essentially splitting a monolithic change into
+%% the \emph{greatest common prefix} of the insertion and deletion
+%% contexts, leaving smaller changes on the leaves of this prefix:
+%% 
+%% \begin{myhs}
+%% \begin{code}
+%% gcp :: TreeC var -> TreeC var -> TreeC (Change23 var)
+%% gcp LeafC              LeafC              = LeafC
+%% gcp (BinC a1 b1)     (BinC a2 b2)     = BinC (gcp a1 a2) (gcp b1 b2)
+%% gcp (TriC a1 b1 c1)  (TriC a1 b2 c2)  = TriC (gcp a1 a2) (gcp b1 b2) (gcp c1 c2)
+%% gcp a                  b                  = Hole (a , b)
+%% \end{code}
+%% \end{myhs}
+%% 
+%%   In the last case of the |gcp| function either |a| and |b|
+%% are both holes or the constructors disagree,
+%% hence they do \emph{not} belong in the common prefix.
+%% 
+%%   One might be tempted to take the results of |changeTreeC|, pipe
+%% them into the |gcp| function directly.  Yet, the
+%% \emph{greatest common prefix} consumes all the possible constructors
+%% leading to disagreeing parts of the contexts where this might be too greedy.
+%% We must be careful not to break bindings as shown below:
+%% 
+%% %\begin{figure}
+%% \begin{minipage}[t]{.55\textwidth}
+%% \begin{myhs}
+%% \begin{code}
+%% -- prob = changeTree (Bin t t) (Bin x t)
+%% prob  :: Change23 MetaVar
+%% prob  =  Change  (  BinC (Hole 0)  (Hole 0)
+%%                  ,  BinC x         (Hole 0))
+%% \end{code}
+%% \end{myhs}
+%% \end{minipage} %
+%% \begin{minipage}[t]{.35\textwidth}
+%% \[ |gcp prob ==| \hspace{6em} \]
+%% %\includegraphics[scale=0.3]{src/img/patch-02.pdf}
+%% oops
+%% \end{minipage}
+%% % \caption{How |gcp| breaks binding. The triangle represents a |TreeC| with no holes.}
+%% % \label{fig:patch-scoping-problem}
+%% % \end{figure}
+%% 
+%%   In this example, the second change contains a |Hole 0| that does not
+%% occur in the deletion context, and is hence \emph{unbound}. To address
+%% this problem, we go over the result from our call to |gcp|, pulling
+%% changes up the tree until each change is closed, that is, the set of
+%% variables in both contexts is identical. We call this process the
+%% \emph{closure} of a patch and declare a function to compute this
+%% below.
+%% 
+%%   We have illustrated the process of |closure| in
+%% \Cref{fig:closure}. Note that in both the input and output for the
+%% |closure| function the subtree |x| appears on the deletion
+%% context. Moreover, the |closure| functions only bubbles up the minimal
+%% number of constructors to ensure all changes are closed.  In
+%% particular, the |Bin| constructor at the root is still part of the
+%% spine after the call to |closure|. 
+%% 
+%% \begin{figure}
+%% %\includegraphics[scale=0.3]{src/img/patch-03.pdf}
+%% oops
+%% \caption{Graphical representation of the |closure| function.}
+%% \label{fig:closure}
+%% \end{figure}
+%% 
+%% \begin{myhs}
+%% \begin{code}
+%% closure :: TreeC (Change23 MetaVar) -> Patch23
+%% \end{code}
+%% \end{myhs}
+%% 
+%%   Although the |closure| function apparently always returns a patch,
+%% its implementation might fail if there exists no way of closing all
+%% the changes. In our case, this will never happen as we know that
+%% |changeTree| outputs a closed change. In the worst case, the
+%% resulting spine will be empty---but the change will certainly be
+%% closed.  That is due to |postprocess|, which could have been merged
+%% with |closure|. We kept them separate for clarity.
+%% \Cref{sec:representing-changes} comes back to the |closure| function
+%% in more detail on its generic incarnation. For now, it is more
+%% important to understand that it facilitates merging our patches, later on (\Cref{sec:merging}).
+%% It is worth mentioning that the result of |closure p| should be a patch that
+%% can be applied to \emph{at least as many elements as |p|}. In some corner
+%% cases |closure| might enlarge the domain of a patch by breaking some contractions.
+%% This is not an issue, however, as being able to apply a patch to more
+%% elements is a good thing.
+%% 
+%%   As soon as every change within the spine has been closed, we have a
+%% \emph{patch}.  The final |diff| function for |Tree| is then defined
+%% as follows:
+%% 
+%% \begin{myhs}
+%% \begin{code}
+%% diffTree :: Tree -> Tree -> Patch23
+%% diffTree s d = closure $$ gcp $$ changeTree s d
+%% \end{code}
+%% \end{myhs}
+%%  
+%%   We could now define the |applyPatch23| function that applies a
+%% \emph{patch}, rather than the |applyChange23| we saw previously.  This
+%% is done by traversing the object tree and the spine of the patch until
+%% a change is found and applying that change to the \emph{local}
+%% subtrees in question.  
+%% 
+%% %% For one, we are not trying to
+%% %% minimize the changes after we |extract| a context from the source or
+%% %% destination trees. This makes merging significantly harder.  Another
+%% %% problem is that we are not addressing what happens when there
+%% %% exists a subtree that appears in at least two different places with
+%% %% one occurrence being under a larger subtree. This can break the apply
+%% %% function and needs to be identified and handled. Moreover, this example algorithm
+%% %% shares subtrees too eagerly. For instance, every occurrence of |Leaf|
+%% %% will be shared under the same metavariable. This restriction does not
+%% %% impact the correctness of the algorithm but is an important point on
+%% %% the design space: how to \emph{drive} this algorithm, \Cref{sec:sharing}.
+%% 
+
+\subsection{Defining the Oracle for |Tree|}
+\label{sec:concreteoracle}
+
+  In order to have a working version of our differencing algorithm for
+|Tree| we must provide the |wcs| implementation. Recall that the |wcs|
+function, \emph{which common subtree}, has type |Tree -> Tree -> Tree
+-> Maybe MetaVar|. Given a fixed |s| and |d|, |wcs s d x| returns
+|Just i| if |x| is the $i^{\textrm{th}}$ subtree of |s| and |d| and
+|Nothing| if |x| does not appear in |s| or |d|.  One implementation of
+this function computes the intersection of all the subtrees in |s| and
+|d|, and then search for the subtree |x| the resulting list.
+Enumerating all the subtrees of any |Tree| is straightforward:
+
+\begin{myhs}
+\begin{code}
+subtrees :: Tree -> [Tree]
+subtrees (Leaf n)     = [Leaf n]
+subtrees (Bin x y)    = Bin x y    : (subtrees x ++ subtrees y)
+subtrees (Tri x y z)  = Tri x y z  : (subtrees x ++ subtrees y ++ subtrees z)
+\end{code}
+\end{myhs}
+
+It is now straightforward to implement the |wcs| function: we compute
+the intersection of all the subtrees of |s| and |d| and use this list
+to determine whether the argument tree occurs in both |s| and
+|d|. This check is done with |elemIndex| which returns the index of
+the element, when it occurs in the list.
+
+\begin{myhs}
+\begin{code}
+wcs :: Tree -> Tree -> Tree -> Maybe MetaVar
+wcs s d x = elemIndex x (subtrees s intersect sutrees d)
+\end{code}
+\end{myhs}
+
+This implementation, however, is not particularly efficient.  The
+inefficiency comes from two places: firstly, checking trees for
+equality is linear in the size of the tree; furthermore, enumerating
+all subtrees is exponential.  If we want our algorithm to be efficient
+we \emph{must} have an amortized constant-time |wcs|.
+
+  Defining |wcs s d| efficiently consists, firstly, in computing a set
+of trees which contains the subtrees of |s| and |d|, and secondly, in
+being able to efficiently query this set for membership.  Symbolic
+manipulation software, such as Computer Algebra Systems, perform
+similar computations frequently, and performance is just as
+important. These systems often rely on a technique known as
+\emph{hash-consing}~\cite{Goto1974,Filliatre2006}, which is part
+of the canon of programming folklore. Hash consing arises as a means of
+\emph{maximal sharing} of subtrees in memory and constant time
+comparison -- two trees are equal if they are stored in the same
+memory location -- but it is by far not limited to it. We will be using a
+variant of \emph{hash-consing} to define |wcs s d|.
+
+  To efficiently compare trees for equality we will be using
+cryptographic hash functions~\cite{Menezes1997} to construct a fixed
+length bitstring that uniquely identifies a tree modulo hash
+collisions.  Said identifier will be the hash of the root of the tree,
+which will depend on the hash of every subtree, much like a
+\emph{merkle tree}~\cite{Merkle1988}. Suppose we have a function
+|merkleRoot| that computes some suitable identifier for every tree, we
+can compare trees efficiently by comparing their associated
+identifiers:
+
+\begin{myhs}
+\begin{code}
+instance Eq Tree where t == u = merkleRoot t == merkleRoot u
+\end{code}
+\end{myhs}
+
+  The definition of |merkleRoot| function is straightforward. It is
+important that we use the |merkleRoot| of the parts of a |Tree|
+to compute the |merkleRoot| of the whole. This construction,
+when coupled with a cryptographic hash function, call it |hash|,
+is what guarantee injectivity modulo hash collisions.
+
+\begin{myhs}
+\begin{code}
+merkleRoot :: Tree -> Digest
+merkleRoot (LeafH n)    = hash (encode "1" ++ encode n)
+merkleRoot (Bin x y)    = hash (concat ["2" , merkleRoot x , merkleRoot y])
+merkleRoot (Tri x y z)  = hash (concat ["3" , merkleRoot x , merkleRoot y , merkleRoot z])
+\end{code}
+\end{myhs}
+
+  Note that although it is theoretically possible to have false
+positives, when using a cryptographic hash function the chance of
+collision is negligible and hence, in practice, they never
+happen~\cite{Menezes1997}. Nonetheless, it would be easy to detect when a
+collision has occured in our algorithm; consequently, we chose to
+ignore this issue.
+
+  Recall we are striving for a constant time |(==)| implementation,
+but the |(==)| definition above is still linear, we must recompute the
+|merkleRoot| on every comparison. We fix this by caching the hash
+associated with every node of a |Tree|.  This is done by the
+|decorate| function, \Cref{fig:pepatches:decorate}.
+
+\begin{myhs}
+\begin{code}
+type TreeH   = (TreeH' , Digest)
+data TreeH'  = LeafH
+             | BinH TreeH  TreeH
+             | TriH TreeH  TreeH  TreeH
+decorate :: Tree -> TreeH
+\end{code}
+\end{myhs}
+
+\begin{figure}
+%{
+% %format WD c ha he = "\begin{array}{c} \HS{hash}\HS{=}" ha " \\ \HS{height}\HS{=}" he " \\"  c " \end{array}"
+%format WD c ha he = "\begin{array}{c} \HS{hash}\HS{=}" ha "\\"  c " \end{array}"
+\centering
+\begin{myforest}
+[,phantom , s sep'+=60pt
+[|Bin| , name=A [|Bin| [|Leaf| [|42|]] [|Leaf| [|42|]]] [|Leaf| [|84|]]]
+[|WD Bin "0f42ab" 3|, tikz+={
+        \draw [hdiff-black,->] (A.east) [out=25, in=165]to node[midway,above]{|preprocess|} (!c.west);
+      }
+  [|WD Bin "310dac" 2| , name=ex1
+    [|WD Leaf "0021ab" 1| [|WD 42 "004200" 0|]]
+    [|WD Leaf "0021ab" 1| [|WD 42 "004200" 0|]]
+  ]
+  [|WD Leaf "4a32bd" 1|
+    [|WD 84 "008400" 0|]
+  ]
+]
+]
+\end{myforest}
+%}
+\caption{Example of decorating a tree with hashes, through the
+|decorate| function.}
+\label{fig:pepatches:decorate}
+\end{figure}
+
+  We omit the implementation of |decorate| for now, even if it is
+straightforward. Moreover, a generic version is introduced in
+\Cref{WHERE}. The |TreeH| datype carries round the
+|merkleRoot| of its first component, hence, enabling us
+to define |(==)| in constant time.
+
+  The second source of inefficiency, enumerating all possible
+subtrees, can be addressed by choosing a better data structure.  In
+order to check whether a tree |x| is a subtree of a fixed |s| and |d|,
+it suffices to check whether the merkle root of |x| appears in a
+``database'' of the common merkle roots of |s| and |d|. Given that a
+|Digest| is just a |[Word]|, the optimal choice for such ``database''
+is a Trie~\cite{Brass2008} mapping a |[Word]| to a |MetaVar|. Trie
+lookups are efficient and hardly depend on the number of elements in
+the trie. In fact, our lookups run in amortized constant time here, as
+the length of a |Digest| is fixed.
+
+  Finally, we are able to write our efficient |wcs| oracle that
+concludes the implementation of our algorithm for the concrete
+|Tree| type.  The |wcs| oracle will now receive |TreeH|, i.e.,
+trees annotated with their merkle roots at every node, and will
+populate the ``database'' of common digests.
+
+\begin{myhs}
+\begin{code}
+wcs :: TreeH -> TreeH -> TreeH -> Maybe MetaVar
+wcs s d = lookup (mkTrie s intersect mkTrie d) . merkleRoot
+  where
+    (intersect)  :: Trie k v  -> Trie k u  -> Trie k v
+    lookup       :: Trie k v  -> [k]       -> Maybe v
+    mkTrie       :: TreeH     -> Trie Word MetaVar
+\end{code}
+\end{myhs}
+
+  The use of cryptographic hashes is unsurprising. They are almost
+folklore for speeding up a variety of computations. It is important to
+notice that the efficiency of our algorithm comes from our novel
+representation of patches combined with a amortized constant time
+|wcs| function. Without being able to duplicate or permute subtrees,
+the algorithm would have to backtrack in a number of situations.
+
+%   Our technique for detecting shared subtrees is similar to
+% \emph{hash-consing}~\cite{Filliatre2006} in spirit. We come back to a
+% more detailed description in \Cref{secsec:related-work}.  Another
+% similar line of work is the minimization of finite automata, which can
+% be done in linear time~\cite{Bubenzer2014}, hence, one could imagine
+% adapting such techniques for detecting shared trees without the use of
+% cryptographic hashes. Nevertheless, the details are non-trivial and
+% further exploration is left for future work.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \section{The Type of Patches}
 
@@ -2314,119 +3101,6 @@ chg s d = let f = wcs s d in Chg (extract f s) (extract f d)
 \end{code}
 \end{myhs}
 
-  In general lines, that is all there is to it to the differencing
-algorithm: compute the sharing map and traverse the source and
-destination trees replacing the subtrees that are supposed to be shared
-by metavariables. Looking carefully at |chg| above, however,
-we see it does \emph{not} produce correct changes, that is,
-it is not the case that |apply (chg s d) s == Just d| for all |s| and |d|.
-The problem can be observed when we pass a source and
-a destination trees where a common subtree occurs
-by itself but also as a subtree of another common subtree.
-Such situation is illustrated in \Cref{fig:pepatches:extract-problem}.
-In particular, the patch shown in \Cref{fig:pepatches:extract-problem:res}
-cannot be applied since the deletion context does not instantiate
-the metavariable |metavar y|, required by the insertion context.
-
-\begin{figure}
-\subfloat[|s|]{%
-\begin{myforest}
-[|Bin| [|Bin| [t] [u]] [k]]
-\end{myforest}%
-}\hfill%
-\subfloat[|d|]{%
-\begin{myforest}
-[|Bin| [|Bin| [t] [u]] [t]]
-\end{myforest}
-}\hfill%
-\subfloat[Illustration of |wcs s d|]{%
-\begin{myhs*}[.40\textwidth]%
-\begin{code}
-wcs s d (Bin t u)  = Just (metavar x)
-wcs s d t          = Just (metavar y)
-wcs s d u          = Just (metavar z)
-wcs _ _ _          = Nothing
-\end{code}
-\end{myhs*}
-}\hfill%
-\subfloat[Result of |chg s d|]{%
-\begin{myforest}
-[,change
-  [|Bin| [x,metavar] [k]]
-  [|Bin| [x,metavar] [y,metavar]]
-]
-\end{myforest}
-\label{fig:pepatches:extract-problem:res}}%
-\caption{Context extraction must care to produce
-well-formed changes. The nested occurrence of |t| within |Bin t u|
-here yields a change with an undefined variable on its insertion
-context.}
-\label{fig:pepatches:extract-problem}
-\end{figure}
-
-  There are many ways to solve this problem. The two
-following solutions are perhaps the most natural ones.
-We could replace |metavar y|
-by |t| and ignore the sharing or we could replace |metavar x| by |Bin (metavar
-y) (metavar z)|, pushing the metavariables to the leaves maximizing
-sharing. These would give rise to the changes shown in
-\Cref{fig:pepatches:extract-sol-01}. There is dichotomy
-between wanting to maximize the spine but at the same time achieve maximal
-sharing. On the one hand, copies closer
-to the root are easier to merge and less sharing means it is
-easier to isolate changes to separate parts of the tree.
-On the other hand, sharing as much as possible might capture
-the change being represented more closely.
-
-  Another, less intuitive, solution to the problem
-is to only share uniquely occurring subtrees, effectively simulating
-the \unixdiff{} with the \texttt{--patience} option, which only
-copies uniquely occurring lines. In fact, to make this easy to experiment,
-we will parameterize our |extract| function with which method should
-we use.
-
-\begin{myhs}
-\begin{code}
-data ExtractionMode  =  NoNested |  ProperShare |  Patience
-\end{code}
-\end{myhs}
-
-  The |NoNested| mode will forget sharing in favor of copying larger
-subtrees.  It would drop the sharing of |t| producing
-\Cref{fig:pepatches:extract-sol:nonest}.  The |ProperShare| mode is
-the opposite. It would produce
-\Cref{fig:pepatches:extract-sol:proper}. Finally, |Patience| only
-share subtrees that occur only once in the source and once in the
-destination. For the inputs in
-\Cref{fig:pepatches:extract-problem-01}, extracting contexts under
-|Patience| mode would produce the same result as |NoNested|, but they
-are not the same in general.
-
-\begin{figure}
-\centering
-\subfloat[Do not share nested common subtrees.]{%
-\begin{myforest}
-[,change
-  [|Bin| [x,metavar] [k]]
-  [|Bin| [x,metavar] [t]]
-]
-\end{myforest}
-\label{fig:pepatches:extract-sol-01:nonest}}%
-\qquad\qquad
-\subfloat[Expand metavariables pursuing all sharing opportunities]{%
-\begin{myforest}
-[,change
-  [|Bin| [|Bin| [y,metavar] [z,metavar]] [k]]
-  [|Bin| [|Bin| [y,metavar] [z,metavar]] [y,metavar]]
-]
-\end{myforest}
-\label{fig:pepatches:extract-sol-01:proper}}%
-\caption{Context extraction must care to produce
-well-formed changes. The nested occurrence of |t| within |Bin t u|
-here yields a change with an undefined variable on its insertion
-context.}
-\label{fig:pepatches:extract-sol-01}
-\end{figure}
 
   The problem of deciding \emph{what can be shared} has another facet
 to it, which is particularly relevant in the domain of differencing for
@@ -2448,72 +3122,6 @@ methods which will be discussed shortly
 issue were very successful, hence, the best option really became
 avoiding the issue by making sure that we can easily exclude certain
 trees from being shared.}
-
-\begin{figure}
-\victor{Find a better example... not sure this really illustrates
-the differences}
-
-\centering
-\subfloat[Source and Destination]{%
-\begin{myforest}
-[,phantom, for children={fit=band}
-  [|Tri|,name=r
-    [|Bin| [a] [b]]
-    [|Bin| [a] [b]]
-    [k]]
-  [|Tri|
-    [|Bin| [b] [a]]
-    [|Bin| [a] [b]]
-    [k]]
-]
-\node at ($ (r) - (1.0,0) $) {|extract m|};
-\end{myforest}}%
-\quad
-\subfloat[|m = Patience|]{%
-\begin{myforest}
-[,change
-  [|Tri| [|Bin| [a] [b]]
-         [|Bin| [a] [b]]
-         [z,metavar]]
-  [|Tri| [|Bin| [b] [a]]
-         [|Bin| [a] [b]]
-         [z,metavar]]
-]
-\end{myforest}
-\label{fig:pepatches:extraction-01:patience}}%
-
-\subfloat[|m = NoNest|]{%
-\begin{myforest}
-[,change
-  [|Tri| [x,metavar]     [x,metavar] [y,metavar]]
-  [|Tri| [|Bin| [b] [a]] [x,metavar] [y,metavar]]
-]
-\end{myforest}
-\label{fig:pepatches:extraction-01:nonest}}%
-\quad
-\subfloat[|m = ProperShare|]{%
-\begin{myforest}
-[,change
-  [|Tri| [|Bin| [x,metavar] [y,metavar]]
-         [|Bin| [x,metavar] [y,metavar]]
-         [z,metavar]]
-  [|Tri| [|Bin| [y,metavar] [x,metavar]]
-         [|Bin| [x,metavar] [y,metavar]]
-         [z,metavar]]
-]
-\end{myforest}
-\label{fig:pepatches:extraction-01:proper}}
-\quad
-\caption{Different extraction methods for the same pair or trees.}
-\label{fig:pepatches:extraction-01}
-\end{figure}
-
-  \Cref{fig:pepatches:extraction-01} illustrates the changes that
-would be extracted following each |ExtractionMode| for the same source
-and destination. We will soon look at the details of context
-extraction and defining the |diff| function
-(\Cref{sec:pepatches:extract}), but before doing so, we take a quick
-detour and to look at how to define the |wcs| function efficiently next.
 
 \subsection{Which Common Subtree, Efficiently}
 

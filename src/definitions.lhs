@@ -43,6 +43,11 @@
   {\endpboxed%
    \hsnewpar\belowdisplayskip
    \ignorespacesafterend}
+\newenvironment{myownhscodeFig}%
+  {\vspace*{-5.7em}\hscodestyle
+   \let\hspre\(\let\hspost\)%
+   \pboxed}
+  {\endpboxed\ignorespacesafterend}
 \makeatother
 \sethscode{myownhscode}
 
@@ -52,6 +57,15 @@
 }{%
 \end{minipage}%
 }
+
+\newenvironment{myhsFig}[1][0.95\textwidth]{%
+\sethscode{myownhscodeFig}%
+\begin{myhs*}[#1]%
+}{%
+\end{myhs*}%
+\sethscode{myownhscode}
+}
+
 
 \newenvironment{myhs}[1][0.95\textwidth]{%
 \nopagebreak[3]%Denies latex to pagebreak before code blocks!
