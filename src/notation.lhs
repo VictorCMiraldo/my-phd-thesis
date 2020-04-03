@@ -10,11 +10,21 @@
 %format phi          = "\HVNI{\varphi}"
 %format phi1         = "\HVNI{\varphi_1}"
 %format phi2         = "\HVNI{\varphi_2}"
+%format psi          = "\HVNI{\psi}"
+%format psi1         = "\HVNI{\psi_1}"
+%format psi2         = "\HVNI{\psi_2}"
 %format kappa        = "\HVNI{\kappa}"
 %format kappa1       = "\HVNI{\kappa_1}"
 %format kappa2       = "\HVNI{\kappa_2}"
+%format sigma        = "\HVNI{\sigma}"
+%format alpha        = "\HVNI{\alpha}"
+%format beta         = "\HVNI{\beta}"
+%format gamma        = "\HVNI{\gamma}"
+%format zeta         = "\HVNI{\zeta}"
+%format exists       = "\HVNI{\exists}"
 %format =~=          = "\HS{\approx}"
-%format (TApp a)     = "\HS{@}" a 
+%format intersect    = "\HS{\cap}"
+%format (TApp a)     = "\HS{@}" a
 
 %%% Types
 %format GenericGen   = "\HT{\mathit{Generic}_{\mathsf{gen}}}"
