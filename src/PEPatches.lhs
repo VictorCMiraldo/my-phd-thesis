@@ -801,6 +801,20 @@ tree matching should be used as the representation of change.
 \subsection{Meta Theory}
 \label{sec:pepatches:meta-theory}
 
+\victor{Nice squiggol:
+
+\begin{squiggol}[tight]
+|f x + y|
+\reasonEq{\text{Oh, I see}}
+|smthing else|
+\noreasonRel{\Rightarrow}
+|lalaa == lele|
+\reasonRel{\approx}{1+1 = 2}
+|finally|
+\end{squiggol}
+
+}
+
 %% POTENTIAL NOTATION:
 %{
 

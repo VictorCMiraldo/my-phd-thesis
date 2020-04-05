@@ -1,6 +1,5 @@
 %% Logistic Stuff
 
-\usepackage{supertabular}
 
 \definecolor{C1}{RGB}{0,153,204}
 \definecolor{C2}{RGB}{89,0,179}

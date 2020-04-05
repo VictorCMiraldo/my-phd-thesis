@@ -5,7 +5,11 @@
 %% The draft option disables microtype and displays overful hboxes
 %% in the text, plus its faster to compile
 
+%% My internal packages:
 \usepackage{hdiff-forest}
+\usepackage{squiggol}
+
+\usepackage{supertabular}
 \usepackage[all]{xy}
 
 \title{Type-Safe Generic Differencing of Mutually Recursive Families}
