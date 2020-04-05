@@ -1,0 +1,65 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                                                            %%
+%% Package ``squiggol''                                                       %%
+%%                                                                            %%
+%% Provides a set of enviroments over align and align* for easy equational    %%
+%% reasoning                                                                  %%
+%%                                                                            %%
+%% Version: v0.0.1                                                            %%
+%% Authors: Victor Cacciari Miraldo                                           %%
+%% License: MIT License (c) 2019 Victor Cacciari Miraldo                      %%
+%% GitHub Repo: https://github.com/VictorCMiraldo/my-phd-thesis               %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\NeedsTeXFormat{LaTeX2e}
+%% VCM: the date MUST be on the format YYY/MM/DD
+\ProvidesPackage{squiggol}[2020/04/05 Squiggol]
+
+\RequirePackage{amsmath}
+\RequirePackage{ifthen}
+\ProcessOptions\relax
+
+%% Todo: make argument somewhere?
+\definecolor{symcolor}{RGB}{34,50,68}
+
+\newcommand{\reasonBase}[2]{\PackageError{squiggol}{not inside squiggol env}{}}
+\newcommand{\reasonRel}[2]{\reasonBase{#1}{\quad \{ #2 \}}}
+\newcommand{\noreasonRel}[1]{\reasonBase{#1}{}}
+\newcommand{\reasonEq}[1]{\reasonRel{\equiv}{#1}}
+\newcommand{\noreasonEq}[1]{\noreasonRel{\equiv}{#1}}
+
+\makeatletter
+\newenvironment{squiggolBase}{%
+\color{symcolor}
+\start@align\@ne\st@rredtrue\m@ne% def of \begin{align*}
+&%
+}{%
+\endalign%
+}
+\makeatother
+
+\newenvironment{squiggolW}{%
+\renewcommand{\reasonBase}[2]{\\ \ensuremath{##1} \enspace & \enspace ##2 \\ & }
+\addtolength{\jot}{-.3em}
+\squiggolBase%
+}{%
+\endsquiggolBase%
+}
+
+\newenvironment{squiggolT}{%
+\renewcommand{\reasonBase}[2]{& \enspace ##2 \\ \ensuremath{##1} \enspace & }
+\squiggolBase%
+}{%
+\endsquiggolBase%
+}
+
+\newenvironment{squiggol}[1][wide]{%
+\ifthenelse{\equal{#1}{wide}}%
+  {\let\closeme\endsquiggolW \squiggolW}%
+  {\let\closeme\endsquiggolT \squiggolT}%
+}{\closeme}
+
+
+
+
+
+\endinput
