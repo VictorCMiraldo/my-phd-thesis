@@ -1,7 +1,7 @@
   Throughout this thesis we have presented two approaches to
 structural differencing. In \Cref{chap:structural-patches} we saw
-\texttt{stdiff}, which albeit unpractical, provided us with important
-insights into the representation and computation of patches. These
+\texttt{stdiff}, which although unpractical, provided us with important
+insights into the representation of patches. These
 insights and experience led us to develop \texttt{hdiff},
 \Cref{chap:pattern-expression-patches}, which improved upon the
 previous aproach with a more efficient |diff| function at
@@ -9,23 +9,23 @@ the expense of the simplicity of the merge algorithm: the
 |merge| function from \texttt{hdiff} is much more involved
 than that of \texttt{stdiff}.
 
-  In this chapter we apply our algorithms to real-world
+  In this chapter we evaluate our algorithms on real-world
 conflicts extracted from \texttt{GitHub} and analyze
-the results. We are interested in performance measruments
+the results. We are interested in performance measurements
 and synchronization success rates, which are central
 factors to the applicability of structural differencing
 in the context of software version control.
 
   To conduct the aforementioned evaluation we have extracted a total
-of 12687 usable datapoints from \texttt{GitHub}. They have been
-obtained from large public repositories in Java, JavaScript, Python,
-Lua and Clojure. The choice of programming languages was motivated by
-the parsers that were readily available in Hackage, with the exception
+of $12\,650$ usable datapoints from \texttt{GitHub}. They have been
+obtained from large public repositories storing code written in Java,
+JavaScript, Python, Lua and Clojure. The choice of programming languages
+was motivated by the availability of parsers, with the exception
 of Clojure, where we borrowed a parser from a MSc
 thesis~\cite{Garufi2018}. More detailed information about data
 collection is given in \Cref{sec:eval:collection};
 
-   The evaluation of \texttt{stdiff} enjoys less
+   The evaluation of \texttt{stdiff} has fewer
 datapoints than \texttt{hdiff} for the sole reason that \texttt{stdiff}
 requires the \texttt{generics-mrsop} library, which triggers a memory
 leak in GHC\footnote{\url{https://gitlab.haskell.org/ghc/ghc/issues/17223} and
@@ -37,8 +37,8 @@ larger abstract syntax trees. Consequently, we could only evaluated
 \label{sec:eval:collection}
 
   Collecting files from \texttt{GitHub} can
-be easily done with the help of some bash scripting. The overal idea to
-extracting the merge conflicts from a given repository is listing all
+be easily done with the help of some bash scripting. The overal idea is to
+extract the merge conflicts from a given repository by listing all
 commits $c$ with more than two parents, recreating the repository at
 the state immediatly previous to $c$ then attempting to call
 \texttt{git merge} at that state.
@@ -56,18 +56,18 @@ all we have to do is run the following commands at its root.
   \item For each commit $c$ as above, let its parents be $p, qs$;
 checkout the repository at $p$ and attempt to \texttt{git merge
 --no-commit qs}.  The \texttt{--no-commit} switch is important since
-it gives us a change to inspect the result of the merge.
+it gives us a chance to inspect the result of the merge.
 
   \item Next we parse the output of \texttt{git ls-files --unmerged},
-which provides us the git three \emph{object-id} for each file that
+which provides us with the three \emph{object-ids} for each file that
 coud not be automatically merged: one identifier for the common ancestor
 and one identifier for each of the two diverging replicas.
 
   \item Then we use \texttt{git cat-file} to get the files corresponding
 to each of the \emph{object-ids} gathered on the previous step. This yields
 us three files, \texttt{O.lang}, \texttt{A.lang} and \texttt{B.lang}.
-Lastly, we use \texttt{git show} to save the \texttt{M.lang} that
-was commited by a human, in $c$, resolving the conflict.
+Lastly, we use \texttt{git show} to save the file \texttt{M.lang} that
+was commited by a human resolving the conflict.
 \end{itemize}
 
   After running the steps above for a number of repositories, we end
@@ -75,11 +75,13 @@ up with a list of folders containing a merge conflict that was solved
 by a human. Each of these folders contain a span $A \leftarrow O
 \rightarrow B$ and a file $M$ which is the human-produced result of
 synchronizing $A$ and $B$.  We refer the reader to the full code for
-more details \victor{WHERE IS THE CODE?}.  Overall, we acquired 12687
+more details \victor{WHERE IS THE CODE?}.  Overall, we acquired $12\,650$
 usable conflicts -- that is, we were able to parse the four files
-parse with the parsers available to us -- and 2770 conflicts where at
+parse with the parsers available to us -- and $2\,767$ conflicts where at
 least one file yielded a parse error. \Cref{tbl:eval:summary-data}
-provides the distribution of datapoints per programming language.
+provides the distribution of datapoints per programming language and
+displays the amount of conflicts that yielded a parse error. These parse
+errors are an inevitable consequence of using off-the-shelf parsers.
 
 \begin{table}
 \centering
@@ -97,13 +99,6 @@ Python     & 27 & 4387 & 848 \\  \midrule
 \label{tbl:eval:summary-data}
 \end{table}
 
-  Next we look into two experiments aimed at studying the performance
-and applicability of the different merge algorithms. Recall each
-datapoint consists in four files for a specific language,
-a span $A \leftarrow O \rightarrow B$, which could not be resolved
-by \texttt{git merge} alone, and a file $M$ which was created
-by a human to resolve the conflict.
-
 \section{Performance}
 \label{sec:eval:performance}
 
@@ -112,22 +107,24 @@ by a human to resolve the conflict.
 \subfloat[Runtimes from \texttt{stdiff} shown in
 a log-log plot. The lines illustrate the behavior of \texttt{stdiff}
 being between linear and quadratic]{%
-\includegraphics[width=0.4\textwidth]{src/img/runtimes-stdiff.pdf}
+\includegraphics[width=0.45\textwidth]{src/img/runtimes-stdiff.pdf}
 \label{fig:eval:perf:stdiff}}
 \quad
 \subfloat[Runtimes from \texttt{hdiff} shown in a linear plot.]{%
-\includegraphics[width=0.4\textwidth]{src/img/runtimes-hdiff.pdf}
+\includegraphics[width=0.45\textwidth]{src/img/runtimes-hdiff.pdf}
 \label{fig:eval:perf:hdiff}}
-\caption{Performance measrumentes of \texttt{stdiff} and \texttt{hdiff}
+\caption{Performance measurementes of \texttt{stdiff} and \texttt{hdiff}
 differencing functions. The horizontal axis has the sum of the number
 of constructors in the source and destination trees.}
 \label{fig:eval:perf}
 \end{figure}
 
   To measure the performance of the |diff| functions in both
-approaches we computed four patches per datapoint, namelly
-\texttt{diff O A}, \texttt{diff O B}, \texttt{diff O M} and
-\texttt{diff A B}.  Whilst computing patches we limited the memory
+approaches we computed four patches per datapoint, namelly:
+\texttt{diff O A},$\,$ \texttt{diff O B},$\,$ \texttt{diff O M}$\,$ and
+\texttt{diff A B}.
+
+  Whilst computing patches we limited the memory
 usage to 8GB and runtime to 30s. If a call to |diff| used more than
 the enabled temporal and spacial resources it was automatically
 killed. We ran both \texttt{stdiff} and \texttt{hdiff} on the same
@@ -160,22 +157,21 @@ than \texttt{stdiff}. We do see, however, that the \texttt{proper} context
 extraction is slightly slower than \texttt{nonest} or \texttt{patience}.
 Finally, only 14 calls timed-out and none used more than 8GB of memory.
 
-  Measuring performance of pure Haskell code is nuanced and need some
-attention. We have used the |time| auxiliary function, below.  We
-based ourselves on the \texttt{timeit} package but adapted to fully
-force the evaluation of the result of the action, with the |deepseq|
-method and force its execution with the bang pattern in |res|, ensuring
-the thunk is fully evaluated.
+  Measuring performance of pure Haskell code is subtle due to its lazy
+evaluation semantics. We have used the |time| auxiliary function,
+below.  We based ourselves on the \texttt{timeit} package but adapted
+to fully force the evaluation of the result of the action, with the
+|deepseq| method and force its execution with the bang pattern in
+|res|, ensuring the thunk is fully evaluated.
 
 \begin{myhs}
 \begin{code}
 time :: (NFData a) => IO a -> IO (Double, a)
-time act = do
-    t1 <- getCPUTime
-    result <- act
-    let !res = result `deepseq` result
-    t2 <- getCPUTime
-    return (fromIntegral (t2-t1) * 1e-12 , res)
+time act = do  t1 <- getCPUTime
+               result <- act
+               let !res = result `deepseq` result
+               t2 <- getCPUTime
+               return (fromIntegral (t2-t1) * 1e-12 , res)
 \end{code}
 \end{myhs}
 
@@ -185,7 +181,7 @@ time act = do
   While the performance measurements provide some empirical evidence
 that \texttt{hdiff} is in the right complexity class, the
 synchronization experiment, discussed in this section, aims at
-estabilishing a lower bound on the amount of conflicts that could be
+estabilishing a lower bound on the number of conflicts that could be
 solved in practice.
 
   The synchronization experiment consists in attempting to
@@ -194,60 +190,61 @@ If \texttt{hdiff} produces a patch with no conflicts,
 we apply it to $O$ and compare the result against $M$,
 which was produced by a human. There are four possible outcomes,
 three of which we expect to see and one that would indicate
-a bigger flat. The three outcomes we would like to see are:
+a more substantial problem. The three outcomes we expect to see are:
 \emph{success}, which indicates the merge was
 succesful and was equal to that produced by a human;
 \emph{mdif} which indicates that the merge was
-successful but produced a different result than what the human did;
+successful but produced a different than the manual merge;
 and finally \emph{conf} which means that the merge was
-unsuccessful. The two other possible outcomes come from either
+unsuccessful. The other possible outcome comes from
 producing a patch that \emph{cannot} be applied to \texttt{O},
 which is refered to as \emph{apply-fail}.
 Naturally, timeout or out-of-memory exceptions can still occur
 and fall under \emph{other}. The merge experiment was capped
 at 45 seconds of runtime and 8GB of virtual memory.
 
-  The distinctino between \emph{success} and \emph{mdif} is important.
+  The distinction between \emph{success} and \emph{mdif} is important.
 Being able to merge a conflict but obtaining a different result from
 what was committed by a human does not necessarily imply that either result
-is wrong. Developers can perform \emph{more or less} modifications merging
-when committing \texttt{M}. For example, \Cref{fig:eval:mdif-suc-01} illustrates
-a distilled example from our dataset which the human performed an extra
-operation when merging, namelly adapting the \emph{sheet} field of one replica.
+is wrong. Developers can perform \emph{more or fewer} modifications when
+committing \texttt{M}. For example, \Cref{fig:eval:mdif-suc-01} illustrates
+an example distilled from our dataset which the human performed an extra
+operation when merging, namely adapting the \emph{sheet} field of one replica.
 It can also be the case that the developer made a mistake
 which was fixed in a later commit. Therefore, a result of \emph{mdif}
 in a datapoint does not immediatly indicate the wrong behavior
 of our merging algorithm. The success rate, however, provides us
-with a believable lower bound to how many conflicts can be solved
+with a reasonable lower bound on the number of conflicts that can be solved
 automatically, in practice.
 
 \begin{figure}
-\footnotesize \centering
+\small \centering
 \subfloat[Replica \texttt{A}]{%
 \begin{minipage}[t]{\textwidth}
 \begin{verbatim}
-dict={name='A', sheet='a'
-     ,name='B', sheet='b'
-     ,name='C', sheet='c'}
+d={name='A', sheet='a'
+  ,name='B', sheet='b'
+  ,name='C', sheet='c'}
 \end{verbatim}
+\vspace{.01em}
 \end{minipage}}
-\qquad%
+\quad%
 \subfloat[Replica \texttt{B}]{%
 \begin{minipage}[t]{\textwidth}
 \begin{verbatim}
-dict={name='A', sheet='path/a'
-     ,name='B', sheet='path/b'
-     ,name='X', sheet='path/x'
-     ,name='C', sheet='path/c'}
+d={name='A', sheet='path/a'
+  ,name='B', sheet='path/b'
+  ,name='X', sheet='path/x'
+  ,name='C', sheet='path/c'}
 \end{verbatim}
 \end{minipage}}
-\qquad%
+\quad%
 \subfloat[Common ancestor, \texttt{O}]{%
 \begin{minipage}[t]{\textwidth}
 \begin{verbatim}
-dict={name='A', sheet='path/a'
-     ,name='B', sheet='path/b'
-     ,name='C', sheet='path/c'}
+d={name='A', sheet='path/a'
+  ,name='B', sheet='path/b'
+  ,name='C', sheet='path/c'}
 \end{verbatim}
 \end{minipage}}
 \qquad%
@@ -255,68 +252,49 @@ dict={name='A', sheet='path/a'
 \subfloat[Merge produced by a human]{%
 \begin{minipage}{\textwidth}
 \begin{verbatim}
-dict={name='A', sheet='a'
-     ,name='B', sheet='b'
-     ,name='X', sheet='x'
-     ,name='C', sheet='c'}
+d={name='A', sheet='a'
+  ,name='B', sheet='b'
+  ,name='X', sheet='x'
+  ,name='C', sheet='c'}
 \end{verbatim}
 \end{minipage}}
 \qquad\qquad\qquad%
 \subfloat[Merge produced by \texttt{hdiff}]{%
 \begin{minipage}{\textwidth}
 \begin{verbatim}
-dict={name='A', sheet='a'
-     ,name='B', sheet='b'
-     ,name='X', sheet='path/x'
-     ,name='C', sheet='c'}
+d={name='A', sheet='a'
+  ,name='B', sheet='b'
+  ,name='X', sheet='path/x'
+  ,name='C', sheet='c'}
 \end{verbatim}
 \end{minipage}}
-\caption{Example distiled from commit \texttt{60eba8} from \texttt{hawkthorne-server-lua}, from
-GitHub. One replica inroduced entries in a dictionary where another
-transformed a system path. The human merge transformed the system path in the newly
-inserted entry, which is more than just merging changes. The \texttt{hdiff} tool did
-produce a correct merge, but this got classified as \texttt{mdif}.}
+\caption{Example distiled from \texttt{hawkthorne-server-lua},
+commit \texttt{60eba8}. One replica
+inroduced entries in a dictionary where another transformed a system
+path. The \texttt{hdiff} tool did produce a correct merge given, but this got
+classified as \texttt{mdif}.}
 \label{fig:eval:mdif-suc-01}
 \end{figure}
 
-
-%%% No one cares about stdiff; moreover, I need to run it
-%%% on the same dataset.
-%%%
-%%% \subsection{\texttt{stdiff}}
-%%%
-%%% \begin{table}
-%%% \small
-%%% \centering
-%%% \begin{tabular}{@@{}lrlrlll@@{}} \toprule
-%%% Language & \emph{success} & \% & \emph{merge-diff} & \% & \emph{conf} & Other \\ \midrule
-%%% Clojure       & 68 & 0.07 & 69 & 0.07 & 850 & 227 \\
-%%% Lua           & 75 & 0.13 & 26 & 0.04 & 486 & 163 \\ \midrule
-%%% \emph{totals} & 143 & 0.09 & 95 & 0.06 & 1336 & \\ \bottomrule
-%%% \end{tabular}
-%%% \caption{Conflicts solved by \texttt{stdiff}.}
-%%% \label{tbl:eval:merge-stdiff}
-%%% \end{table}
-%%%
-%%%   \Cref{tbl:eval:merge-stdiff} shows the classify the results of
-%%% attempting to solve each conflict in our dataset using \texttt{stdiff}'s merge function
-%%% (\Cref{sec:stdiff:merging}). The \emph{Other} column shows the amound
-%%% of conflicts that either timedout or raised an out-of-memory exception.
-%%%
-%%%   From \Cref{tbl:eval:merge-stdiff}, we observe that 15\% of the collected conflicts could be
-%%% solved and, in 60\% of these cases, the automatic solution did correspond with
-%%% what a human would have done.
-%%%
-%%% \victor{The results are slightly differnt than what Arian reported; thats because
-%%% Arian's implementation had a bug and considered more merges than it should}
-%%%
-%%% \subsection{\texttt{hdiff}}
+\begin{table}
+\centering
+\begin{tabular}{@@{}lrl@@{\qquad}rl@@{\qquad}l@@{}} \toprule
+Language & \emph{success} & \% & \emph{mdif} & \% & \emph{suc+mdiff}\% \\
+\midrule
+ Clojure    & 184  & 0.15 & 211 & 0.17 & 0.32 \\
+ Java       & 978  & 0.34 & 479 & 0.16 & 0.5 \\
+ JavaScript & 1045 & 0.3  & 273 & 0.08 & 0.38 \\
+ Lua        & 185  & 0.25 & 101 & 0.14 & 0.39 \\
+ Python     & 907  & 0.21 & 561 & 0.13 & 0.34 \\
+\bottomrule
+\end{tabular}
+\caption{Best synchronization success rate per language.}
+\label{tbl:eval:merge-hdiff-aggr}
+\end{table}
 
 \begin{table}
-\renewcommand{\arraystretch}{1.2}
-\small
 \centering
-\begin{tabular}{@@{}llcrlrll@@{}} \toprule
+\begin{tabular}{@@{}llcrl@@{\qquad}rl@@{\qquad}l@@{}} \toprule
 Language & Mode & Height & \emph{success} & \% & \emph{mdif} & \% & \emph{conf} \\ \midrule
 \multirow{3}{*}{Clojure} % timeouts: 0; sums: 1214
   & |Patience|     & 1 & 184  & 0.15 & 211 & 0.17 & 819 \\
@@ -346,66 +324,46 @@ Language & Mode & Height & \emph{success} & \% & \emph{mdif} & \% & \emph{conf} 
 \end{tabular}
 \caption{Conflicts solved by \texttt{hdiff} with different parameters.}
 \label{tbl:eval:merge-hdiff}
-\renewcommand{\arraystretch}{1.3}
 \end{table}
 
-  Given the multitude of dials we can adjust in \texttt{hdiff},
-we have run the experiment with each combination of extraction
-method (|Patience, NoNested, ProperShare|), local or global metavariable
+
+  Given the multitude of dials we can adjust in \texttt{hdiff}, we
+have run the experiment with each combination of extraction method
+(|Patience, NoNested, ProperShare|), local or global metavariable
 scoping and minimum sharing height of $1, 3$ and $9$.
-\Cref{fig:eval:merge-hdiff} shows the combination of parameters
-that yielded the most successes per extraction method, the column
-for scoping is omited because local scope outperformed global scoping in
-all instances. It is worth noting that a 100\% success rate is unachievable.
-Some conflicts really come from a subtree being modified in
-two distinct ways and inevitably require human intervention.
+\Cref{fig:eval:merge-hdiff} shows the combination of parameters that
+yielded the most successes per extraction method, the column for
+scoping is omitted because local scope outperformed global scoping in
+all instances. \Cref{fig:eval:merge-hdiff-aggr} shows only the highest
+success rate per language.
 
-
-  When \texttt{hdiff} returned a patch with conflicts,
-that is, we could \emph{not} successfully solve the merge, we recorded
-which conflicts we saw. \Cref{tbl:eval:hdiff-conflict-distr}
-shows the distribution of each conflict type throughout the
-dataset. Note that a patch resulting from a merge can have multiple
-conflicts. This information is useful for deciding which aspects of
-the merge algorithm can yield better rewards.  \victor{so what? Do I even want this
-informantion?}
-
-\begin{table}
-\centering
-\begin{tabular}{@@{}lllllllll@@{}}
- & \rotatebox{50}{\small \texttt{not-eq}}  &
-   \rotatebox{50}{\small \texttt{inst-mod}} &
-   \rotatebox{50}{\small \texttt{del-spn}} &
-   \rotatebox{50}{\small \texttt{ins-ins}} &
-   \rotatebox{50}{\small \texttt{inst-ins}} &
-   \rotatebox{50}{\small \texttt{inst-del}} &
-   Others \\ \midrule
-Amount & 7904 & 5052 & 2144 & 1892 & 868 & 357 & 506 \\
-Percentile & 0.42 & 0.27 & 0.11 & 0.1 & 0.05 & 0.02 & 0.03 \\
-\bottomrule
-\end{tabular}
-\caption{Distribution of conflicts observed by \texttt{hdiff}.}
-\label{tbl:eval:hdiff-conflict-distr}
-\end{table}
-
-  The varying true success rates seen in \Cref{tbl:eval:merge-hdiff} are expected.
-Different parameters used with \texttt{hdiff} yield different patches, which
-might be easier or harder to merge. Out of the datapoints that resulted in \emph{mdif}
-we have manually analyzed ??? randomly selected cases. We
-witnessed that ??? of those \texttt{hdiff} behaved as we expect, and
-the \emph{mdif} result was attributed to the human performing more operations
-than a structural merge would have performed. \Cref{fig:eval:mdif-suc-01},
-illustrates one example, distilled from the manually analyzed cases.
-\victor{I've seen 13 so far, and 11 of them \texttt{hdiff} behaved
-expectedly. The other two are discussed in \Cref{sec:eval:diff-extr-methods}}
+  The varying true success rates seen in \Cref{tbl:eval:merge-hdiff}
+are to be expected.  Different parameters used with \texttt{hdiff}
+yield different patches, which might be easier or harder to merge. Out
+of the datapoints that resulted in \emph{mdif} we have manually
+analyzed ??? randomly selected cases. We witnessed that ??? of those
+\texttt{hdiff} behaved as we expect, and the \emph{mdif} result was
+attributed to the human performing more operations than a structural
+merge would have performed. \Cref{fig:eval:mdif-suc-01}, illustrates
+one example, distilled from the manually analyzed cases.  \victor{I've
+seen 13 so far, and 11 of them \texttt{hdiff} behaved expectedly. The
+other two are discussed in \Cref{sec:eval:diff-extr-methods}}
 \victor{Anyway... So what? What do we do with this info?}
 \victor{Should I list the cases I looked into?}
 
+  It is worth noting that even though 100\% success
+rate is unachievable -- some conflicts really come from a subtree being
+modified in two distinct ways and inevitably require human
+intervention -- the results we have seen are very encouraging.
+In \Cref{fig:eval:merge-hdiff-aggr} we see that \texttt{hdiff} produces
+a merge in at least 30\% of datapoints and the majority of the time,
+it matches the handmade merge.
 
-  The cases where \emph{the same} datapoint yeilds a true success
-and a \emph{mdif}, depending on which extraction method was used,
-are interesting. Let us look at two complimentary examples (\Cref{fig:eval:nn-pt-01,fig:eval:nn-pt-02}) that were distilled from these contradicting
-cases.
+  The cases where \emph{the same} datapoint yields a true success and
+a \emph{mdif}, depending on which extraction method was used, are
+interesting. Let us look at two complimentary examples
+(\Cref{fig:eval:nn-pt-01,fig:eval:nn-pt-02}) that were distilled from
+these contradicting cases.
 
 \begin{figure}
 \centering
@@ -640,6 +598,34 @@ structures with complex semantics, such as source-code. On the one hand
 we have that sharing method modifiers triggers unwanted replication
 of a change. On the other, the lack of sharing of empty method bodies makes
 it difficult to place an insertion in its correct position.
+
+
+  When \texttt{hdiff} returned a patch with conflicts,
+that is, we could \emph{not} successfully solve the merge, we recorded
+the class of conflicts we observed. \Cref{tbl:eval:hdiff-conflict-distr}
+shows the distribution of each conflict type throughout the
+dataset. Note that a patch resulting from a merge can have multiple
+conflicts. This information is useful for deciding which aspects of
+the merge algorithm can yield better results.
+\victor{so what? Do I even want this informantion?}
+
+\begin{table}
+\centering
+\begin{tabular}{@@{}lllllllll@@{}}
+ & \rotatebox{50}{\small \texttt{not-eq}}  &
+   \rotatebox{50}{\small \texttt{inst-mod}} &
+   \rotatebox{50}{\small \texttt{del-spn}} &
+   \rotatebox{50}{\small \texttt{ins-ins}} &
+   \rotatebox{50}{\small \texttt{inst-ins}} &
+   \rotatebox{50}{\small \texttt{inst-del}} &
+   Others \\ \midrule
+Amount & 7904 & 5052 & 2144 & 1892 & 868 & 357 & 506 \\
+Percentile & 0.42 & 0.27 & 0.11 & 0.1 & 0.05 & 0.02 & 0.03 \\
+\bottomrule
+\end{tabular}
+\caption{Distribution of conflicts observed by \texttt{hdiff}.}
+\label{tbl:eval:hdiff-conflict-distr}
+\end{table}
 
 
 \subsection{Threats to Validity}

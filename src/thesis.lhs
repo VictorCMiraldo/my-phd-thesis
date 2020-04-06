@@ -17,14 +17,14 @@
 
 \author{Victor Cacciari Miraldo}
 
-\promotor{Prof.dr. J.T. Jeuring}
+\promotor{Prof.dr. G. Keller}
 \copromotor{Dr. W. Swierstra}
 
 \NWOproject{Revision Control of Structured Data}
 \NWOgrantnumber{612.001.401}
 
-\defensedate{hopefuly, in the future!}
-\authorbirthdate{october 16, 1991}
+\defensedate{October 5, 2020}
+\authorbirthdate{October 16, 1991}
 \authorbirthplace{S\~{a}o Paulo, Brasil}
 
 % Include my definitions

@@ -183,7 +183,7 @@ I'll pass it to 'book' just in case.}
 %%%%%%%%%%%%%%%%
 
 %% Hacky way of bringing the latest git commit
-%% into here; byt hey, it works! makes it easy
+%% into here; but hey, it works! makes it easy
 %% to know which version of the thesis the feedback came from.
 \ifPHD@isdraft
 \input{dist/version.tex}
