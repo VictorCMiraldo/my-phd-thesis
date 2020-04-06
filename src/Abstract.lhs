@@ -20,7 +20,7 @@ complexity. Consequently, the merging algorithm is more intricate and
 the patches can be harder to reason about.
 
   Both of our approaches can be instantiated to mutually recursive
-families of datatypes and, consequently, can be used to compare
+datatypes and, consequently, can be used to compare
 elements of most programming languages.  Writing the software that
 does so, however, comes with additional challenges.  To address this we
 have developed two new libraries for generic programming in Haskell.

@@ -90,8 +90,8 @@ around this last issue by writing edit-scripts in a typed
 form~\cite{Lempsink2009}, but this requires some non-trivial generic
 programming techniques to scale.
 
-  The second half of this chapter is the state-of-the-art
-of the generic programming ecosystem in Haskell. Including
+  The second half of this chapter is the
+state-of-the-art of the generic programming ecosystem in Haskell. Including
 the \texttt{GHC.Generics} and \texttt{generics-sop}
 libraries, which introduce all the necessary parts for us to build
 our own solutions later, in \Cref{chap:generic-programming}.
@@ -112,21 +112,19 @@ different problems.
 In the biology domain \cite{Akutsu2010b,Henikoff1992,McKenna2010},
 for example, one is concerned solely in finding similar
 structures in a large set of structures, whereas
-in software version control systems we actually want to store,
-manipulate and combine the differences between objects.
+in software version control systems manipulating and combining
+differences is important.
 
   The wide applicability of differencing and edit distances
 leads to a variety of cost notions, edit-script
-operations and algorithms for computing them~\cite{Bille2005,Bergroth2000,Paassen2018}.
-
-  In this section we will review some of the important notions and
+operations and algorithms for computing them~\cite{Bille2005,Bergroth2000,Paassen2018}. In this section we will review some of the important notions and
 background work on edit distance. We start by looking at the string
 edit distance (\Cref{sec:background:string-edit-distance}) and then
 generalize this to untyped trees (\Cref{sec:background:tree-edit-distance}),
 as it is classically portrayed in the literature, which
 is reviewed in \Cref{sec:background:literature-review}.
 Finally, we discuss some of the consequences of working with
-typed trees in \Cref{sec:background:typed-tree-edit-distance}.
+typed trees in \Cref{sec:gp:well-typed-tree-diff}.
 
 \subsection{String Edit Distance and \unixdiff{}}
 \label{sec:background:string-edit-distance}
@@ -141,21 +139,27 @@ Subsequence (LCS)}~\cite{Bergroth2000}, on the other hand, considers
 insertions, deletions and copies as edit operations and is better
 suited for identifying shared sequences between strings.
 
-\subsubsection*{Levenshtein Distance}
-
-  The Levenshtein distance considers insertions, deletions and
+\paragraph{Levenshtein Distance}
+The Levenshtein distance regards insertions, deletions and
 substitutions of characters as edit operations, which can
-be modeled in Haskell by the |EditOp| datatype below.
+be modeled in Haskell by the |EditOp| datatype below. Each of those
+operations have a predefined \emph{cost} metric.
 
 \begin{myhs}
 \begin{code}
 data EditOp = Ins Char | Del Char | Subst Char Char
+
+cost :: EditOp -> Int
+cost (Ins _)      = 1
+cost (Del _)      = 1
+cost (Subst c d)  = if c == d then 0 else 1
 \end{code}
 \end{myhs}
 
-  The semantics of these edit operations are straightforward. The |apply|
-function, shown below, gives a denotational semantics of |[EditOp]|
-by mapping edit-scripts to partial functions over |String|s.
+  These individual operations are then grouped into a list, usually
+denoted an \emph{edit-script}. The |apply| function, below, gives
+edit-scripts a denotational semantics by mapping them to partial
+functions over |String|s.
 
 \begin{myhs}
 \begin{code}
@@ -167,20 +171,11 @@ apply (Subst c d  : ops)  (s :  ss)  = guard (c == s) >> (d :) <$$> apply ops ss
 \end{code}
 \end{myhs}
 
-  The cost metric associated with these edit operations is defined
+  The |cost| metric associated with these edit operations is defined
 to force substitutions to cost less than insertions and deletions.
 This ensures that the algorithm looking for the list of edit operations
 with the minimum cost will prefer substitutions over deletions
 and insertions.
-
-\begin{myhs}
-\begin{code}
-cost :: EditOp -> Int
-cost (Ins _)      = 1
-cost (Del _)      = 1
-cost (Subst c d)  = if c == d then 0 else 1
-\end{code}
-\end{myhs}
 
   We can compute the \emph{edit-script}\index{edit-script}, i.e. a
 list of edit operations, with the minimum cost quite easily with a
@@ -196,16 +191,15 @@ lev :: String -> String -> [EditOp]
 lev []      []      = []
 lev (x:xs)  []      = Del x : lev xs []
 lev []      (y:ys)  = Ins y : lev [] ys
-lev (x:xs)  (y:ys)  =
-  let  i = Ins y      : lev (x:  xs)      ys
-       d = Del x      : lev      xs  (y:  ys)
-       s = Subst x y  : lev      xs       ys
-   in minimumBy cost [i , d , s]
+lev (x:xs)  (y:ys)  =  let  i = Ins y      : lev (x:  xs)      ys
+                            d = Del x      : lev      xs  (y:  ys)
+                            s = Subst x y  : lev      xs       ys
+                       in minimumBy cost [i , d , s]
 \end{code}
 \end{myhs}
 \caption{Definition of the function that returns the
 edit-script with the minimum Levenshtein Distance between two strings.}
-\label{fig:background:string-levshtein}
+\label{fig:background:string-leveshtein}
 \end{figure}
 
 \begin{myhs}
@@ -222,9 +216,9 @@ minimum possible cost.
 
 \begin{myhs}
 \begin{code}
-lev "ab" "ba" =?  [ Del 'a' , Subst 'b' 'b' , Ins 'a']
-                  [ Ins 'b' , Subst 'a' 'a' , Del 'b']
-                  [ Subst 'a' 'b' , Subst 'b' 'a' ]
+lev "ab" "ba" `elem` [ [ Del 'a' , Subst 'b' 'b' , Ins 'a']
+                     , [ Ins 'b' , Subst 'a' 'a' , Del 'b']
+                     , [ Subst 'a' 'b' , Subst 'b' 'a' ]]
 \end{code}
 \end{myhs}
 
@@ -383,13 +377,11 @@ data Tree = Node Label [Tree]
 arity :: Label -> Int
 
 apply :: [EOp] -> [Tree] -> Maybe [Tree]
-apply [] [] = Just []
-apply (Cpy : ops) ts
-  = apply (Ins l : Del l : ops) ts
-apply (Del l : ops) (Node l' xs:ts)
-  = guard (l == l') >> apply ops (xs ++ ts)
-apply (Ins l : ops) ts
-  = (\(args , rest) -> Node l args : rest) . takeDrop (arity l)
+apply []                           []   = Just []
+apply (Cpy    : ops)               ts   = apply (Ins l : Del l : ops) ts
+apply (Del l  : ops) (Node l' xs:  ts)  = guard (l == l') >> apply ops (xs ++ ts)
+apply (Ins l  : ops)               ts
+  = (\(args , rs) -> Node l args : rs) . takeDrop (arity l)
     <$$> apply ops ts
 \end{code}
 \end{myhs}
@@ -532,7 +524,7 @@ edit-scripts have inherent shortcomings when they
 are used to compare tree structured data. The first and most striking
 is that the use of heuristics to compute optimal solutions is unavoidable.
 Consider the tree-edit-scripts between the following two trees:
-
+\nopagebreak[4]
 \begin{center}
 \begin{forest}
 [, change={white}{} , s sep=12mm
@@ -565,7 +557,7 @@ is not guaranteed to be type-safe~\cite{Vassena2016}.
 
   Finally, we must mention the lack of expressivity that comes from edit-scripts,
 from the \emph{differencing} point of view. Consider the trees below,
-
+\nopagebreak[4]
 \begin{center}
 \begin{forest}
 [, change={white}{} , s sep=12mm
@@ -873,7 +865,7 @@ Vassena~\cite{Vassena2016}, which shows that typed edit-scripts might
 not be the best underlying framework for this, as one needs to
 manually type-check the resulting edit-scripts.
 
-  Besides source-code differencing we have patch inference and
+  Besides source-code differencing there is patch inference and
 generation tools. Some infer patches from human created data
 \cite{Kim2013}, whereas other, such as
 \texttt{Coccinelle}~\cite{Andersen2008,Palix2011}, receive as input a
