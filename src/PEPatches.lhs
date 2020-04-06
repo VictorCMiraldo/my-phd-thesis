@@ -801,25 +801,12 @@ tree matching should be used as the representation of change.
 \subsection{Meta Theory}
 \label{sec:pepatches:meta-theory}
 
-\victor{Nice squiggol:
-
-\begin{squiggol}[tight]
-|f x + y|
-\reasonEq{\text{Oh, I see}}
-|smthing else|
-\noreasonRel{\Rightarrow}
-|lalaa == lele|
-\reasonRel{\approx}{1+1 = 2}
-|finally|
-\end{squiggol}
-
-}
-
 %% POTENTIAL NOTATION:
 %{
 
 %format (app (p) x) = "\mathopen{\HT{\llbracket}}" p "\mathclose{\HT{\rrbracket}}\>" x
-%format after       = "\HT{\bullet}"
+%format after p q   = p "\mathbin{\HT{\bullet}}" q
+%format after'      = "\HT{\bullet}"
 %format iff         = "\HS{\iff}"
 
 \victor{maybe move the notation to the topleve;
@@ -859,15 +846,15 @@ change that witnesses the composition is given by
 
 \begin{myhs}
 \begin{code}
-(after) :: Chg kappa fam at -> Chg kappa fam at -> Maybe (Chg kappa fam at)
-p after q = case unify (chgDel p) (chgIns q) of
+(after') :: Chg kappa fam at -> Chg kappa fam at -> Maybe (Chg kappa fam at)
+after p q = case unify (chgDel p) (chgIns q) of
     Left   _      -> Nothing
     Right  sigma  -> Just (Chg (substApply sigma (chgDel q)) (substApply sigma (chgIns p)))
 \end{code}
 \end{myhs}
 
-  We say that |p after q| is defined if there exists a change
-|k| such that |p after q == Just k|, or, equivalently, if
+  We say that |after p q| is defined if there exists a change
+|k| such that |after p q == Just k|, or, equivalently, if
 |chgDel p| is unifiable with |chgIns q|.
 
   Note that it is inherent that purely structural composition of two changes
@@ -896,67 +883,79 @@ a variable name.
 
 \begin{lemma}[Composition Correct] \label{lemma:pepatches:comp-correct}
 For any changes |p| and |q| and trees |x| and |y| aptly typed;
-|app (p after q) x == Just y| if and only if
+|app (after p q) x == Just y| if and only if
 |exists z dot (app q x) == Just z && app p z == Just y|.
 \end{lemma}
 \begin{proof}
 \begin{description}
 \item[if.]
-Assuming |app (p after q) x == Just y|, we want to prove there exists
+Assuming |app (after p q) x == Just y|, we want to prove there exists
 |z| such that |app q x == Just z| and |app p z == Just y|. Let |sigma|
 be the result of |unify (chgDel p) (chgIns q)|, witnessing |after p q|;
 let |gamma| be the result of |unify (sigma (chgDel q)) x|, witnessing the
 application.
-\begin{enumerate}
-\item First, we observe that |chgDel q| unifies with |x|
-through |gamma . sigma|. Moreover, |(gamma . sigma) q == x|.
-Hence, |app q x == Just z|, for |z = (gamma . sigma) (ctxIns q)|.
 
-\item Now, we must prove that there exists a substitution
-|zeta| such that |zeta (ctxDel p) == zeta z|
-Taking |zeta = gamma . sigma| and observing that |(gamma . sigma) (ctxIns q)|
-has no variables enables us to conclude that we can
-apply |p| to |z|.
+Take |z = (gamma . sigma) (ctxIns q)|, and let us prove it 
+unifies |ctxDel p| and |z|.
+\begin{squiggol}[tight]
+|(gamma . sigma) (ctxDel p) == (gamma . sigma) z|
+\reasonRel{\iff}{|z| \text{ has no variables}}
+|(gamma . sigma) (ctxDel p) == z|
+\reasonRel{\iff}{\text{definition of } |z|}
+|(gamma (sigma (ctxDel p)) == gamma (sigma (ctxIns q))|
+\noreasonRel{\;\Longleftarrow\;}
+|sigma (ctxDel p) == sigma (ctx ins q)|
+\end{squiggol}
 
-\item Finally, we must prove that the result of
-applying |p| to |z| coincides with |y|, that is, |zeta (ctxIns p) == y|.
-Which is trivial given |zeta == gamma . sigma| and our hypothesis.
-\end{enumerate}
+Hence, |p| can be applied to |z|, and the result is |(gamma . sigma) (ctxIns p)|,
+which by hypothesis, is equal to |y|.
+
 \item[only if.]
 Assuming there exists |z| such that |app q x == Just z| and
-|app p x == Just y|, we want to prove that |app (after p q) x == Just y|.
+|app p z == Just y|, we want to prove that |app (after p q) x == Just y|.
 Let |alpha| be such that |alpha (ctxDel q) == x|, hence, |z == alpha (ctxIns q)|;
 Let |beta| be such that |beta (ctxDel p) == z|, hence |y == beta (ctxIns p)|.
 \begin{enumerate}
 \item First we prove that |after p q| is defined, that is,
-there exists |sigma'| such that |sigma' (ctxIns q) == sigma' (ctxDel p)|.
+there exists |sigma'| that unifies |ctxIns q| and |ctxDel p|.
 Take |sigma' = alpha ++ beta|, and recall |alpha| and |beta|
-have disjoint supports.
+have disjoint supports because we assume |p| and |q| have a
+disjoint set of names.
 
-\begin{myhs}
-\begin{code}
-     sigma'  (ctxIns q)  ==  sigma'  (ctxDel p)
-iff  alpha   (ctxIns q)  ==  beta    (ctxDel p)   -- disjoint supports
-iff  z                   ==  beta    (ctxDel p)   -- def z
-iff  beta z              ==  beta    (ctxDel p)   -- z has no variables
-\end{code}
-\end{myhs}
+\begin{squiggol}[tight]
+|sigma'  (ctxIns q)  ==  sigma'  (ctxDel p)|
+\reasonRel{\iff}{\text{disjoint supports}}
+|alpha (ctxIns q) == beta (ctxDel p)|
+\reasonRel{\iff}{\text{definition of } |z|}
+|z == beta (ctxDel p)|
+\end{squiggol}
 
-\item Since |sigma'| unifies |ctxIns q| and |ctxDel p|, let
-|sigma| be their \emph{most general unifier}, that is,
-|sigma = unify (ctxIns q) (ctxDel p)|. This yields
-that |sigma' = gamma . sigma| for some |gamma| and
-that |p after q == Chg (sigma (ctxDel q)) (sigma (ctxIns p))|.
+Since |sigma'| unifies |ctxIns q| and |ctxDel p|, let
+|sigma| be their \emph{most general unifier}.
+Then, |sigma' == gamma . sigma| for some |gamma| and
+|after p q == Chg (sigma (ctxDel q)) (sigma (ctxIns p))|.
 
-\item Next we prove |sigma (ctxDel q)| can be
-applied to |x|. Well, we know |x == beta (ctxDel q)|
-and |beta (ctxDel q) == sigma' (ctxDel q)|, hence,
-|x == (gamma . sigma) (ctxDel q)|.
-Because |x| has no variables, |gamma x == x|.
-Hence, |gamma| witnesses the unification of |sigma (ctxDel q)|
-and |x|. Hence, |app (after p q) x == gamma (sigma (ctxIns p))|
-Finally, a straightforward calculation yields that
-|gamma (sigma (ctxIns p)) == y|.
+\item Next we prove |app (after p q) x == Just y|.
+First we prove |sigma (ctxDel q)| unifies with |x|.
+
+\begin{squiggol}[tight]
+|x == beta (ctxDel q)|
+\reasonRel{\iff}{\text{Disj. supports};\text{Def. }|sigma'|}
+|x == gamma (sigma (ctxDel q))|
+\reasonRel{\iff}{|x| \text{ has no variables}}
+|gamma x == gamma (sigma (ctxDel q))|
+\end{squiggol}
+
+Hence, |app (after p q) x| evaluates to |gamma (sigma (ctxIns p))|.
+Proving it coincides with |y| is a straighforward calculation:
+
+\begin{squiggol}[tight]
+|gamma (sigma (ctxIns p)) == y|
+\reasonRel{\iff}{\text{Def. }|y|}
+|gamma (sigma (ctxIns p)) == alpha (ctxIns p)|
+\reasonRel{\iff}{\text{Disj. supports};\text{Def. }|sigma'|}
+|gamma (sigma (ctxIns p)) == gamma (sigma (ctxIns p))|
+\end{squiggol}
 \end{enumerate}
 \end{description}
 \end{proof}
@@ -972,13 +971,53 @@ indistinguishable through their application semantics:
 |p ~ q iff forall x dot (app p x) == (app q x)|
 \]
 
-\begin{lemma}[Definability of Composition]
-Let |p|, |q| and |r| be aptly typed changes;
+\begin{lemma}[Definability of Composition] \label{lemma:pepatches:comp-def}
+For any changes |p| and |q| and trees |x| and |y| aptly typed;
+|app (after p q) x == Just y| if and only if
+|exists z dot (app q x) == Just z && app p z == Just y|.
+Let |p|, |q| and |r| be aptly typed changes, then,
 |after (after p q) r| is defined if and only if |after p (after q r)|
 is defined.
 \end{lemma}
 \begin{proof}
-If the proof above is fine; I'll transcribe what I have.
+\begin{description}
+\item[if.] Assuming |after (after p q) r| is defined,
+Let |sigma| and |theta| be such that |sigma (ctxDel p) == sigma (ctxIns q)|
+and |theta (sigma (ctxDel q)) == theta (ctxIns r)|.
+We must prove that (a) |ctxIns r| unifies with |ctxDel q| through some
+substitution |theta'| and (b) |sigma' (ctxIns q)| unifies with |ctxDel p|.
+
+\begin{enumerate}
+\item Take |theta' = theta . sigma|, then:
+\begin{squiggol}[tight]
+|(theta . sigma) (ctxIns r) == (theta . sigma) (ctxDel q)|
+\reasonRel{\iff}{|support sigma intersect vars r == emptyset|}
+|theta (ctxIns r) == (theta . sigma) (ctxDel q)|
+\end{squiggol}
+\end{enumerate}
+
+Then, let |zeta| be the idempodent \emph{most general unifier} of |ctxIns r| and
+|ctxDel q|, it follows that |theta' = gamma . zeta| for some |gamma|.
+Consequently, |after q r = Chg (zeta (ctxDel r)) (zeta (ctxIns q))|.
+
+Now, we must construct |sigma'| to unify |ctxDel p| and |zeta (ctxIns q)|,
+which enables the construction of |after p (after q r)|.
+Let |sigma' = theta . sigma| and reduce it to one of our assumptions:
+
+\begin{squiggol}[tight]
+|theta (sigma (ctxDel p)) == theta (sigma (zeta (ctxIns q)))|
+\reasonRel{\iff}{|theta . sigma == gamma . zeta|}
+|theta (sigma (ctxDel p)) == gamma (zeta (zeta (ctxIns q)))|
+\reasonRel{\iff}{|zeta|\text{ idempotent}}
+|theta (sigma (ctxDel p)) == gamma (zeta (ctxIns q))|
+\reasonRel{\iff}{|theta . sigma == gamma . zeta|}
+|theta (sigma (ctxDel p)) == theta (sigma (ctxIns q))|
+\noreasonRel{\;\Longleftarrow\;}
+|sigma (ctxDel p) == sigma (ctxIns q)|
+\end{squiggol}
+
+\item[only if.] Analogous.
+\end{description}
 \end{proof}
 
 \begin{lemma}[Associativity of Composition] \label{lemma:pepatches:comp-assoc}
@@ -987,11 +1026,12 @@ that |after (after p q) r| is defined, then
 |after (after p q) r ~ after p (after q r)|.
 \end{lemma}
 \begin{proof}
-If the proof above is fine; I'll transcribe what I have.
+Straightforward application of \Cref{lemma:pepatches:comp-def} and
+\Cref{lemma:pepatches:comp-correct}.
 \end{proof}
 
 \begin{lemma}[Identity of Composition] \label{lemma:pepatches:comp-id}
-Let |p| be a change, then |cpy = Chg (metavar x) (metavar x)| is
+Let |p| be a change, then let |cpy = Chg (metavar x) (metavar x)| is
 the identity of composition. That is, |after p cpy == p == after cpy p|.
 \end{lemma}
 \begin{proof}
@@ -1003,18 +1043,11 @@ a partial monoid structure for |Chg| and |after| under extensional
 change equality, |~|. This further strengthens the applicability
 of |Chg| as a sound replacement for edit-script.
 
-\victor{discuss inverses?}
-
-\victor{
-The |PatchPE ki codes| forms either:
-\begin{itemize}
-\item Partial monoid, if we want |vars ins <= vars del|
-\item Grupoid, if we take |vars ins == vars del|
-\end{itemize}
-}
-
-\victor{Finish; conclude}
-
+%format inv p = p "^{\HVNI{-1}}"
+  Because of the well-scopedness of changes, that is,
+for any change |p| we have that |vars (chgDel p) == vars (chgIns p)|,
+we could go a step further and define the inverse of a change, |inv p|,
+and prove that we get a grupoid of changes under |~|. Yet, 
 
 %}
 %%% END OF TEMPORARY NOTATION
@@ -1035,7 +1068,7 @@ as a result of context extraction, \Cref{fig:pepatches:extract-sol}.
 
 \begin{myhs}
 \begin{code}
-data ExtractionMode  =  NoNested |  ProperShare |  Patience
+data ExtractionMode  =  NoNested | ProperShare | Patience
 \end{code}
 \end{myhs}
 

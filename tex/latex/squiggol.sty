@@ -46,7 +46,8 @@
 }
 
 \newenvironment{squiggolT}{%
-\renewcommand{\reasonBase}[2]{& \enspace ##2 \\ \ensuremath{##1} \enspace & }
+\addtolength{\jot}{-.2em}
+\renewcommand{\reasonBase}[2]{& &\enspace ##2 \\ \ensuremath{##1} \enspace & }
 \squiggolBase%
 }{%
 \endsquiggolBase%

@@ -17,8 +17,11 @@
 %format kappa1       = "\HVNI{\kappa_1}"
 %format kappa2       = "\HVNI{\kappa_2}"
 %format sigma        = "\HVNI{\sigma}"
-%format alpha        = "\HVNI{\alpha}"
+%format sigma'       = "\HVNI{\sigma}^{\prime}"
+%format theta        = "\HVNI{\theta}"
+%format theta'       = "\HVNI{\theta}^{\prime}"
 %format beta         = "\HVNI{\beta}"
+%format iota         = "\HVNI{\iota}"
 %format gamma        = "\HVNI{\gamma}"
 %format zeta         = "\HVNI{\zeta}"
 %format exists       = "\HVNI{\exists}"
@@ -70,13 +73,17 @@
 %format PatchGDiff = "\HTNI{\mathit{Patch}_\textsc{gd}}"
 %format PatchST    = "\HTNI{\mathit{Patch}_\textsc{st}}"
 
-
 %%% HDiff Notation
 
 %format PatchPE     = "\HTNI{\mathit{Patch}_\textsc{pe}}"
 %format (metavar i) = "\HTNI{\digemFormatMetavar{" i "}}"
 %format MV_Prim i   = "\HTNI{\digemFormatMetavarKappaFam{\kappa}{" i "}}"
 %format MV_Comp i   = "\HTNI{\digemFormatMetavarKappaFam{\mathit{fam}}{" i "}}"
+
+%format (ctxDel p)  = "{" p "}_{\HVNI{\mathrm{del}}}"
+%format (ctxIns p)  = "{" p "}_{\HVNI{\mathrm{ins}}}"
+%format (chgDel p)  = "{" p "}_{\HVNI{\mathrm{del}}}"
+%format (chgIns p)  = "{" p "}_{\HVNI{\mathrm{ins}}}"
 
 
 %%% TMP?
