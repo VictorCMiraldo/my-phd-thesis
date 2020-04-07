@@ -661,6 +661,17 @@ validity, it would have given us more datapoints though}
 \section{Discussion}
 
 
+  From our preliminary evaluation, \Cref{chap:eval}, we observed that
+duplications and contractions are not particularly useful. In fact, the best
+merging success rate came from only copying subtrees that occur uniquely,
+that is, using the |Patience| context extraction. This suggests that it might
+be worthwhile to forbid duplication and contractions on the representation level
+and work on a merging algorithm that enjoys the precondition that each
+metavariable occurs only twice.
+
+
+
+
 
 %%% Local Variables:
 %%% mode: latex

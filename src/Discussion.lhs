@@ -1,28 +1,30 @@
   This thesis explored two preliminary approaches to structural
-differencing, coupled with the respective generic programming
+differencing and the respective generic programming
 libraries necessary to implement them. The first method,
 \texttt{stdiff}, was presented in \Cref{chap:structural-patches} and
 revealed itself to be unpratical due to poor performance.  The second
 method, \texttt{hdiff}, was discussed in
 \Cref{chap:pattern-expression-patches} and experimented with in
-\Cref{chap:eval}. Moreover, it has shown better potential to be used
-in practical applications.
-
+\Cref{chap:eval}.
 
 \section{The Future of Structural Differencing}
 
   Applying structural differncing tools to version control of source
-code comes with many challanges. This dissertation addresses some
-of these challanges. Namelly, those around representing and
-computing patches efficiently. There are a number of further challanges
-that would need to be addressed if we ever want an industrial
-structural differncing tool out there. The three most pressing
-would be the following.
+code comes with many challanges. This dissertation addresses just a
+few of them, namelly, those around representing and computing patches
+efficiently. There are a number of other difficulties that would need
+to be addressed if we ever want an industrial structural differncing
+tool. In the remainder of this section we take a look at some of the
+most pressing challenges and discuss a little about the future of
+structural differencing.
 
+  There are three main difficulties in applying structural differencing
+with the objective of writing better merge algorithms:
 \begin{enumerate}
 \item How to properly handle formatting and comments of source code:
-should the AST keep this information ? If so, the tree matching must
-be adapted to cope with this.
+should the AST keep this information? If so, the tree matching must
+be adapted to cope with this. Two equal trees must be matched regardless of whether
+or not they appeared with a different formatting in their respective source files.
 \item How to ensure that subtrees are only being shared wihin their
 respective scope and, equally importantly, how to specify which datatypes
 of the AST are affected by scopes.
@@ -34,13 +36,19 @@ the merge algorithm to always chose higher version numbers, for example,
 whenever it finds a conflict in, say, a cabal file?
 \end{enumerate}
 
-  From a broader perspective, however, there are interesting applications
-closely related to version control that could benefit greatly from
-structural differencing techniques, without bumping into the challenges above.
-I conjecture that, with moderate effort, we could deploy \texttt{hdiff} to
-provide a human readable summary of a patch, something that looks
-at the working directory, computes the structural diffs between the various
-files, just like \texttt{git diff}, but displays information in the lines of:
+  Fixing the obstacles above in a generic way would be a significant
+effort.  So much so that it makes me question the applicability of
+structural differencing for the exclusive purpose of merging
+source-code.  From a broader perspective, however, there are many
+interesting applications that could benefit from structural
+differencing techniques.  In particular, we can probably use
+structural differencing to aid any task where a human does not
+directly edits the files being analyzed or when the result of the
+analisys does not need to be interacted with.  For example, it should
+be possible to deploy \texttt{hdiff} to provide a human readable
+summary of a patch, something that looks at the working directory,
+computes the structural diffs between the various files, just like
+\texttt{git diff}, but displays information in the lines of:
 %
 \begin{alltt}
 some/project/dir \$ hsummary
@@ -65,19 +73,14 @@ Some care must be taken with the unordered trees, even though I conjecture
 
 \section{Concluding Remarks}
 
-  This dissertation is a scratch on the surface of the problems surrounding
-structural differencing for source-code.
-
- Design-space is very large; We found algortihms that are easy to merge
-and hard to compute and vice-versa.
-
-
-
-If \texttt{hdiff --patience} does show better merging capability even under
-the more difficult merging algorithm, maybe we should disallow duplications
-and contractions altogether. This does go hand in hand with sharing; with
-better sharing control we could understand that local variable declarations
-are not to be shared outside their scope.
+  This dissertation is a scratch on the surface of the problems
+surrounding structural differencing for source-code
+versioning. Although the design space is large, we have studied some
+of design options. We have found approaches that are easy to merge but
+hard to compute and vice-versa.  In the process of developping our
+prototypes we have also improved the Haskell ecosystem for generic
+programming. Finally, we have seen that \texttt{hidff} has shown
+promissing results, even if its merging algorithm is more intricate.
 
 %%% Local Variables:
 %%% mode: latex
