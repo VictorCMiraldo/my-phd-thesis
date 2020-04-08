@@ -129,3 +129,20 @@ I'd argue our mage still constitutes a correct result.
 
 Import reordering; hdiff still produced a correct result. The human merge
 permuted the insertions.
+
+## 14 insertion-order
+
+Imports were inserted from both replicas; hdiff picked a different order.
+
+## 18 human-made-mistake
+
+The manual merge is weird and replicates classes; hdiff performed as expected here.
+
+## 21 ignoring-change
+
+Very similar to case 03. Hdiff did well here again
+
+## 24 cant-say
+
+This one is particularly complicated; I'd conservatively mark it
+as hdiff doing something shady.
