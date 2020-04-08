@@ -53,38 +53,65 @@ Which can be done by the means of an edit-script. The second field, however,
 witnesses a change in the recursive structure of the type. We see that
 we have inserted new information, namely |(Bin SQ e)|. After inserting
 this \emph{context}, we simply copy |d| from the source to the destination.
-And in this example we see all the necessary pieces to write a general
+This transformation has been sketched graphically in \Cref{fig:stdiff:patch0-c},
+and showcases all the necessary pieces we will need to write a general
 encoding of transformations between objects that support insertions, deletions
 and copies.
 
 \todo{make subtrees triangles}
 \begin{figure}
 \centering
-\subfloat[Source tree, |t1|]{%
+\subfloat[Source, |t1|]{%
 \begin{forest}
 [ |Bin| [ |Tri| [a] [b] [c]] [d]]
-\end{forest}\qquad
-\label{fig:stdiff:patch0-a}
-}%
+\end{forest}\quad
+\label{fig:stdiff:patch0-a}}%
 \qquad
-\subfloat[Destination tree, |t2|]{%
+\subfloat[Destination, |t2|]{%
 \begin{forest}
 [ |Bin| [ |Bin| [a'] [b] ] [|Bin| [d] [e]] ]
-\end{forest}\qquad
-\label{fig:stdiff:patch0-b}}
-\caption{Graphical representation of a simple transformation}
+\end{forest}
+\label{fig:stdiff:patch0-b}}%
+\qquad
+\subfloat[Graphical Representation of a patch that transforms |t1| into |t2|]{%
+%{
+%format TO a b = "{" a "}\mathbin{\HS{\mapsto}}{" b "}"
+%format Cpy a  = "\HS{=}{" a "}"
+%format Ins a  = "\HS{+}{" a "}"
+%format Del a  = "\HS{-}{" a "}"
+\begin{forest}
+[|Cpy Bin|
+  [|TO Tri Bin|
+    [|TO a a'|]
+    [|Cpy b|]
+    [|Del c|]]
+  [|Ins (Bin SQ e)| [|Cpy d|]]]
+\end{forest}}
+\caption{Graphical representation of a simple transformation. Copies, insertinos
+and deletions around the tree are represented with |Cpy|, |Ins| and |Del| respectively.
+Modifications are denoted |TO|.}
+%}
 \label{fig:stdiff:patch0}
 \end{figure}
 
-  To write the \texttt{stdiff} algorithms in
-Haskell, we must rely on the \texttt{generics-mrsop} library (\Cref{sec:gp:mrsop}) as our
-generic programming workhorse for two reasons. First, we do
-require the concept of explicit sums of products in the very
-definition of |PatchST x|. Secondly, we need \texttt{gdiff}'s
-assistance in computing patches (\Cref{sec:stdiff:oraclesenum})
-and \texttt{gdiff} also requires, to a lesser extent, sums of products structured
-datatypes, hence is easily written with \texttt{generics-mrsop},
-as seen in \Cref{sec:gp:well-typed-tree-diff}.
+\victor{How about this little next parargaph?}
+
+  At a glance, the \texttt{stdiff} approach to differencing is a different
+way of representing edit-scripts to follow the shape of the datatype in question.
+We advance that the approach from \Cref{chap:pattern-expression-patches} supersedes
+this approach in all aspects, consequently, we invide the reader who is
+interested in understanding methods that work to jump directly
+to \Cref{chap:pattern-expression-patches}.
+
+  To write the \texttt{stdiff} algorithms in Haskell, we must rely on
+the \texttt{generics-mrsop} library (\Cref{sec:gp:mrsop}) as our
+generic programming workhorse for two reasons. First, we do require
+the concept of explicit sums of products in the very definition of
+|PatchST x|. Secondly, we need \texttt{gdiff}'s assistance in
+computing patches (\Cref{sec:stdiff:oraclesenum}) and \texttt{gdiff}
+also requires, to a lesser extent, sums of products structured
+datatypes, hence is easily written with \texttt{generics-mrsop}, as
+seen in \Cref{sec:gp:well-typed-tree-diff}.
 
   The contributions in this chapter arise from joint work
 with Pierre-Evariste Dagand, published in TyDe 2017~\cite{Miraldo2017} and
@@ -99,14 +126,13 @@ Master thesis work~\cite{Putten2019}.  We chose to present all of our
 work in a single programming language to keep the thesis consistent
 throughout.
 
-\victor{TODO: LATER: review the structure; i think it might change!}
   In this chapter we will delve into the construction of |PatchST| and its
 respective components. Firstly, we familiarize ourselves with |PatchST|
 and is application function, \Cref{sec:stdiff:patches}. Next we look into
 merging and its cummutativity proof in \Cref{sec:stdiff:merging}. Lastly,
 we discuss the |diff| function in \Cref{sec:stdiff:diff}, which comprises
-a significant drawback of the \texttt{stdiff} approach for
-its computational complexity.
+a significant drawback of the \texttt{stdiff} approach for its computational 
+complexity.
 
 \section{The Type of Patches}
 \label{sec:stdiff:patches}
