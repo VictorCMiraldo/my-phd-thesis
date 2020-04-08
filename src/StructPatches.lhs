@@ -152,10 +152,6 @@ between values of $\mu F$ by successively applying the description of difference
 values of type $F$, closely following the initial algebra semantics of
 datatypes.
 
-\victor{I wonder if a diagram similar to the one in our paper with pierre
-would help here... I think so. Will leave drawing the monster for
-a rainy sunday though}
-
 \subsection*{Functorial Patches}
 \label{sec:stdiff:diff:functor}
 
@@ -547,9 +543,6 @@ applyAlmu (Del  c ctx)  (Fix rep)  = delCtx ctx <$$> match c rep
 the necessary singletons to make the |applySpine| typecheck. These
 can be easily replaced by |getSNat| with the correct proxies.
 
-  In fact, defining |PatchST ix| as |Almu ix ix| will fit the
-our abstract formulation of differencing\victor{Where is this?}.
-
 \begin{myhs}
 \begin{code}
 type PatchST kappa codes ix = Almu kappa codes ix ix
@@ -814,9 +807,8 @@ it unusuable in practice.
 a tree |x| into |y| is enumerating all possible patches and filtering
 our those with the smallest \emph{cost}, for some \emph{cost} metric.
 In this section, we will write a naive enumeration engine for
-|PatchST| and argue that exploring suitable notions of
-\emph{cost} brings a lot of tensions to the design.
-\victor{We barely talk about cost...}
+|PatchST| and argue that regardless of the \emph{cost} notion,
+the state space explodes quickly and becames intractable.
 
   The enumeration follows the Agda model~\cite{Miraldo2017}
 closely and is not very surprising. Nevertheless, it does
