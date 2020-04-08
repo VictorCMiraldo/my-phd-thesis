@@ -286,6 +286,8 @@ Language & \emph{success} & \% & \emph{mdif} & \% & \emph{suc+mdiff}\% \\
  JavaScript & 1045 & 0.3  & 273 & 0.08 & 0.38 \\
  Lua        & 185  & 0.25 & 101 & 0.14 & 0.39 \\
  Python     & 907  & 0.21 & 561 & 0.13 & 0.34 \\
+\midrule
+\emph{Total}& 3299 & 0.26 & 1625 & 0.13 & 0.39 \\
 \bottomrule
 \end{tabular}
 \caption{Best synchronization success rate per language.}
@@ -599,7 +601,6 @@ we have that sharing method modifiers triggers unwanted replication
 of a change. On the other, the lack of sharing of empty method bodies makes
 it difficult to place an insertion in its correct position.
 
-
   When \texttt{hdiff} returned a patch with conflicts,
 that is, we could \emph{not} successfully solve the merge, we recorded
 the class of conflicts we observed. \Cref{tbl:eval:hdiff-conflict-distr}
@@ -607,7 +608,6 @@ shows the distribution of each conflict type throughout the
 dataset. Note that a patch resulting from a merge can have multiple
 conflicts. This information is useful for deciding which aspects of
 the merge algorithm can yield better results.
-\victor{so what? Do I even want this informantion?}
 
 \begin{table}
 \centering
@@ -630,7 +630,7 @@ Percentile & 0.42 & 0.27 & 0.11 & 0.1 & 0.05 & 0.02 & 0.03 \\
 
 \subsection{Threats to Validity}
 
-  The synchronization experiment is encouraging. Before
+  The synchronization experiment is encouraging, but before
 drawing conclusions however, we must analyze our assumptions
 and setting and pre-emptively undertand which factors
 could also be influencing the numbers.
@@ -654,24 +654,48 @@ our merging process, the final numbers would not inform us about how
 many code transformations are \emph{disjoint} and could be automatically
 merged.
 
-\victor{We didn't look into rebases; argue this is not necessarily a threat to
-validity, it would have given us more datapoints though}
+  Another case worth noting is that although we have not found many cases
+where \texttt{hdiff} performed a wrong merge, \Cref{fig:eval:nn-pt-01,fig:eval:nn-pt-02}
+showcases two such cases, hence, it is important to take the aggregate success
+rate with a grain of salt. There exists a probablity that some of the
+\emph{mdif} cases are false positives, that is, \texttt{hdiff} produced a merge
+but it performed the wrong operation.
 
+  Finally, one can also argue we have only looked at fewer conflicts than
+what we could have by not considering conflicts that arise from rebasing.
+This does not necessarily make a threat to validity, but indeed would have
+given us more data. That being said, we would only be able to recreate rebases
+done through \texttt{GitHub} web interface. The rebases done on the command line are
+impossible to recreate.
 
 \section{Discussion}
 
+  This chapter provided an empirical evaluation of our methods and
+techniques. Here we saw how \texttt{stdiff} is at least one order of
+magnitude slower than \texttt{hdiff}, rendering it unusable in
+practice. Preliminary synchronization experiments with \texttt{stdiff}
+also showcased a smaller success rate. The performance measurements
+of \texttt{hdiff} are quite impressive however. Even with all the
+overhead introduced by generic programming and an unoptimized algorithm,
+we can still compute patches almost instantaneously.
 
-  From our preliminary evaluation, \Cref{chap:eval}, we observed that
-duplications and contractions are not particularly useful. In fact, the best
-merging success rate came from only copying subtrees that occur uniquely,
-that is, using the |Patience| context extraction. This suggests that it might
-be worthwhile to forbid duplication and contractions on the representation level
-and work on a merging algorithm that enjoys the precondition that each
-metavariable occurs only twice.
+  The synchronization results for \texttt{hdiff} are equally encouraging.
+A proper calculation of the probability that a conflict encountered in \texttt{GitHub}
+could be solved automatically is involved and out of the scope of this thesis.
+Nevertheless, we have observed that 26\% of the conflicts in our dataset
+could be solved by \texttt{hdiff} and did match what a human peformed and an
+additional 13\% could be solved but did not match a manually produced result.
 
-
-
-
+  An interesting observation that comes from the
+synchtronization experiment, \Cref{tbl:eval:merge-hdiff}, is that the
+best merging success rate for all languages used the |Patience|
+context extracton -- only copying subtrees that occur uniquely.  This
+suggests that it might be worthwhile to forbid duplication and
+contractions on the representation level and work on a merging
+algorithm that enjoys the precondition that each metavariable occurs
+only twice. This simplification could enable us to write a simpler
+merging algorithm and an Agda model, which can then be used to prove
+important propeties about out algorithms
 
 %%% Local Variables:
 %%% mode: latex
