@@ -17,10 +17,9 @@ be restricted to order-preserving partial injections to be
 efficiently translated to edit-scripts later.  The \texttt{hdiff}
 approach never translates to edit-scripts, which means the tree
 matchings we compute are subject to \emph{no} restrictions.  In fact,
-\texttt{hdiff} uses these unrestricted tree matchings as \emph{the patch}, 
+\texttt{hdiff} uses these unrestricted tree matchings as \emph{the patch},
 instead of translating them \emph{into} a
-patch. Consequently, we do not need any of the classical restrictions
-imposed on tree matchings.
+patch.
 
   Suppose we want to describe a change that modifies the left element
 of a binary tree. If we had the full Haskell programming language
@@ -160,20 +159,19 @@ type Change phi = (TreeC phi , TreeC phi)
 
 \begin{figure}
 \centering
-\subfloat{%
+\subfloat[|diff (Bin t u) (Bin u t)|]{%
 \begin{myforest}
 [,change [|Bin| [0,metavar] [1,metavar]]
          [|Bin| [1,metavar] [0,metavar]]]
 \end{myforest}
 }\qquad
-\subfloat{%
+\subfloat[|diff (Bin t u) (Tri t a u)|]{%
 \begin{myforest}
 [,change [|Bin| [0,metavar]       [1,metavar]]
          [|Tri| [0,metavar] [|a|] [1,metavar]]]
 \end{myforest}
 }
-\caption{Illustration of |diff (Bin t u) (Bin u t)| to the left and
-|diff (Bin t u) (Tri t a u)| on the right. Metavariables are denoted
+\caption{Illustration of two changes. Metavariables are denoted
 with |metavar x|.}
 \label{fig:pepatches:first-change}
 \end{figure}
@@ -259,11 +257,12 @@ ins (Hole i)      m  = lookup i m
 
 \subsubsection{Computing Changes}
 
-  Next, we explore how to produce a change from a source and a
-destination, defining the |chgTree| function. Intuitively, this function will
+  Next we will define the |chgTree| function, which
+produces a change from a source and a destination.
+Intuitively, the |chgTree| function should
 try to exploit as many copy opportunities as possible. For now, we delegate
 the decision of whether a subtree should be copied or not to an
-oracle: assume we have access a function |wcs :: Tree -> Tree ->
+oracle: assume we have access to a function |wcs :: Tree -> Tree ->
 Tree -> Maybe MetaVar|, short for \emph{``which common subtree''}.  The
 call |wcs s d x| returns |Nothing| when |x| is \emph{not} a subtree of
 |s| and |d|; if |x| is a subtree of both |s| and |d|, it returns |Just
@@ -276,8 +275,8 @@ equal subtrees.
 traverses both trees searching for shared subtrees -- hence postulating
 the existence of such an oracle is not a particularly strong
 assumption to make. In \Cref{sec:pepatches:concreteoracle}, we provide an efficient
-implementation for |Tree|. For now, assuming the oracle exists allows for
-a clear separation of concerns.  The |changeTree| function merely
+implementation. For now, assuming the oracle exists allows for
+a clear separation of concerns.  The |chgTree| function merely
 has to compute the deletion and insertion contexts, using said
 oracle -- the inner workings of the oracle are abstracted away cleanly.
 
@@ -323,7 +322,7 @@ by itself but also as a subtree of another common subtree.
 Such situation is illustrated in \Cref{fig:pepatches:extract-problem}.
 In particular, the patch shown in \Cref{fig:pepatches:extract-problem:res}
 cannot be applied since the deletion context does not instantiate
-the metavariable |metavar y|, required by the insertion context.
+the metavariable |metavar y|, which required by the insertion context.
 
 \begin{figure}
 \subfloat[|s|]{%
@@ -380,10 +379,8 @@ context.}
 ]
 \end{myforest}
 \label{fig:pepatches:extract-sol-01:proper}}%
-\caption{Context extraction must care to produce
-well-formed changes. The nested occurrence of |t| within |Bin t u|
-here yields a change with an undefined variable on its insertion
-context.}
+\caption{Two potential solutions to the problem of nested common
+subtrees, illustrated in \Cref{fig:pepatches:extract-problem}}
 \label{fig:pepatches:extract-sol-01}
 \end{figure}
 
@@ -436,9 +433,6 @@ time being, let us move on to the intuition behind computing the |wcs|
 function efficiently for the concrete case of the |Tree| datatype.
 
 \begin{figure}
-\victor{Find a better example... not sure this really illustrates
-the differences}
-
 \centering
 \subfloat[Source and Destination]{%
 \begin{myforest}
@@ -630,7 +624,7 @@ decorate :: Tree -> TreeH
 
   We omit the implementation of |decorate| for now, even if it is
 straightforward. Moreover, a generic version is introduced in
-\Cref{WHERE}. The |TreeH| datype carries round the
+\Cref{sec:pepatches:diff}. The |TreeH| datype carries round the
 |merkleRoot| of its first component, hence, enabling us
 to define |(==)| in constant time.
 
@@ -661,18 +655,12 @@ wcs s d = lookup (mkTrie s intersect mkTrie d) . merkleRoot
 \end{code}
 \end{myhs}
 
-  \digress{The use of cryptographic hashes is unsurprising. They are almost
+  The use of cryptographic hashes is unsurprising. They are almost
 folklore for speeding up a variety of computations. It is important to
 notice that the efficiency of the algorithm comes from the novel
 representation of patches combined with a amortized constant time
 |wcs| function. Without being able to duplicate or permute subtrees,
-the algorithm would have to backtrack in a number of situations.}
-
-\victor{The closes to us is perhaps XyDiff, which still uses
-edit scripts but adds a 'move' operation; note that the move is only
-possible because xml is untyped; hence we can always remove a child
-of a node and move it somewhere else. Finally, they also use hashes
-in a less specified manner.}
+the algorithm would have to backtrack in a number of situations.
 
 %   Our technique for detecting shared subtrees is similar to
 % \emph{hash-consing}~\cite{Filliatre2006} in spirit. We come back to a
@@ -707,9 +695,8 @@ data Holes kappa fam h a where
 \end{myhs}
 
   The |TreeC MetaVar| datatype, defined in
-\Cref{sec:pepatches:concrete-changes} and used to represent a value of type
-|Tree| augmented with metavariables, is in
-fact, isomorhic to the type |Holes (P [ Int ]) (P [ Tree ]) (Const Int)|.
+\Cref{sec:pepatches:concrete-changes} to represent a value of type
+|Tree| augmented with metavariables is isomorhic to |Holes (P [ Int ]) (P [ Tree ]) (Const Int)|.
 Abstracting away the specific family for |Tree|, the datatype |Holes
 kappa fam (Const Int)| gives a functor mapping an element of the
 family into its representation augmented with integers, used to
@@ -728,21 +715,24 @@ data MetaVar kappa fam at where
 \end{myhs}
 
   With |MetaVar| above, we can always fetch the |Int| identifying
-the metavar but we maintain all the type-level information we need
-to inspect at run-time. We define the |HolesMV| synonym
-for values augmented with metavariables for convenience.
+the metavar, with |metavarGet|, but we maintain all the type-level
+information we could need to inspect at run-time.
+The |HolesMV| datype below is convenient since most of the times
+our |Holes| structures will contain metavariables.
 
 \begin{myhs}
 \begin{code}
+metavarGet :: MetaVar kappa fam at -> Int
+
 type HolesMV kappa fam = Holes kappa fam (MetaVar kappa fam)
 \end{code}
 \end{myhs}
 
-  A \emph{change} is our \emph{unit of transformation} and
-as we have already seen, consists in a pair of a deletion context and an
+  A \emph{change} consists in a pair of a deletion context and an
 insertion context for the same type.  These contexts are
 values of the mutually recursive family in question augmented with
-metavariables:
+metavariables.
+
 
 \begin{myhs}
 \begin{code}
@@ -770,7 +760,14 @@ unification means |sigma| assigns a term (no holes) for each
 metavariable in |chgDel c|. In turn, when applying |sigma| to |chgIns
 c| we must guarantee that every metavariable in |chgIns c|
 gets substituted, yielding a term with no holes as a result.
-Consequently we expect a value of type |Chg| to be well-scoped, that
+Attempting to apply a non-well-scoped change is a violation of
+the contract of |applyChg|. We throw an error on that case
+and distinguish it from a change |c| not being able to be applied to |x|
+because |x| is not an element of the domain of |c|.
+The |uninstHole| above will be called in the precise situation
+where holes were left uninstantiated in |substApply sigma (chgIns c)|
+
+  In general, we expect a value of type |Chg| to be well-scoped, that
 is, all the variables that are present in the insertion context must
 also occur on the deletion context, in Haskell:
 
@@ -781,19 +778,13 @@ vars        :: HolesMV kappa fam at -> Map Int Arity
 wellscoped  :: Chg kappa fam at -> Bool
 wellscoped (Chg d i) = keys (vars i) == keys (vars d)
 \end{code}
-\victor{decide... is |vars del == vars ins| or |vars ins < vars del|}?
 \end{myhs}
 
-  Attempting to apply a non-well-scoped change is a violation of
-the contract of |applyChg|. We throw an error on that case
-and distinguish it from a change |c| not being able to be applied to |x|
-because |x| is not an element of the domain of |c|.
-
-  A change, |Chg|, is very similar to a \emph{tree matching}
+  A |Chg| is very similar to a \emph{tree matching}
 (\Cref{sec:background:tree-edit-distance}) with less restrictions. In
 other words, it arbitrarily maps subtrees from the source to the
 destination. From an algebraic point of view, this already gives us a
-desirable structure, as we will explore next, in \Cref{sec:pepatches:meta-theory}.
+desirable structure, as we will explore next in \Cref{sec:pepatches:meta-theory}.
 In fact, we argue that there is no need to translate the tree matching
 into an edit-script, like most traditional algorithms do. The
 tree matching should be used as the representation of change.
@@ -804,45 +795,60 @@ tree matching should be used as the representation of change.
 %% POTENTIAL NOTATION:
 %{
 
-%format (app (p) x) = "\mathopen{\HT{\llbracket}}" p "\mathclose{\HT{\rrbracket}}\>" x
+%format (app (p))   = "\mathopen{\HT{\llbracket}}" p "\mathclose{\HT{\rrbracket}}\>"
 %format after p q   = p "\mathbin{\HT{\bullet}}" q
 %format after'      = "\HT{\bullet}"
 %format iff         = "\HS{\iff}"
 
-\victor{maybe move the notation to the topleve;
-I quite like semantic brackets for application}
-
-  The |Chg| datatype represents a complete detachment from
-edit-scripts. We can represent arbitrary structural transformations
-through the ability to duplicate, permute and contract arbitrary
-subtrees.  Effectively, we argue that an arbitrary function between
-the nodes of a source tree and the desired destination tree make for
-an effective representation of a patch. By avoiding translating this
-mapping to an edit-script, we also avoid all the restrictions imposed
-by classic \emph{tree mappings} (\Cref{def:background:tree-mapping}),
-which are very restrictive -- order preserving partial bijections
-which preserve the ancestry order.
-
   On this section we will look into how |Chg| admits a simple
-composition operation and forms a partial monoid or
-a partial grupoid depending on whether we allow metavariables to
-be left unused or not. We shall be ignoring the \emph{change-versus-patch}
-distinction and working solely with \emph{changes} in this section.
-We can always recompute a patch from a change if we wish to do so and,
-for meta-theoretical concerns, the distinction is artificial nevertheless
- -- it was put in place as a means to better drive
-the synchronization algorithm.
+composition operation which makes a partial monoid.  Through the
+remainder of this section we will assume changes have all been
+$\alpha$-converted to never capture names and denote the application
+function of a change, |applyChg c|, as |app c|.  We will also abuse
+notation and denote |substApply sigma p| by |sigma p|, whenever the
+context makes it clear that |sigma| is a substitution. Finally, we
+will abide by the Barendregt convention~\cite{Barendregt1984} in our
+proofs and metatheory -- that is, all changes that appear in in some
+mathematical context have their bound variable names independent of
+each other, or, no two changes share a variable name.
 
-  Through the remainder of this section we will assume changes have
-all been $\alpha$-converted to never capture names.
 
-  Composing two changes |c0 = Chg d0 i0| with |c1 = Chg d1 i1| is
-possible if and only if the image of |chgApply c0| has elements in common
-with the domain of |chgApply c1|. This can be easily witnessed
-by trying to unify |i0| with |d1|. If they are unifiable, the changes
-are composable. In fact, let |sigma = unify i0 d1|, the
-change that witnesses the composition is given by
-|c = Chg (substApply sigma d0) (substApply sigma i1)|.
+\begin{figure}
+\subfloat[Change |p|]{%
+\begin{myforest}
+[,change [w,metavar] [|Bin| [w,metavar] [t]]]
+\end{myforest}}\quad
+\subfloat[Change |q|]{%
+\begin{myforest}
+[,change [|Bin| [x,metavar] [y,metavar]]
+         [|Bin| [y,metavar] [x,metavar]]]
+\end{myforest}}\quad
+\subfloat[Composition |after p q|]{%
+\begin{myforest}
+[,change [|Bin| [x,metavar] [y,metavar]]
+         [|Bin| [|Bin| [y,metavar] [x,metavar]] [t]]]
+\end{myforest}}\enspace
+\subfloat[Composition |after q p|]{%
+\enspace
+\begin{myforest}
+[,change [w,metavar] [|Bin| [t] [w,metavar]]]
+\end{myforest}\enspace}
+\caption{Example of change composition. The composition usually can be applied to
+less elements than its parts and is clearly not commutative.}
+\label{fig:pepatches:comp-01}
+\end{figure}
+
+  The composition of two changes, say, |p| after |q|,
+returns a change that maps a subset of the domain of |q|
+into a subset of the image of |p|. \Cref{fig:pepatches:comp-01},
+for example, illustrates two changes and their two different compositions.
+In the case of \Cref{fig:pepatches:comp-01} both |after p q| and |after q p|
+exist, but this is not the case generally.
+The composition of two changes |after p q| is defined if and only if
+the image of |app q| has elements in common with the domain of |app p|.
+In other words, when |chgIns q| is unifiable with |chgDel p|.
+In fact, let |sigma = unify (chgIns q) (chgDel p)|, the
+composition |after p q| is given by |Chg (sigma (chgDel q)) (sigma (chgIns p))|.
 
 \begin{myhs}
 \begin{code}
@@ -853,12 +859,8 @@ after p q = case unify (chgDel p) (chgIns q) of
 \end{code}
 \end{myhs}
 
-  We say that |after p q| is defined if there exists a change
-|k| such that |after p q == Just k|, or, equivalently, if
-|chgDel p| is unifiable with |chgIns q|.
-
   Note that it is inherent that purely structural composition of two changes
-|p| after |q| yields a change, |pq|, that potentially misses sharing
+|p| after |q| yields a change, |after p q|, that potentially misses sharing
 opportunities. Imagine that |p| inserts a subtree |t| that was
 deleted by |q|. Our composition algorithm posses no information
 that this |t| is to be treated as a copy. This also occurs in
@@ -867,24 +869,16 @@ than recomputing differences. We can imagine that a more complicated
 composition algorithm could work around and recognize the copies
 in those situations.
 
-  Regardless of whether the composition produces \emph{the best}
-patches possible or not, it is vital that it is correct. That
+  We do not particularly care whether composition produces \emph{the best}
+change possible or not. We do not even have a notion of \emph{best}
+at the moment. It is vital, however, that it produces a correct change. That
 is, the composition of two patches is indistinguishable from
-the composition of their application function. For the remainder
-of this section we will abuse notation and write |sigma x|
-instead of |substApply sigma x|. Finally, is
-is crucial to recall we will abide by the Barendregt convention~\cite{Barendregt1984}
-in our proofs and metatheory -- that is, all changes that appear
-in in some mathematical context have their bound variable names
-independent of each other, or, no two changes share
-a variable name.
-
-\victor{Is this style of proof ok? Can you follow it?}
+the composition of their application functions.
 
 \begin{lemma}[Composition Correct] \label{lemma:pepatches:comp-correct}
 For any changes |p| and |q| and trees |x| and |y| aptly typed;
 |app (after p q) x == Just y| if and only if
-|exists z dot (app q x) == Just z && app p z == Just y|.
+|exists z dot (app q) x == Just z && app p z == Just y|.
 \end{lemma}
 \begin{proof}
 \begin{description}
@@ -895,7 +889,7 @@ be the result of |unify (chgDel p) (chgIns q)|, witnessing |after p q|;
 let |gamma| be the result of |unify (sigma (chgDel q)) x|, witnessing the
 application.
 
-Take |z = (gamma . sigma) (ctxIns q)|, and let us prove it 
+Take |z = (gamma . sigma) (ctxIns q)|, and let us prove it
 unifies |ctxDel p| and |z|.
 \begin{squiggol}[tight]
 |(gamma . sigma) (ctxDel p) == (gamma . sigma) z|
@@ -921,7 +915,7 @@ there exists |sigma'| that unifies |ctxIns q| and |ctxDel p|.
 Take |sigma' = alpha ++ beta|, and recall |alpha| and |beta|
 have disjoint supports because we assume |p| and |q| have a
 disjoint set of names.
-
+%
 \begin{squiggol}[tight]
 |sigma'  (ctxIns q)  ==  sigma'  (ctxDel p)|
 \reasonRel{\iff}{\text{disjoint supports}}
@@ -937,7 +931,7 @@ Then, |sigma' == gamma . sigma| for some |gamma| and
 
 \item Next we prove |app (after p q) x == Just y|.
 First we prove |sigma (ctxDel q)| unifies with |x|.
-
+%
 \begin{squiggol}[tight]
 |x == beta (ctxDel q)|
 \reasonRel{\iff}{\text{Disj. supports};\text{Def. }|sigma'|}
@@ -948,7 +942,7 @@ First we prove |sigma (ctxDel q)| unifies with |x|.
 
 Hence, |app (after p q) x| evaluates to |gamma (sigma (ctxIns p))|.
 Proving it coincides with |y| is a straighforward calculation:
-
+%
 \begin{squiggol}[tight]
 |gamma (sigma (ctxIns p)) == y|
 \reasonRel{\iff}{\text{Def. }|y|}
@@ -960,21 +954,19 @@ Proving it coincides with |y| is a straighforward calculation:
 \end{description}
 \end{proof}
 
-  Once we have established that composition is correct
-with respect to application, we would like to ensure
-composition is associative. But first, it is handy to
-consider an extensional equality over changes. Two
-changes are said to be equal if and only if they are
-indistinguishable through their application semantics:
+  Once we have established that composition is correct with respect to
+application, we would like to ensure composition is associative. But
+first we need to specify what we mean by \emph{equal} changes. We will
+consider an extensional equality over changes. Two changes are said to
+be equal if and only if they are indistinguishable through their
+application semantics.
 
-\[
-|p ~ q iff forall x dot (app p x) == (app q x)|
-\]
+\begin{definition}[Change Equality]
+Two changes |p| and |q| are said to be equal, denoted |p ~ q|,
+if and only if |forall x dot (app p x) == (app q x)|
+\end{definition}
 
 \begin{lemma}[Definability of Composition] \label{lemma:pepatches:comp-def}
-For any changes |p| and |q| and trees |x| and |y| aptly typed;
-|app (after p q) x == Just y| if and only if
-|exists z dot (app q x) == Just z && app p z == Just y|.
 Let |p|, |q| and |r| be aptly typed changes, then,
 |after (after p q) r| is defined if and only if |after p (after q r)|
 is defined.
@@ -986,17 +978,15 @@ Let |sigma| and |theta| be such that |sigma (ctxDel p) == sigma (ctxIns q)|
 and |theta (sigma (ctxDel q)) == theta (ctxIns r)|.
 We must prove that (a) |ctxIns r| unifies with |ctxDel q| through some
 substitution |theta'| and (b) |sigma' (ctxIns q)| unifies with |ctxDel p|.
-
-\begin{enumerate}
-\item Take |theta' = theta . sigma|, then:
+Take |theta' = theta . sigma|, then:
+%
 \begin{squiggol}[tight]
 |(theta . sigma) (ctxIns r) == (theta . sigma) (ctxDel q)|
 \reasonRel{\iff}{|support sigma intersect vars r == emptyset|}
 |theta (ctxIns r) == (theta . sigma) (ctxDel q)|
 \end{squiggol}
-\end{enumerate}
 
-Then, let |zeta| be the idempodent \emph{most general unifier} of |ctxIns r| and
+Let |zeta| be the idempodent \emph{most general unifier} of |ctxIns r| and
 |ctxDel q|, it follows that |theta' = gamma . zeta| for some |gamma|.
 Consequently, |after q r = Chg (zeta (ctxDel r)) (zeta (ctxIns q))|.
 
@@ -1032,7 +1022,7 @@ Straightforward application of \Cref{lemma:pepatches:comp-def} and
 
 \begin{lemma}[Identity of Composition] \label{lemma:pepatches:comp-id}
 Let |p| be a change, then let |cpy = Chg (metavar x) (metavar x)| is
-the identity of composition. That is, |after p cpy == p == after cpy p|.
+the identity of composition. That is, |after p cpy ~ p ~ after cpy p|.
 \end{lemma}
 \begin{proof}
 Trivial; |cpy| unifies with anything.
@@ -1043,11 +1033,14 @@ a partial monoid structure for |Chg| and |after| under extensional
 change equality, |~|. This further strengthens the applicability
 of |Chg| as a sound replacement for edit-script.
 
-%format inv p = p "^{\HVNI{-1}}"
+%format (inv p) = p "^{\HVNI{-1}}"
   Because of the well-scopedness of changes, that is,
 for any change |p| we have that |vars (chgDel p) == vars (chgIns p)|,
 we could go a step further and define the inverse of a change, |inv p|,
-and prove that we get a grupoid of changes under |~|. Yet, 
+and go on to prove that we get a grupoid of changes under |~|.
+
+\victor{Then do it! Identity will be funny; |after p (inv p)| will not
+be equiv to |cpy|. We could consider more lenient equivalences,maybe?}
 
 %}
 %%% END OF TEMPORARY NOTATION
@@ -3276,6 +3269,13 @@ is a sensible notion of ``best'' patch.
 
 
 \victor{Frst person or third person?}
+
+
+\victor{The closes to us is perhaps XyDiff, which still uses
+edit scripts but adds a 'move' operation; note that the move is only
+possible because xml is untyped; hence we can always remove a child
+of a node and move it somewhere else. Finally, they also use hashes
+in a less specified manner.}
 
   With \texttt{hdiff} we have seen that a complete detachment from edit-scripts
 enables us to define a computationally efficient differencing algorithm.
