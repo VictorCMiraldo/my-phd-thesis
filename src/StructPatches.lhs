@@ -58,7 +58,6 @@ and showcases all the necessary pieces we will need to write a general
 encoding of transformations between objects that support insertions, deletions
 and copies.
 
-\todo{make subtrees triangles}
 \begin{figure}
 \centering
 \subfloat[Source, |t1|]{%
@@ -74,34 +73,34 @@ and copies.
 \label{fig:stdiff:patch0-b}}%
 \qquad
 \subfloat[Graphical Representation of a patch that transforms |t1| into |t2|]{%
-%{
-%format TO a b = "{" a "}\mathbin{\HS{\mapsto}}{" b "}"
-%format Cpy a  = "\HS{=}{" a "}"
-%format Ins a  = "\HS{+}{" a "}"
-%format Del a  = "\HS{-}{" a "}"
+%format StTO a b = "{" a "}\mathbin{\HS{\mapsto}}{" b "}"
+%format StCpy a  = "\HS{=}{" a "}"
+%format StIns a  = "\HS{+}{" a "}"
+%format StDel a  = "\HS{-}{" a "}"
 \begin{forest}
-[|Cpy Bin|
-  [|TO Tri Bin|
-    [|TO a a'|]
-    [|Cpy b|]
-    [|Del c|]]
-  [|Ins (Bin SQ e)| [|Cpy d|]]]
+[|StCpy Bin|
+  [|StTO Tri Bin|
+    [|StTO a a'|]
+    [|StCpy b|]
+    [|StDel c|]]
+  [|StIns (Bin SQ e)| [|StCpy d|]]]
 \end{forest}}
-\caption{Graphical representation of a simple transformation. Copies, insertinos
-and deletions around the tree are represented with |Cpy|, |Ins| and |Del| respectively.
-Modifications are denoted |TO|.}
-%}
+\caption{Graphical representation of a simple transformation. Copies,
+insertinos and deletions around the tree are represented with |StCpy|,
+|StIns| and |StDel| respectively.  Modifications are denoted |StTO|.}
 \label{fig:stdiff:patch0}
 \end{figure}
 
-\victor{How about this little next parargaph?}
-
-  At a glance, the \texttt{stdiff} approach to differencing is a different
-way of representing edit-scripts to follow the shape of the datatype in question.
-We advance that the approach from \Cref{chap:pattern-expression-patches} supersedes
-this approach in all aspects, consequently, we invide the reader who is
-interested in understanding methods that work to jump directly
-to \Cref{chap:pattern-expression-patches}.
+  The stdiff approach to differencing is unlike the edit-scripts we
+saw previously, using the shape of the datatype in question to
+define a structured notion of patch. As we will see in the remainder
+of this chapter, however, \emph{computing} these patches is
+intractable. This lead us to abandon this approach in favour of the
+differencing algorithm presented in \Cref{chap:pattern-expression-patches}.
+Nonetheless, we believe there is value in studying this approach.
+For one it explores a different part in the design space compared to the \texttt{gdiff}
+algorithm we saw previously, but it also provides insights
+that help understand the more efficient approach in \Cref{chap:pattern-expression-patches}.
 
   To write the \texttt{stdiff} algorithms in Haskell, we must rely on
 the \texttt{generics-mrsop} library (\Cref{sec:gp:mrsop}) as our
@@ -190,16 +189,18 @@ We index the datatype |Spine| by the sum codes it operates over
 because we need to lookup the fields of the constructors
 that have changed, and \emph{align} them in the case of |SChg|.
 Alignments will be introduced shortly, for the time being,
-let us continue to focus on spines. Intuitively, Spines act on sums and capture
-the ``largest shared coproduct structure'':
+let us continue to focus on spines. Intuitively, spines act on sums and capture
+the ``largest shared coproduct structure''.
+Recall |kappa :: kon -> Star| interprets the opaque types
+in the mutualy recursive family in question and |codes :: [[[Atom kon]]]| lists
+all the sums-of-products in the family, both come from \texttt{generics-mrsop}
+representation of mutually recursive datatypes, discussed in \Cref{sec:gp:mrsop}.
 
 \begin{myhs}
 \begin{code}
-data Spine  (kappa :: kon -> Star) (codes :: [[[Atom kon]]])
-            :: [[Atom kon]] -> [[Atom kon]] -> Star where
+data Spine  kappa codes :: [[Atom kon]] -> [[Atom kon]] -> Star where
   Scp   :: Spine kappa codes s1 s1
-  SCns  :: Constr s1 c1 -> NP (At kappa codes) (Lkup c1 s1)
-        -> Spine kappa codes s1 s1
+  SCns  :: Constr s1 c1 -> NP (At kappa codes) (Lkup c1 s1) -> Spine kappa codes s1 s1
   SChg  :: Constr s1 c1 -> Constr s2 c2 -> Al kappa codes (Lkup c1 s1) (Lkup c2 s2)
         -> Spine kappa codes s1 s2
 \end{code}
@@ -214,21 +215,27 @@ how this would severely limit the number of potential copy
 opportunities throughout patches. For example, imagine we want to
 patch the following values:
 
+%{
+%format T1 = "\HT{T_1}"
+%format T2 = "\HT{T_2}"
+%format U1 = "\HT{U_1}"
+%format U2 = "\HT{U_2}"
 \begin{myhs}
 \begin{code}
-data TA = TA X Y Z | TAB TB
-data TB = TB X Y Z | TBA TA
+data T  = T1  X Y Z  | T2  U
+data U  = U1  X Y Z  | U2  T
 
-diff (TA x1 y1 z1) (TB x2 y2 z2) = SChg TA TB ...
+diff (T1 x1 y1 z1) (U1 x2 y2 z2) = SChg T1 U1 dots
 \end{code}
 \end{myhs}
 
   With a fully homogeneous |Spine| type, our only option is
-to delete |TA|, then insert |TB| at the \emph{recursion} layer
+to delete |T1|, then insert |U1| at the \emph{recursion} layer
  (\ref{sec:stdiff:diff:fixpoint})
 This would be unsatisfactory as it only allows copying of one of the fields,
 where \texttt{gdiff} would be able to copy more fields for it does not
 care about the recursive structure.
+%}
 
   The semantics of |Spine| are straightforward, but before continuing
 with |applySpine|, a short technical interlude is necessary. The
@@ -260,7 +267,7 @@ function, whose definition follow shortly.
 
 \begin{myhs}
 \begin{code}
-applySpine  :: (EqHO kappa) -> SNat ix -> SNat iy
+applySpine  :: (EqHO kappa) => SNat ix -> SNat iy
             -> Spine kappa codes (Lkup ix codes) (Lkup iy codes)
             -> Rep kappa (Fix kappa codes) (Lkup ix codes)
             -> Maybe (Rep kappa (Fix kappa codes) (Lkup iy codes))
@@ -295,15 +302,11 @@ source (|Adel|), or associate two fields from both lists (|AX|).
 
 \begin{myhs}
 \begin{code}
-data Al  (kappa :: kon -> Star) (codes :: [[[Atom kon]]])
-         :: [Atom kon] -> [Atom kon] -> Star where
+data Al kappa codes :: [Atom kon] -> [Atom kon] -> Star where
   A0    :: Al kappa codes (P []) (P [])
-  AX    :: At kappa codes x -> Al kappa codes xs ys
-        -> Al kappa codes (x Pcons xs)  (x Pcons ys)
-  ADel  :: NA kappa (Fix kappa codes) x -> Al kappa codes xs ys
-        -> Al kappa codes (x Pcons xs) ys
-  AIns  :: NA kappa (Fix kappa codes) x -> Al kappa codes xs ys
-        -> Al kappa codes xs (x Pcons ys)
+  AX    :: At kappa codes x              -> Al kappa codes xs ys -> Al kappa codes (x Pcons  xs)  (x Pcons  ys)
+  ADel  :: NA kappa (Fix kappa codes) x  -> Al kappa codes xs ys -> Al kappa codes (x Pcons  xs)            ys
+  AIns  :: NA kappa (Fix kappa codes) x  -> Al kappa codes xs ys -> Al kappa codes           xs   (x Pcons  ys)
 \end{code}
 \end{myhs}
 
@@ -325,9 +328,7 @@ trying to associate incompatible atoms. Recall |(:*)| and
 
 \begin{myhs}
 \begin{code}
-applyAl  :: (EqHO kappa)
-         => Al kappa codes xs ys
-         -> PoA kappa (Fix kappa codes) xs
+applyAl  :: (EqHO kappa) => Al kappa codes xs ys -> PoA kappa (Fix kappa codes) xs
          -> Maybe (PoA kappa (Fix kappa codes) ys)
 applyAl A0                NP0         = return NP0
 applyAl (AX    dx  dxs)   (x :*  xs)  = (:*)    <$$> applyAt (dx :*: x) <*> applyAl dxs xs
@@ -351,11 +352,9 @@ the recursive position with |Almu|, which we will get to shortly.
 
 \begin{myhs}
 \begin{code}
-data At  (kappa :: kon -> Star) (codes :: [[[Atom kon]]])
-         :: Atom kon -> Star where
+data At  (kappa :: kon -> Star) (codes :: [[[Atom kon]]]) :: Atom kon -> Star where
   AtSet  :: TrivialK kappa kon -> At kappa codes ((P K kon))
-  AtFix  :: (IsNat ix)
-         => Almu kappa codes ix ix -> At kappa codes ((P I ix))
+  AtFix  :: (IsNat ix) => Almu kappa codes ix ix -> At kappa codes ((P I ix))
 \end{code}
 \end{myhs}
 
@@ -369,9 +368,7 @@ value. The recursive position case is directly handled by the
 
 \begin{myhs}
 \begin{code}
-applyAt  :: EqHO ki
-         => At kappa codes at
-         -> NA kappa (Fix kappa codes)) at
+applyAt  :: (EqHO ki) => At kappa codes at -> NA kappa (Fix kappa codes)) at 
          -> Maybe (NA kappa (Fix kappa codes) at)
 applyAt (AtSet (Trivial x y)) (NA_K a)
   | eqHO x y   = Just (NA_K a)
@@ -425,15 +422,12 @@ them. It is precisely these operations that we must account for here.
 
 \begin{myhs}
 \begin{code}
-data Almu  (kappa :: kon -> Star) (codes :: [[[Atom kon]]])
-           :: Nat -> Nat -> Star where
+data Almu  kappa codes :: Nat -> Nat -> Star where
   Spn  :: Spine kappa codes (Lkup ix codes) (Lkup iy codes)
        -> Almu kappa codes ix iy
-  Ins  :: Constr (Lkup iy codes) c
-       -> InsCtx kappa codes ix (Lkup c (Lkup iy codes))
+  Ins  :: Constr (Lkup iy codes)  c -> InsCtx  kappa codes ix  (Lkup c (Lkup iy codes))
        -> Almu kappa codes ix iy
-  Del  :: Constr (Lkup ix codes) c
-       -> DelCtx kappa codes iy (Lkup c (Lkup ix codes))
+  Del  :: Constr (Lkup ix codes)  c -> DelCtx  kappa codes iy  (Lkup c (Lkup ix codes))
        -> Almu kappa codes ix iy
 \end{code}
 \end{myhs}
@@ -473,15 +467,9 @@ two cases, as seen above.
 
 \begin{myhs}
 \begin{code}
-data Ctx (kappa :: kon -> Star) (codes :: [[[Atom kon]]]) (p :: Nat -> Nat -> Star)
-         (ix :: Nat) :: [Atom kon] -> Star where
-  H  :: IsNat iy
-     => p ix iy
-     -> PoA kappa (Fix kappa codes) xs
-     -> Ctx kappa codes p ix ((P I iy) Pcons xs)
-  T  :: NA kappa (Fix kappa codes) a
-     -> Ctx kappa codes p ix xs
-     -> Ctx kappa codes p ix (a Pcons xs)
+data Ctx kappa codes (p :: Nat -> Nat -> Star) (ix :: Nat) :: [Atom kon] -> Star where
+  H  :: (IsNat iy) => p ix iy -> PoA kappa (Fix kappa codes) xs -> Ctx kappa codes p ix ((P I iy) Pcons xs)
+  T  :: NA kappa (Fix kappa codes) a -> Ctx kappa codes p ix xs -> Ctx kappa codes p ix (a Pcons xs)
 \end{code}
 \end{myhs}
 
@@ -494,9 +482,7 @@ field applied to the received tree:
 
 \begin{myhs}
 \begin{code}
-insCtx  :: (IsNat ix, EqHO kappa)
-        => InsCtx kappa codes ix xs
-        -> Fix kappa codes ix
+insCtx  :: (IsNat ix, EqHO kappa) => InsCtx kappa codes ix xs -> Fix kappa codes ix
         -> Maybe (PoA kappa (Fix kappa codes) xs)
 insCtx (H x rest) v  = (:* rest) . NA_I  <$$> applyAlmu x v
 insCtx (T a ctx)  v  = (a :*)            <$$> insCtx ctx v
@@ -514,9 +500,7 @@ an application function that applies to more elements for free.
 
 \begin{myhs}
 \begin{code}
-delCtx  :: (IsNat ix, EqHO kappa)
-        => DelCtx kappa codes ix xs
-        -> PoA kappa (Fix kappa codes) xs
+delCtx  :: (IsNat ix, EqHO kappa) => DelCtx kappa codes ix xs -> PoA kappa (Fix kappa codes) xs
         -> Maybe (Fix kappa codes ix)
 delCtx (H x rest)  (NA_I v  :* p) = applyAlmu (unFlip x) v
 delCtx (T a ctx)   (at      :* p) = delCtx ctx p
@@ -529,9 +513,7 @@ functionality or insertion and deletion of a context.
 
 \begin{myhs}
 \begin{code}
-applyAlmu  :: (IsNat ix, IsNat iy, EqHO kappa)
-           => Almu kappa codes ix iy
-           -> Fix kappa codes ix
+applyAlmu  :: (IsNat ix, IsNat iy, EqHO kappa) => Almu kappa codes ix iy -> Fix kappa codes ix
            -> Maybe (Fix kappa codes iy)
 applyAlmu (Spn sp)      (Fix rep)  = Fix <$$> applySpine _ _ spine rep
 applyAlmu (Ins  c ctx)  (Fix rep)  = Fix . inj c <$$> insCtx ctx f
@@ -542,6 +524,8 @@ applyAlmu (Del  c ctx)  (Fix rep)  = delCtx ctx <$$> match c rep
   The two underscores at the |Spn| case are just an extraction of
 the necessary singletons to make the |applySpine| typecheck. These
 can be easily replaced by |getSNat| with the correct proxies.
+\Cref{fig:stdiff:example0} provides a graphical illustration of
+a value of type |PatchST| that transforms two concrete trees.
 
 \begin{myhs}
 \begin{code}
@@ -558,6 +542,43 @@ destination values it computes are guaranteed to be type-correct \emph{by
 construction}. This is unlike the line-based or untyped approaches
 (which may generate ill-formed values) and similar to earlier
 results on type-safe differences~\cite{Lempsink2009}.
+
+\begin{figure}
+\centering
+\subfloat[Source tree]{%
+\begin{forest}
+[|Bin| [|x|]
+       [|Tri| [|a|] [|b|] [|c|]]]
+\end{forest}
+}\qquad
+\subfloat[Destination tree]{%
+\begin{forest}
+[|Bin| [|Tri| [|m|] [|x|] [|n|]]
+       [|Bin| [|a|] [|b|]]]
+\end{forest}
+}\qquad
+\subfloat[Graphical Representation of patch]{%
+\begin{forest}
+[|Bin| [|StIns (Tri m SQ n)| [|Cpy x|]]
+       [|StTO Tri Bin| [|Cpy a|] [|Cpy b|] [|Del c|]]]
+\end{forest}}
+
+\vspace{6em}
+
+\subfloat[|PatchST| that transforms source into destination, in Haskell]{%
+\begin{myhsFig}
+\begin{code}
+Spn (SCns Bin  (   AtFix  (Ins Tri (T m (H (Spn Cpy) (n :* NP0))))
+               :*  AtFix  (Spn (SChg Tri Bin (  AX    (AtFix (Spn Cpy)) (
+                                                AX    (AtFix (Spn Cpy)) (
+                                                ADel  (NA_I c)
+                                                A0)))))
+               NP0))
+\end{code}
+\end{myhsFig}}
+\caption{A value of type |PatchST| with its graphical representation.}
+\label{fig:stdiff:example0}
+\end{figure}
 
 \section{Merging Patches}
 \label{sec:stdiff:merging}
@@ -580,7 +601,21 @@ in \Cref{fig:stdiff:merging0}. We call non-interfering patches
 
 \begin{figure}
 \centering
-Draw a simple example of mergeable patches here
+\subfloat[Patch |p|]{%
+\begin{forest}
+[|Bin| [|StTO a a'|]
+       [|StCpy b|]]
+\end{forest}}\qquad%
+\subfloat[Patch |q|]{%
+\begin{forest}
+[|Bin| [|StIns (Bin SQ c)| [|StCpy a|]]
+       [|StTO b b'|]]
+\end{forest}}\qquad%
+\subfloat[Merge of |p| and |q|]{%
+\begin{forest}
+[|Bin| [|StIns (Bin SQ c)| [|StTO a a'|]]
+       [|StTO b b'|]]
+\end{forest}}
 \caption{A simple example of mergeable patches.}
 \label{fig:stdiff:merging0}
 \end{figure}
@@ -862,8 +897,10 @@ enumSpn  :: SNat ix -> SNat iy
          -> Rep ki (Fix ki codes) (Lkup ix codes)
          -> Rep ki (Fix ki codes) (Lkup iy codes)
          -> [Spine ki codes (Lkup ix codes) (Lkup iy codes)]
-enumSpn six siy (sop -> Tag cx px) (sop -> Tag cy py)
-  = case testEquality six siy of
+enumSpn six siy x y =
+  let  Tag cx px = sop x
+       Tag cy py = sop y
+   in case testEquality six siy of
       Nothing -> SChg cx cy <$> enumAl px py
       Just Refl -> case testEquality cx cy of
            Nothing   -> SChg cx cy <$> enumAl px py
@@ -874,7 +911,7 @@ enumSpn six siy (sop -> Tag cx px) (sop -> Tag cy py)
 \end{myhs}
 
   Note how the choice of the spine operation is deterministic. Each
-situation is uniquely determined by a |Spine| constructor. Enumerating
+case is uniquely determined by a |Spine| constructor. Enumerating
 atoms, |enumAt|, is trivial. Atoms are either opaque types or recursive
 positions. Opaque types are handled by |TrivialK| and recursive positions
 are handled recursively by |enumAlmu|. Finally, alignments of products is analogous
@@ -959,8 +996,7 @@ The definition of |ES| -- introduced in
 
 \begin{myhs}
 \begin{code}
-data ES (kappa :: kon -> Star) (codes :: [[[Atom kon]]])
-    :: [Atom kon] -> [Atom kon] -> Star where
+data ES kappa codes :: [Atom kon] -> [Atom kon] -> Star where
   ES0  :: ES kappa codes (P []) (P [])
   Ins  :: Cof kappa codes a t  -> ES kappa codes          i   (t :++:  j)  -> ES kappa codes           i   (a Pcons  j)
   Del  :: Cof kappa codes a t  -> ES kappa codes (t :++:  i)           j   -> ES kappa codes (a Pcons  i)            j
@@ -996,7 +1032,7 @@ annSrc' (x :* xs) (Cpy _ c es) = let poa = fromJust $ matchCof c x
 \end{code}
 \end{myhs}
 
-  The deterministic diff function for |Almu| then starts by checking
+  The deterministic diff function for |Almu| starts by checking
 the annotations present at the root of its argument trees. In case both
 are copies, we start with a spine. If at least one of them is not
 a copy we insert or delete the constructor not flagged as a copy.
@@ -1007,6 +1043,10 @@ to continue diffing against, in |diffCtx|. When there are no more copies to be p
 we just return a \emph{stiff} patch, which deletes the entire source
 and inserts the entire destination tree.
 
+%format ann1 = "\HV{ann_1}"
+%format ann2 = "\HV{ann_2}"
+%format rep1 = "\HV{rep_1}"
+%format rep2 = "\HV{rep_2}"
 \begin{myhs}
 \begin{code}
 diffAlmu  :: FixAnn kappa codes (Const Ann) ix -> FixAnn kappa codes (Const Ann) iy
