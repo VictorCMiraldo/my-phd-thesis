@@ -799,6 +799,8 @@ tree matching should be used as the representation of change.
 %format after p q   = p "\mathbin{\HT{\bullet}}" q
 %format after'      = "\HT{\bullet}"
 %format iff         = "\HS{\iff}"
+%format cpy         = "\HTNI{\epsilon}"
+%format emptyset    = "\HVNI{\emptyset}"
 
   On this section we will look into how |Chg| admits a simple
 composition operation which makes a partial monoid.  Through the
@@ -958,11 +960,12 @@ Proving it coincides with |y| is a straighforward calculation:
 application, we would like to ensure composition is associative. But
 first we need to specify what we mean by \emph{equal} changes. We will
 consider an extensional equality over changes. Two changes are said to
-be equal if and only if they are indistinguishable through their
+be equivalent if and only if they are indistinguishable through their
 application semantics.
 
-\begin{definition}[Change Equality]
-Two changes |p| and |q| are said to be equal, denoted |p ~ q|,
+%format ~~ = "\HT{\approx}"
+\begin{definition}[Change Equivalent]
+Two changes |p| and |q| are said to be equivalent, denoted |p ~~ q|,
 if and only if |forall x dot (app p x) == (app q x)|
 \end{definition}
 
@@ -1013,7 +1016,7 @@ Let |sigma' = theta . sigma| and reduce it to one of our assumptions:
 \begin{lemma}[Associativity of Composition] \label{lemma:pepatches:comp-assoc}
 Let |p|, |q| and |r| be aptly typed changes such
 that |after (after p q) r| is defined, then
-|after (after p q) r ~ after p (after q r)|.
+|after (after p q) r ~~ after p (after q r)|.
 \end{lemma}
 \begin{proof}
 Straightforward application of \Cref{lemma:pepatches:comp-def} and
@@ -1021,8 +1024,8 @@ Straightforward application of \Cref{lemma:pepatches:comp-def} and
 \end{proof}
 
 \begin{lemma}[Identity of Composition] \label{lemma:pepatches:comp-id}
-Let |p| be a change, then let |cpy = Chg (metavar x) (metavar x)| is
-the identity of composition. That is, |after p cpy ~ p ~ after cpy p|.
+Let |p| be a change, then |cpy = Chg (metavar x) (metavar x)| is
+the identity of composition. That is, |after p cpy ~~ p ~~ after cpy p|.
 \end{lemma}
 \begin{proof}
 Trivial; |cpy| unifies with anything.
@@ -1030,17 +1033,81 @@ Trivial; |cpy| unifies with anything.
 
   \Cref{lemma:pepatches:comp-assoc,lemma:pepatches:comp-id} establish
 a partial monoid structure for |Chg| and |after| under extensional
-change equality, |~|. This further strengthens the applicability
-of |Chg| as a sound replacement for edit-script.
+change equality, |~~|.
 
 %format (inv p) = p "^{\HVNI{-1}}"
   Because of the well-scopedness of changes, that is,
 for any change |p| we have that |vars (chgDel p) == vars (chgIns p)|,
-we could go a step further and define the inverse of a change, |inv p|,
-and go on to prove that we get a grupoid of changes under |~|.
+we could go a step further and define the inverse of a change, |inv p|.
+In fact, defining the inverse is trivial:
 
-\victor{Then do it! Identity will be funny; |after p (inv p)| will not
-be equiv to |cpy|. We could consider more lenient equivalences,maybe?}
+\begin{myhs}
+\begin{code}
+inv :: Chg kappa fam at -> Chg kappa fam at
+inv p = Chg (chgIns p) (chgDel p)
+\end{code}
+\end{myhs}
+
+  Naturally, then, we would expect that |after p (inv p) ~~ cpy|, but
+that is not the case. The domain of |cpy| is the entire set of trees,
+but the domain of |after p (inv p)| is potentially
+smaller. Consequently, we can always find a tree |t| such that |app
+cpy t == Just t| but |app (after p (inv p)) == Nothing|.
+
+\victor{Unsure about the rest of the section; I should prove |~| below
+makes an equivalence relation; I don't have this proof and the
+transitivty case is tricky}
+
+  The problem with inverses above comes from the fact that |after p
+(inv p)| is \emph{less general} than the identity, that is, it has a
+smaller domain.  In other words, |after p (inv p)| works on a subset
+of the domain of |cpy|, but it performs the same action as |cpy| for
+the elements it is defined.  This is known as the \emph{extension
+order} in a $p$-category \cite{Robinson1988}, for the theoretically
+inclined reader. In our particular case, it is realized in the
+following definition.
+
+\begin{definition}[Extension Order]
+Let |p| and |q| be two aptly typed changes; we say that |q| is
+an extension of |p|, denoted |p <= q|, if and only if |forall x,y dot
+(app p) x == Just y| implies |app q x == Just y|.
+In other words, |p <= q| when |p| is equal to |q| restricted to the
+domain of |p|.
+\end{definition}
+
+  The relation |<=| defined above makes a partial order on changes and
+could help defining a weaker notion of change equivalent. In a first
+approximation, we could say that
+|p| and |q| are \emph{approximate changes}, denoted |p ~ q|
+when |p <= q| or |q <= p|. The definition of |~| pointwise would read:
+
+\[ |p ~ q iff forall x `elem` (dom p intersect dom q) dot (app p) x == (app q) x| \]
+
+  Yet, the \emph{approximate changes} relation do not make up an equivalence
+relation. The problem comes from transitivity, which does not hold in general.
+Pick changes |p|, |q| and |r| such that |dom p intersect dom q|
+and |dom q intersect dom p| are empty but |dom p intersect dom r /= emptyset|.
+It trivially holds that |p ~ q| and |q ~ r| but it is not necessarily the case.
+thath |p ~ r|. We conjecture that it should be straightforward to fix
+the problem as long as we compare apples to apples. That is, we should not be
+trying to compare arbitrary changes, but instead, those that have at least one
+common point in their domain. The proper definition of \emph{approximate changes}
+would then be:
+
+\begin{definition}[Approximate Changes] \label{def:pepatches:equiv-changes}
+Let |p| and |q| be aptly typed changes;
+We say that |p| and |q| are approximate, denoted |p ~ q|, if and only
+if there exists |x| and |y| such that |(app p) x == Just y == (app q) x|
+and either |p <= q| or |q <= p|.
+\end{definition}
+
+  \digress{I believe that \Cref{def:pepatches:equiv-changes} above makes
+an equivalence relation and would would enable us to prove that
+|after p (inv p) ~ cpy ~ after (inv p) p|. Concluding that |(Chg , after')|
+makes a grupoid modulo |~|. Unfortunately, I ran
+out of time carrying these proofs. I decided to include it at least
+provides some different ideas anyway about when two changes should be
+equivalent.}
 
 %}
 %%% END OF TEMPORARY NOTATION
@@ -1049,15 +1116,16 @@ be equiv to |cpy|. We could consider more lenient equivalences,maybe?}
 \subsection{Computing Changes}
 \label{sec:pepatches:diff}
 
-  Next, we explore the generic counterpart to the |chgTree| function,
-from \Cref{sec:pepatches:concrete-changes}. Recall that the
-differencing algorithm starts by computing the \emph{sharing map} of
-its source |s| and destination |d|, which enable us to efficiently
-decide if a given tree |x| is a subtree of |s| and |d|.  Later, a
-second pass uses this sharing map and \emph{extracts} the deletion and
-insertion contexts, according to some of the extraction modes.
-The extraction modes ensure we will produce well-scoped changes
-as a result of context extraction, \Cref{fig:pepatches:extract-sol}.
+  Having seen how |Chg| have the basic properties we would expect, we
+move on to how to computing them. In this section we will define the generic
+counterpart to the |chgTree| function, from
+\Cref{sec:pepatches:concrete-changes}. Recall that the differencing
+algorithm starts by computing the \emph{sharing map} of its source |s|
+and destination |d|, which enable us to efficiently decide if a given
+tree |x| is a subtree of |s| and |d|.  Later, a second pass uses this
+sharing map and \emph{extracts} the deletion and insertion contexts,
+according to some of the extraction modes.  The extraction modes
+ensure we will produce well-scoped changes, \Cref{fig:pepatches:extract-sol-01}.
 
 \begin{myhs}
 \begin{code}
@@ -1066,27 +1134,27 @@ data ExtractionMode  =  NoNested | ProperShare | Patience
 \end{myhs}
 
   The \emph{sharing map} is central to the efficiency of the
-differencing algorithm, but it marks subtrees for sharing
-regardless of underlying semantics, which can be a problem
-when the trees in question represent complex structures such
-as abstract syntax trees. We must be careful not to \emph{overshare}
-trees.  Imagine a local variable declaration \verb!int x = 0;! in an
-arbitrary function; it should \emph{not} be shared with a syntactically
-equal declaration in another function.  A careful analysis of what can
-and cannot be shared would require domain-specific knowledge of the
-programming language in question.  Nevertheless, we can impose
-different restrictions that make it \emph{unlikely} that values will
-be shared across scope boundaries.  A simple and effective such
-measure is not sharing subtrees with height strictly less than one
-(or a configurable parameter). This keeps constants and most variable
-declarations from being shared, effectively avoiding the issue.
-\digress{I would like to reiterate the \emph{avoiding-the-issue}
-aspect of this decision. I did attempt to overcome this with a few
-methods which will be discussed later
+differencing algorithm, but it marks subtrees for sharing regardless
+of underlying semantics, which can be a problem when the trees in
+question represent complex structures such as abstract syntax
+trees. We must be careful not to \emph{overshare} trees.  Imagine a
+local variable declaration \verb!int x = 0;! inside an arbitrary
+function. This declaration should \emph{not} be shared with another
+syntactically equal declaration in another function.  A careful
+analysis of what can and cannot be shared would require
+domain-specific knowledge of the programming language in question.
+Nevertheless, we can impose different restrictions that make it
+\emph{unlikely} that values will be shared across scope boundaries.  A
+simple and effective such measure is not sharing subtrees with height
+strictly less than one (or a configurable parameter). This keeps
+constants and most variable declarations from being shared,
+effectively avoiding the issue.  \digress{I would like to reiterate
+the \emph{avoiding-the-issue} aspect of this decision. I did attempt
+to overcome this with a few methods which will be discussed later
 (\Cref{sec:pepatches:discussion}). None of my attempts at solving the
-issue were successful, hence, the best option really became
-avoiding the issue by making sure that we can easily exclude certain
-trees from being shared.}
+issue were successful, hence, the best option really became avoiding
+the issue by making sure that we can easily exclude certain trees from
+being shared.}
 
 \subsubsection{Which Common Subtree, Generically}
 
@@ -1095,7 +1163,7 @@ the first thing we must do is annotate our trees with hashes at
 every point. Gladly, the |Holes| datatype from \genericssimpl{}
 also supports annotations. Unlike the concrete example, however,
 we will also keep the height of each tree to enable us to easily
-forbid trees smaller than a certain height to be shared.
+forbid sharing trees smaller than a certain height.
 The |PrepFix| datatype, defined below, serves the same purpose as
 the simpler |TreeH|, from our concrete example.
 
@@ -1107,11 +1175,12 @@ type PrepFix kappa fam = SFixAnn kappa fam PrepData
 \end{code}
 \end{myhs}
 
-  The |decorate| function can be easily written with the help of
+  The |decorate| function can be written with the help of
 synthesized attributes (\Cref{sec:gp:annfix}). The homonym
-|synthesize| function from \genericssimpl{} does exactly
-that. \Cref{fig:pepatches:decorate} illustrates the same example from
-\Cref{fig:pepatches:decorate-conc}, but with hashes and heights.
+|synthesize| function from \genericssimpl{} serves this very purpose.
+We ommit the algebra passed to synthesize but invide the interested
+reader to check |Data.HDiff.Diff.Preprocess| in the source
+(\Cref{chap:where-is-the-code}).
 
 \begin{myhs}
 \begin{code}
@@ -1146,21 +1215,24 @@ decorate  = synthesize dots
 \label{fig:pepatches:decorate}
 \end{figure}
 
-  The hashes are computed from the a unique identifier per constructor
+  The algebra used by |decorate|, above, computes a hash at each constructor
+of the tree. The hashes are computed from the a unique identifier per constructor
 and a concatenation of the hashes of the subtrees. The hash of the
 root in \Cref{fig:pepatches:decorate}, for example, is computed with
 a call to |hash (concat ["Main.Tree.Bin", "310dac", "4a32bd"])|.  This
 ensures that hashes uniquely identify a subtree modulo hash
 collisions.
 
-  After preprocessing the input trees we want to traverse them and
-insert every hash we see in a hash map, associated with a a counter
-for how many times we have seen a tree. We use a simple
-|Int64|-indexed trie~\cite{Brass2008} as our datastructure. \digress{I
-would like to also implemented this algorithm with a big-endian
-Patricia Tree~\cite{Okasaki1998} and compare the results. I think the
-difference would be small, but worth considering when working on a
-production implementation}.
+  After preprocessing the input trees we traverse them and insert
+every hash we see in a hash map from hashes to integers.  These
+integers count how many times we have seen a tree, indicating the
+arity of a subtree. Shared subtrees occur with arity of at least two:
+once in the deletion context and once in the insertion context.  The
+underlying datastructure is a |Int64|-indexed trie~\cite{Brass2008} as
+our datastructure. \digress{I would like to also implemented this
+algorithm with a big-endian Patricia Tree~\cite{Okasaki1998} and
+compare the results. I think the difference would be small, but worth
+considering when working on a production implementation}.
 
 \begin{myhs}
 \begin{code}
@@ -1176,8 +1248,7 @@ yield the following map.
 
 \begin{myhs}
 \begin{code}
-fromList  [("0f42ab",  1),  ("310dac",  1),  ("0021ab",  2)
-          ,("004200",  2),  ("4a32bd",  1),  ("008400",  1)]
+fromList  [("0f42ab",  1),  ("310dac",  1),  ("0021ab",  2) ,("004200",  2), dots]
 \end{code}
 \end{myhs}
 
@@ -1187,6 +1258,7 @@ map. Which consists in the intersection of the arity maps and a final
 pass adding a unique identifier to every key. We also keep
 track of how many metavariables were assigned, so we can always
 allocate fresh names without having to go inspect the whole map again.
+This is just a technical consequence of working with binders explicitely.
 
 \begin{myhs}
 \begin{code}
@@ -1194,9 +1266,8 @@ type MetavarAndArity = MAA {getMetavar :: Int , getArity :: Arity}
 
 buildSharingMap  :: PrepFix a kappa fam ix -> PrepFix a kappa fam ix
                  -> (Int , Trie MetaVarAndArity)
-buildSharingMap x y
-  =   T.mapAccum (\i ar -> (i+1 , MAA i ar) ) 0
-  $$  T.zipWith (+) (buildArityMap x) (buildArityMap y)
+buildSharingMap x y  =   T.mapAccum (\i ar -> (i+1 , MAA i ar) ) 0
+                     $$  T.zipWith (+) (buildArityMap x) (buildArityMap y)
 \end{code}
 \end{myhs}
 
@@ -1211,9 +1282,8 @@ defined below.
 
 \begin{myhs}
 \begin{code}
-wcs  :: (All Digestible kappa)
-     => PrepFix kappa fam at -> PrepFix kappa fam at
-     -> (PrepFix kappa fam at -> Maybe Int)
+wcs  :: (All Digestible kappa) => PrepFix kappa fam at -> PrepFix kappa fam at
+     -> PrepFix kappa fam at -> Maybe Int
 wcs s d =  let m = buildSharingMap s d
            in famp getMetavar . flip T.lookup m . getDigest . getAnnot
 \end{code}
@@ -1229,30 +1299,29 @@ bounded depth of the patricia tree.
 and ignore the remote possibility of hash collisions,
 even if it would not be hard to detect these collisions whilst
 computing the arity map. To do so, we should store the tree with its associated
-hash instead of just the hash, then, on every insertion we could check
+hash instead of only storing the hash. Then, on every insertion we could check
 that the inserted tree matches with the tree already in the map.
-This process would cost us precious time and hence, we chose
-to ignore hash collisions. \digress{Cryptographic hashes have
-negligible collision probability but can be much more expensive to compute,
-could be interesting to implement this algorithm with a non-cryptographic hash
-and employ this collision checking to better understand what is the best option.
-I believe this collision checking will be much slower for it brings the complexity
-of the algorithm up}
+\digress{If I had used a non-cryptographic hash, which are much faster to
+compute than cryptographic hash functions, I would have had to
+employ the collision detection mechanism above. This would
+cost a significant amount of time. Hence, it is worth paying the
+price for a more expensive hash function.}
 
 \subsubsection{Context Extraction}
 \label{sec:pepatches:extract}
 
-  After computing the set of common subtrees, we move on to deciding
-which of those subtrees should be shared, that is, abstracted by a
+  After computing the set of common subtrees, we must decide which of
+those subtrees should be shared. Shared subtrees are abstracted by a
 metavariable in every location they would occur in the deletion and
-insertion contexts. We chose to never share subtrees with height
+insertion contexts.
+
+  Recall we chose to never share subtrees with height
 smaller than a given parameter. Our choice is very pragmatic in the
-sense that we can preprocess all the trees and annotate them with
-their height, which does not involve any domain specific knowledge and
-is efficient.  \digress{In the code, I abstracted this away by the
-means of a predicate |CanShare| below. I hoped to come back here and
-implement more refined sharing strategies.  I never had time for that,
-unfortunately.}
+sense that we can preprocess the necessary information and
+it effectively avoids most of the oversharing without involving
+domain specific knowledge. The |CanShare| below is a synonym for
+a predicate over trees used to decide whether we can share a
+given tree or not.
 
 \begin{myhs}
 \begin{code}
@@ -1260,11 +1329,11 @@ type CanShare kappa fam = forall ix dot PrepFix kappa fam ix -> Bool
 \end{code}
 \end{myhs}
 
-  The interface function receives an |ExtractionMode|, a sharing map
+  The |extract| function takes an |ExtractionMode|, a sharing map
 and a |CanShare| predicate and two preprocessed fixpoints to extract
-contexts from. The reason we receive two trees and produce two
+contexts from. The reason we receive two trees at the same time and produce two
 contexts is because modes like |NoNested| perform some
-cleanup that depends no global information.
+cleanup that depends on global information.
 
 \begin{myhs}
 \begin{code}
@@ -1289,32 +1358,35 @@ examples next, but I sketch other possibilities later
 (\Cref{sec:pepatches:discussion}).}
 
 \paragraph{Extracting with |NoNested|}
-Extracting contexts with the |NoNested| mode is simple.
+Extracting contexts with the |NoNested| mode happens in two passes.
 We first extract the contexts naively, then make a second pass
-removing the variables that appear exclusively in the insertion
-context by the trees they abstracted over. To keep the extraction
-algorithm linear is imortant to \emph{not} forget which common subtrees
-have been substituted on the first pass. Hence, we create a context that
-contains metavariables and their associated tree.
+removing the variables that appear exclusively in the insertion.
+To keep the extraction algorithm linear is imortant to \emph{not}
+forget which common subtrees have been substituted on the first pass.
+Hence, we create a context that contains metavariables and their
+associated tree.
 
 \begin{myhs}
 \begin{code}
-noNested1  :: CanShare kappa fam -> Trie MetavarAndArity -> PrepFix a kappa fam at
+noNested1  :: CanShare kappa fam -> Trie MetavarAndArity -> PrepFix kappa fam at
            -> Holes kappa fam (Const Int :*: PrepFix a kappa fam) at
 noNested1 h sm x@(PrimAnn _    xi) = Prim xi
 noNested1 h sm x@(SFixAnn ann  xi)
   =  if h x  then  maybe recurse (mkHole x) $$ lookup (getDigest ann) sm
              else  recurse
- where
-    recurse     = Roll (repMap (noNested1 h sm) xi)
-    mkHole x v  = Hole (Const (getMetavar v) :*: x)
+ where  recurse     = Roll (repMap (noNested1 h sm) xi)
+        mkHole x v  = Hole (Const (getMetavar v) :*: x)
 \end{code}
 \end{myhs}
 
-  The second pass will go over holes and decide whether to
-transform the |Const Int| into a |MetaVar kappa fam| or
-whether to forget this was a potential shared tree and
-keep the tree in there instead. \victor{Should I add the definition?}
+  The second pass maps over the holes in the output from the first pass
+and decides whether to transform the
+|Const Int| into a |MetaVar kappa fam| or whether to forget this was a
+potential shared tree and keep the tree instead. We will ommit the
+implementation of the second pass. It consists in a straightforward
+traversal of the output of |noNested1|, we direct the interested
+reader to check |Data.HDiff.Diff.Modes| in the source code for more
+details (\Cref{chap:where-is-the-code}).
 
 \paragraph{Extracting with |Patience|}
 The |Patience| extraction can be done in a single pass.
@@ -1337,21 +1409,32 @@ patience h sm x@(PrimAnn _    xi) = Prim xi
 patience h sm x@(SFixAnn ann  xi)
   =  if h x  then  maybe recurse (mkHole x) $$ lookup (getDigest ann) sm
              else  recurse
- where
-    recurse     = Roll (repMap (patience h sm) xi)
-    mkHole x v  | getArity v == 2  = Hole (MV_Comp (getMetavar v))
-                | otherwise        = sfixToHoles x
+ where  recurse     = Roll (repMap (patience h sm) xi)
+        mkHole x v  | getArity v == 2  = Hole (MV_Comp (getMetavar v))
+                    | otherwise        = sfixToHoles x
 \end{code}
 \end{myhs}
 
 \paragraph{Extracting with |ProperShares|}
-The |ProperShares| methos prioritizes sharing more smaller subtrees
-instead of less, but bigger subtrees.
-We say that a tree |x| is a \emph{proper-share} between |s| and
+The |ProperShares| method prefers sharing smaller subtrees more times
+instead of but bigger subtrees, which might shadow nested commonly occuring
+subtrees (\Cref{fig:pepatches:extract-problem}).
+
+  Given a source |s| and a destination |d|,
+we say that a tree |x| is a \emph{proper-share} between |s| and
 |d| whenever no subtree of |x| occurs in |s| and |d| with arity greater
 than that of |x|. In other words, |x| is a proper-share if
-and only if all of its subtrees only occur as subtrees of
-other occurrences of |x|.
+and only if all of its subtrees occur only as subtrees of
+other occurrences of |x|. For the two trees below, |u| is a proper-share
+but |Bin t u| is not: |t| occurs once \emph{outside} |Bin t u|.
+
+\begin{center}
+\begin{myforest}
+[,phantom,l=0mm,s sep=12mm
+  [|Bin| [|Bin| [t] [u]] [k]]
+  [|Bin| [|Bin| [t] [u]] [t]]]
+\end{myforest}
+\end{center}
 
   Extracting contexts with under the |ProperShare| mode
 consists in annotating the source and destination trees with
@@ -1366,7 +1449,8 @@ two methods and, hence, omited.
 \paragraph{The |chg| function.}  Finally, the generic |chg| function
 receives a source and destination trees, |s| and |d|, and computes a
 change that encodes the information necessary to transform the source
-into the destination:
+into the destination according to some extraction mode |extMode|.
+In our prototype, the extraction mode comes from a command line option.
 
 \begin{myhs}
 \begin{code}
@@ -1379,23 +1463,10 @@ chg x y =  let  dx             = decorate x
 \end{code}
 \end{myhs}
 
-  The extraction mode |extMode| above is assumed to be some
-configurable parameter. In our prototype, it comes from
-a command line option.
-
 \section{The Type of Patches}
 
 \begin{figure}
 \centering
-\subfloat{%
-\begin{myforest}
-[,change
-  [|Bin| [x,metavar] [|Leaf| [|5|]]]
-  [|Bin| [x,metavar] [|Leaf| [|6|]]]
-]
-\end{myforest}
-\label{fig:pepatches:example-04:A}}%
-\quad\quad\quad
 \subfloat{%
 \begin{myforest}
 [,change
@@ -1404,18 +1475,29 @@ a command line option.
 ]
 \end{myforest}
 \label{fig:pepatches:example-04:B}}%
-\caption{Example of disjoint changes.}
+\quad\quad\quad
+\subfloat{%
+\begin{myforest}
+[,change
+  [|Bin| [x,metavar] [|Leaf| [|5|]]]
+  [|Bin| [x,metavar] [|Leaf| [|6|]]]
+]
+\end{myforest}
+\label{fig:pepatches:example-04:A}}%
+\caption{Simple Example of disjoint changes. The leftmost change operates solely
+on the left child of the root whereas the rightmost change operates
+solely on the right child.}
 \label{fig:pepatches:example-04}
 \end{figure}
 
-  In the previous section we have seen how \emph{changes}
+  Up until now we have sen how how \emph{changes}
 consisting in a deletion and a insertion context are a suitable
 representation for encoding transformations between trees.
 In fact, changes are very similar to \emph{tree matchings}
 (\Cref{sec:background:tree-edit-distance}) with less restrictions.
-From a synchronization point of view, however, we do not yet
-posses enough information to merge these \emph{changes}
-effectively.
+From a synchronization point of view, however, these \emph{changes}
+are very difficult to merge. They do not explicitly encode
+enough information for that.
 
   Synchronizing changes requires us to understand which
 constructors in the deletion context are, in fact, just being copied
@@ -1425,10 +1507,16 @@ tree whereas the other alters the left child and duplicates the right
 child in-place.  These changes are \emph{disjoint} and should be possible to
 be automatically synchronized.  To recognize them as \emph{disjoint}
 will require more information than what is provided by |Chg|.
-Nevertheless, the notion of \emph{change} is still the backbone of
-the implementation.  In fact, our |diff| algorithm (\Cref{sec:pepatches:diff})
-will produce a \emph{change}, which will then be translated to more expressive
-representations.
+
+  Observing the definition of |Chg| reveals that the deletion context
+might \emph{delete} many constructors that that are being inserted,
+in the same place, by the insertion context. The changes from
+\Cref{fig:pepatches:example-04}, for exmaple, conceal the fact that the |Bin| at the root of the source tree is, in fact, being copied in both changes.
+Following the \texttt{stdiff} nomenclature, the |Bin| at
+the root of both changes in \Cref{fig:pepatches:example-04} should be
+places in the \emph{spine} of the patch.  That is, it is copied over
+from source to destination but it leads to changes further down the
+tree.
 
 \begin{figure}
 \centering
@@ -1455,23 +1543,13 @@ evident \emph{spine}.}
 \label{fig:pepatches:example-02}
 \end{figure}
 
-  Observing the definition of |Chg| reveals that the
-deletion context might \emph{delete} many constructors that the insertion
-context later insert, as in \Cref{fig:pepatches:example-04}.
-This conceals the fact that the
-|Bin| at the root of the tree was in fact being copied. Following
-the \texttt{stdiff} nomenclature, the |Bin| at the root of both
-changes in \Cref{fig:pepatches:example-04} should be places
-in the \emph{spine} of the patch.  That is, it is copied over
-from source to destination but it leads to changes further down the
-tree.
-
-  A \emph{patch} consists in a spine that contains changes
-in its leaves and is defined by the type |Patch| below.
-\Cref{fig:pepatches:example-02} illustrates the difference
-between patches and changes graphically.
-In \Cref{fig:pepatches:example-02:chg} we see |Bin (Leaf 42)|
-being repeated in both contexts -- whereas in
+  A \emph{patch}, then, is precisely the idea of many individual
+changes operating in separate parts of the source tree. It consists in
+a spine that contains changes in its leaves and is defined by the type
+|Patch| below.  \Cref{fig:pepatches:example-02} illustrates the
+difference between patches and changes graphically.  In
+\Cref{fig:pepatches:example-02:chg} we see |Bin (Leaf 42)| being
+repeated in both contexts -- whereas in
 \Cref{fig:pepatches:example-02:patch} it has been placed in the spine
 and consequently, is clearly identified as a copy.
 
@@ -1482,7 +1560,7 @@ type Patch kappa fam = Holes kappa fam (Chg kappa fam)
 \end{myhs}
 
   Patches are computed from changes by
-extracting topmost common constructors from the
+extracting common constructors from the
 deletion and insertion contexts into the spine. In other words, we
 would like to push the changes down towards the leaves of the
 tree. There are two different ways for doing so, illustrated by
@@ -1554,8 +1632,8 @@ globallyScopedPatch (Chg d i) = holesMap (uncurry' Chg) (lgg d i)
 
   Albeit easy to compute, however, \emph{globally-scoped} patches
 contribute little information from a synchronization point of view.
-In fact, it can make merging even harder as shown in
-\Cref{fig:pepatches:misaligned}, where a
+To an extent, it can even make merging harder. Take
+\Cref{fig:pepatches:misalignment}, where a
 globally scoped patch is produced from a change.
 It is harder to understand that the |(:) 42| is being deleted
 by looking at the globally-scoped patch than by looking at the change.
@@ -1563,7 +1641,10 @@ This is because the first |(:)| constructor is considered to be in the spine
 by the naive anti-unification, which proceeds top-down.
 Note that a bottom-up approach would
 would suffer similar issues for insertions anyway.
-\victor{This is a problem Harmony also had!}
+This is an issue that untyped approaches must inherently employ some
+sort of schema to overcome, as was the case in \texttt{harmony}~\cite{Foster2007}. In our case, the type information is enough to solve this.
+The take away from this example is that globally-scoped patches will give us
+a harder time when synchronizing.
 The real solution to this problem is the notion of \emph{alignment}
 which will be discussed shortly (\Cref{sec:pepatches:alignment}), for
 the time being we will maintain our focus on scoping.
@@ -1617,10 +1698,11 @@ holesMap    :: (forall x dot phi x -> psi x)
 holesJoin   :: Holes kappa fam (Holes kappa fam) at -> Holes kappa fam at
 
 chgDistr    :: PatchPE ki codes at -> Chg ki codes at
-chgDistr p  = Chg  (holesJoin (holesMap chgDel  p))
-                   (holesJoin (holesMap chgIns  p))
+chgDistr p  = Chg  (holesJoin (holesMap chgDel  p)) (holesJoin (holesMap chgIns  p))
 \end{code}
 \end{myhs}
+
+\victor{\Huge I'm here}
 
   It is worth noting that we must care that |chgDistr| wont
 capture variables. It will only work properly if all metavariables
@@ -1630,7 +1712,7 @@ performance reasons.  Throughout the implementation, however, we
 continuously ensure that even though we produce and work with
 \emph{locally scoped} patches, all scopes contains disjoint sets of
 names and therefore can be safely distributed.  In the context of
-meta-theoretical definitions and proofs we will abide by Barendregts
+meta-theoretical definitions and proofs we will abide by Barendregt's
 Convention~\cite{Barendregt1984} where no two bound variables are
 identified with the same name.  \digress{I wonder how an
 implementation using De Bruijn indexes would look like. I'm not
@@ -2176,7 +2258,8 @@ trees with \emph{no holes}; \emph{rigid}. The one position,
 of type |HolesAnn kappa fam IsRigid dots| identifies the subtree which
 we should continue to align against.
 We omit the full implementation of |hasRigidZipper| here but invite
-the interested reader to check the source code.\victor{where?}
+the interested reader to check |Data.HDiff.Diff.Align| in the
+source code (\Cref{chap:where-is-the-code}).
 
   Finally, we are ready to define |alignChg| in its entirety.  We
 start computing the multiset of variables used throughout a patch,

@@ -17,7 +17,7 @@ factors to the applicability of structural differencing
 in the context of software version control.
 
   To conduct the aforementioned evaluation we have extracted a total
-of $12\,650$ usable datapoints from \texttt{GitHub}. They have been
+of \qTotalUsableConf{} usable datapoints from \texttt{GitHub}. They have been
 obtained from large public repositories storing code written in Java,
 JavaScript, Python, Lua and Clojure. The choice of programming languages
 was motivated by the availability of parsers, with the exception
@@ -75,13 +75,14 @@ up with a list of folders containing a merge conflict that was solved
 by a human. Each of these folders contain a span $A \leftarrow O
 \rightarrow B$ and a file $M$ which is the human-produced result of
 synchronizing $A$ and $B$.  We refer the reader to the full code for
-more details \victor{WHERE IS THE CODE?}.  Overall, we acquired $12\,650$
-usable conflicts -- that is, we were able to parse the four files
-parse with the parsers available to us -- and $2\,767$ conflicts where at
-least one file yielded a parse error. \Cref{tbl:eval:summary-data}
-provides the distribution of datapoints per programming language and
-displays the amount of conflicts that yielded a parse error. These parse
-errors are an inevitable consequence of using off-the-shelf parsers.
+more details (\Cref{chap:where-is-the-code}). Overall, we acquired
+\qTotalUsableConf{} usable conflicts -- that is, we were able to parse
+the four files parse with the parsers available to us -- and
+\qTotalParseErrorConf{} conflicts where at least one file yielded a
+parse error. \Cref{tbl:eval:summary-data} provides the distribution of
+datapoints per programming language and displays the amount of
+conflicts that yielded a parse error. These parse errors are an
+inevitable consequence of using off-the-shelf parsers.
 
 \begin{table}
 \centering
@@ -92,7 +93,7 @@ Java       & 19 & 2903 & 849 \\
 JavaScript & 28 & 3395 & 965 \\
 Lua        & 27 & 750 & 91 \\
 Python     & 27 & 4387 & 848 \\  \midrule
-\multicolumn{2}{r}{Totals:} & 12650 & 2767 \\
+\multicolumn{2}{r}{Totals:} & \qTotalUsableConf & \qTotalParseErrorConf \\
 \bottomrule
 \end{tabular}
 \caption{Summary of collected data}
@@ -281,13 +282,13 @@ classified as \texttt{mdif}.}
 \begin{tabular}{@@{}lrl@@{\qquad}rl@@{\qquad}l@@{}} \toprule
 Language & \emph{success} & \% & \emph{mdif} & \% & \emph{suc+mdiff}\% \\
 \midrule
- Clojure    & 184  & 0.15 & 211 & 0.17 & 0.32 \\
- Java       & 978  & 0.34 & 479 & 0.16 & 0.5 \\
- JavaScript & 1045 & 0.3  & 273 & 0.08 & 0.38 \\
- Lua        & 185  & 0.25 & 101 & 0.14 & 0.39 \\
- Python     & 907  & 0.21 & 561 & 0.13 & 0.34 \\
+ Clojure    & 184    & 0.15 & 211 & 0.17 & 0.32 \\
+ Java       & 978    & 0.34 & 479 & 0.16 & 0.5 \\
+ JavaScript & 1\,045 & 0.3  & 273 & 0.08 & 0.38 \\
+ Lua        & 185    & 0.25 & 101 & 0.14 & 0.39 \\
+ Python     & 907    & 0.21 & 561 & 0.13 & 0.34 \\
 \midrule
-\emph{Total}& 3299 & 0.26 & 1625 & 0.13 & 0.39 \\
+\emph{Total}& \qSolvedConf{} & 0.26 & 1625 & 0.13 & 0.39 \\
 \bottomrule
 \end{tabular}
 \caption{Best synchronization success rate per language.}
@@ -299,29 +300,29 @@ Language & \emph{success} & \% & \emph{mdif} & \% & \emph{suc+mdiff}\% \\
 \begin{tabular}{@@{}llcrl@@{\qquad}rl@@{\qquad}l@@{}} \toprule
 Language & Mode & Height & \emph{success} & \% & \emph{mdif} & \% & \emph{conf} \\ \midrule
 \multirow{3}{*}{Clojure} % timeouts: 0; sums: 1214
-  & |Patience|     & 1 & 184  & 0.15 & 211 & 0.17 & 819 \\
-  & |NoNested|     & 3 & 149  & 0.12 & 190 & 0.16 & 875 \\
-  & |ProperShare|  & 9 & 92   & 0.08 & 84  & 0.07 & 1038 \\
+  & |Patience|     & 1 & 184    & 0.15 & 211 & 0.17 & 819 \\
+  & |NoNested|     & 3 & 149    & 0.12 & 190 & 0.16 & 875 \\
+  & |ProperShare|  & 9 & 92     & 0.08 & 84  & 0.07 & 1\,038 \\
 \midrule
 \multirow{3}{*}{Java} % timeouts: 1; sums: 2900
-  & |Patience|     & 1 & 978  & 0.34 & 479 & 0.16 & 1443 \\
-  & |NoNested|     & 3 & 924  & 0.32 & 447 & 0.15 & 1529 \\
-  & |ProperShare|  & 9 & 548  & 0.19 & 197 & 0.07 & 2155 \\
+  & |Patience|     & 1 & 978    & 0.34 & 479 & 0.16 & 1\,443 \\
+  & |NoNested|     & 3 & 924    & 0.32 & 447 & 0.15 & 1\,529 \\
+  & |ProperShare|  & 9 & 548    & 0.19 & 197 & 0.07 & 2\,155 \\
 \midrule
 \multirow{3}{*}{JavaScript} % diferent timeouts; differnt sums
-  & |Patience|     & 1 & 1045 & 0.3 & 273 & 0.08 & 2060 \\
-  & |NoNested|     & 3 & 988  & 0.29 & 273 & 0.08 & 2124 \\
-  & |ProperShare|  & 9 & 748  & 0.22 & 116 & 0.03 & 2499 \\
+  & |Patience|     & 1 & 1\,045 & 0.3  & 273 & 0.08 & 2\,060 \\
+  & |NoNested|     & 3 & 988    & 0.29 & 273 & 0.08 & 2\,124 \\
+  & |ProperShare|  & 9 & 748    & 0.22 & 116 & 0.03 & 2\,499 \\
 \midrule
 \multirow{3}{*}{Lua} % timeouts: 0; sums: 748
-  & |Patience|     & 3 & 185  & 0.25 & 101 & 0.14 & 462 \\
-  & |NoNested|     & 3 & 171  & 0.23 & 110 & 0.15 & 467 \\
-  & |ProperShare|  & 9 & 86   & 0.11 & 29  & 0.04 & 633 \\
+  & |Patience|     & 3 & 185    & 0.25 & 101 & 0.14 & 462 \\
+  & |NoNested|     & 3 & 171    & 0.23 & 110 & 0.15 & 467 \\
+  & |ProperShare|  & 9 & 86     & 0.11 & 29  & 0.04 & 633 \\
 \midrule
 \multirow{3}{*}{Python} %timeouts: 1; sums 4298
-  & |Patience|     & 1 & 907  & 0.21 & 561 & 0.13 & 2830 \\
-  & |NoNested|     & 3 & 830  & 0.19 & 602 & 0.14 & 2866 \\
-  & |ProperShare|  & 9 & 446  & 0.1  & 223 & 0.05 & 3629 \\
+  & |Patience|     & 1 & 907    & 0.21 & 561 & 0.13 & 2\,830 \\
+  & |NoNested|     & 3 & 830    & 0.19 & 602 & 0.14 & 2\,866 \\
+  & |ProperShare|  & 9 & 446    & 0.1  & 223 & 0.05 & 3\,629 \\
 \bottomrule
 \end{tabular}
 \caption{Conflicts solved by \texttt{hdiff} with different parameters.}
@@ -343,7 +344,8 @@ success rate per language.
 are to be expected.  Different parameters used with \texttt{hdiff}
 yield different patches, which might be easier or harder to merge. Out
 of the datapoints that resulted in \emph{mdif} we have manually
-analyzed ??? randomly selected cases. We witnessed that ??? of those
+analyzed \qManualMDiffAnal{} randomly selected cases. We witnessed that 
+\qManualMDiffOk{} of those
 \texttt{hdiff} behaved as we expect, and the \emph{mdif} result was
 attributed to the human performing more operations than a structural
 merge would have performed. \Cref{fig:eval:mdif-suc-01}, illustrates

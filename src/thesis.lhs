@@ -37,6 +37,18 @@
 
 \newcommand{\lhsinclude}[1]{}
 
+%% quantities
+
+%% How many conflicts have we seen, solved, etc...
+\newcommand{\qTotalUsableConf}{$12\,650$}
+\newcommand{\qTotalParseErrorConf}{$2\,767$}
+\newcommand{\qSolvedConf}{$3\,299$}
+\newcommand{\qSolvedPerc}{$26\%$}
+
+%% How many merge-diff cases have I seen so far?
+\newcommand{\qManualMDiffAnal}{???}
+\newcommand{\qManualMDiffOk}{???}
+
 \begin{document}
 \maketitle
 
@@ -104,8 +116,12 @@ Thanks to family, supervisor, friends and hops!
 \lhsinclude{Discussion.lhs}
 %include src/Discussion.lhs
 
-% \appendix
-% \chapter{Some Formulas}
+\appendix
+\chapter{Obtaining the Code and Dataset}
+\label{chap:where-is-the-code}
+\lhsinclude{ObtainingTheCode.lhs}
+%include src/ObtainingTheCode.lhs
+
 
 \backmatter
 
