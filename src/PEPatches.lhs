@@ -1974,26 +1974,8 @@ producing a patch with locally scoped changes and copies in its spine.}
 \label{fig:pepatches:cpyonspine}
 \end{figure}
 
-\section{Merging Patches}
-
-\victor{\huge I'm here}
-
-  Recall the change shown in \Cref{fig:pepatches:misalignment:A},
-call it |c|. Computing a \emph{locally scoped} patch from such change, that is,
-calling |close c|, would return |Hole c| -- meaning |c| is already
-in minimal closed form and cannot have a larger spine whilst maintaining
-well-scopedness. Working with locally-scoped only prevents situations
-such as \Cref{fig:pepatches:misalignment:B} to occur, but it does
-not help us in synchronizing |c|.
-
-  Recognizing deletions and insertions is crucial for synchronization: no
-merging algorithm can be posibly work if we cannot
-distinguish old information from new information. Flagging |Bin 42| as a
-deletion in \Cref{fig:pepatches:misalignment:A} means we still must
-produce an \emph{alignment} of the minimal changes produced by |close|.
-That is, we would like to write |c| as \Cref{fig:pepatches:alignment:B}.
-We can only uncover the copies in \Cref{fig:pepatches:alignment:B} after
-recognizing the deletion of the root |(:)| in \Cref{fig:pepatches:aligment:A}.
+\subsection{Aligning Changes}
+\label{sec:pepatches:alignments}
 
 \begin{figure}
 \centering
@@ -2005,8 +1987,8 @@ recognizing the deletion of the root |(:)| in \Cref{fig:pepatches:aligment:A}.
 ]
 \end{myforest}
 \label{fig:pepatches:alignment-01:A}}
-\quad\quad
-\subfloat[Deletion of |(: 42)| correctly identified.]{%
+\qquad\qquad
+\subfloat[Alignment where the deletion of |(: 42)| is correctly identified.]{%
 \begin{myforest}
 [, delctx , alignmentSmall
   [|(:)| [|42|] [SQ]]
@@ -2017,26 +1999,30 @@ recognizing the deletion of the root |(:)| in \Cref{fig:pepatches:aligment:A}.
 ]
 \end{myforest}
 \label{fig:pepatches:alignment-01:B}}%
-\caption{Properly aligned version of \Cref{fig:pepatches:misalignment}.}
+\caption{Properly aligned version of \Cref{fig:pepatches:misalignment}, where
+the deletion of |(: 42)| gets properly identified.}
 \label{fig:pepatches:alignment-01}
 \end{figure}
 
-  Before synchronizing patches, then, we must \emph{align} them.
+  As we have seen in the previous sections, locally-scoped changes
+avoid the problem of misaligning copies by not recognizing insertions
+or deletions (\Cref{fig:pepatches:misalignment}), but the problem
+remains. In fact, recognizing deletions and insertions is crucial
+for synchronization: no merging algorithm can be posibly work if we cannot
+distinguish old information from new information.
 In this section we will look into a datatype and an algorithm for
-representing and computing alignments, \Cref{sec:pepatches:alignments}.
-Next, we look into a merging algorithm for synchronizing aligned patches,
-in \Cref{sec:pepatches:merging}.
+representing and computing alignments, which are crucial for
+synchronization.
 
-\subsection{Aligning Patches}
-\label{sec:pepatches:alignments}
-
-\victor{
-  It is worth noting that untyped synchronizers, such
+  Take \Cref{fig:pepatches:alignment:A} (which is a copy of
+\Cref{fig:pepatches:misalignment:A}). If we are able to identify
+|Bin 42| as a deletion, the copies that happen after it become
+evident, as shown in \Cref{fig:pepatches:alignment:B}.
+It is worth noting that untyped synchronizers, such
 as \texttt{harmony}~\cite{Foster2007}, must employ schemas to overcome issues
 similar to that of \Cref{fig:pepatches:misalignment}. In our case,
 the type information will enable us to identify insertions and deletions
 properly.
-}
 
   An aligned patch consists in a spine of copied constructors
 leading to a \emph{well-scoped alignment}. This alignment, in turn,
@@ -2057,7 +2043,7 @@ type PatchAl kappa fam = Holes kappa fam (Al kappa fam)
 
 \begin{figure}
 \centering
-\subfloat[Non aligned patch |p|]{%
+\subfloat[Locally-scoped patch |p|]{%
 \begin{myforest}
 [|Bin|, s sep=3mm
   [,change , s sep=1mm
@@ -2068,7 +2054,7 @@ type PatchAl kappa fam = Holes kappa fam (Al kappa fam)
     [|Bin| [|Leaf| [|42|]] [z,metavar]]]]
 \end{myforest}}%
 \quad
-\subfloat[Result of |align p|]{%
+\subfloat[Result of |align p|, still locally scoped.]{%
 \begin{myforest}
 [|Bin|
  [|Bin| , alignmentSmall
@@ -2088,21 +2074,26 @@ changes performed by |p|.}
   Since our patches are locally scoped, computing an aligned patch
 is simply done by mapping over the spine and aligning the individual changes.
 Computing the \emph{alignment} for a change |c| consists in
-identifying which parts of the deletion context correspond
-to which pars of the insertion context, that is, which constructors
-or metavariables represent \emph{the same information} in the
-source object of the change.
+identifying what information in the deletion context correspond
+to \emph{the same information} in the insertion context.
+The bits and pieces in the deletion context that
+have no correspondent in the insertion context should be identified
+as deletions and vice-versa for the insertion context.
+In \Cref{fig:pepatches:alignment-01:A}, for example, the second |(:)|
+in the deletion context represents the same information as the
+root |(:)| in the insertion context.
 
-  The deletion of |(: 42)| in \Cref{fig:pepatches:alignment-01:B}
-has all fields, except one recursive field, containing no metavariables.
-These trees with no metavariables are denoted as \emph{rigid} trees.
-A \emph{rigid} tree has the guarantee that none of its
-subtrees is being copied, moved or modified. In fact,
-\emph{rigid} trees have been entirely deleted from the source or inserted
-at the destination of the change. Consequently, if a constructor
-in the deletion (resp. insertion) context has all but one of
-its subtrees being \emph{rigid}, it is only natural to consider
-this constructor to be part of the \emph{deletion} (resp. \emph{insertion}).
+  We can recognize the deletion of |(: 42)| in
+\Cref{fig:pepatches:alignment-01:B} structurally.  All of its fields,
+except one recursive field, contains no metavariables.  We denote
+trees with no metavariables as \emph{rigid} trees.  A \emph{rigid}
+tree has the guarantee that none of its subtrees is being copied,
+moved or modified. Consequently, \emph{rigid} trees are being entirely
+deleted from the source or inserted at the destination of the
+change. If a constructor in the deletion (resp. insertion) context has
+all but one of its subtrees being \emph{rigid}, it is only natural to
+consider this constructor to be part of the \emph{deletion}
+(resp. \emph{insertion}).
 
   We will be representing a deletion or
 insertion of a recursive \emph{layer} by identifying the \emph{position}
@@ -2112,6 +2103,8 @@ the deletion or insertion must not alter the type that our patch
 operates over. This is easy to identify since we
 followed typed approach, where we always have access to type-level
 information.
+
+\victor{\huge I'm here}
 
   In the remainder of this section we discuss how to represent
 an aligned change, such as \Cref{fig:pepatches:alignment-01:B}, and
@@ -2431,7 +2424,7 @@ that's where the log n is hidden.
 }
 
 
-\subsection{Merging Aligned Patches}
+\section{Merging Aligned Patches}
 \label{sec:pepatches:merging}
 
   In the previous sections we have seen how |Chg|
