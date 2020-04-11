@@ -7,6 +7,9 @@ method, \texttt{hdiff}, was discussed in
 \Cref{chap:pattern-expression-patches} and experimented with in
 \Cref{chap:eval}.
 
+\victor{Say something about important generic programming patterns;
+annotations are super important for instance}
+
 \section{The Future of Structural Differencing}
 
   Applying structural differncing tools to version control of source

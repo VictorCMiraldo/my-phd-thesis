@@ -1459,7 +1459,8 @@ chg x y =  let  dx             = decorate x
                 dy             = decorate y
                 (_, sh)        = buildSharingMap opts dx dy
             in extract extMode canShare (dx :*: dy)
- where canShare t = 1 < treeHeight (getConst (getAnn t))
+ where
+   canShare t = 1 < treeHeight (getConst (getAnn t))
 \end{code}
 \end{myhs}
 
@@ -1630,24 +1631,18 @@ globallyScopedPatch (Chg d i) = holesMap (uncurry' Chg) (lgg d i)
 \end{code}
 \end{myhs}
 
-  Albeit easy to compute, however, \emph{globally-scoped} patches
-contribute little information from a synchronization point of view.
-To an extent, it can even make merging harder. Take
-\Cref{fig:pepatches:misalignment}, where a
-globally scoped patch is produced from a change.
-It is harder to understand that the |(:) 42| is being deleted
-by looking at the globally-scoped patch than by looking at the change.
-This is because the first |(:)| constructor is considered to be in the spine
-by the naive anti-unification, which proceeds top-down.
-Note that a bottom-up approach would
-would suffer similar issues for insertions anyway.
-This is an issue that untyped approaches must inherently employ some
-sort of schema to overcome, as was the case in \texttt{harmony}~\cite{Foster2007}. In our case, the type information is enough to solve this.
-The take away from this example is that globally-scoped patches will give us
-a harder time when synchronizing.
-The real solution to this problem is the notion of \emph{alignment}
-which will be discussed shortly (\Cref{sec:pepatches:alignment}), for
-the time being we will maintain our focus on scoping.
+  \emph{Globally-scoped} patches are easy to compute but contribute
+little information from a synchronization point of view.  To an
+extent, it makes merging even harder. Take
+\Cref{fig:pepatches:misalignment}, where a globally scoped patch is
+produced from a change.  It is harder to understand that the |(: 42)|
+is being deleted by looking at the globally-scoped patch than by
+looking at the change.  This is because the first |(:)| constructor is
+considered to be in the spine by the naive anti-unification algorithm,
+which proceeds top-down.  A bottom-up approach is also unpractical, we
+would have to decide which leaves to pair together and it would suffer
+similar issues for data inserted on the tail of linearly-structured
+data.
 
 \begin{figure}
 \centering
@@ -1675,76 +1670,80 @@ in the head of linearly-structured data.}
 \label{fig:pepatches:misalignment}
 \end{figure}
 
-  \emph{Locally-scoped} changes implies that
+  \emph{Locally-scoped} patches implies that
 changes might still contain repeated constructors in the root
 of their deletion and insertion contexts -- hence they will not be
-structurally minimal. On the other hand, copies are easy to
-identify and reconciliation will happen \emph{in place}. This later
-reason being particularly important for a industrial synchronizer since
-it enables the \emph{conflicts} to be put in place and refer
-to small parts of the patch instead of the whole.
+structurally minimal. Although more involved to compute, they
+give us a change to address insertions and deletions
+of constructors before we end up misalignming copies.
 
   Independently of global or local scoping,
 ignoring the information about the spine yields a forgetful
-functor from patches back into changes. It is simple to define thanks
-to the free monad structure of |Holes|, which gives us the
-necessary monadic multiplication.
-
-\begin{myhs}
-\begin{code}
-holesMap    :: (forall x dot phi x -> psi x)
-            => Holes kappa fam phi at -> Holes kappa fam psi at
-
-holesJoin   :: Holes kappa fam (Holes kappa fam) at -> Holes kappa fam at
-
-chgDistr    :: PatchPE ki codes at -> Chg ki codes at
-chgDistr p  = Chg  (holesJoin (holesMap chgDel  p)) (holesJoin (holesMap chgIns  p))
-\end{code}
-\end{myhs}
-
-\victor{\Huge I'm here}
-
-  It is worth noting that we must care that |chgDistr| wont
-capture variables. It will only work properly if all metavariables
-have already been properly $\alpha$-converted to avoid capturing. We
-cannot enforce this invariant directly in the |chgDistr| function for
-performance reasons.  Throughout the implementation, however, we
-continuously ensure that even though we produce and work with
-\emph{locally scoped} patches, all scopes contains disjoint sets of
-names and therefore can be safely distributed.  In the context of
-meta-theoretical definitions and proofs we will abide by Barendregt's
-Convention~\cite{Barendregt1984} where no two bound variables are
-identified with the same name.  \digress{I wonder how an
+functor from patches back into changes, named |chgDistr|.
+Its definition is straighforward thans to to the free monad structure
+of |Holes|, which gives us the necessary monadic multiplication.
+We must care that |chgDistr| will not
+capture variables, that is,
+all metavariables must have already been properly $\alpha$-converted.
+We cannot enforce this invariant directly in the |chgDistr| function for
+performance reasons, consequently, we must manually ensure that all
+scopes contains disjoint sets of names and therefore can be
+safely distributed whenever applicable. This is a usual difficulty
+when handling objects with binders, in general.
+\digress{I wonder how an
 implementation using De Bruijn indexes would look like. I'm not
 immediately sure it would be easier to enforce correct indexes. Through
 the bowels of the code we ensure two changes have disjoint sets of
 names by adding the successor of the maximum variable of one over the
 other.}
 
-  The application semantics of |Patch| is easily defined in terms
-of |chgApply|. As usual, assume all metavariable scopes are disjoint, the
-application of a patch is defined as:
-
 \begin{myhs}
 \begin{code}
-apply  :: (All Eq kappa) => Patch kappa fam at -> SFix kappa fam at -> SFix kappa fam at
-apply  = chgApply . chgDistr
+holesMap    :: (forall x dot phi x -> psi x) => Holes kappa fam phi at -> Holes kappa fam psi at
+
+holesJoin   :: Holes kappa fam (Holes kappa fam) at -> Holes kappa fam at
+
+chgDistr    :: Patch ki codes at -> Chg ki codes at
+chgDistr p  = Chg  (holesJoin (holesMap chgDel p)) (holesJoin (holesMap chgIns p))
 \end{code}
 \end{myhs}
 
-  From our empirical experience, discussed in
-\Cref{sec:pepatches:experiments}, it does seem like
-\emph{locally-scoped} patches outperform \emph{globally-scoped}
-enabling us to solve more conflicts successfully. Besides this
-empirical validation, opting for \emph{locally-scoped} patches also
-enable us to place conflicts in-place, which is better than issuing a
-single conflict for the whole patch. For these reasons, we will move
-on with \emph{locally-scoped} patches. Next,
-\Cref{sec:pepatches:closures} introduces an algorithm for translating
-a single |Chg| into a patch with locally-scoped changes and
-\Cref{sec:pepatches:alignment} looks into further refining the changes
-into \emph{alignments}, providing even more information to the
-synchronization engine.
+
+  The application semantics of |Patch| is independent of the scope
+choices, and is easily defined in terms of |chgApply|. First we
+computing a global change that correspons to the patch in question,
+then use |chgApply|. The |apply| function below works for locally and
+globally scoped patches, as long as we care that the precondition for
+|chgDistr| is maintained.
+
+\begin{myhs}
+\begin{code}
+apply  :: (All Eq kappa) => Patch kappa fam at -> SFix kappa fam at -> Maybe (SFix kappa fam at)
+apply p = chgApply (chgDistr p)
+\end{code}
+\end{myhs}
+
+\victor{I'm unsure whether the next 3 paragraphs break the flow too much, please comment}
+
+  Overall, we find ourselves in a dilemma. On the one hand we have
+\emph{globally-scoped} patches, which have larger spines but can
+produce results that are difficult to understand and synchronize, as
+in \Cref{fig:pepatches:misalignment}. On the other hand,
+\emph{locally-scoped} patches are more involved to compute, as we will
+study next, \Cref{sec:pepatches:closures}, but they forbid bad
+misalignments and also enable us to process small changes
+indenepdently of one another in the tree.  This is particularly
+important for being able to develop an industrial synchronizer at some
+point, as it keeps \emph{conflicts} small and isolated.
+
+  We advance that the actual solution will consist in using a bit of
+both scopings at the same time. First we will produce a locally-scoped
+patch, which forbids situations as in
+\Cref{fig:pepatches:misalignment}.  This gives us an oportunity of
+identifying deletions and insertions that could cause copies to be
+misaligned, essentially producing a globally-scoped \emph{alignment},
+we will discuss this in more detail shortly
+(\Cref{sec:pepatches:alignment}).
 
 \subsection{Computing Closures}
 \label{sec:pepatches:closures}
@@ -1785,7 +1784,7 @@ to maintain scope.]{%
 \quad
 \label{fig:pepatches:example-minimal:C}}%
 \quad\quad
-\subfloat[Patch with minimal changes computed with |close| applied to \ref{fig:pepatches:example-minimal:A}]{%
+\subfloat[Patch with minimal changes that results from |close| applied to \ref{fig:pepatches:example-minimal:A}]{%
 \quad
 \begin{myforest}
 [|Bin|, s sep=5mm
@@ -1795,9 +1794,19 @@ to maintain scope.]{%
 \end{myforest}
 \quad
 \label{fig:pepatches:example-minimal:D}}%
-\caption{Some non-minimal and one minimal change.}
+\caption{Some non-minimal-closed and minimal-closed changes examples.}
 \label{fig:pepatches:example-minimal}
 \end{figure}
+
+  Computing locally-scoped patches consists in first computing
+the largst possible spine, like with globally-scoped patches, then
+enlarging the resulting changes until they are well-scoped and closed.
+\Cref{fig:pepatches:example-03} actually
+illustrates this process well. Computing the closure of
+\Cref{fig:pepatches:example-03:A} is done by computing
+\Cref{fig:pepatches:example-03:B}, then \emph{pushing} the the |Bin|
+constructor down the changes, fixing their scope, resulting in
+\Cref{fig:pepatches:example-03:C}.
 
 %{
 %format dn = "\HSVar{d_n}"
@@ -1805,25 +1814,26 @@ to maintain scope.]{%
 %format dj = "\HSVar{d_j}"
 %format ij = "\HSVar{i_j}"
 
-  We say a change |c :: Chg kappa fam at| is in \emph{minimal}
-form if and only if it is closed with respect to some global scope and,
-either: (A) |chgDel c| and |chgIns c| have different constructors at their
-root or (B) they contain the same constructor and said constructor is
-necessary to maintain well-scopedness. In other words, when |chgDel c| and
-|chgIns c| contain the same constructor, take
-|chgDel c = inj d0 dots dn| and |chgIns c = inj i0 dots in|.  If there
-exists a variable |v| that occurs in |ij| but is not defined in |dj|
-then we cannot put |inj| into a spine whilst maintaining all
-changes well-scoped. \Cref{fig:pepatches:example-minimal} illustrates
-some cases.
+  We say a change |c| is in \emph{minimal-closed}
+form if and only if it is closed with respect to some global scope
+and, either: (A) |chgDel c| and |chgIns c| have different constructors
+at their root or (B) they contain the same constructor to maintain
+well-scopedness. More formally, when |chgDel c| and |chgIns c| contain
+the same constructor, let |chgDel c == X d0 dots dn| and |chgIns c == X
+i0 dots in|, we say |X| is necessary to maintain well-scopedness if
+there exists an index |j| and variable |v| such that |v| occurs in
+|ij| but is not defined in |dj|.  This means we cannot place |X| in
+the spine whilst maintaining all changes
+well-scoped. \Cref{fig:pepatches:example-minimal} illustrates some
+cases.
 %}
 
   Defining whether a change is closed or not has its nuances. Firstly,
 we can only know that a change is in fact closed if we know, at least,
 how many times each variable is used globally.  Say a variable |x| is
 used |n + m| times in total, and it has |n| and |m| occurrences in the
-deletion and insertion contexts of |c|, then |x| is not used anywhere
-else but in |c|, in other words, |x| is \emph{local} to |c|. If all
+deletion and insertion contexts of |c|, then |x| does not occur anywhere
+else but within |c|, in other words, |x| is \emph{local} to |c|. If all
 variables of |c| are \emph{local} to |c|, we say |c| is closed.  Given
 a multiset of variables |g :: Map Int Arity| for the global scope, we
 can define |isClosedChg| in Haskell as:
@@ -1838,32 +1848,22 @@ isClosedChg global (Chg d i) = isClosed global (vars d) (vars i)
 \end{code}
 \end{myhs}
 
-  Given a well-scoped change |c|, we would like
-to compute a spine with minimal changes in its leaves.
-We start by computing the least general generalization |s = lgg (chgDel c) (chdIns c)|
-which might contain \emph{locally ill-scoped} changes, then we push
-constructors that are in the spine into the changes until they are
-all closed. Recall \Cref{fig:pepatches:example-03}, which
-illustrates this process well. Computing the closure of
-\Cref{fig:pepatches:example-03:A} is done by computing
-\Cref{fig:pepatches:example-03:B}, then \emph{pushing} the the |Bin|
-constructor down the changes, fixing their scope, resulting in
-\Cref{fig:pepatches:example-03:C}.
+  The |close| function, shown in \Cref{fig:pepatches:close}, is
+responsible for pushing constructors through the least general
+generalization until they represent minimal-closed changes. It calls an
+auxiliary version that receives the global scope and keeps track of
+the variables it has seen so far.  The worst case scenario happens when
+the we need \emph{all} constructors of the spine to close the change,
+in which case, |close c = Hole c|; yet, if we pass a non-well-scoped
+change change to |close|, it cannot produce a result and throws
+an error instead.
 
-  The |close| function, \Cref{fig:pepatches:close}, is responsible for pushing
-constructors through the least general generalization until they
-represent minimal changes. It calls an auxiliary version that receives
-the global scope and keeps track of the variables it seen so far.
-The worst case scenario happens when the we need \emph{all} constructors
-of the spine to close the change, in which case, |close c = Hole c|;
-yet, if we pass a well-scoped change change to |close|, we must be able
-to produce a patch.
-
-  Deciding whether a given change is closed or not requires us to keep
-track of the variables we have seen being declared and used in a change.
-Recomputing this multisets would be a waste of resources and would yield
-a much slower algorithm. The |annWithVars| function below computes the
-variables that occur in two contexts and annotates a change with them:
+  Efficiently computing closures requires us to keep track of the
+variables we have seen being declared and used in a change -- that is,
+we have seen occurences in the deletion and insertion context
+respectively.  Recomputing this multisets would result in a slower
+algorithm.  The |annWithVars| function below computes the variables
+that occur in two contexts and annotates a change with them:
 
 \begin{myhs}
 \begin{code}
@@ -1901,15 +1901,8 @@ closeAux gl (Roll x) =
 \label{fig:pepatches:close}
 \end{figure}
 
-  The |closeAux| function, \Cref{fig:pepatches:close},
-receives a spine with leaves of type |WithVars dots|
-and attempts to \emph{enlarge} them as necessary.
-If it is not possible to close the current spine, we
-return a |InL dots| equivalent to pushing all the
-constructors of the spine down the deletion and insertion contexts.
-The main component behind |closeAux| is |chgVarsDistr|, which distributes
-|WithVars| over a spine and computes the union of the
-declared and used multisets.
+  At the heart of the |close| function we have the |chgVarsDistr|,
+which is just like |chgDistr|, but keeps the explicit variable annotations.
 
 \begin{myhs}
 \begin{code}
@@ -1921,11 +1914,18 @@ chgVarsDistr rs =  let  us  = map (exElim uses)   (getHoles rs)
 \end{code}
 \end{myhs}
 
+  The |closeAux| function, \Cref{fig:pepatches:close},
+receives a spine with leaves of type |WithVars dots|
+and attempts to \emph{enlarge} them as necessary.
+If it is not possible to close the current spine, we
+return a |InL dots| equivalent to pushing all the
+constructors of the spine down the deletion and insertion contexts.
+
+
 \subsection{The |diff| Function}
 
-  Equipped with the ability to produce changes and minize these
-changes by pushing them to the leaves of the tree, we move on to
-defining the |diff| function. As usual, it receives a source and
+  Equipped with the ability to produce changes and minimize them,
+we move on to defining the |diff| function. As usual, it receives a source and
 destination trees, |s| and |d|, and computes a patch that encodes the
 information necessary to transform the source into the
 destination. The extraction of the contexts yields a |Chg|, which is
@@ -1975,6 +1975,8 @@ producing a patch with locally scoped changes and copies in its spine.}
 \end{figure}
 
 \section{Merging Patches}
+
+\victor{\huge I'm here}
 
   Recall the change shown in \Cref{fig:pepatches:misalignment:A},
 call it |c|. Computing a \emph{locally scoped} patch from such change, that is,
@@ -2027,6 +2029,14 @@ in \Cref{sec:pepatches:merging}.
 
 \subsection{Aligning Patches}
 \label{sec:pepatches:alignments}
+
+\victor{
+  It is worth noting that untyped synchronizers, such
+as \texttt{harmony}~\cite{Foster2007}, must employ schemas to overcome issues
+similar to that of \Cref{fig:pepatches:misalignment}. In our case,
+the type information will enable us to identify insertions and deletions
+properly.
+}
 
   An aligned patch consists in a spine of copied constructors
 leading to a \emph{well-scoped alignment}. This alignment, in turn,
