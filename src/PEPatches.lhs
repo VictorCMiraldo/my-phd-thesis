@@ -1465,6 +1465,7 @@ chg x y =  let  dx             = decorate x
 \end{myhs}
 
 \section{The Type of Patches}
+\label{sec:pepatches:patches}
 
 \begin{figure}
 \centering
@@ -1901,8 +1902,9 @@ closeAux gl (Roll x) =
 \label{fig:pepatches:close}
 \end{figure}
 
-  At the heart of the |close| function we have the |chgVarsDistr|,
-which is just like |chgDistr|, but keeps the explicit variable annotations.
+  The |chgVarsDistr| is the engine of the |close| function.
+It distributes a spine over a change, similar to |chgDistr|,
+but here we care to maintain the explicit variable annotations correctly.
 
 \begin{myhs}
 \begin{code}
@@ -2024,20 +2026,23 @@ similar to that of \Cref{fig:pepatches:misalignment}. In our case,
 the type information will enable us to identify insertions and deletions
 properly.
 
-  An aligned patch consists in a spine of copied constructors
-leading to a \emph{well-scoped alignment}. This alignment, in turn,
-consists in a sequence of insertions, deletions or spines,
-which finally lead to a |Chg|. This is not so different from
-\texttt{stdiff}s' |Almu|, presented in \Cref{sec:stdiff:diff:fixpoint}.
-In addition to simple insertions, deletions and spines we also
-add explicit information about copies and permutations to aid
+  An aligned patch consists in a spine of copied constructors leading
+to a \emph{well-scoped alignment}. This alignment, in turn, consists
+in a sequence of insertions, deletions or spines, which finally lead
+to a |Chg|. These |Chg| in the leaves of the alignment can be
+globally-scoped with respect to the alignment they belong.  Finally,
+we also add explicit information about copies and permutations to aid
 the synchronization engine later on. \Cref{fig:pepatches:alignment-02}
-illustrates a value of type |Patch| and its corresponding
-alignment, of type |PatchAl| defined below.
+illustrates a value of type |Patch| and its corresponding alignment,
+of type |PatchAl| defined below. Note how the the scope from each
+change in \Cref{fig:pepatches:alignment-02:A} is preserved in
+\Cref{fig:pepatches:alignment-02:B}, but the |Bin| on the left of the
+root can now be safely identified as a copy without losing information
+about the scope of |metavar x|.
 
 \begin{myhs}
 \begin{code}
-type PatchAl kappa fam = Holes kappa fam (Al kappa fam)
+type PatchAl kappa fam = Holes kappa fam (Al kappa fam (Chg kappa fam))
 \end{code}
 \end{myhs}
 
@@ -2052,7 +2057,7 @@ type PatchAl kappa fam = Holes kappa fam (Al kappa fam)
   [,change , s sep=1mm
     [z,metavar]
     [|Bin| [|Leaf| [|42|]] [z,metavar]]]]
-\end{myforest}}%
+\end{myforest}\label{fig:pepatches:alignment-02:A}}%
 \quad
 \subfloat[Result of |align p|, still locally scoped.]{%
 \begin{myforest}
@@ -2063,7 +2068,7 @@ type PatchAl kappa fam = Holes kappa fam (Al kappa fam)
  [,insctx , alignmentSmall
    [|Bin| [|Leaf| [|42|]] [SQ]]
    [|Cpy (metavar z)|]]]
-\end{myforest}}
+\end{myforest}\label{fig:pepatches:alignment-02:B}}
 \caption{A patch |p| and its corresponding aligned version. Note
 how the aligned version provides more information about
 which constructors are actually copied inside the
@@ -2104,12 +2109,12 @@ operates over. This is easy to identify since we
 followed typed approach, where we always have access to type-level
 information.
 
-\victor{\huge I'm here}
-
-  In the remainder of this section we discuss how to represent
-an aligned change, such as \Cref{fig:pepatches:alignment-01:B}, and
-how to compute them from a |Chg kappa fam at|. Our starting
-point is in defining the |alignChg| function, declared below.
+  In the remainder of this section we discuss the datatypes necessary
+to represent an aligned change, as illustrated in
+\Cref{fig:pepatches:alignment-01:B}, and how to compute said
+alignments from a |Chg kappa fam at|. The |alignChg| function,
+declared below, will receive a well-scoped change and compute an
+aligment.
 
 \begin{myhs}
 \begin{code}
@@ -2117,24 +2122,32 @@ alignChg  :: Chg kappa fam at -> Al kappa fam (Chg kappa fam) at
 \end{code}
 \end{myhs}
 
-  In general, we represent insertions and deletions with a
-|Zipper|~\cite{Huet1991}. A zipper over a datatype |t| is
-the type of \emph{one-hole-contexts} over |t|, where the hole
-indicates a selected position. We will only
-be using zippers over a \emph{single} layer of a fixpoint at a time.
-In our case, then, a zipper over the |Bin| constructor
-is either |Bin SQ u| or |Bin u SQ|, indicating a selected position is
-in the left or the right subtree -- we briefly discuss zippers
-generically in \ref{sec:gp:simplistic-zipper}.
+  The alignments here, encoded in the |Al| datatype, is similar to its
+predecessor |Almu| from \texttt{stdiff}
+(\Cref{sec:stdiff:diff:fixpoint}), it records insertions, deletions
+and spines over a fixpoint. Insertions and deletions will be
+represented with |Zipper|s~\cite{Huet1991}. A zipper over a datatype
+|t| is the type of \emph{one-hole-contexts} over |t|, where the hole
+indicates a selected position. We will use the zippers provided
+directly by the \genericssimpl{} library
+(\Cref{sec:gp:simplistic-zipper}).  These zippers encode a
+\emph{single} layer of a fixpoint at a time, for example, a zipper
+over the |Bin| constructor is either |Bin SQ u| or |Bin u SQ|,
+indicating a selected position is in the left or the right subtree. It
+\emph{does not} enable us to specify a hole inside the left or right
+subtree, like in |Bin (Bin SQ t) u|.
 
-  A value of type |Zipper| then will be equivalent to one layer of
-a fixpoint with one of its recursive positions identified.
-It shall carry trees (encoded by |SFix kappa fam|) in all
-its positions except one, which represents where the alignment
-\emph{continues}. An alignment |Al kappa fam f at| represents a
-sequence of insertions and deletions interleaved with spines which
-ultimately lead to \emph{modifications}, which are typed according to
-the |f| parameter.
+  A value of type |Zipper c g h at| is then equivalent to a constructor
+of type |at| with one of its recursive positions replaced by a value
+of type |h at| and the other positions |at'| (recursive or not) carrying
+values of type |g at'|. The |c| above is a constraint that enables us
+to inform GHC some properties of type |at| and is mostly a technicality.
+
+  An alignment |Al kappa fam f at| represents a
+sequence of insertions and deletions interleaved with spines, copies
+and permutations which ultimately lead to \emph{unclassified modifications},
+which are typed according to the |f| parameter. Deletions and insertions
+explicitely mention a zipper and one recursive field to continue the alignment.
 
 \begin{myhs}
 \begin{code}
@@ -2144,14 +2157,14 @@ data Al kappa fam f at where
 \end{code}
 \end{myhs}
 
-  The |CompountCnstr| constraint must be carried around to indicate we
+  The |CompountCnstr| constraint above must be carried around to indicate we
 are aligning a type that belongs to the mutually recursive family and
-therefore has a generic representation -- this is just a Haskell technicality.
+therefore has a generic representation -- again, just a Haskell technicality.
 
-  Naturally, if no insertion or deletion can be made but both
+  Naturally, if no insertion or deletion can be performed but both
 insertion and deletion contexts have the same constructor at their
-root, we want to recognize this constructor as part of a spine and
-continue aligning its fields pairwise.
+root, we want to recognize this constructor as part of the spine of
+the alignment, and continue to align its fields pairwise.
 
 \begin{myhs}
 \begin{code}
@@ -2159,11 +2172,16 @@ continue aligning its fields pairwise.
 \end{code}
 \end{myhs}
 
+  The |Spn| inside an alignment does not need to preserve metavariable scoping,
+consequently, it can be pushed closer to the leaves uncovering as many
+copies as possible.
+
   When no |Ins|, |Del| or |Spn| can be used,
-we must be fallback to recording a modification,
-of type |f at|. Most of the times, |f| will be |Chg kappa fam|,
-but we might need to add some extra information in the leaves
-of an alignment.
+we must be fallback to recording a unclassified modification,
+of type |f at|. Most of the times |f| will be simply |Chg kappa fam|,
+but we will be needing to add some extra information in the leaves
+of an alignment later. Moreover, keeping the |f| a parameter
+turns |Al| into a functor which enables us to map over it easily.
 
 \begin{myhs}
 \begin{code}
@@ -2171,19 +2189,19 @@ of an alignment.
 \end{code}
 \end{myhs}
 
-  Finally, it is useful to flag copies and permutations early for they
-are simpler to synchronize than arbitrary changes.  A copy is
-witnessed by a change |c = Chg (metavar x) (metavar x)| such that
-|metavar x| only occurs twice globally. This means all occurrences of
-|metavar x| have been accounted for in |c| and the tree at |metavar x|
-in the source of the change is not being duplicated anywhere else.
+  Imagine an alignment |a = Mod (Chg (metavar x) (metavar x))|. Does |a|
+represent a copy or is |x| contracted or duplicated? Because metavariables
+are scoped globally within an alignment, we can only distinguish between
+copies and duplications by traversing the entire alignment and recording
+the arity of |x|. Yet, it is an important distinction to make. A copy
+synchronizes with anything whereas a contraction needs to satisfy
+aditional constraints. Therefore, we will identify copies and permutations
+directly in the alignment.
 
-  A permutation, on the other hand, is witnessed by |c = Chg (metavar
-x) (metavar y)|, where both |metavar x| and |metavar y| are different
-but also occur only twice globally.  It is a bit more restrictive than
-a copy, since this represents that the tree at |metavar x| is being
-moved -- that is, its \emph{location} is being modified but its \emph{content}
-remains the same.
+  Let |c = Chg (metavar x) (metavar y)| with both |x| and |y| occur twice
+in their global scope: once in the deletion context and once in the
+insertion context. We say |c| is a copy when |x == y| and a permutation
+when |x /= y|.
 
 \begin{myhs}
 \begin{code}
@@ -2194,24 +2212,26 @@ remains the same.
 
   Equipped with a definition for alignments, we move on to defining
 |alignChg|.  Given a change |c|, the first step of |alignChg c| is
-checking whether the root of |chgDel c| (resp. |chgIns c|) can be deleted
-(resp. inserted) -- that is, all of the of the constructor
-at the root of |chgDel c| (resp. |chgIns c|) are \emph{rigid} trees
-with the exception of a single recursive field. If we can delete the
-root, we flag it as a deletion and continue through the recursive
-\emph{non-rigid} field. If we cannot perform a deletion at the root of
-|chgDel c| nor an insertion at the root of |chgIns c| but they are
-constructed with the same constructor, we identify the
-constructor as being part of the alignments' spine
-and recursing on the children. If |chgDel c| and |chgIns c| do not even
-have the same constructor at the root, nor are copies
-or permutations, we finally fallback and flag an arbitrary modification.
+checking whether the root of |chgDel c| (resp. |chgIns c|) can be
+deleted (resp. inserted). A deletion (resp. insertion) of an occurence
+of a constructor |X| can be performed when all the of fields of |X| at
+this occurence are \emph{rigid} trees with the exception of a single
+recursive field -- recall \emph{rigid} trees contains no
+metavariables. If we can delete the root, we flag it as a deletion and
+continue through the recursive \emph{non-rigid} field. If we cannot
+perform a deletion at the root of |chgDel c| nor an insertion at the
+root of |chgIns c| but they are constructed with the same constructor,
+we identify the constructor as being part of the alignments' spine
+. If |chgDel c| and |chgIns c| do not even
+have the same constructor at the root, nor are copies or permutations,
+we finally fallback and flag an unclassified modification.
 
-  To check whether a constructor can be inserted in an efficient manner
-we must have this information annotated over the tree. Annotating a tree
-augmented with holes with information about whether or not any |Hole|
-constructor occurs is done with |annotRigidity|, shown in
-\Cref{fig:pepatches:rigidity}.
+  To check whether constructors can be deleted or inserted efficiently,
+we must annotate rigidity information throughout our trees.
+The |IsRigid| datatype captures whether a tree contains
+any metavariables or not whereas
+the |annotRigidity| function computes the annotated tree. The relevant
+code is shown in \Cref{fig:pepatches:rigidity}.
 
 \begin{figure}
 \begin{myhs}
@@ -2239,10 +2259,17 @@ about whether or not it actually contains a hole.}
   Once our trees have been annotated with rigidity information,
 we proceed to the extraction of a zippers to witness
 potential insertions or deletions. This
-is done by the |hasRigidZipper| function, which first extracts
-\emph{all} possible zippers from the root and checks whether there
-is a single on that satisfy the criteria. If there is, we return it
-wrapped in a |Just|.
+is done by the |hasRigidZipper| function. It is implemented
+by extracting \emph{all} possible zippers from the root and
+checking whether there is a single one that has all of its fields
+rigid except for a single recursive one. If we find such a zipper,
+we return it wrapped in a |Just|. Note that requiring that there
+is \emph{a single} zipper satisfying the criteria means there
+is no choice point involved in detecting insertions and deletions,
+which maintains the efficiency of our algorithms.
+We omit the full implementation of |hasRigidZipper| here but invite
+the interested reader to check |Data.HDiff.Diff.Align| in the
+source code (\Cref{chap:where-is-the-code}).
 
 \begin{myhs}
 \begin{code}
@@ -2253,28 +2280,33 @@ hasRigidZipper  :: HolesAnn kappa fam IsRigid (MetaVar kappa fam) t
 \end{code}
 \end{myhs}
 
-\victor{I feel I need more info on the paras below}
-  The return type is close to almost what the |Del| and |Ins|
-constructors expect: a value of type |t| where all but one
-recursive positions are populated by the |SFix kappa fam| datatype, \ie{},
-trees with \emph{no holes}; \emph{rigid}. The one position,
-of type |HolesAnn kappa fam IsRigid dots| identifies the subtree which
-we should continue to align against.
-We omit the full implementation of |hasRigidZipper| here but invite
-the interested reader to check |Data.HDiff.Diff.Align| in the
-source code (\Cref{chap:where-is-the-code}).
+  Checking for deletions, for example, can be easily done by first checking
+whether the root can has a rigid zipper, if so, we can flag the
+deletion. The sketch of |alD| below illustrates this process.
+The |rest| variable is the single \emph{non-rigid} recursive
+subtree of |d|.
 
-  Finally, we are ready to define |alignChg| in its entirety.  We
+\begin{myhs}
+\begin{code}
+alD d i = case hasRigidZipper d of
+    Just (Zipper zd rest) -> Del delZ (continueAligning rest i)
+    dots
+\end{code}
+\end{myhs}
+
+  The full |alD| is naturally more complex. For one, we must check wheter
+|i| also has a rigid zipper but when both |d| and |i| have rigid zippers,
+we must check whether they are the same constructor and, if so, mark
+it as part of the spine instead. The |al| function encapsulates the |alD|
+above and is shown in \Cref{fig:pepatches:align-fulldef}. A call to |al|
+will attempt to extract deletions, then insertions, then finally falling
+back to copies, permutations, modifications or recursivly calling itself
+inside spines.
+
+  We are now ready to define |alignChg| in its entirety.  We
 start computing the multiset of variables used throughout a patch,
 annotate the deletion and insertion context with |IsRigid| and proceed
-to actually align them with the |al| function, whose full definition
-can be found in \Cref{fig:pepatches:align-fulldef}, and, albeit long,
-is rather simple. In general lines, |al| attempts to delete as many
-constructors as possible, followed by inserting as many constructors
-as possible; whenever it finds that it deleted and inserted the same
-constructor, it uses a |Spn| instead and calls itself recursively
-on the leaves of the |Spn|. Ultimately, when none of |Del|, |Ins|
-or |Spn| can be used it falls back to |Cpy|, |Prm| or |Mod|.
+to actually align them with the |al| function.
 
 \begin{myhs}
 \begin{code}
@@ -2286,9 +2318,9 @@ alignChg c@(Chg d i) = al (chgVargs c) (annotRigidity d) (annotRigidity i)
 \begin{figure}
 \begin{myhs}
 \begin{code}
-type Aligner kappa fam  = HolesAnn kappa fam IsStiff (MetaVar kappa fam) t
-                        -> HolesAnn kappa fam IsStiff (MetaVar kappa fam) t
-                        -> Al kappa fam t
+type Aligner kappa fam  =    HolesAnn kappa fam IsStiff (MetaVar kappa fam) t
+                        ->   HolesAnn kappa fam IsStiff (MetaVar kappa fam) t
+                        ->   Al kappa fam (Chg kappa fam t)
 
 
 al :: Map Int Arity -> Aligner kappa fam
@@ -2338,16 +2370,16 @@ al vars d i = alD (alS vars (al vars)) d i
 \label{fig:pepatches:align-fulldef}
 \end{figure}
 
-  The |alignChg| and |disalign|, sketched below, form an isomorphism
-between alignments and changes. The |disalign| function is plugs
-deletion and insertion zippers, casting a zipper over |SFix| into a
+  Forgeting information computed |alignChg| is trivial but enables
+us to convert back into a |Chg|. The |disalign| function, sketched
+below, plugs deletion and insertion zippers casting a zipper over |SFix| into a
 zipper over |Holes| where necessary; distributes the constructors in
 the spine into both deletion and insertion contexts and translates
 |Cpy| and |Prm| as expected.
 
 \begin{myhs}
 \begin{code}
-disalign :: Al kappa fam at -> Chg kappa fam at
+disalign :: Al kappa fam (Chg kappa fam) at -> Chg kappa fam at
 disalign (Del (Zipper del rest)) =
   let Chg d i = disalign rest
    in Chg (Roll (plug (cast del) d) i)
@@ -2355,13 +2387,13 @@ disalign dots
 \end{code}
 \end{myhs}
 
-  A spine with alignments in its leaves is denoted
-as an aligned patch, and, just like changes,
-alignments also easily distribute over spines:
+  Distributing an outer spine through an alignment is trivial.
+All we must do is place all the constructors of the outer spine
+as |Spn|:
 
 \begin{myhs}
 \begin{code}
-alDistr :: PatchAl kappa fam at -> Al kappa fam at
+alDistr :: PatchAl kappa fam at -> Al kappa fam (Chg kappa fam) at
 alDistr (Hole al)  = al
 alDistr (Prim k)   = Spn (Prim k)
 alDistr (Roll r)   = Spn (Roll (repMap alDistr r))
@@ -2369,39 +2401,44 @@ alDistr (Roll r)   = Spn (Roll (repMap alDistr r))
 \end{myhs}
 
   Finally, computing aligned patches from locally-scoped patches
-is done by mapping over the spine and align the changes
+is done by mapping over the outer spine and aligning the changes
 individually, then we make a pass over the result and issue copies for
-opaque values that appear on the alignment's spine. The auxiliary
-function |align'| returns the successor of the last issued name to
-ensure we can easily produce fresh names later on, if need be.
-Note that |align| introduces information, namely, new metavariables
-that represent copies over opaque values that appear on the alignment's
-spine. This means that mapping |disalign| to the result of |align|
-will \emph{not} produce the same result. We have \emph{no} isomorphism here.
+opaque values that appear on the alignment's inner spine.
 
 \begin{myhs}
 \begin{code}
 align :: Patch kappa fam at -> PatchAl kappa fam at
 align = fst . align'
+\end{code}
+\end{myhs}
 
+  The auxiliary function |align'| returns the successor of the last
+issued name to ensure we can easily produce fresh names later on, if
+need be. Once again, a technicality of handling names explicitely.
+Note that |align| introduces information, namely, new metavariables
+that represent copies over opaque values that appear on the
+alignment's spine. This means that mapping |disalign| to the result of
+|align| will \emph{not} produce the same result. Alignments and
+changes are \emph{not} isomorphic.
+
+\begin{myhs}
+\begin{code}
 align' :: Patch kappa fam at -> (PatchAl kappa fam at , Int)
-align' p = flip runState maxv
-         $$ holesMapM (alRefineM cpyPrims . alignChg vars) p
-  where
-    vars = patchVars p
-    maxv = maybe 0 id (lookupMax vars)
+align' p = flip runState maxv $$ holesMapM (alRefineM cpyPrims . alignChg vars) p
+ where  vars = patchVars p
+        maxv = maybe 0 id (lookupMax vars)
 \end{code}
 \end{myhs}
 
   The |cpyPrims| above issues a |Cpy i|, for a fresh name |i| whenever
-it sees a modification with the form |Chg (Prim x) (Prim y)| and |x == y|.
+it sees a modification with the form |Chg (Prim x) (Prim y)| with |x == y|.
 The |alRefineM f| applies a function in the leaves of the |Al| and
 has type.
 
 \begin{myhs}
 \begin{code}
-alRefineM  :: (Monad m) => (forall x dot f x -> m (Al' kappa fam g x))
-           -> Al' kappa fam f ty -> m (Al' kappa fam g ty)
+alRefineM  :: (Monad m) => (forall x dot f x -> m (Al kappa fam g x))
+           -> Al kappa fam f ty -> m (Al kappa fam g ty)
 \end{code}
 \end{myhs}
 
@@ -2411,21 +2448,54 @@ to access type-level information in order to compute
 zippers and understand deletions and insertions of a single
 layer in a homogeneous fashion -- the type that results from
 the insertion or deletion is the same type that is expected
-by the insertion or deletion. \digress{At least in my experience,
-defining a synchronization algorithm without alignments
-proved a significantly more difficult, if not impossible.}
+by the insertion or deletion.
 
-\victor{
-Still mention:
-\begin{itemize}
-  \item Conjecture: arbitrarily deep zippers will give edit-script like complexity!
-that's where the log n is hidden.
-\end{itemize}
+\subsection{Summary}
+
+  In \Cref{sec:pepatches:patches} we have seen how |Chg| represents
+an unrestricted tree-matching, which can later be translated into
+isolated, well-scoped, fragments connected through an outer spine
+and making up a |Patch|. Finally, we have seen how to
+extract valuable information from well-scoped about which constructors
+have been deleted, inserted or still belong to an inner spine, giving
+rise to alignments. This representation is a mix of local and
+global alignments. The outer spine is important to isolate a
+large change into smaller chunks, independent of one anoter.
+
+  The |diff| function produces a |Patch| instead of a |PatchAl|
+to keep it consistent with our previously published work~\cite{Miraldo2019},
+but also because its easier to manage calls to |align| where they are
+directly necessary, since |align| produces fresh variables and
+this can require special attention to keep names from being shadowed.
+
+  In fact, the |diff| function could be any path in the diagram
+portrayed in \Cref{fig:pepatches:possible-diffs}. There is no \emph{right}
+choice as this depends on the specific application in question. For our
+particular case of pursuing a synchronizaton function, we require all
+the information up to |PatchAl|.
+
+\begin{figure}
+\centering
+%{
+%format Delta = "\HTNI{\Delta}"
+\begin{displaymath}
+\xymatrix@@C+1pc{
+  |Delta (SFix kappa fam) at| \ar[r]^(.47){|Delta decorate|} \ar[ddr]_{|diff|}
+     & |Delta (PrepFix kappa fam) at| \ar[d]^{|extract extMode|} & \\
+     & |Chg kappa fam at| \ar[d]^{|close|} & \\
+   & |Patch kappa fam at| \ar[r]_(.45){|align|} & |PatchAl al kappa fam at|
 }
-
+\end{displaymath}
+\caption{Conceptual pipeline of the design space for the |diff|
+function. |Delta f x| denotes |(f x , f x)|}
+%}
+\label{fig:pepatches:possible-diffs}
+\end{figure}
 
 \section{Merging Aligned Patches}
 \label{sec:pepatches:merging}
+
+\victor{\Huge I'm here}
 
   In the previous sections we have seen how |Chg|
 can be used as the \emph{representation} of a transformation
