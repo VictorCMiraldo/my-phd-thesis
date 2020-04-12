@@ -59,6 +59,13 @@
 \newcommand{\HVNI}[1]{\ifdefined\HSVarNI\HSVarNI{#1}\else#1\fi}
 \newcommand{\HTNI}[1]{\ifdefined\HSConNI\HSConNI{#1}\else#1\fi}
 
+% Finally, HSCustom can use any other color for whatever purpose we choose.
+\newcommand{\HSCustom}[2]{\mathcolor{#1}{\ensuremath{#2}}}
+% HSCustomNC disables nested calls to mathcolor
+% TODO: make it work! xD
+\newcommand{\HSCustomNC}[2]{%
+\mathcolor{#1}{\ensuremath{#2}}}
+
 %subst keyword a = "\HSKeyword{" a "}"
 %subst conid a   = "\HSCon{" a "}"
 %subst varid a   = "\HSVar{" a "}"

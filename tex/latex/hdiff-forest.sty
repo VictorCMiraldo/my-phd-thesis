@@ -41,14 +41,14 @@
 \definecolor{insctx-border}{RGB}{81,205,165}
 
 
-\newcommand{\digemFormatMetavar}[1]{\ensuremath{\#_{#1}}}
-\newcommand{\digemFormatMetavarKappaFam}[2]{\ensuremath{\#^{#1}_{#2}}}
+\newcommand{\hdiffFormatMetavar}[1]{\ensuremath{\#_{#1}}}
+\newcommand{\hdiffFormatMetavarKappaFam}[2]{\ensuremath{\#^{#1}_{#2}}}
 
-%% This was based on: https://tex.stackexchange.com/questions/342334/drawing-super-nodes-in-a-tree 
+%% This was based on: https://tex.stackexchange.com/questions/342334/drawing-super-nodes-in-a-tree
 \forestset{%
   debug=nodewalks,
   default preamble={%
-      for tree={text=hdiff-constr, 
+      for tree={text=hdiff-constr,
                 edge=hdiff-black},
     },
 %%%%%%%%%%%%%%%%
@@ -57,7 +57,7 @@
     %% delay is crucial here; otherwise the default content
     %% is used. See manual page 6!
     delay={content/.wrap pgfmath arg={%
-       \digemFormatMetavar{##1}
+       \hdiffFormatMetavar{##1}
      }{content()}}
    },
 %%%%%%%%%%%%%%%%
@@ -83,16 +83,16 @@
         [\phantom{} , append, fit=rectangle, no edge, before drawing tree={%
             tikz+={%
               \begin{scope}[on background layer]
-                \node (n) [ %fill=hdiff-change-bg, 
-                           % inner sep=\savedinnerysep, 
+                \node (n) [ %fill=hdiff-change-bg,
+                           % inner sep=\savedinnerysep,
                            dashed, draw=#1,
-                           rounded corners, fit to=tree] {}; 
+                           rounded corners, fit to=tree] {};
               \end{scope}
             },
             if level=0{}{ %else
                tikz+={%
                  \begin{scope}[on background layer]
-                   \path [draw=hdiff-black, \forestoption{edge}] 
+                   \path [draw=hdiff-black, \forestoption{edge}]
                               (!u.parent anchor) -- (n.north -| !1.child anchor)
                               \forestoption{edge label};
                  \end{scope}
@@ -101,7 +101,7 @@
           },
         ]} %end replace-by
     },
-    tikz+={ \node (m1) at ($ (!1)!0.5!(!2) $) {}; 
+    tikz+={ \node (m1) at ($ (!1)!0.5!(!2) $) {};
             \node (m2) at ($ (m1) $)          {};
             \node [text=hdiff-black] at ($ (m1)!0.5!(m2) $) {#2};
           },
@@ -125,7 +125,7 @@
           if content={SQ}{%
             text=#3,
             content={$\square$},
-            alias=#1 
+            alias=#1
           }{}},
       },
       tikz+={\draw[#3,->] (#1) to[out=0,in=180] (!2.first);
@@ -139,8 +139,8 @@
 %%%%%%%%%%%%%%%
   alignment/.style 2 args={%
     tikz+={%
-      \node (ni) at ($ (!c.parent first) + (-#2,0) $) {}; 
-      \node (nf) at ($ (!c.parent last)  + (#2,0)  $) {}; 
+      \node (ni) at ($ (!c.parent first) + (-#2,0) $) {};
+      \node (nf) at ($ (!c.parent last)  + (#2,0)  $) {};
       \draw[hdiff-gray,densely dotted] (ni) to[out=20,in=160]
          node[pos=#1,solid,text=hdiff-gray,draw=hdiff-gray,fill=white] {\tiny\textit{Al}}
            (nf);
