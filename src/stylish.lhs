@@ -79,7 +79,6 @@
 %subst special a = "\HSSpecial{" a "}"
 %subst comment a = "\HSComment{ -\! -" a "}"
 
-
 %format family     = "\HSKeyword{family}"
 %format pattern    = "\HSKeyword{pattern}"
 %format forall     = "\HSSym{\forall}"

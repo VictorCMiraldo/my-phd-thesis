@@ -97,6 +97,14 @@ to the \genericssimpl{} library.
 
 \victor{Maybe we write another paper with Pierre about it?}
 
+%% The closest approach to \texttt{hdiff}
+%% in the literature is perhaps \texttt{XyDiff}~\cite{Marian2002}, which
+%% uses hashes to compute tree matchings but still relies on edit-scripts
+%% with the additon of a `move' operation. Such `move' operation is only
+%% possible because \texttt{XyDiff} operataes over XML, which is untyped.
+%% Therefore we can always remove a child of a node and move it somewhere
+%% else.
+
 \section{Changes}
 
 \subsection{A Concrete Example}
@@ -403,7 +411,7 @@ occurring subtrees, effectively simulating the \unixdiff{} with the
 \texttt{patience} option, which only copies uniquely occurring
 lines. In fact, to make this easy to experiment with, we will parameterize
 our final |extract| with which \emph{context extraction
-methods} should be used to computing changes.
+mode} should be used to computing changes.
 
 \begin{myhs}
 \begin{code}
@@ -3378,51 +3386,49 @@ isEqChg di ca cb =  let  ca' = refineChg di ca
 
   With \texttt{hdiff} we have seen that a complete detachment from
 edit-scripts enables us to define a computationally efficient
-differencing algorithm.  Moreover, we have seen how our patches can
-still be merged and posses a sensible algebraic structure. Although we
-will discuss empirical results shortly, in \Cref{chap:experiments}, we
-advance that \texttt{hdiff} has shown a strong potential for practical
-use.  The current state of \texttt{hdiff}, however, is still that of a
-\emph{proof-of-concept} as opposed to a practical implementation of a
-tool. In this section we will discuss a number aspects that were left
-as future work.
-
-  It is worth mentioning that the closest approach to \texttt{hdiff}
-in the literature is perhaps \texttt{XyDiff}~\cite{Marian2002}, which
-uses hashes to compute tree matchings but still relies on edit-scripts
-with the additon of a `move' operation. Such `move' operation is only
-possible because \texttt{XyDiff} operataes over XML, which is untyped.
-Therefore we can always remove a child of a node and move it somewhere
-else.
-
-\victor{I'm here}
+differencing algorithm and how the notion of \emph{change} coupled
+with a simple notion of composition gives a sensible algebraic
+structure.  The patch datatype in \texttt{hdiff} is more expressive
+than edit-script based approaches, it enables us to write
+transformations involving arbitrary permutations and duplications. As
+a consequence, we have a more involved merge algorithm. For one, we
+cannot easily generalize our three-way merge to $n$-way merge. More
+importantly, though, there are subleties in the algorithm that arose
+purely from practical necessities. It can certainly benefit from
+further work. Nevertheless, \texttt{hdiff} has shown a strong
+potential for practical use, as we will see shortly in
+\Cref{chap:experiments}.  The current state of \texttt{hdiff},
+however, is still that of a \emph{proof-of-concept} as opposed to a
+practical implementation of a tool. In this section we will discuss a
+number aspects that were left as future work.
 
 \subsubsection{Refining Matching and Sharing Control}
-  In its current state, our matching engine uses hashes indiscriminately.
-All information under a subtree is used to compute its hash. This
-might not be desirable though, imagine a parser that annotates
-its resulting AST with source-location tokens. This would mean that
-if a statement was permuted, we would not be able to recognize it as such,
-since both occurrences would have different source-location tokens and,
-consequently, different hashes.
+  The matching engine underlying \texttt{hdiff} uses hashes
+indiscriminately, all information under a subtree is used to compute
+its hash, which can be undesirable. Imagine a parser that annotates
+its resulting AST with source-location tokens. This means that we
+would not be able to recognize permutations of statements, for
+example, since both occurrences would have different source-location
+tokens and, consequently, different hashes.
 
   This issue goes hand in hand with deciding which parts of the tree can
 be shared and up until which point. For example, we probably never
 want to share local statements outside their scope.  Recall we avoided
 this issue by restricting whether a subtree could be shared
-or not based on its \emph{height}. This was a pragmatic design choice
+or not based on its height. This was a pragmatic design choice
 that enabled us to make progress but it is a work-around at its best.
 
-  Salting the hash function of |preprocess| is also not an option.
+  Salting the hash function of |preprocess| is not an option for
+working around the issue of sharing control.
 If the information driving the salt function changes, none of the
 subtrees under there can be shared again. To illustrate this,
 suppose we push scope names into a stack with a
 function |intrScope :: SFix kappa fam at -> Maybe String|, which would be
-supplied by the user and returns a |Just| whenever the datatype in question
-introduces a scope. The definition of |intrScope| would naturally depend
-on the universe in question. The |const Nothing| function works as a default
+supplied by the user. It returns a |Just| whenever the datatype in question
+introduces a scope. The |const Nothing| function works as a default
 value, meaning that the mutually recursive family in question has no
-scope-dependent naming. A more interesting |intrScope| is given below.
+scope-dependent naming. A more interesting |intrScope|, for
+some imaginary mutually recursive family, is given below.
 
 \begin{myhs}
 \begin{code}
@@ -3432,12 +3438,13 @@ intrScope _                      = Nothing
 \end{code}
 \end{myhs}
 
-  With |intrScope| as above, we could instruct the |preprocess| to push module names
-and function names every time it traverses through one such element
-of the family. For example, preprocessing the pseudo-code below would
-mean that the hash for \verb!a! inside \verb!fib! would be
-computed with |["m" , "fib"]| as a salt; but \verb!a! inside \verb!fat!
-would be computed with |["m" , "fat"]| as a salt, yielding a different hash.
+  With |intrScope| as above, we could instruct the |preprocess| to
+push module names and function names every time it traverses through
+one such element of the family. For example, preprocessing the
+pseudo-code below would mean that the hash for \verb!a! inside
+\verb!fib! would be computed with |["m" , "fib"]| as a salt; but
+\verb!a! inside \verb!fat!  would be computed with |["m" , "fat"]| as
+a salt, yielding a different hash.
 
 \begin{verbatim}
 module m
@@ -3445,16 +3452,18 @@ module m
   fat n = let a = 0; ...
 \end{verbatim}
 
-  This will work out well for many cases, but as soon as a change altered any information
-that was being used as a salt, nothing could be shared anymore. For example,
-if we rename \verb!module m! to \verb!module x!, the source and destination
-would contain no common hashes, since we would have used |["m"]| to salt the hashes
-for the source tree, but |["x"]| for the destination, yielding different hashes.
+  This will work out well for many cases, but as soon as a change
+altered any information that was being used as a salt, nothing could
+be shared anymore. For example, if we rename \verb!module m! to
+\verb!module x!, the source and destination would contain no common
+hashes, since we would have used |["m"]| to salt the hashes for the
+source tree, but |["x"]| for the destination, yielding different
+hashes.
 
   This problem is twofold, however. Besides identifying the algorithmic
 means to ensure \texttt{hdiff} could be scope-aware and respect said scopes,
 we must also engineer an interface to enable the user to easily define
-said scopes. We envisioned a design with a custom version of the \genericssimpl{}
+said scopes. I envisioned a design with a custom version of the \genericssimpl{}
 library, with an added alias for the identity functor that could receive special treatment,
 for example:
 
@@ -3462,9 +3471,9 @@ for example:
 \begin{code}
 newtype Scoped f = Scoped { unScoped :: f }
 
-data Decl = ImportDecl dots
-          | FunDecl String [ParmDecl] (Scoped Body)
-          dots
+data Decl  = ImportDecl dots
+           | FunDecl String [ParmDecl] (Scoped Body)
+           dots
 \end{code}
 \end{myhs}
 
@@ -3479,14 +3488,17 @@ Controlling on the height of the trees and minimizing this issue was
 the best option to move forward in an early stage.
 
 \subsubsection{Extraction Methods, \emph{Best} Patch and Edit-Scripts}
-We have presented three extraction methods, which we called |NoNested|, |ProperShare| and |Patience|.
-Computing the diff between two trees using different extraction methods can produce
-different patches. Certainly there can be more extraction methods. One such
-example that we never had the time to implement was a refinement of |ProperShare|,
-aimed at breaking the sharing introduced by it. The idea was to list the the metavariables
-that appear in the deletion and insertion context and compute the LCS between
-these lists. The location of copies enable us to break sharing and introduce new metavariables.
-For example, take the change below.
+
+We have presented three extraction methods, which we called
+|NoNested|, |ProperShare| and |Patience|.  Computing the diff between
+two trees using different extraction methods can produce different
+patches. Certainly there can be more extraction methods. One such
+example that I never had the time to implement was a refinement of
+|ProperShare|, aimed at breaking the sharing introduced by it. The
+idea was to list the the metavariables that appear in the deletion and
+insertion context and compute the LCS between these lists. The
+location of copies enable us to break sharing and introduce new
+metavariables.  For example, take the change below.
 
 \begin{center}
 \begin{myforest}
@@ -3499,12 +3511,14 @@ For example, take the change below.
 \end{myforest}
 \end{center}
 
-  The list of metavariables in the deletion context is |[metavar x , metavar x , metavar z , metavar x]|,
-but in the insertion context we have |[metavar x , metavar z , metavar x]|. Computing the
-LCS between these lists yields |[Del x , Cpy , Cpy , Cpy]|. The first |Del| suggests a contraction
-is really necessary, but the last copy shows that we could \emph{break} the sharing by renaming
-|(metavar x)| to |(metavar k)|, for example. This would essentially transform the change
-above into:
+  The list of metavariables in the deletion context is |[metavar x ,
+metavar x , metavar z , metavar x]|, but in the insertion context we
+have |[metavar x , metavar z , metavar x]|. Computing the LCS between
+these lists yields |[Del x , Cpy , Cpy , Cpy]|. The first |Del|
+suggests a contraction is really necessary, but the last copy shows
+that we could \emph{break} the sharing by renaming |(metavar x)| to
+|(metavar k)|, for example. This would essentially transform the
+change above into:
 
 \begin{center}
 \begin{myforest}
@@ -3521,31 +3535,29 @@ above into:
 to introduce more variables, forget some sharing constraints, and ultimately
 enlarge the domain of our patches.
 
-  Forgetting about sharing is just one example of a different context extraction mechanism and,
-without a formal notion about when a patch is \emph{better} than another,
-its impossible to make a decision about which context extraction should be
-used. Our experimental results suggest that |Patience| yields patches that
-merge successfully more often, but this is far from providing a metric
-on patches, like the usual notion of cost does for edit-scripts.
-
-\victor{more text?}
+  Forgetting about sharing is just one example of a different context
+extraction mechanism and, without a formal notion about when a patch
+is \emph{better} than another, its impossible to make a decision about
+which context extraction should be used. Our experimental results
+suggest that |Patience| yields patches that merge successfully more
+often, but this is far from providing a metric on patches, like the
+usual notion of cost does for edit-scripts.
 
 \paragraph{Relation to Edit-Scripts.} Another interesting aspect that
-we would have liked to look at is the relation between our |Patch| datatype
+I would have liked to look at is the relation between our |Patch| datatype
 and traditional edit-scripts. The idea of breaking sharing above can be used
 to translate our patches to an edit-script. Some early experiments did show
 that we could use this method to compute approximations of the least-cost
-edit-script in linear time, but more research is needed to validate this.
-
-\victor{We know, for a fact, that computing the least cost edit-script
-take $\mathcal{O}(n \log{n})$. Our algo computes a patch
-in $\mathcal{O}(n)$. Whats the relaton? where's the $\log{n}$?}
+edit-script in linear time. Given that the minimum cost edit-script takes
+nearly quadratic time~\cite{backurs2015}, it might be worth looking into
+how good an approximation we might be able to compute in linear time.
+\victor{fact-check the above reference more carefully}
 
 \subsubsection{Formalizations and Generalizations}
 Formalizing and proving properties about our |diff| and |merge| functions
-was also on my list of things to do. As it turns out, the extensional nature
+was also one of my preiorities. As it turns out, the extensional nature
 of |Patch| makes for a difficult Agda formalization, which is the reason
-we this was left as further work.
+this was left as further work.
 
   The value of a formalization goes beyond enabling us to prove
 important properties. It also provides a laboratory for generalizing
