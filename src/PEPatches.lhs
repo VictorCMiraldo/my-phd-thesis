@@ -1752,7 +1752,7 @@ patch, which forbids situations as in
 identifying deletions and insertions that could cause copies to be
 misaligned, essentially producing a globally-scoped \emph{alignment},
 we will discuss this in more detail shortly
-(\Cref{sec:pepatches:alignment}).
+(\Cref{sec:pepatches:alignments}).
 
 \subsection{Computing Closures}
 \label{sec:pepatches:closures}
@@ -2134,7 +2134,7 @@ alignChg  :: Chg kappa fam at -> Al kappa fam (Chg kappa fam) at
 predecessor |Almu| from \texttt{stdiff}
 (\Cref{sec:stdiff:diff:fixpoint}), it records insertions, deletions
 and spines over a fixpoint. Insertions and deletions will be
-represented with |Zipper|s~\cite{Huet1991}. A zipper over a datatype
+represented with |Zipper|s~\cite{Huet1997}. A zipper over a datatype
 |t| is the type of \emph{one-hole-contexts} over |t|, where the hole
 indicates a selected position. We will use the zippers provided
 directly by the \genericssimpl{} library

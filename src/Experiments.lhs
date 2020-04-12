@@ -22,7 +22,7 @@ obtained from large public repositories storing code written in Java,
 JavaScript, Python, Lua and Clojure. The choice of programming languages
 was motivated by the availability of parsers, with the exception
 of Clojure, where we borrowed a parser from a MSc
-thesis~\cite{Garufi2018}. More detailed information about data
+thesis~\cite{Garuffi2018}. More detailed information about data
 collection is given in \Cref{sec:eval:collection};
 
    The evaluation of \texttt{stdiff} has fewer
@@ -44,7 +44,7 @@ the state immediatly previous to $c$ then attempting to call
 \texttt{git merge} at that state.
 
   Our script improves upon the script written
-by a master student~\cite{Garufi2018} by making sure to collect
+by a master student~\cite{Garuffi2018} by making sure to collect
 the file that a human committed as the resolution of the conflict,
 denoted \texttt{M.lang}. To collect conflicts from a repository, then,
 all we have to do is run the following commands at its root.
@@ -334,17 +334,17 @@ Language & Mode & Height & \emph{success} & \% & \emph{mdif} & \% & \emph{conf} 
 have run the experiment with each combination of extraction method
 (|Patience, NoNested, ProperShare|), local or global metavariable
 scoping and minimum sharing height of $1, 3$ and $9$.
-\Cref{fig:eval:merge-hdiff} shows the combination of parameters that
+\Cref{tbl:eval:merge-hdiff} shows the combination of parameters that
 yielded the most successes per extraction method, the column for
 scoping is omitted because local scope outperformed global scoping in
-all instances. \Cref{fig:eval:merge-hdiff-aggr} shows only the highest
+all instances. \Cref{tbl:eval:merge-hdiff-aggr} shows only the highest
 success rate per language.
 
   The varying true success rates seen in \Cref{tbl:eval:merge-hdiff}
 are to be expected.  Different parameters used with \texttt{hdiff}
 yield different patches, which might be easier or harder to merge. Out
 of the datapoints that resulted in \emph{mdif} we have manually
-analyzed \qManualMDiffAnal{} randomly selected cases. We witnessed that 
+analyzed \qManualMDiffAnal{} randomly selected cases. We witnessed that
 \qManualMDiffOk{} of those
 \texttt{hdiff} behaved as we expect, and the \emph{mdif} result was
 attributed to the human performing more operations than a structural
@@ -359,7 +359,7 @@ other two are discussed in \Cref{sec:eval:diff-extr-methods}}
 rate is unachievable -- some conflicts really come from a subtree being
 modified in two distinct ways and inevitably require human
 intervention -- the results we have seen are very encouraging.
-In \Cref{fig:eval:merge-hdiff-aggr} we see that \texttt{hdiff} produces
+In \Cref{tbl:eval:merge-hdiff-aggr} we see that \texttt{hdiff} produces
 a merge in at least 30\% of datapoints and the majority of the time,
 it matches the handmade merge.
 

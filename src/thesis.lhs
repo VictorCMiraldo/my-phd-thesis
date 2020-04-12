@@ -117,7 +117,7 @@ Thanks to family, supervisor, friends and hops!
 %include src/Discussion.lhs
 
 \appendix
-\chapter{Obtaining the Code and Dataset}
+\chapter{Source-Code and Dataset}
 \label{chap:where-is-the-code}
 \lhsinclude{ObtainingTheCode.lhs}
 %include src/ObtainingTheCode.lhs
