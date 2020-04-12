@@ -35,6 +35,7 @@
   \endgroup
 }
 
+
 \newcommand{\HSKeyword}[1]{\mathcolor{hsgold3}{\textbf{#1}}}
 \newcommand{\HSNumeral}[1]{\mathcolor{hsred3}{#1}}
 \newcommand{\HSChar}[1]{\mathcolor{hsred2}{#1}}
@@ -62,9 +63,10 @@
 % Finally, HSCustom can use any other color for whatever purpose we choose.
 \newcommand{\HSCustom}[2]{\mathcolor{#1}{\ensuremath{#2}}}
 % HSCustomNC disables nested calls to mathcolor
-% TODO: make it work! xD
+\newcommand{\mathnocolor}[2]{#2}
 \newcommand{\HSCustomNC}[2]{%
-\mathcolor{#1}{\ensuremath{#2}}}
+\mathcolor{#1}{\let\mathcolor\mathnocolor%
+\ensuremath{#2}}}
 
 %subst keyword a = "\HSKeyword{" a "}"
 %subst conid a   = "\HSCon{" a "}"
