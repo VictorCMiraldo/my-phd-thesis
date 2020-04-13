@@ -1364,7 +1364,7 @@ rather quite common for tree differencing algorithms. They often belong
 to complexity classes that make them impractical.
 
   Another downside comes to the surface when we want to look into merging
-these edit-scripts. \citet{Vassena2016} developed a merging
+these edit-scripts. Marco Vassena~\cite{Vassena2016} developed a merging
 algorithm but notes some difficult setbacks, mainly due to
 the heterogeneity of |ES|. Suppose, for example, we want to merge |p : ES xs ys|
 and |q : ES xs zs|. This means producing an edit-script |r : ES xs ks|.
@@ -1372,9 +1372,8 @@ But how can we determine |ks| here? It is not always the case that
 there is a solution. In fact, the merge algorithm~\cite{Vassena2016}
 for |ES| might fail due to conflicting changes \emph{or} the
 inability to find a suitable |ks|.
-
-  Regardless, the approach from \citet{Lempsink2004}, later enriched
-by \citet{Vassena2016} was of great inspiration for this thesis in
+Regardless, th work of Marco Vassena~\cite{Vassena2016}
+was of great inspiration for this thesis in
 showing that there definitely is a place for type-safe approaches
 to differencing.
 
@@ -1462,14 +1461,13 @@ gsize r (x :**: y)   = gsize r x + gsize r y
 
   Naturally, we still need to convert values of |GHC.Generics.Rep f x|
 into their closed representation, |SRep phi (GHC.Generics.Rep f)| and
-make some choice for |phi|. The
-\genericssimpl{} library originally uses |K1 R| as |phi|, essentially
+make some choice for |phi|. We could use |K1 R| as |phi|, essentially
 translating only the first layer into a generic representation,
 but as we shall see in \Cref{sec:gp:simplistic-deep}, we can also
 translate the entire value and uses a fixpoint combinator in |phi|.
 
   Even though |SRep| lacks a \emph{codes-based} approach, that is,
-it can be defined for arbitrary types like \texttt{GHC.Generics}, 
+it can be defined for arbitrary types like \texttt{GHC.Generics},
 it still admits some combinators that greatly assist a
 programmer when writing their generic code, unlike \texttt{GHC.Generics}.
 The most useful being |repMap|, |repZip| and |repLeaves|, that map, zip
