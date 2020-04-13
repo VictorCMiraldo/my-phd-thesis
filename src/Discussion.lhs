@@ -1,53 +1,52 @@
-  This thesis explored two preliminary approaches to structural
-differencing and the respective generic programming
-libraries necessary to implement them. The first method,
-\texttt{stdiff}, was presented in \Cref{chap:structural-patches} and
-revealed itself to be unpratical due to poor performance.  The second
-method, \texttt{hdiff}, was discussed in
-\Cref{chap:pattern-expression-patches} and experimented with in
-\Cref{chap:eval}.
+  Even though the main topic of this thesis is \emph{structural
+differencing}, a significant part of the contribution lies in field of
+generic programming.  The two libraries we wrote make it possible to
+use powerful generic programming techniques over larger class of
+datatypes than what was previously available.  In particular, defining
+the generic interpretation as a cofree comonad and a free monad
+combined in a single datatype is very powerful. Being able to annotate
+and augment datatypes, for example, was paramount for scaling our
+algorithms.
 
-\victor{Say something about important generic programming patterns;
-annotations are super important for instance}
+  On the subject of structural differencing we have explored two preliminary
+approaches. A first method, \texttt{stdiff}, was presented in
+\Cref{chap:structural-patches} and revealed itself to be unpractical
+due to poor performance. The second method, \texttt{hdiff},
+introduced in \Cref{chap:pattern-expression-patches}, has shown
+much better potential. Empirical results were discussed in \Cref{chap:eval}.
 
 \section{The Future of Structural Differencing}
 
-  Applying structural differncing tools to version control of source
-code comes with many challanges. This dissertation addresses just a
-few of them, namelly, those around representing and computing patches
-efficiently. There are a number of other difficulties that would need
-to be addressed if we ever want an industrial structural differncing
-tool. In the remainder of this section we take a look at some of the
-most pressing challenges and discuss a little about the future of
-structural differencing.
-
-  There are three main difficulties in applying structural differencing
-with the objective of writing better merge algorithms:
+  The larger picture of structural differencing is more subtle, though.
+It is not because our preliminary prototype shown good results
+that we are ready to scale it to be the next \texttt{git merge}.
+There are three main difficulties in applying structural differencing
+to source-code with the objective of writing better merge algorithms:
 \begin{enumerate}
 \item How to properly handle formatting and comments of source code:
 should the AST keep this information? If so, the tree matching must
 be adapted to cope with this. Two equal trees must be matched regardless of whether
 or not they appeared with a different formatting in their respective source files.
-\item How to ensure that subtrees are only being shared wihin their
+\item How to ensure that subtrees are only being shared within their
 respective scope and, equally importantly, how to specify which datatypes
 of the AST are affected by scopes.
 \item When merging fails, returning a patch with conflicts, a human
 must interact with the tool and solve the conflicts. What kind of interface
-would be suitable for that? Further ahead, comes que question of
+would be suitable for that? Further ahead, comes the question of
 automatic conflict solving domain-specific languages. Could we configure
 the merge algorithm to always chose higher version numbers, for example,
 whenever it finds a conflict in, say, a cabal file?
 \end{enumerate}
 
-  Fixing the obstacles above in a generic way would be a significant
+  Fixing the obstacles above in a generic way would require a significant
 effort.  So much so that it makes me question the applicability of
 structural differencing for the exclusive purpose of merging
 source-code.  From a broader perspective, however, there are many
-interesting applications that could benefit from structural
+other interesting applications that could benefit from structural
 differencing techniques.  In particular, we can probably use
 structural differencing to aid any task where a human does not
 directly edits the files being analyzed or when the result of the
-analisys does not need to be interacted with.  For example, it should
+analysis does not need to be interacted with.  For example, it should
 be possible to deploy \texttt{hdiff} to provide a human readable
 summary of a patch, something that looks at the working directory,
 computes the structural diffs between the various files, just like
@@ -61,29 +60,38 @@ import statements added;
 \end{alltt}
 
   In combination with the powerful web interfaces of services like GitHub or
-GitLab, we could also use such tools to study the evolution of code or to
-inform the assignee of a pull request wether or not it detected the
+GitLab, we could also use tools like \texttt{hdiff} to study the evolution of
+code or to inform the assignee of a pull request whether or not it detected the
 changes to be \emph{structurally disjoint}. If nothing else, we could
-at least direct the attention of the developers to the locations where
-actual conflicts are.
+at least direct the attention of the developers to the locations in the source-code
+where there are actual conflicts and the developer has to make a choice.
+That is where mistakes are more likely to be made. One way of circumventing
+the formatting and comment issues above is to write a tool
+that checks whether the developer included all changes in a sensible way
+and warns them otherwise, but it is always a human performing the actual merge.
 
-  Finally, differencing file formats that are based on \texttt{JSON} or
-\texttt{XML}, such as word and spreadsheet processors, might be much
-easier than source code. The formatting of a \texttt{.odf} file is automatically
-generated and independent of the formatting of document inside the file.
-Some care must be taken with the unordered trees, even though I conjecture
-\texttt{hdiff} would behave mostly alright.
+  Finally, differencing file formats that are based on \texttt{JSON}
+or \texttt{XML}, such as word and spreadsheet processors, might be
+much easier than source code. Take the formatting of a \texttt{.odf}
+file for example.  It is automatically generated and independent of
+the formatting of document inside the file and it has no scoping or
+sharing inside, hence, it would be simpler to deploy a structural
+merging tool over \texttt{.odf} files.  Some care must be taken with
+the unordered trees, even though I conjecture \texttt{hdiff} would
+behave mostly alright.
 
 \section{Concluding Remarks}
 
-  This dissertation is a scratch on the surface of the problems
-surrounding structural differencing for source-code
-versioning. Although the design space is large, we have studied some
-of design options. We have found approaches that are easy to merge but
-hard to compute and vice-versa.  In the process of developping our
+  This dissertation explored a novel approach to structural
+differencing and a successful prototype for computing
+and merging patches for said approach. The main novelty
+comes from relying on unrestricted tree-matchings, which are possible
+because we never translate to an edit-script-like structure.
+We have identified the challenges of employing such techniques
+to merging of source-code but still achieved encouraging
+empirical results. In the process of developing our
 prototypes we have also improved the Haskell ecosystem for generic
-programming. Finally, we have seen that \texttt{hidff} has shown
-promissing results, even if its merging algorithm is more intricate.
+programming.
 
 %%% Local Variables:
 %%% mode: latex
