@@ -349,11 +349,9 @@ analyzed \qManualMDiffAnal{} randomly selected cases. We witnessed that
 \texttt{hdiff} behaved as we expect, and the \emph{mdif} result was
 attributed to the human performing more operations than a structural
 merge would have performed. \Cref{fig:eval:mdif-suc-01}, illustrates
-one example, distilled from the manually analyzed cases.  \victor{I've
-seen 13 so far, and 11 of them \texttt{hdiff} behaved expectedly. The
-other two are discussed in \Cref{sec:eval:diff-extr-methods}}
-\victor{Anyway... So what? What do we do with this info?}
-\victor{Should I list the cases I looked into?}
+one example, distilled from the manually analyzed cases. We will
+shortly discuss two cases, illustrate in \Cref{fig:eval:nn-pt-01:fig:eval:nn-pt-02},
+where \texttt{hdiff} behaved unexpectedly.
 
   It is worth noting that even though 100\% success
 rate is unachievable -- some conflicts really come from a subtree being
@@ -649,12 +647,12 @@ transformations that happen further down the file to be undetected
 using \texttt{hdiff}. Although \texttt{stdiff} would not suffer from
 this problem, it is already impractical by itself.
 
-  Our decision of disconsidering formatting, comments and source-location
-is twofold. First, the majority of the available parsers does not include
-said information. Secondly, if we had considered all that information in
-our merging process, the final numbers would not inform us about how
-many code transformations are \emph{disjoint} and could be automatically
-merged.
+  Our decision of disconsidering formatting, comments and
+source-location tokens is twofold. First, the majority of the
+available parsers does not include said information. Secondly, if we
+had considered all that information in our merging process, the final
+numbers would not inform us about how many code transformations are
+\emph{disjoint} and could be automatically merged.
 
   Another case worth noting is that although we have not found many cases
 where \texttt{hdiff} performed a wrong merge, \Cref{fig:eval:nn-pt-01,fig:eval:nn-pt-02}

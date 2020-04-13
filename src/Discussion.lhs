@@ -8,12 +8,12 @@ combined in a single datatype is very powerful. Being able to annotate
 and augment datatypes, for example, was paramount for scaling our
 algorithms.
 
-  On the subject of structural differencing we have explored two preliminary
+  On \emph{structural differencing}, we have explored two preliminary
 approaches. A first method, \texttt{stdiff}, was presented in
 \Cref{chap:structural-patches} and revealed itself to be unpractical
 due to poor performance. The second method, \texttt{hdiff},
 introduced in \Cref{chap:pattern-expression-patches}, has shown
-much better potential. Empirical results were discussed in \Cref{chap:eval}.
+much better potential. Empirical results were discussed in \Cref{chap:experiments}.
 
 \section{The Future of Structural Differencing}
 
