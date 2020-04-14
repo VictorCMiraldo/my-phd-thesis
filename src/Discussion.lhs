@@ -1,7 +1,7 @@
   Even though the main topic of this thesis is \emph{structural
 differencing}, a significant part of the contribution lies in field of
 generic programming.  The two libraries we wrote make it possible to
-use powerful generic programming techniques over larger class of
+use powerful generic programming techniques over larger classes of
 datatypes than what was previously available.  In particular, defining
 the generic interpretation as a cofree comonad and a free monad
 combined in a single datatype is very powerful. Being able to annotate
@@ -13,12 +13,12 @@ approaches. A first method, \texttt{stdiff}, was presented in
 \Cref{chap:structural-patches} and revealed itself to be unpractical
 due to poor performance. The second method, \texttt{hdiff},
 introduced in \Cref{chap:pattern-expression-patches}, has shown
-much better potential. Empirical results were discussed in \Cref{chap:experiments}.
+much greater potential. Empirical results were discussed in \Cref{chap:experiments}.
 
 \section{The Future of Structural Differencing}
 
   The larger picture of structural differencing is more subtle, though.
-It is not because our preliminary prototype shown good results
+It is not because our preliminary prototype has shown good results
 that we are ready to scale it to be the next \texttt{git merge}.
 There are three main difficulties in applying structural differencing
 to source-code with the objective of writing better merge algorithms:
@@ -35,7 +35,7 @@ must interact with the tool and solve the conflicts. What kind of interface
 would be suitable for that? Further ahead, comes the question of
 automatic conflict solving domain-specific languages. Could we configure
 the merge algorithm to always chose higher version numbers, for example,
-whenever it finds a conflict in, say, a cabal file?
+whenever it finds a conflict in, say, a config file?
 \end{enumerate}
 
   Fixing the obstacles above in a generic way would require a significant
@@ -45,8 +45,8 @@ source-code.  From a broader perspective, however, there are many
 other interesting applications that could benefit from structural
 differencing techniques.  In particular, we can probably use
 structural differencing to aid any task where a human does not
-directly edits the files being analyzed or when the result of the
-analysis does not need to be interacted with.  For example, it should
+directly edit the files being analyzed or when the result of the
+analysis does require no further interaction.  For example, it should
 be possible to deploy \texttt{hdiff} to provide a human readable
 summary of a patch, something that looks at the working directory,
 computes the structural diffs between the various files, just like
@@ -71,7 +71,7 @@ that checks whether the developer included all changes in a sensible way
 and warns them otherwise, but it is always a human performing the actual merge.
 
   Finally, differencing file formats that are based on \texttt{JSON}
-or \texttt{XML}, such as word and spreadsheet processors, might be
+or \texttt{XML}, such as document processors and spreadsheet processors, might be
 much easier than source code. Take the formatting of a \texttt{.odf}
 file for example.  It is automatically generated and independent of
 the formatting of document inside the file and it has no scoping or

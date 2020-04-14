@@ -23,7 +23,7 @@ JavaScript, Python, Lua and Clojure. The choice of programming languages
 was motivated by the availability of parsers, with the exception
 of Clojure, where we borrowed a parser from a MSc
 thesis~\cite{Garuffi2018}. More detailed information about data
-collection is given in \Cref{sec:eval:collection};
+collection is given in \Cref{sec:eval:collection}.
 
    The evaluation of \texttt{stdiff} has fewer
 datapoints than \texttt{hdiff} for the sole reason that \texttt{stdiff}
@@ -53,9 +53,9 @@ all we have to do is run the following commands at its root.
   \item List each commit $c$ with at least two parents with
 \texttt{git rev-list --merges}.
 
-  \item For each commit $c$ as above, let its parents be $p, qs$;
-checkout the repository at $p$ and attempt to \texttt{git merge
---no-commit qs}.  The \texttt{--no-commit} switch is important since
+  \item For each commit $c$ as above, let its parents be $p_0$ and $ps$;
+checkout the repository at $p_0$ and attempt to \texttt{git merge
+--no-commit ps}.  The \texttt{--no-commit} switch is important since
 it gives us a chance to inspect the result of the merge.
 
   \item Next we parse the output of \texttt{git ls-files --unmerged},
@@ -65,24 +65,24 @@ and one identifier for each of the two diverging replicas.
 
   \item Then we use \texttt{git cat-file} to get the files corresponding
 to each of the \emph{object-ids} gathered on the previous step. This yields
-us three files, \texttt{O.lang}, \texttt{A.lang} and \texttt{B.lang}.
+three files, \texttt{O.lang}, \texttt{A.lang} and \texttt{B.lang}.
 Lastly, we use \texttt{git show} to save the file \texttt{M.lang} that
 was committed by a human resolving the conflict.
 \end{itemize}
 
   After running the steps above for a number of repositories, we end
 up with a list of folders containing a merge conflict that was solved
-by a human. Each of these folders contain a span $A \leftarrow O
+manually. Each of these folders contain a span $A \leftarrow O
 \rightarrow B$ and a file $M$ which is the human-produced result of
 synchronizing $A$ and $B$.  We refer the reader to the full code for
 more details (\Cref{chap:where-is-the-code}). Overall, we acquired
 \qTotalUsableConf{} usable conflicts -- that is, we were able to parse
-the four files parse with the parsers available to us -- and
+the four files with the parsers available to us -- and
 \qTotalParseErrorConf{} conflicts where at least one file yielded a
 parse error. \Cref{tbl:eval:summary-data} provides the distribution of
-datapoints per programming language and displays the amount of
+datapoints per programming language and displays the number of
 conflicts that yielded a parse error. These parse errors are an
-inevitable consequence of using off-the-shelf parsers.
+inevitable consequence of using off-the-shelf parsers on an existing dataset.
 
 \begin{table}
 \centering
@@ -96,7 +96,10 @@ Python     & 27 & 4387 & 848 \\  \midrule
 \multicolumn{2}{r}{Totals:} & \qTotalUsableConf & \qTotalParseErrorConf \\
 \bottomrule
 \end{tabular}
-\caption{Summary of collected data}
+\caption{Distribution of datapoints within our dataset~\cite{Miraldo2020_Dataset}.
+The repositories were chosen manually by searching each respective language in GitHub.
+Our criteria for seleting repositories to mine was based on number of forks
+and commits, in an attempt to maximize pull requests.}
 \label{tbl:eval:summary-data}
 \end{table}
 
@@ -127,7 +130,7 @@ approaches we computed four patches per datapoint, namely:
 
   Whilst computing patches we limited the memory
 usage to 8GB and runtime to 30s. If a call to |diff| used more than
-the enabled temporal and spacial resources it was automatically
+the available temporal and spacial resources it was automatically
 killed. We ran both \texttt{stdiff} and \texttt{hdiff} on the same
 machine, yet, we stress that the absolute values are of little
 interest.  The real take away from this experiment is the empirical
@@ -159,8 +162,8 @@ extraction is slightly slower than \texttt{nonest} or \texttt{patience}.
 Finally, only 14 calls timed-out and none used more than 8GB of memory.
 
   Measuring performance of pure Haskell code is subtle due to its lazy
-evaluation semantics. We have used the |time| auxiliary function,
-below.  We based ourselves on the \texttt{timeit} package but adapted
+evaluation semantics. We have used the |time| auxiliary function
+below.  We based ourselves on the \texttt{timeit} package, but adapted it
 to fully force the evaluation of the result of the action, with the
 |deepseq| method and force its execution with the bang pattern in
 |res|, ensuring the thunk is fully evaluated.
@@ -185,7 +188,7 @@ synchronization experiment, discussed in this section, aims at
 establishing a lower bound on the number of conflicts that could be
 solved in practice.
 
-  The synchronization experiment consists in attempting to
+  The synchronization experiment consists of attempting to
 merge the $A \leftarrow O \rightarrow B$ span for every datapoint.
 If \texttt{hdiff} produces a patch with no conflicts,
 we apply it to $O$ and compare the result against $M$,
@@ -280,13 +283,13 @@ classified as \texttt{mdif}.}
 \begin{table}
 \centering
 \begin{tabular}{@@{}lrl@@{\qquad}rl@@{\qquad}l@@{}} \toprule
-Language & \emph{success} & \% & \emph{mdif} & \% & \emph{suc+mdiff}\% \\
+Language & \emph{success} & (ratio) & \emph{mdif} & (ratio) & \emph{suc+mdiff} ratio & \emph{conf} & \emph{fail} \\
 \midrule
- Clojure    & 184    & 0.15 & 211 & 0.17 & 0.32 \\
- Java       & 978    & 0.34 & 479 & 0.16 & 0.5 \\
- JavaScript & 1\,045 & 0.3  & 273 & 0.08 & 0.38 \\
- Lua        & 185    & 0.25 & 101 & 0.14 & 0.39 \\
- Python     & 907    & 0.21 & 561 & 0.13 & 0.34 \\
+ Clojure    & 184    & (0.15) & 211 & (0.17) & 0.32 & ?? & 0 \\
+ Java       & 978    & (0.34) & 479 & (0.16) & 0.5  & ?? & 0 \\
+ JavaScript & 1\,045 & (0.3 ) & 273 & (0.08) & 0.38 & ?? & 0 \\
+ Lua        & 185    & (0.25) & 101 & (0.14) & 0.39 & ?? & 0 \\
+ Python     & 907    & (0.21) & 561 & (0.13) & 0.34 & ?? & 0 \\
 \midrule
 \emph{Total}& \qSolvedConf{} & 0.26 & 1625 & 0.13 & 0.39 \\
 \bottomrule
@@ -298,7 +301,7 @@ Language & \emph{success} & \% & \emph{mdif} & \% & \emph{suc+mdiff}\% \\
 \begin{table}
 \centering
 \begin{tabular}{@@{}llcrl@@{\qquad}rl@@{\qquad}l@@{}} \toprule
-Language & Mode & Height & \emph{success} & \% & \emph{mdif} & \% & \emph{conf} \\ \midrule
+Language & Mode & Height & \emph{success} & (ratio) & \emph{mdif} & (ratio) & \emph{conf} \\ \midrule
 \multirow{3}{*}{Clojure} % timeouts: 0; sums: 1214
   & |Patience|     & 1 & 184    & 0.15 & 211 & 0.17 & 819 \\
   & |NoNested|     & 3 & 149    & 0.12 & 190 & 0.16 & 875 \\
@@ -349,7 +352,7 @@ analyzed \qManualMDiffAnal{} randomly selected cases. We witnessed that
 \texttt{hdiff} behaved as we expect, and the \emph{mdif} result was
 attributed to the human performing more operations than a structural
 merge would have performed. \Cref{fig:eval:mdif-suc-01}, illustrates
-one example, distilled from the manually analyzed cases. We will
+one such example, distilled from the manually analyzed cases. We will
 shortly discuss two cases, illustrate in \Cref{fig:eval:nn-pt-01:fig:eval:nn-pt-02},
 where \texttt{hdiff} behaved unexpectedly.
 
@@ -358,7 +361,7 @@ rate is unachievable -- some conflicts really come from a subtree being
 modified in two distinct ways and inevitably require human
 intervention -- the results we have seen are very encouraging.
 In \Cref{tbl:eval:merge-hdiff-aggr} we see that \texttt{hdiff} produces
-a merge in at least 30\% of datapoints and the majority of the time,
+a merge in at least 39\% of datapoints and the majority of the time,
 it matches the handmade merge.
 
   The cases where \emph{the same} datapoint yields a true success and
@@ -597,7 +600,7 @@ the order of declarations matter, for example.
   The examples in \Cref{fig:eval:nn-pt-01,fig:eval:nn-pt-02} illustrate
 an inherent difficulty of using naive structured differencing over
 structures with complex semantics, such as source-code. On the one hand
-we have that sharing method modifiers triggers unwanted replication
+sharing method modifiers triggers undesired replication
 of a change. On the other, the lack of sharing of empty method bodies makes
 it difficult to place an insertion in its correct position.
 
@@ -620,10 +623,12 @@ the merge algorithm can yield better results.
    \rotatebox{50}{\small \texttt{inst-del}} &
    Others \\ \midrule
 Amount & 7904 & 5052 & 2144 & 1892 & 868 & 357 & 506 \\
-Percentile & 0.42 & 0.27 & 0.11 & 0.1 & 0.05 & 0.02 & 0.03 \\
+Ratio  & 0.42 & 0.27 & 0.11 & 0.1 & 0.05 & 0.02 & 0.03 \\
 \bottomrule
 \end{tabular}
-\caption{Distribution of conflicts observed by \texttt{hdiff}.}
+\caption{Distribution of conflicts observed by running \texttt{hdiff}
+over our dataset~\cite{Miraldo2020_Dataset}.  The first row displays
+the number of times that |throwConf| was called with which label.}
 \label{tbl:eval:hdiff-conflict-distr}
 \end{table}
 
@@ -661,8 +666,8 @@ rate with a grain of salt. There exists a probability that some of the
 \emph{mdif} cases are false positives, that is, \texttt{hdiff} produced a merge
 but it performed the wrong operation.
 
-  Finally, one can also argue we have only looked at fewer conflicts than
-what we could have by not considering conflicts that arise from rebasing.
+  Finally, one can also argue we have not considered conflicts that
+arise from rebasing, as these are not observed in the git history.
 This does not necessarily make a threat to validity, but indeed would have
 given us more data. That being said, we would only be able to recreate rebases
 done through \texttt{GitHub} web interface. The rebases done on the command line are
@@ -689,7 +694,7 @@ encouraging.  A proper calculation of the probability that a conflict
 encountered in \texttt{GitHub} could be solved automatically is
 involved and out of the scope of this thesis.  Nevertheless, we have
 observed that 39\% of the conflicts in our dataset could be solved by
-\texttt{hdiff} and 66\% of the solutions did match what a human performed.
+\texttt{hdiff} and 66\% of these solutions did match what a human performed.
 
   An interesting observation that comes from the
 synchronization experiment, \Cref{tbl:eval:merge-hdiff}, is that the
