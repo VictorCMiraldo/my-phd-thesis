@@ -1,4 +1,3 @@
-* TODO Upload Thesis to MyPhD
 * TODO Release final versions [1/3]
 ** TODO Code
 *** TODO Hackage
@@ -6,4 +5,7 @@
 *** TODO DOI in Zenodo
 ** DONE Dataset in Zenodo
 ** TODO Update and cite in thesis
+* TODO Get Final Quote for printing
+* TODO Upload Thesis to MyPhD
+* TODO Workout the reception
 
