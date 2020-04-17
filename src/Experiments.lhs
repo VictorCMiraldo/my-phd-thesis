@@ -83,16 +83,18 @@ parse error. \Cref{tbl:eval:summary-data} provides the distribution of
 datapoints per programming language and displays the number of
 conflicts that yielded a parse error. These parse errors are an
 inevitable consequence of using off-the-shelf parsers on an existing dataset.
+The parseable conflicts have been compiled into a publicly available
+dataset~\cite{Miraldo2020_Dataset}.
 
 \begin{table}
 \centering
 \begin{tabular}{@@{}llll@@{}} \toprule
 Language & Repositories & Parseable Conflicts & Non-parseable Conflicts \\ \midrule
-Clojure    & 31 & 1215 & 14  \\
-Java       & 19 & 2903 & 849 \\
-JavaScript & 28 & 3395 & 965 \\
-Lua        & 27 & 750 & 91 \\
-Python     & 27 & 4387 & 848 \\  \midrule
+Clojure    & 31 & 1213 & 16  \\
+Java       & 19 & 2901 & 851 \\
+JavaScript & 28 & 3392 & 965 \\
+Lua        & 27 & 748  & 91 \\
+Python     & 27 & 4298 & 848 \\  \midrule
 \multicolumn{2}{r}{Totals:} & \qTotalUsableConf & \qTotalParseErrorConf \\
 \bottomrule
 \end{tabular}
@@ -283,15 +285,15 @@ classified as \texttt{mdif}.}
 \begin{table}
 \centering
 \begin{tabular}{@@{}lrl@@{\qquad}rl@@{\qquad}l@@{}} \toprule
-Language & \emph{success} & (ratio) & \emph{mdif} & (ratio) & \emph{suc+mdiff} ratio & \emph{conf} & \emph{fail} \\
+Language & \emph{success} & (ratio) & \emph{mdif} & (ratio) & \emph{suc+mdiff} ratio & \emph{conf} & \emph{t/o} \\
 \midrule
- Clojure    & 184    & (0.15) & 211 & (0.17) & 0.32 & ?? & 0 \\
- Java       & 978    & (0.34) & 479 & (0.16) & 0.5  & ?? & 0 \\
- JavaScript & 1\,045 & (0.3 ) & 273 & (0.08) & 0.38 & ?? & 0 \\
- Lua        & 185    & (0.25) & 101 & (0.14) & 0.39 & ?? & 0 \\
- Python     & 907    & (0.21) & 561 & (0.13) & 0.34 & ?? & 0 \\
+ Clojure    & 184    & (0.15) & 211 & (0.17) & 0.32 & 818 & 0 \\
+ Java       & 978    & (0.34) & 479 & (0.16) & 0.5  & 1\,443 & 1 \\
+ JavaScript & 1\,046 & (0.3 ) & 274 & (0.08) & 0.38 & 2\,062 & 10 \\
+ Lua        & 185    & (0.25) & 101 & (0.14) & 0.39 & 462 & 0 \\
+ Python     & 907    & (0.21) & 561 & (0.13) & 0.34 & 2\,829 & 1 \\
 \midrule
-\emph{Total}& \qSolvedConf{} & 0.26 & 1625 & 0.13 & 0.39 \\
+\emph{Total}& \qSolvedConf{} & 0.26 & 1626 & 0.13 & 0.39 & 7\,614 & 12 \\
 \bottomrule
 \end{tabular}
 \caption{Best synchronization success rate per language.}
@@ -299,36 +301,39 @@ Language & \emph{success} & (ratio) & \emph{mdif} & (ratio) & \emph{suc+mdiff} r
 \end{table}
 
 \begin{table}
+\small
 \centering
-\begin{tabular}{@@{}llcrl@@{\qquad}rl@@{\qquad}l@@{}} \toprule
-Language & Mode & Height & \emph{success} & (ratio) & \emph{mdif} & (ratio) & \emph{conf} \\ \midrule
-\multirow{3}{*}{Clojure} % timeouts: 0; sums: 1214
-  & |Patience|     & 1 & 184    & 0.15 & 211 & 0.17 & 819 \\
-  & |NoNested|     & 3 & 149    & 0.12 & 190 & 0.16 & 875 \\
-  & |ProperShare|  & 9 & 92     & 0.08 & 84  & 0.07 & 1\,038 \\
+\begin{tabular}{@@{}llcrl@@{\qquad}rl@@{\qquad}ll@@{}} \toprule
+Language & Mode & Height & \emph{success} & (ratio) & \emph{mdif} & (ratio) & \emph{conf} & \emph{t/o} \\ \midrule
+\multirow{3}{*}{Clojure} % sums: 1213
+  & |Patience|     & 1 & 184    & 0.15 & 211 & 0.17 & 818    & 0 \\
+  & |NoNested|     & 3 & 149    & 0.12 & 190 & 0.16 & 874    & 0 \\
+  & |ProperShare|  & 9 & 92     & 0.08 & 84  & 0.07 & 1\,037 & 0 \\
 \midrule
-\multirow{3}{*}{Java} % timeouts: 1; sums: 2900
-  & |Patience|     & 1 & 978    & 0.34 & 479 & 0.16 & 1\,443 \\
-  & |NoNested|     & 3 & 924    & 0.32 & 447 & 0.15 & 1\,529 \\
-  & |ProperShare|  & 9 & 548    & 0.19 & 197 & 0.07 & 2\,155 \\
+\multirow{3}{*}{Java} % sums: 2901
+  & |Patience|     & 1 & 978    & 0.34 & 479 & 0.16 & 1\,443 & 1 \\
+  & |NoNested|     & 3 & 924    & 0.32 & 509 & 0.18 & 1\,467 & 1 \\
+  & |ProperShare|  & 9 & 548    & 0.19 & 197 & 0.07 & 2\,155 & 1 \\
 \midrule
-\multirow{3}{*}{JavaScript} % diferent timeouts; differnt sums
-  & |Patience|     & 1 & 1\,045 & 0.3  & 273 & 0.08 & 2\,060 \\
-  & |NoNested|     & 3 & 988    & 0.29 & 273 & 0.08 & 2\,124 \\
-  & |ProperShare|  & 9 & 748    & 0.22 & 116 & 0.03 & 2\,499 \\
+\multirow{3}{*}{JavaScript} % sums: 3392
+  & |Patience|     & 1 & 1\,046 & 0.3  & 274 & 0.08 & 2\,062 & 10 \\
+  & |NoNested|     & 3 & 991    & 0.29 & 273 & 0.08 & 2\,124 & 4  \\
+  & |ProperShare|  & 9 & 748    & 0.22 & 116 & 0.03 & 2\,508 & 20 \\
 \midrule
-\multirow{3}{*}{Lua} % timeouts: 0; sums: 748
-  & |Patience|     & 3 & 185    & 0.25 & 101 & 0.14 & 462 \\
-  & |NoNested|     & 3 & 171    & 0.23 & 110 & 0.15 & 467 \\
-  & |ProperShare|  & 9 & 86     & 0.11 & 29  & 0.04 & 633 \\
+\multirow{3}{*}{Lua} % sums: 748
+  & |Patience|     & 3 & 185    & 0.25 & 101 & 0.14 & 462 & 0 \\
+  & |NoNested|     & 3 & 171    & 0.23 & 110 & 0.15 & 467 & 0 \\
+  & |ProperShare|  & 9 & 86     & 0.11 & 29  & 0.04 & 633 & 0 \\
 \midrule
-\multirow{3}{*}{Python} %timeouts: 1; sums 4298
-  & |Patience|     & 1 & 907    & 0.21 & 561 & 0.13 & 2\,830 \\
-  & |NoNested|     & 3 & 830    & 0.19 & 602 & 0.14 & 2\,866 \\
-  & |ProperShare|  & 9 & 446    & 0.1  & 223 & 0.05 & 3\,629 \\
+\multirow{3}{*}{Python} % sums 4298
+  & |Patience|     & 1 & 907    & 0.21 & 561 & 0.13 & 2\,829 & 1 \\
+  & |NoNested|     & 3 & 830    & 0.19 & 602 & 0.14 & 2\,865 & 1 \\
+  & |ProperShare|  & 9 & 446    & 0.1  & 223 & 0.05 & 3\,627 & 2 \\
 \bottomrule
 \end{tabular}
-\caption{Conflicts solved by \texttt{hdiff} with different parameters.}
+\caption{Best results for each extraction mode. The \emph{height} column
+indicates the number passed to \texttt{--min-height}. All of the above
+were obtained with \emph{locally-scoped} patches.}
 \label{tbl:eval:merge-hdiff}
 \end{table}
 

@@ -40,9 +40,9 @@
 %% quantities
 
 %% How many conflicts have we seen, solved, etc...
-\newcommand{\qTotalUsableConf}{$12\,650$}
-\newcommand{\qTotalParseErrorConf}{$2\,767$}
-\newcommand{\qSolvedConf}{$3\,299$}
+\newcommand{\qTotalUsableConf}{$12\,552$}
+\newcommand{\qTotalParseErrorConf}{$2\,771$}
+\newcommand{\qSolvedConf}{$3\,300$}
 \newcommand{\qSolvedPerc}{$26\%$}
 
 %% How many merge-diff cases have I seen so far?
