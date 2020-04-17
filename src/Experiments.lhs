@@ -284,7 +284,7 @@ classified as \texttt{mdif}.}
 
 \begin{table}
 \centering
-\begin{tabular}{@@{}lrl@@{\qquad}rl@@{\qquad}l@@{}} \toprule
+\begin{tabular}{@@{}lrl@@{\qquad}rl@@{\qquad}lll@@{}} \toprule
 Language & \emph{success} & (ratio) & \emph{mdif} & (ratio) & \emph{suc+mdiff} ratio & \emph{conf} & \emph{t/o} \\
 \midrule
  Clojure    & 184    & (0.15) & 211 & (0.17) & 0.32 & 818 & 0 \\
@@ -296,7 +296,8 @@ Language & \emph{success} & (ratio) & \emph{mdif} & (ratio) & \emph{suc+mdiff} r
 \emph{Total}& \qSolvedConf{} & 0.26 & 1626 & 0.13 & 0.39 & 7\,614 & 12 \\
 \bottomrule
 \end{tabular}
-\caption{Best synchronization success rate per language.}
+\caption{Best synchronization success rate per language. No \emph{apply-fail}
+was encountered in the entire dataset and the timeouts where negligible.}
 \label{tbl:eval:merge-hdiff-aggr}
 \end{table}
 
