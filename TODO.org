@@ -1,11 +1,11 @@
-* TODO Update experiment table
-* TODO Release final versions [1/3]
+* DONE Update experiment table
+* TODO Release final versions [2/3]
 ** TODO Code
 *** TODO Hackage
 *** TODO Release in GitHub
 *** TODO DOI in Zenodo
 ** DONE Dataset in Zenodo
-** TODO Update and cite in thesis
+** DONE Update and cite in thesis
 * TODO Get Final Quote for printing
 * TODO Upload Thesis to MyPhD
 * TODO Workout the reception
