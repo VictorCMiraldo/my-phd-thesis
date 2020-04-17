@@ -95,7 +95,7 @@ Java       & 19 & 2901 & 851 \\
 JavaScript & 28 & 3392 & 965 \\
 Lua        & 27 & 748  & 91 \\
 Python     & 27 & 4298 & 848 \\  \midrule
-\multicolumn{2}{r}{Totals:} & \qTotalUsableConf & \qTotalParseErrorConf \\
+\emph{Totals} & 132 & \qTotalUsableConf & \qTotalParseErrorConf \\
 \bottomrule
 \end{tabular}
 \caption{Distribution of datapoints within our dataset~\cite{Miraldo2020_Dataset}.
@@ -332,8 +332,10 @@ Language & Mode & Height & \emph{success} & (ratio) & \emph{mdif} & (ratio) & \e
 \bottomrule
 \end{tabular}
 \caption{Best results for each extraction mode. The \emph{height} column
-indicates the number passed to \texttt{--min-height}. All of the above
-were obtained with \emph{locally-scoped} patches.}
+indicates the minum height a subtree must have to qualify for sharing,
+configured with the \texttt{--min-height} option. All of the above results
+were obtained with \emph{locally-scoped} patches, \emph{globally-scoped}
+success rates were consistently lower than their \emph{locally-scoped} counterpat.}
 \label{tbl:eval:merge-hdiff}
 \end{table}
 

@@ -13,7 +13,7 @@
 \usepackage[all]{xy}
 
 \title{Type-Safe Generic Differencing of Mutually Recursive Families}
-\titleDUTCH{same title in dutch}
+\titleDUTCH{Getypeerde Generieke Differentiatie van Wederzijds Recursieve Datatypes}
 
 \author{Victor Cacciari Miraldo}
 
@@ -56,8 +56,8 @@
 \frontmatter
 \tableofcontents
 
-\chapter{Declaration}
-Thanks to family, supervisor, friends and hops!
+% \chapter{Declaration}
+% Thanks to family, supervisor, friends and hops!
 
 \chapter{Abstract}
 \lhsinclude{Abstract.lhs}
