@@ -1041,13 +1041,21 @@ Trivial; |cpy| unifies with anything.
 
   \Cref{lemma:pepatches:comp-assoc,lemma:pepatches:comp-id} establish
 a partial monoid structure for |Chg| and |after| under extensional
-change equality, |~~|.
+change equality, |~~|. As we shall see next, however, it is not
+trivial to squeeze more structure out of this change representation.
+\digress{I would have enjoyed to be able to spend more time studying
+the metatheory. Obviously, it is not because the options discussed
+next failed that there exists no options to extend the metatheory
+whatsoever. It is still worth discussing the difficulties I encountered
+while trying to use standard techniques, below.}
+
+\subsubsection{Loose Ends}
 
 %format (inv p) = p "^{\HVNI{-1}}"
-  Because of the well-scopedness of changes, that is,
-for any change |p| we have that |vars (chgDel p) == vars (chgIns p)|,
-we could go a step further and define the inverse of a change, |inv p|.
-In fact, defining the inverse is trivial:
+  The first thing that comes to mind is the definition of
+the inverse of a change. Since changes are well-scoped, that is,
+|vars (chgDel p) == vars (chgIns p)| for any change |p|,
+defining the inverse of a change |p|, denoted |inv p|, is trivial:
 
 \begin{myhs}
 \begin{code}
@@ -1058,64 +1066,110 @@ inv p = Chg (chgIns p) (chgDel p)
 
   Naturally, then, we would expect that |after p (inv p) ~~ cpy|, but
 that is not the case. The domain of |cpy| is the entire set of trees,
-but the domain of |after p (inv p)| is potentially
-smaller. Consequently, we can always find a tree |t| such that |app
-cpy t == Just t| but |app (after p (inv p)) == Nothing|.
+but the domain of |after p (inv p)| is generally
+smaller. Consequently, we can find a tree |t| such that |app cpy t ==
+Just t| but |app (after p (inv p)) == Nothing|.
 
-\victor{Unsure about the rest of the section; I should prove |~| below
-makes an equivalence relation; I don't have this proof and the
-transitivity case is tricky}
+%format subseteq = "\HS{\subseteq}"
 
-  The problem with inverses above comes from the fact that |after p
-(inv p)| is \emph{less general} than the identity, that is, it has a
+  The problem with inverses above stems from |after p
+(inv p)| being \emph{less general} than the identity, since it has a
 smaller domain.  In other words, |after p (inv p)| works on a subset
 of the domain of |cpy|, but it performs the same action as |cpy| for
-the elements it is defined.  This is known as the \emph{extension
-order} in a $p$-category \cite{Robinson1988}, for the theoretically
-inclined reader. In our particular case, it is realized in the
-following definition.
+the elements it is defined. It is natural then to attempt to talk about
+changes modulo their domain. We could think of stating |p <= q| whenever
+|(app p) subseteq (app q)|. That is, when |p| and |q| are the same
+except that the domain of |q| is larger. This |<=| is known
+as the usual \emph{extension order}~\cite{Robinson1988}, and when
+instantiated for our particular case, yields the definition below.
 
 \begin{definition}[Extension Order]
 Let |p| and |q| be two aptly typed changes; we say that |q| is
-an extension of |p|, denoted |p <= q|, if and only if |forall x,y dot
-(app p) x == Just y| implies |app q x == Just y|.
-In other words, |p <= q| when |p| is equal to |q| restricted to the
-domain of |p|.
+an extension of |p|, denoted |p <= q|, if and only if
+|forall x `elem` dom p dot (app p) x == (app q) x|.
+In other words, |p <= q| when |q| coincides with |p| in a restriction
+of its domain.
 \end{definition}
 
-  The relation |<=| defined above makes a partial order on changes and
-could help defining a weaker notion of change equivalent. In a first
-approximation, we could say that
-|p| and |q| are \emph{approximate changes}, denoted |p ~ q|
-when |p <= q| or |q <= p|. The definition of |~| point-wise would read:
+%format ~  = "\HS{\sim}"
+%format /~ = "\HS{\nsim}"
 
-\[ |p ~ q iff forall x `elem` (dom p intersect dom q) dot (app p) x == (app q) x| \]
+  This gives us a partial order on changes and it is the case that
+|after p (inv p) <= cpy| and |after (inv p) p <= cpy|. Attempting
+to identify |after p (inv p)| as somehow equivalent to |cpy| using |<=|
+will not work, however.
 
-  Yet, the \emph{approximate changes} relation do not make up an equivalence
-relation. The problem comes from transitivity, which does not hold in general.
-Pick changes |p|, |q| and |r| such that |dom p intersect dom q|
-and |dom q intersect dom p| are empty but |dom p intersect dom r /= emptyset|.
-It trivially holds that |p ~ q| and |q ~ r| but it is not necessarily the case
-that |p ~ r|. We conjecture that it should be straightforward to fix
-the problem as long as we compare apples to apples. That is, we should not be
-trying to compare arbitrary changes, but instead, those that have at least one
-common point in their domain. The proper definition of \emph{approximate changes}
-would then be:
+  We could think of defining a notion of \emph{approximate changes},
+denoted |p ~ q|, by estabilishing whether |p| and |q| are comparable
+under |<=|. Since |<=| is not total, however. this would not yeild
+an equivalence relation (transitivity does not hold, illustrated in
+\Cref{pepatches:approx-not-equiv}).
 
-\begin{definition}[Approximate Changes] \label{def:pepatches:equiv-changes}
-Let |p| and |q| be aptly typed changes;
-We say that |p| and |q| are approximate, denoted |p ~ q|, if and only
-if there exists |x| and |y| such that |(app p) x == Just y == (app q) x|
-and either |p <= q| or |q <= p|.
-\end{definition}
+\begin{figure}
+\centering
+\subfloat[Change |p|]{%
+\begin{myforest}
+[,change
+  [|Bin| [|Bin| [a,metavar] [b,metavar]] [c,metavar]]
+  [|Bin| [c,metavar] [|Bin| [a,metavar] [b,metavar]]]]
+\end{myforest}
+\label{fig:pepatches:approx-not-equiv:A}}
+\quad
+\subfloat[Change |q|]{%
+\begin{myforest}
+[,change
+  [|Bin| [t,metavar] [u,metavar]]
+  [|Bin| [u,metavar] [t,metavar]]]
+\end{myforest}
+\label{fig:pepatches:approx-not-equiv:B}}
+\quad
+\subfloat[Change |r|]{%
+\begin{myforest}
+[,change
+  [|Bin| [x,metavar] [|Bin| [y,metavar] [z,metavar]]]
+  [|Bin| [|Bin| [y,metavar] [z,metavar]] [x,metavar]]]
+\end{myforest}
+\label{fig:pepatches:approx-not-equiv:C}}
+\caption{Three changes such that |p ~ q| (because |p <= q|) and |q ~ r| (because |r <= q|). Yet, |p /~ r| since neither |p <= r| nor |r <= p|.}
+\label{fig:pepatches:approx-not-equiv}
+\end{figure}
 
-  \digress{I believe that \Cref{def:pepatches:equiv-changes} above makes
-an equivalence relation and would would enable us to prove that
-|after p (inv p) ~ cpy ~ after (inv p) p|. Concluding that |(Chg , after')|
-makes a grupoid modulo |~|. Unfortunately, I ran
-out of time carrying these proofs. I decided to include it at least
-provides some different ideas anyway about when two changes should be
-equivalent.}
+  The extension order cannot be used to define the \emph{best}
+change between two elements |x| and |y|. Take |x| to be |Bin (Bin a b) a|
+and |y| to be |Bin (Bin b a) a|, for which two uncomparable candidate
+changes are shwon in \Cref{fig:pepatches:ext-ord-not-cost}.
+
+  This short discussion does not mean that there is \emph{no} suitable
+way to compare the changes in \Cref{fig:pepatches:ext-ord-not-cost} or
+to define |~| in such a way that the changes in
+\Cref{fig:pepatches:approx-not-equiv} can be considered equivalent. It
+does mean, however, that simply comparing the domain of changes is a
+weak definition and a robust definition will probably be significantly
+more involved.
+
+\begin{figure}
+\centering
+\subfloat[Change |p|]{%
+\begin{myforest}
+[,change
+  [|Bin| [|Bin| [x,metavar] [y,metavar]] [a]]
+  [|Bin| [|Bin| [y,metavar] [x,metavar]] [a]]]
+\end{myforest}
+\label{fig:pepatches:approx-not-equiv:A}}
+\quad
+\subfloat[Change |q|]{%
+\begin{myforest}
+[,change
+  [|Bin| [|Bin| [a,metavar] [y,metavar]] [a,metavar]]
+  [|Bin| [|Bin| [y,metavar] [a,metavar]] [a,metavar]]]
+\end{myforest}
+\label{fig:pepatches:approx-not-equiv:B}}
+\caption{Two changes that could be used to transform the same element |x|
+but are not comparable with |<=|.}
+\label{fig:pepatches:ext-ord-not-cost}
+\end{figure}
+
+
 
 %}
 %%% END OF TEMPORARY NOTATION
