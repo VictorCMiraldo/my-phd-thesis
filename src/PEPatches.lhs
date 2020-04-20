@@ -136,7 +136,7 @@ from source to destination making use of permutations and duplications
 where necessary.
 
   A new datatype, |TreeC phi|, enables us to annotate a value of
-|Tree| with holes of type |phi|. Therefore, |TreeC MetaVar|
+|Tree| with holes of type |phi|. Therefore, |TreeC Metavar|
 represents the type of |Tree| with holes carrying metavariables.
 These metavariables correspond to arbitrary trees that are
 \emph{common subtrees} of both the source and destination of the
@@ -147,7 +147,7 @@ values but later on we will need to carry additional information.
 
 \begin{myhs}
 \begin{code}
-type MetaVar = Int
+type Metavar = Int
 
 data TreeC phi = Hole   phi | LeafC  Int | BinC   TreeC TreeC | TriC   TreeC TreeC TreeC
 \end{code}
@@ -201,7 +201,7 @@ substitution.
 
 \begin{myhs}
 \begin{code}
-chgApply :: Change MetaVar -> Tree -> Maybe Tree
+chgApply :: Change Metavar -> Tree -> Maybe Tree
 chgApply (d , i) x = del d x >>= ins i
 \end{code}
 \end{myhs}
@@ -221,7 +221,7 @@ we use implement a simple auxiliary function to do so.
 
 \begin{myhs}
 \begin{code}
-del :: TreeC MetaVar -> Tree -> Maybe (Map MetaVar Tree)
+del :: TreeC Metavar -> Tree -> Maybe (Map Metavar Tree)
 del ctx t = go ctx t empty
 \end{code}
 \end{myhs}
@@ -236,7 +236,7 @@ metavariable with the current tree.
 
 \begin{myhs}
 \begin{code}
-go :: TreeC -> Tree -> Map MetaVar Tree -> Maybe (Map MetaVar Tree)
+go :: TreeC -> Tree -> Map Metavar Tree -> Maybe (Map Metavar Tree)
 go (LeafC n)     (Leaf n')    m = guard (n == n') >> return m
 go (BinC x y)    (Bin a b)    m = go x a m >>= go y b
 go (TriC x y z)  (Tri a b c)  m = go x a m >>= go y b >>= go z c
@@ -255,7 +255,7 @@ defined below.
 
 \begin{myhs}
 \begin{code}
-ins :: TreeC MetaVar -> Map MetaVar Tree -> Maybe Tree
+ins :: TreeC Metavar -> Map Metavar Tree -> Maybe Tree
 ins (LeafC n)     m  = return (Leaf n)
 ins (BinC x y)    m  = Bin <$$> ins x m <*> ins y m
 ins (TriC x y z)  m  = Tri <$$> ins x m <*> ins y m <*> ins z m
@@ -271,7 +271,7 @@ Intuitively, the |chgTree| function should
 try to exploit as many copy opportunities as possible. For now, we delegate
 the decision of whether a subtree should be copied or not to an
 oracle: assume we have access to a function |wcs :: Tree -> Tree ->
-Tree -> Maybe MetaVar|, short for \emph{``which common subtree''}.  The
+Tree -> Maybe Metavar|, short for \emph{``which common subtree''}.  The
 call |wcs s d x| returns |Nothing| when |x| is \emph{not} a subtree of
 |s| and |d|; if |x| is a subtree of both |s| and |d|, it returns |Just
 i|, for some metavariable |i|.  The only condition we impose is
@@ -290,7 +290,7 @@ oracle -- the inner workings of the oracle are abstracted away cleanly.
 
 \begin{myhs}
 \begin{code}
-chgTree :: Tree -> Tree -> Change MetaVar
+chgTree :: Tree -> Tree -> Change Metavar
 chgTree s d  = let f = wcs s d in (extract f s, extract f d)
 \end{code}
 \end{myhs}
@@ -307,7 +307,7 @@ being computed and recurse over the remaining subtrees.
 
 \begin{myhs}
 \begin{code}
-extract :: (Tree -> Maybe MetaVar) -> Tree -> TreeC MetaVar
+extract :: (Tree -> Maybe Metavar) -> Tree -> TreeC Metavar
 extract o t = maybe (peel t) Hole (o t)
   where  peel (Leaf n)     = LeafC n
          peel (Bin a b)    = BinC (extract o a) (extract o b)
@@ -502,7 +502,7 @@ function efficiently for the concrete case of the |Tree| datatype.
   In order to have a working version of our differencing algorithm for
 |Tree| we must provide the |wcs| implementation. Recall that the |wcs|
 function, \emph{which common subtree}, has type |Tree -> Tree -> Tree
--> Maybe MetaVar|. Given a fixed |s| and |d|, |wcs s d x| returns
+-> Maybe Metavar|. Given a fixed |s| and |d|, |wcs s d x| returns
 |Just i| if |x| is the $i^{\textrm{th}}$ subtree of |s| and |d| and
 |Nothing| if |x| does not appear in |s| or |d|.  One implementation of
 this function computes the intersection of all the subtrees in |s| and
@@ -526,7 +526,7 @@ the element, when it occurs in the list.
 
 \begin{myhs}
 \begin{code}
-wcs :: Tree -> Tree -> Tree -> Maybe MetaVar
+wcs :: Tree -> Tree -> Tree -> Maybe Metavar
 wcs s d x = elemIndex x (subtrees s intersect sutrees d)
 \end{code}
 \end{myhs}
@@ -642,7 +642,7 @@ order to check whether a tree |x| is a subtree of a fixed |s| and |d|,
 it suffices to check whether the merkle root of |x| appears in a
 ``database'' of the common merkle roots of |s| and |d|. Given that a
 |Digest| is just a |[Word]|, the optimal choice for such ``database''
-is a Trie~\cite{Brass2008} mapping a |[Word]| to a |MetaVar|. Trie
+is a Trie~\cite{Brass2008} mapping a |[Word]| to a |Metavar|. Trie
 lookups are efficient and hardly depend on the number of elements in
 the trie. In fact, our lookups run in amortized constant time here, as
 the length of a |Digest| is fixed.
@@ -655,11 +655,11 @@ populate the ``database'' of common digests.
 
 \begin{myhs}
 \begin{code}
-wcs :: TreeH -> TreeH -> TreeH -> Maybe MetaVar
+wcs :: TreeH -> TreeH -> TreeH -> Maybe Metavar
 wcs s d = lookup (mkTrie s intersect mkTrie d) . merkleRoot
   where  (intersect)  :: Trie k v  -> Trie k u  -> Trie k v
          lookup       :: Trie k v  -> [k]       -> Maybe v
-         mkTrie       :: TreeH     -> Trie Word MetaVar
+         mkTrie       :: TreeH     -> Trie Word Metavar
 \end{code}
 \end{myhs}
 
@@ -702,7 +702,7 @@ data Holes kappa fam h a where
 \end{code}
 \end{myhs}
 
-  The |TreeC MetaVar| datatype, defined in
+  The |TreeC Metavar| datatype, defined in
 \Cref{sec:pepatches:concrete-changes} to represent a value of type
 |Tree| augmented with metavariables is isomorphic to |Holes (P [ Int ]) (P [ Tree ]) (Const Int)|.
 Abstracting away the specific family for |Tree|, the datatype |Holes
@@ -716,13 +716,13 @@ metavariable matches over an opaque value or not:
 
 \begin{myhs}
 \begin{code}
-data MetaVar kappa fam at where
-  MV_Prim  :: (PrimCnstr kappa fam at)      => Int -> MetaVar kappa fam at
-  MV_Comp  :: (CompoundCnstr kappa fam at)  => Int -> MetaVar kappa fam at
+data Metavar kappa fam at where
+  MV_Prim  :: (PrimCnstr kappa fam at)      => Int -> Metavar kappa fam at
+  MV_Comp  :: (CompoundCnstr kappa fam at)  => Int -> Metavar kappa fam at
 \end{code}
 \end{myhs}
 
-  With |MetaVar| above, we can always fetch the |Int| identifying
+  With |Metavar| above, we can always fetch the |Int| identifying
 the metavar, with |metavarGet|, but we maintain all the type-level
 information we could need to inspect at run-time.
 The |HolesMV| datatype below is convenient since most of the times
@@ -730,9 +730,9 @@ our |Holes| structures will contain metavariables.
 
 \begin{myhs}
 \begin{code}
-metavarGet :: MetaVar kappa fam at -> Int
+metavarGet :: Metavar kappa fam at -> Int
 
-type HolesMV kappa fam = Holes kappa fam (MetaVar kappa fam)
+type HolesMV kappa fam = Holes kappa fam (Metavar kappa fam)
 \end{code}
 \end{myhs}
 
@@ -1004,7 +1004,7 @@ Consequently, |after q r = Chg (zeta (ctxDel r)) (zeta (ctxIns q))|.
 Now, we must construct |sigma'| to unify |ctxDel p| and |zeta (ctxIns q)|,
 which enables the construction of |after p (after q r)|.
 Let |sigma' = theta . sigma| and reduce it to one of our assumptions:
-
+%
 \begin{squiggol}[tight]
 |theta (sigma (ctxDel p)) == theta (sigma (zeta (ctxIns q)))|
 \reasonRel{\iff}{|theta . sigma == gamma . zeta|}
@@ -1066,9 +1066,30 @@ inv p = Chg (chgIns p) (chgDel p)
 
   Naturally, then, we would expect that |after p (inv p) ~~ cpy|, but
 that is not the case. The domain of |cpy| is the entire set of trees,
-but the domain of |after p (inv p)| is generally
-smaller. Consequently, we can find a tree |t| such that |app cpy t ==
-Just t| but |app (after p (inv p)) == Nothing|.
+but the domain of |after p (inv p)| is generally strictly smaller.
+Consequently, we can easily find a tree |t| such that |app cpy t ==
+Just t| but |app (after p (inv p)) == Nothing|. Take, for example,
+the change shown in \Cref{fig:pepatches:inv-not-id}.
+
+\begin{figure}
+\centering
+\subfloat[Change |p|]{%
+\begin{myforest}
+[,change [|Bin| [|Leaf| [|42|]] [x,metavar]] [x,metavar]]
+\end{myforest}}%
+\quad
+\subfloat[Change |inv p|]{%
+\begin{myforest}
+[,change [x,metavar] [|Bin| [|Leaf| [|42|]] [x,metavar]]]
+\end{myforest}}%
+\quad
+\subfloat[|after (inv p) p|]{%
+\begin{myforest}
+[,change [|Bin| [|Leaf| [|42|]] [x,metavar]] [|Bin| [|Leaf| [|42|]] [x,metavar]]]
+\end{myforest}}
+\caption{Example of a change, its inverse and their composition}
+\label{fig:pepatches:inv-not-id}
+\end{figure}
 
 %format subseteq = "\HS{\subseteq}"
 
@@ -1327,7 +1348,7 @@ This is just a technical consequence of working with binders explicitly.
 type MetavarAndArity = MAA {getMetavar :: Int , getArity :: Arity}
 
 buildSharingMap  :: PrepFix a kappa fam ix -> PrepFix a kappa fam ix
-                 -> (Int , Trie MetaVarAndArity)
+                 -> (Int , Trie MetavarAndArity)
 buildSharingMap x y  =   T.mapAccum (\i ar -> (i+1 , MAA i ar) ) 0
                      $$  T.zipWith (+) (buildArityMap x) (buildArityMap y)
 \end{code}
@@ -1400,8 +1421,7 @@ cleanup that depends on global information.
 \begin{myhs}
 \begin{code}
 extract  :: ExtractionMode -> CanShare kappa fam -> IsSharedMap
-         -> (PrepFix kappa fam :*: PrepFix kappa fam) at
-         -> Chg kappa fam at
+         -> (PrepFix kappa fam :*: PrepFix kappa fam) at -> Chg kappa fam at
 \end{code}
 \end{myhs}
 
@@ -1443,7 +1463,7 @@ noNested1 h sm x@(SFixAnn ann  xi)
 
   The second pass maps over the holes in the output from the first pass
 and decides whether to transform the
-|Const Int| into a |MetaVar kappa fam| or whether to forget this was a
+|Const Int| into a |Metavar kappa fam| or whether to forget this was a
 potential shared tree and keep the tree instead. We will omit the
 implementation of the second pass. It consists in a straightforward
 traversal of the output of |noNested1|, we direct the interested
@@ -1466,7 +1486,7 @@ and once in the insertion context.
 \begin{myhs}
 \begin{code}
 patience  :: CanShare kappa fam -> Trie MetavarAndArity -> PrepFix a kappa fam at
-          -> Holes kappa fam (MetaVar kappa fam) at
+          -> Holes kappa fam (Metavar kappa fam) at
 patience h sm x@(PrimAnn _    xi) = Prim xi
 patience h sm x@(SFixAnn ann  xi)
   =  if h x  then  maybe recurse (mkHole x) $$ lookup (getDigest ann) sm
@@ -1521,8 +1541,7 @@ chg x y =  let  dx             = decorate x
                 dy             = decorate y
                 (_, sh)        = buildSharingMap opts dx dy
             in extract extMode canShare (dx :*: dy)
- where
-   canShare t = 1 < treeHeight (getConst (getAnn t))
+ where canShare t = 1 < treeHeight (getConst (getAnn t))
 \end{code}
 \end{myhs}
 
@@ -1623,18 +1642,6 @@ type Patch kappa fam = Holes kappa fam (Chg kappa fam)
 \end{code}
 \end{myhs}
 
-  Patches are computed from changes by
-extracting common constructors from the
-deletion and insertion contexts into the spine. In other words, we
-would like to push the changes down towards the leaves of the
-tree. There are two different ways for doing so, illustrated by
-\Cref{fig:pepatches:example-03}.  On one hand we can consider the
-patch metavariables to be \emph{globally-scoped}, yielding
-structurally minimal changes, \Cref{fig:pepatches:example-03:B}.  On
-the other hand, we could strive for \emph{locally-scoped}, where each
-change might still contain repeated constructors as long as they are
-necessary to ensure the change is \emph{closed}, as in
-\Cref{fig:pepatches:example-03:C}.
 
 % Two changes that operate on disjoint
 % subtrees -- have different paths from the root -- are trivially
@@ -1683,6 +1690,19 @@ patch with minimal changes.}
 \label{fig:pepatches:example-03}
 \end{figure}
 
+  Patches are computed from changes by
+extracting common constructors from the
+deletion and insertion contexts into the spine. In other words, we
+would like to push the changes down towards the leaves of the
+tree. There are two different ways for doing so, illustrated by
+\Cref{fig:pepatches:example-03}.  On one hand we can consider the
+patch metavariables to be \emph{globally-scoped}, yielding
+structurally minimal changes, \Cref{fig:pepatches:example-03:B}.  On
+the other hand, we could strive for \emph{locally-scoped}, where each
+change might still contain repeated constructors as long as they are
+necessary to ensure the change is \emph{closed}, as in
+\Cref{fig:pepatches:example-03:C}.
+
   The first option, of \emph{globally-scoped} patches, is
 very easy to compute. All we have to do is to compute the
 anti-unification of the insertion and deletion context.
@@ -1706,6 +1726,7 @@ which proceeds top-down.  A bottom-up approach is also unpractical, we
 would have to decide which leaves to pair together and it would suffer
 similar issues for data inserted on the tail of linearly-structured
 data.
+
 
 \begin{figure}
 \centering
@@ -1786,8 +1807,6 @@ apply p = chgApply (chgDistr p)
 \end{code}
 \end{myhs}
 
-\victor{I'm unsure whether the next 3 paragraphs break the flow too much, please comment}
-
   Overall, we find ourselves in a dilemma. On the one hand we have
 \emph{globally-scoped} patches, which have larger spines but can
 produce results that are difficult to understand and synchronize, as
@@ -1799,7 +1818,7 @@ independently of one another in the tree.  This is particularly
 important for being able to develop an industrial synchronizer at some
 point, as it keeps \emph{conflicts} small and isolated.
 
-  We advance that the actual solution will consist in using a combination of
+  We propose that the actual solution will consist in using a combination of
 both scopings variants. First we will produce a locally-scoped
 patch, which forbids situations as in
 \Cref{fig:pepatches:misalignment}.  This gives us an opportunity of
@@ -1894,12 +1913,13 @@ cases.
   Defining whether a change is closed or not has its nuances. Firstly,
 we can only know that a change is in fact closed if we know, at least,
 how many times each variable is used globally.  Say a variable |x| is
-used |n + m| times in total, and it has |n| and |m| occurrences in the
-deletion and insertion contexts of |c|, then |x| does not occur anywhere
-else but within |c|, in other words, |x| is \emph{local} to |c|. If all
-variables of |c| are \emph{local} to |c|, we say |c| is closed.  Given
-a multiset of variables |g :: Map Int Arity| for the global scope, we
-can define |isClosedChg| in Haskell as:
+used |n + m| times in total within a change |c|, and it has |n| and
+|m| occurrences in the deletion and insertion contexts of |c|,
+respectively.  Then |x| does not occur anywhere else but within |c|,
+in other words, |x| is \emph{local} to |c|. If all variables of |c|
+are \emph{local} to |c|, we say |c| is closed.  Given a multiset of
+variables |g :: Map Int Arity| for the global scope, we can define
+|isClosedChg| in Haskell as:
 
 \begin{myhs}
 \begin{code}
@@ -1922,7 +1942,7 @@ change change to |close|, it cannot produce a result and throws
 an error instead.
 
   Efficiently computing closures requires us to keep track of the
-variables we have seen being declared and used in a change -- that is,
+variables that have been declared and used in a change -- that is,
 we have seen occurrences in the deletion and insertion context
 respectively.  Recomputing this multisets would result in a slower
 algorithm.  The |annWithVars| function below computes the variables
@@ -1960,7 +1980,7 @@ closeAux gl (Roll x) =
     fromInR   :: Sum f g x -> Maybe (g x)
 \end{code}
 \end{myhs}
-\caption{The |close| and |closeAux| functions.}
+\caption{Complete generic definition of |close| and |closeAux|.}
 \label{fig:pepatches:close}
 \end{figure}
 
@@ -2043,12 +2063,19 @@ producing a patch with locally scoped changes and copies in its spine.}
 
 \begin{figure}
 \centering
-\subfloat[Change that deletes |42| at the head of a list.]{%
+\subfloat[Change that deletes |42| at the head of a list]{%
 \begin{myforest}
 [,change , s sep=1mm
-  [|(:)| [|42|] [|(:)| [x,metavar] [|(:)| [y,metavar] [z,metavar]]]]
-  [|(:)| [x,metavar] [|(:)| [y,metavar] [z,metavar]]]
+  [|(:)| [|42|] [|(:)|,name=dca [x,metavar,name=dx]
+                  [|(:)|,name=dcb [y,metavar,name=dy] [z,metavar,name=dz]]]]
+  [|(:)|,name=ica [x,metavar,name=ix]
+    [|(:)|,name=icb [y,metavar,name=iy] [z,metavar,name=iz]]]
 ]
+\draw [->,dashed,thick,black!20!white] (dca) -- (ica);
+\draw [->,dashed,thick,black!20!white] (dcb) -- (icb);
+\draw [->,dashed,thick,black!20!white] (dx)  -- (ix);
+\draw [->,dashed,thick,black!20!white] (dy)  -- (iy);
+\draw [->,dashed,thick,black!20!white] (dz)  -- (iz);
 \end{myforest}
 \label{fig:pepatches:alignment-01:A}}
 \qquad\qquad
@@ -2063,26 +2090,41 @@ producing a patch with locally scoped changes and copies in its spine.}
 ]
 \end{myforest}
 \label{fig:pepatches:alignment-01:B}}%
-\caption{Properly aligned version of \Cref{fig:pepatches:misalignment}, where
-the deletion of |(: 42)| gets properly identified.}
+\caption{The change from \Cref{fig:pepatches:misalignment}, with
+with an association of which nodes of the deletion and
+insertion contexts represent the same information, and an
+explicit representation of that information.}
 \label{fig:pepatches:alignment-01}
 \end{figure}
 
   As we have seen in the previous sections, locally-scoped changes
 avoid the problem of misaligning copies by not recognizing insertions
 or deletions (\Cref{fig:pepatches:misalignment}), but the problem
-remains. In fact, recognizing deletions and insertions is crucial
-for synchronization: no merging algorithm can be possibly work if we cannot
-distinguish old information from new information.
+remains. In fact, being able to recognize which constructors in
+the deletion context correspond to which construtors in the insertion
+context is crucial for synchronization: no merging algorithm can be
+possibly work if we cannot distinguish old information from new information.
 In this section we will look into a datatype and an algorithm for
 representing and computing alignments, which are crucial for
 synchronization.
 
-  Take \Cref{fig:pepatches:alignment:A} (which is a copy of
-\Cref{fig:pepatches:misalignment:A}). If we are able to identify
-|Bin 42| as a deletion, the copies that happen after it become
-evident, as shown in \Cref{fig:pepatches:alignment:B}.
-It is worth noting that untyped synchronizers, such
+
+  Take \Cref{fig:pepatches:alignment-01:A}, which was the change that
+motivated locally-scoped patches, in
+\Cref{fig:pepatches:misalignment}.  This time, howerver, we explicitly
+added information about which constructors, albeit duplicated,
+represent \emph{the same information}.  The |Chg| datatype by itself
+is insufficient to make it clear that |(: 42)| at the root of the
+deletion context has no countertart in the insertion context.
+Computing and representing an alignment is exactly computing and
+representing this association between subtrees of the deletion and
+insertion contexts. In this case, the aligned version of
+\Cref{fig:pepatches:alignment-01:A} is shown in
+\Cref{fig:pepatches:alignment-01:B}, where the |Al| border marks
+scoping for metavariables, a spine within its scope, subsequent
+copies, and the deletion of |(: 42)| are all represented explicitly.
+
+  It is worth noting that untyped synchronizers, such
 as \texttt{harmony}~\cite{Foster2007}, must employ schemas to overcome issues
 similar to that of \Cref{fig:pepatches:misalignment}. In our case,
 the type information will enable us to identify insertions and deletions
@@ -2091,10 +2133,10 @@ properly.
   An aligned patch consists in a spine of copied constructors leading
 to a \emph{well-scoped alignment}. This alignment, in turn, consists
 in a sequence of insertions, deletions or spines, which finally lead
-to a |Chg|. These |Chg| in the leaves of the alignment can be
-globally-scoped with respect to the alignment they belong.  Finally,
-we also add explicit information about copies and permutations to aid
-the synchronization engine later on. \Cref{fig:pepatches:alignment-02}
+to a |Chg|. These |Chg| in the leaves of the alignment are
+globally-scoped with respect to the alignment they belong.
+We also add explicit information about copies and permutations to aid
+the synchronization engine later. \Cref{fig:pepatches:alignment-02}
 illustrates a value of type |Patch| and its corresponding alignment,
 of type |PatchAl| defined below. Note how the the scope from each
 change in \Cref{fig:pepatches:alignment-02:A} is preserved in
@@ -2131,15 +2173,13 @@ type PatchAl kappa fam = Holes kappa fam (Al kappa fam (Chg kappa fam))
    [|Bin| [|Leaf| [|42|]] [SQ]]
    [|Cpy (metavar z)|]]]
 \end{myforest}\label{fig:pepatches:alignment-02:B}}
-\caption{A patch |p| and its corresponding aligned version. Note
-how the aligned version provides more information about
-which constructors are actually copied inside the
-changes performed by |p|.}
+\caption{A patch |p| and its corresponding aligned version.
+The |Al| barrier marks the beginning of an algnment and delimits
+scopes; copies and permutations are marked explicitly and insertions
+and deletions indicate their continuation with |SQ|.}
 \label{fig:pepatches:alignment-02}
 \end{figure}
 
-  Since our patches are locally scoped, computing an aligned patch
-is simply done by mapping over the spine and aligning the individual changes.
 Computing the \emph{alignment} for a change |c| consists in
 identifying what information in the deletion context correspond
 to \emph{the same information} in the insertion context.
@@ -2152,7 +2192,9 @@ root |(:)| in the insertion context.
 
   We can recognize the deletion of |(: 42)| in
 \Cref{fig:pepatches:alignment-01:B} structurally.  All of its fields,
-except one recursive field, contains no metavariables.  We denote
+except one recursive field, contains no metavariables. The
+one subtree which \emph{does contain} metavariables is denoted the
+\emph{focus} of the deletion (resp. insertion). We denote
 trees with no metavariables as \emph{rigid} trees.  A \emph{rigid}
 tree has the guarantee that none of its subtrees is being copied,
 moved or modified. Consequently, \emph{rigid} trees are being entirely
@@ -2161,6 +2203,17 @@ change. If a constructor in the deletion (resp. insertion) context has
 all but one of its subtrees being \emph{rigid}, it is only natural to
 consider this constructor to be part of the \emph{deletion}
 (resp. \emph{insertion}).
+
+  Since our patches are locally scoped, computing an aligned patch is
+simply done by mapping over the spine and aligning the individual
+changes.  Aligning changes, in turn, is done by identifying whether
+the constructor at the head of the deletion (resp. insertion) context
+can be deleted (resp. inserted) then recursing on the focus of the
+deletion (resp. insertion). When the root of the deletion context and
+the root of the insertion context qualify for deletion and insertion,
+we check whether we can add them to a spine instead.
+
+\subsubsection{Generic Alignments}
 
   We will be representing a deletion or
 insertion of a recursive \emph{layer} by identifying the \emph{position}
@@ -2205,11 +2258,13 @@ of type |h at| and the other positions |at'| (recursive or not) carrying
 values of type |g at'|. The |c| above is a constraint that enables us
 to inform GHC some properties of type |at| and is mostly a technicality.
 
-  An alignment |Al kappa fam f at| represents a
-sequence of insertions and deletions interleaved with spines, copies
-and permutations which ultimately lead to \emph{unclassified modifications},
-which are typed according to the |f| parameter. Deletions and insertions
-explicitly mention a zipper and one recursive field to continue the alignment.
+  An alignment |Al kappa fam f at| represents a sequence of insertions
+and deletions interleaved with spines, copies and permutations which
+ultimately lead to \emph{unclassified modifications}, which are typed
+according to the |f| parameter. Next, we will go through the six
+constructors of |Al| one by one. First we have deletions and
+insertions, which explicitly mention a zipper and one recursive field
+to continue the alignment.
 
 \begin{myhs}
 \begin{code}
@@ -2258,17 +2313,17 @@ copies and duplications by traversing the entire alignment and recording
 the arity of |x|. Yet, it is an important distinction to make. A copy
 synchronizes with anything whereas a contraction needs to satisfy
 additional constraints. Therefore, we will identify copies and permutations
-directly in the alignment.
+directly in the alignment to aid the merge function, later.
 
   Let |c = Chg (metavar x) (metavar y)| with both |x| and |y| occur twice
 in their global scope: once in the deletion context and once in the
 insertion context. We say |c| is a copy when |x == y| and a permutation
-when |x /= y|.
+when |x /= y|. These are the last two constructors of |Al|.
 
 \begin{myhs}
 \begin{code}
-  Cpy  :: MetaVar kappa fam at                          -> Al kappa fam f at
-  Prm  :: MetaVar kappa fam at -> MetaVar kappa fam at  -> Al kappa fam f at
+  Cpy  :: Metavar kappa fam at                          -> Al kappa fam f at
+  Prm  :: Metavar kappa fam at -> Metavar kappa fam at  -> Al kappa fam f at
 \end{code}
 \end{myhs}
 
@@ -2335,10 +2390,10 @@ source code (\Cref{chap:where-is-the-code}).
 
 \begin{myhs}
 \begin{code}
-hasRigidZipper  :: HolesAnn kappa fam IsRigid (MetaVar kappa fam) t
+hasRigidZipper  :: HolesAnn kappa fam IsRigid (Metavar kappa fam) t
                 -> Maybe (Zipper  (CompoundCnstr kappa fam t)
                                   (SFix kappa fam)
-                                  (HolesAnn kappa fam IsRigid (MetaVar kappa fam)) t)
+                                  (HolesAnn kappa fam IsRigid (Metavar kappa fam)) t)
 \end{code}
 \end{myhs}
 
@@ -2380,8 +2435,8 @@ alignChg c@(Chg d i) = al (chgVargs c) (annotRigidity d) (annotRigidity i)
 \begin{figure}
 \begin{myhs}
 \begin{code}
-type Aligner kappa fam  =    HolesAnn kappa fam IsStiff (MetaVar kappa fam) t
-                        ->   HolesAnn kappa fam IsStiff (MetaVar kappa fam) t
+type Aligner kappa fam  =    HolesAnn kappa fam IsStiff (Metavar kappa fam) t
+                        ->   HolesAnn kappa fam IsStiff (Metavar kappa fam) t
                         ->   Al kappa fam (Chg kappa fam t)
 
 
@@ -2805,8 +2860,8 @@ will be stored under |eqs|.
 type Subst kappa fam phi = Map (Exists phi)
 
 data MergeState kappa fam = MergeState
-  { iota  :: Map (Exists (MetaVar kappa fam)) (Exists (Chg      kappa fam))
-  , eqs   :: Map (Exists (MetaVar kappa fam)) (Exists (HolesMV  kappa fam))
+  { iota  :: Map (Exists (Metavar kappa fam)) (Exists (Chg      kappa fam))
+  , eqs   :: Map (Exists (Metavar kappa fam)) (Exists (HolesMV  kappa fam))
   }
 \end{code}
 \end{myhs}
@@ -2963,8 +3018,8 @@ we issue a |P2TestEq|.
 
 \begin{myhs}
 \begin{code}
-mrgPrmPrm  :: MetaVar kappa fam x -> MetaVar kappa fam x
-           -> MetaVar kappa fam x -> MetaVar kappa fam x
+mrgPrmPrm  :: Metavar kappa fam x -> Metavar kappa fam x
+           -> Metavar kappa fam x -> Metavar kappa fam x
            -> MergeM kappa fam (Phase2 kappa fam x)
 mrgPrmPrm x y w z  =   onEqvs (\eqs -> substInsert eqs x (Hole w))
                    >>  return (P2TestEq (Chg (Hole x) (Hole y)) (Chg (Hole w) (Hole z)))
@@ -2987,7 +3042,7 @@ the alignment flagged it as a permutation.
 
 \begin{myhs}
 \begin{code}
-mrgPrm  :: MetaVar kappa fam x -> MetaVar kappa fam x -> Chg kappa fam x
+mrgPrm  :: Metavar kappa fam x -> Metavar kappa fam x -> Chg kappa fam x
         -> MergeM kappa fam (Phase2 kappa fam x)
 mrgPrm x y c  =   addToIota "prm-chg" x c
               >>  return (P2Instantiate (Chg (Hole x) (Hole y)) Nothing)
@@ -3341,8 +3396,8 @@ If an occurs-check error is raised, this is forwarded as a conflict.
 \begin{myhs}
 \begin{code}
 splitDelInsMaps  :: MergeState kappa fam
-                 -> Either [Exists (MetaVar kappa fam)]
-                           (  Subst kappa fam (MetaVar kappa fam) ,  Subst kappa fam (MetaVar kappa fam))
+                 -> Either [Exists (Metavar kappa fam)]
+                           (  Subst kappa fam (Metavar kappa fam) ,  Subst kappa fam (Metavar kappa fam))
 splitDelInsMaps (MergeState iot eqvs) = do
     let e' = splitEqvs eqvs
     d <- addEqvsAndSimpl (map (exMap chgDel) iota) e'
