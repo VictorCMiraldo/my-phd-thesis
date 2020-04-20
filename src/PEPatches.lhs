@@ -722,8 +722,8 @@ data Metavar kappa fam at where
 \end{code}
 \end{myhs}
 
-  With |Metavar| above, we can always fetch the |Int| identifying
-the metavar, with |metavarGet|, but we maintain all the type-level
+  With |Metavar| above, we can always retrieve the |Int| identifying
+the metavar, with the |metavarGet| function, but we maintain all the type-level
 information we could need to inspect at run-time.
 The |HolesMV| datatype below is convenient since most of the times
 our |Holes| structures will contain metavariables.
@@ -1151,7 +1151,7 @@ an equivalence relation (transitivity does not hold, illustrated in
   [|Bin| [|Bin| [y,metavar] [z,metavar]] [x,metavar]]]
 \end{myforest}
 \label{fig:pepatches:approx-not-equiv:C}}
-\caption{Three changes such that |p ~ q| (because |p <= q|) and |q ~ r| (because |r <= q|). Yet, |p /~ r| since neither |p <= r| nor |r <= p|.}
+\caption{Three changes such that |p ~ q| (because |p <= q|) and |q ~ r| (because |r <= q|). Yet, |p /~ r| since its not the case that |r <= p| or |p <= r| holds.}
 \label{fig:pepatches:approx-not-equiv}
 \end{figure}
 
@@ -1186,7 +1186,7 @@ more involved.
 \end{myforest}
 \label{fig:pepatches:approx-not-equiv:B}}
 \caption{Two changes that could be used to transform the same element |x|
-but are not comparable with |<=|.}
+but are not comparable under the extension order |(<=)|.}
 \label{fig:pepatches:ext-ord-not-cost}
 \end{figure}
 
@@ -1272,36 +1272,36 @@ decorate  = synthesize dots
 \end{code}
 \end{myhs}
 
-\begin{figure}
-%{
-%format WD c ha he = "\begin{array}{c} \HS{hash}\HS{=}" ha " \\ \HS{height}\HS{=}" he " \\"  c " \end{array}"
-\centering
-\begin{myforest}
-[,phantom , s sep'+=60pt
-[|Bin| , name=A [|Bin| [|Leaf| [|42|]] [|Leaf| [|42|]]] [|Leaf| [|84|]]]
-[|WD Bin "0f42ab" 3|, tikz+={
-        \draw [hdiff-black,->] (A.east) [out=25, in=165]to node[midway,above]{|decorate|} (!c.west);
-      }
-  [|WD Bin "310dac" 2| , name=ex1
-    [|WD Leaf "0021ab" 1| [|WD 42 "004200" 0|]]
-    [|WD Leaf "0021ab" 1| [|WD 42 "004200" 0|]]
-  ]
-  [|WD Leaf "4a32bd" 1|
-    [|WD 84 "008400" 0|]
-  ]
-]
-]
-\end{myforest}
-%}
-\caption{Example of decorating a tree with hashes, through the
-|decorate| function.}
-\label{fig:pepatches:decorate}
-\end{figure}
+%% \begin{figure}
+%% %{
+%% %format WD c ha he = "\begin{array}{c} \HS{hash}\HS{=}" ha " \\ \HS{height}\HS{=}" he " \\"  c " \end{array}"
+%% \centering
+%% \begin{myforest}
+%% [,phantom , s sep'+=60pt
+%% [|Bin| , name=A [|Bin| [|Leaf| [|42|]] [|Leaf| [|42|]]] [|Leaf| [|84|]]]
+%% [|WD Bin "0f42ab" 3|, tikz+={
+%%         \draw [hdiff-black,->] (A.east) [out=25, in=165]to node[midway,above]{|decorate|} (!c.west);
+%%       }
+%%   [|WD Bin "310dac" 2| , name=ex1
+%%     [|WD Leaf "0021ab" 1| [|WD 42 "004200" 0|]]
+%%     [|WD Leaf "0021ab" 1| [|WD 42 "004200" 0|]]
+%%   ]
+%%   [|WD Leaf "4a32bd" 1|
+%%     [|WD 84 "008400" 0|]
+%%   ]
+%% ]
+%% ]
+%% \end{myforest}
+%% %}
+%% \caption{Example of decorating a tree with hashes, through the
+%% |decorate| function.}
+%% \label{fig:pepatches:decorate}
+%% \end{figure}
 
   The algebra used by |decorate|, above, computes a hash at each constructor
 of the tree. The hashes are computed from the a unique identifier per constructor
 and a concatenation of the hashes of the subtrees. The hash of the
-root in \Cref{fig:pepatches:decorate}, for example, is computed with
+root in \Cref{fig:pepatches:decorate-conc}, for example, is computed with
 a call to |hash (concat ["Main.Tree.Bin", "310dac", "4a32bd"])|.  This
 ensures that hashes uniquely identify a subtree modulo hash
 collisions.
@@ -1326,7 +1326,7 @@ buildArityMap :: PrepFix a kappa fam ix -> Trie Arity
 \end{myhs}
 
   A call to |buildArityMap| with the annotated tree shown in
-\Cref{fig:pepatches:decorate}, for example, would
+\Cref{fig:pepatches:decorate-conc}, for example, would
 yield the following map.
 
 \begin{myhs}
@@ -1541,7 +1541,8 @@ chg x y =  let  dx             = decorate x
                 dy             = decorate y
                 (_, sh)        = buildSharingMap opts dx dy
             in extract extMode canShare (dx :*: dy)
- where canShare t = 1 < treeHeight (getConst (getAnn t))
+ where
+   canShare t = 1 < treeHeight (getConst (getAnn t))
 \end{code}
 \end{myhs}
 
@@ -2109,26 +2110,28 @@ representing and computing alignments, which are crucial for
 synchronization.
 
 
-  Take \Cref{fig:pepatches:alignment-01:A}, which was the change that
-motivated locally-scoped patches, in
-\Cref{fig:pepatches:misalignment}.  This time, howerver, we explicitly
-added information about which constructors, albeit duplicated,
-represent \emph{the same information}.  The |Chg| datatype by itself
-is insufficient to make it clear that |(: 42)| at the root of the
-deletion context has no countertart in the insertion context.
-Computing and representing an alignment is exactly computing and
-representing this association between subtrees of the deletion and
-insertion contexts. In this case, the aligned version of
-\Cref{fig:pepatches:alignment-01:A} is shown in
+  Take \Cref{fig:pepatches:alignment-01:A}, which was the very change that
+motivated locally-scoped patches (\Cref{fig:pepatches:misalignment}).
+This time, howerver, we explicitly
+drew information about which constructors, albeit duplicated,
+represent \emph{the same information} in each respective context.
+The |Chg| datatype by itself is insufficient to make it clear that
+|(: 42)| at the root of the deletion context, in
+\Cref{fig:pepatches:alignment-01:A}, has no countertart in the
+insertion context.  Computing and representing an alignment is,
+intuitively, the process of computing and representing this
+association between subtrees of the deletion and insertion contexts.
+
+ The aligned version of \Cref{fig:pepatches:alignment-01:A} is shown in
 \Cref{fig:pepatches:alignment-01:B}, where the |Al| border marks
 scoping for metavariables, a spine within its scope, subsequent
 copies, and the deletion of |(: 42)| are all represented explicitly.
-
-  It is worth noting that untyped synchronizers, such
-as \texttt{harmony}~\cite{Foster2007}, must employ schemas to overcome issues
-similar to that of \Cref{fig:pepatches:misalignment}. In our case,
-the type information will enable us to identify insertions and deletions
-properly.
+It is worth noting that untyped synchronizers, such as
+\texttt{harmony}~\cite{Foster2007}, must employ schemas to overcome
+issues similar to that of \Cref{fig:pepatches:misalignment}. In our
+case, the type information enable us to identify insertions and
+deletions easily by ensuring that they delete one layer of a recursive
+type at a time, never altering the type of the value under scrutiny.
 
   An aligned patch consists in a spine of copied constructors leading
 to a \emph{well-scoped alignment}. This alignment, in turn, consists
@@ -2647,16 +2650,20 @@ changes of |p| and |q|.}
 \label{fig:pepatches:mergesquare}
 \end{figure}
 
-  Recall our patches consist in a spine which leads to
+  Recall our patches consist of a spine which leads to
 locally-scoped alignments, which in turn also
 have an inner spine that ultimately leads to changes. The distinction
 between the \emph{outer} spine and the spine inside the
-alignments is the scope. Consequently, we can map over
-the outer spine without having to remember information
-across calls but we \emph{must} remember information
-inside the scope of an alignment. Take the example in
-\Cref{fig:pepatches:merge-00}, while synchronizing
-the left child of each root, we discover that the tree
+alignments is the scope. Consequently, we can map a pure
+function over the outer spine without having to carry information
+about local scopes delimited by our alignments to the next call.
+When manipulating the \emph{inner} spine, however, we must
+keep track of which variables have or have not been declared
+or used. Take the example in
+\Cref{fig:pepatches:merge-00}, that merges patches |p|
+(\Cref{fig:pepatches:merge-00:A}) and |q| (\Cref{fig:pepatches:merge-00:B})
+to produce a new patch (\Cref{fig:pepatches:merge-00:C}).
+While synchronizing the left child of each root, we discover that the tree
 located at (or, identified by) |metavar x| was |Leaf 42|.
 We must remember this information since we will encounter
 |metavar x| again and must ensure that it matches with
@@ -2677,7 +2684,7 @@ alignments guarantees |metavar x| will not appear elsewhere.
     [|Prm (metavar y) (metavar z)|]
     [|Prm (metavar z) (metavar y)|]]
 ]
-\end{myforest}}\qquad%
+\end{myforest}\label{fig:pepatches:merge-00:A}}\qquad%
 \subfloat[Patch |q|]{%
 \begin{myforest}
 [|Bin| , s sep=7mm
@@ -2685,7 +2692,7 @@ alignments guarantees |metavar x| will not appear elsewhere.
   [,insctx , alignmentSmall
     [|Bin| [|Leaf| [|84|]] [SQ]]
     [|Cpy (metavar k)|]]]
-\end{myforest}}
+\end{myforest}\label{fig:pepatches:merge-00:B}}
 
 \subfloat[Result of |merge p q|]{%
 \begin{myforest}
@@ -2699,7 +2706,7 @@ alignments guarantees |metavar x| will not appear elsewhere.
       [|Prm (metavar y) (metavar z)|]
       [|Prm (metavar z) (metavar y)|]]]
 ]
-\end{myforest}}
+\end{myforest}\label{fig:pepatches:merge-00:C}}
 \caption{Example of a simple synchronization}
 \label{fig:pepatches:merge-00}
 \end{figure}
@@ -2774,7 +2781,9 @@ of the merge algorithm issued it and the two alignments that could not
 be synchronized. Conflicts are issued whenever we were not able to
 reconcile the alignments in question. This happens either when we
 cannot detect that two edits to the same location are non-interfering
-or when two edits to the same location interfere with one another.
+or when two edits to the same location in fact interfere with one another.
+Putting it differently, conflicts might contain false positives where
+edits could have been automatically reconciled.
 The |PatchC| datatype encodes patches which might contain conflicts
 inside.
 
@@ -2786,11 +2795,12 @@ type PatchC kappa fam at    = Holes kappa fam (Sum (Conflict kappa fam) (Chg kap
 \end{code}
 \end{myhs}
 
-  \digress{Before moving on to the bowels of synchronization, I should
-mention that this algorithm is not in a particularly final state, it
-was the last topic I have worked on. I feel some aspects of it could
-be improved but unfortunately, at one point one has to stop and write
-a thesis.}
+  Merging has a large design space. In what follows we will discuss
+our initial exploration and prototype algorithm, which was driven
+practical experiments (\Cref{chap:experiments}).
+\digress{Unfortunately, I never had time to come back and refine the
+merging algorithm from its prototype phase into a more polished
+version. The merging algorithm was the last aspect of the project I worked on.}
 
   The |mergeAl| function is responsible for synchronizing alignments and
 is where most of the work is happens. In broad strokes, it is similar to
@@ -2801,7 +2811,11 @@ copies are the identity of synchronization. In the current setting,
 however, we also have permutations and arbitrary changes to look at.
 The general conducting line of our synchronization algorithm is to
 first record how each subtree was modified and then instantiate these
-modifications in a later phase.
+modifications in a later phase. Tarversing the patches simultaneously
+whilst constructing substitutions would not suffice since the order
+which metavariables appear in each context can be drastically different.
+This would require us to start over every time we discovered new
+information on the current traversal, yielding a very slow merging algorithm.
 
   Let us look at an example, illustrated in
 \Cref{fig:pepatches:merge-02}. We start identifying we are in a
@@ -2848,11 +2862,9 @@ preserved as is.  The resulting patch can be seen in
 \label{fig:pepatches:merge-02}
 \end{figure}
 
-\victor{using iota below might be hard to read; is it?}
-
   We keep track of the equivalences we discover
 in a state monad. The instantiation of metavariables
-will be stored under |iota| and the list of tree equivalences
+will be stored under |inst| and the list of tree equivalences
 will be stored under |eqs|.
 
 \begin{myhs}
@@ -2860,34 +2872,101 @@ will be stored under |eqs|.
 type Subst kappa fam phi = Map (Exists phi)
 
 data MergeState kappa fam = MergeState
-  { iota  :: Map (Exists (Metavar kappa fam)) (Exists (Chg      kappa fam))
+  { inst  :: Map (Exists (Metavar kappa fam)) (Exists (Chg      kappa fam))
   , eqs   :: Map (Exists (Metavar kappa fam)) (Exists (HolesMV  kappa fam))
   }
 \end{code}
 \end{myhs}
 
-  The equivalences in |eqs| are different from instantiations
-in |iota| in an important way. The entries |(metavar v , c)| in |iota|
-represent a decision made by the merging algorithm: the subtree
-located at |metavar v| must be modified according to a change |c| -- which
-means that the result of the merging process will contain no
-occurrences of |metavar v| left.
-The equivalences, on the other hand, represent observations made
-by the merging algorithm, that is, an entry |(metavar v , t)| represents
-an observation that the subtree at |metavar v| is equal to |t|.
-These facts may or may not be used later on. For example, say that
-there is an entry |(metavar u, metavar v)| in |eqs|, but we
-already made a decision about how to instantiate |metavar v|,
-that is, there is also an entry |(metavar v , c)| in |iota|.
-If we substitute occurrences of |metavar u| for |v| we risk reintroducing
-occurrences of |v|, which can yield in patches that cannot be applied.
-\digress{I believe that there is a more elegant way to address
-this. One option could have been using a single map and register equivalences
-some other way. Say that |metavar v| is discovered to be
-equivalent to |t|, it could be registered as |(metavar v , Chg t t)|,
-that is: |metavar v| was |t| and became |t|. Once again, recall that
-the merging algorithm in this section was very much a work-in-progress
-while my PhD finished.}
+\victor{I simplified the explanation and removed the remark below; is this fine?}
+
+  It is important to keep track of equivalences in |eqs|. Say, for
+example, we are to merge two changes that were left as \emph{unclassified}
+by our alignment algorithm. Naturally, their deletion contexts must
+be unifiable, yielding a series of equivalences between their metavariables
+but since we do not possess information about exactly how each of
+those metavariables were transformed, we cannot register how they
+changed in |inst|.
+
+%% 
+%%   The equivalences in |eqs| are different from instantiations in
+%% |inst| and arise from a lack of expressivity from our alignments.
+%% The entries |(metavar v , c)| in |inst|
+%% represent a decision made by the merging algorithm: the subtree
+%% located at |metavar v| must be modified according to a change |c| --
+%% which means that the result of the merging process will contain no
+%% occurrences of |metavar v| left.  The equivalences, on the other hand,
+%% represent observations made by the merging algorithm, that is, an
+%% entry |(metavar v , t)| represents an observation that the subtree at
+%% |metavar v| is equal to |t|. This distinction is intricate and deserves
+%% a more detailed example.
+%% 
+%%   Take \Cref{fig:pepatches:inst-not-eqs},
+%% which shows two aligned patches |p| and |q|, operating over rose trees.
+%% The result of |merge p q| is expectectly |q| itself, since it performs
+%% exactly the modifications done by |p| but additionally inserts some
+%% information (|Rose "nest"|). Since the focus of the insertion performed
+%% by |q| does not appear as a recursive argument, it is not detected
+%% as such by our alignments. Moreover, since |Rose "keep" []| was
+%% also contracted, we cannot flag it as a simple copy. When merging
+%% |Chg (metavar y) (metavar y)| with |
+%% 
+%% 
+%% performs an additional insertion. The difficulty arises from the
+%% the focus of the insertion of |q| appearing in a nested position. our
+%% simple one-layer zippers cannot detect it. Consequently,
+%% when the merging algorithm is looking at both changes to the
+%% left of |(:)|, it has to deal with them as if they were arbitrary changes.
+%% Hence, it unifies the deletion contexts, discovering that |metavar y|
+%% identifies the same tree as |metavar b|. When lookint at the
+%% insertion contexts, we see that on the one hand
+%% this subtree was left untouched (by |p|) but on the other it became
+%% |Rose "nest" [metavar b]|. If we are not careful and simply ask the
+%% unification engine to produce an idempodent substitution to let us
+%% produce the final merge, it would return an \emph{occurs-check} failure.
+%% This issue stems from a combination of factors. For one, |metavar y| does not
+%% get identified as a copy because it is contracted, and secondly, our alignments
+%% to not recognize |Rose "nest" [metavar b]| as an insertion because it has
+%% depth two. \digress{I believe there should be a more elegant way of
+%% working around this issue, but unfortunately I had to leave it as future work.}
+%% 
+%% \begin{figure}
+%% \centering
+%% \subfloat[|p = align (diff o a)|]{%
+%% \begin{myforest}
+%% [|Rose|, s sep=6mm
+%%   [|Cpy (metavar x)|, alignmentSmall]
+%%   [|(:)|,alignmentSmall, s sep=4mm
+%%     [,change [y,metavar] [y,metavar]]
+%%     [,change, s sep=0mm
+%%       [|(:)| [y,metavar]
+%%        [|(:)| [|Rose "rm" []|] [|[]|] ]]
+%%       [|[]|]]]]
+%% \end{myforest}}\quad%
+%% \subfloat[|q = align (diff o b)|]{%
+%% \begin{myforest}
+%% [|Rose|, s sep=12mm
+%%   [|Cpy (metavar a)|, alignmentSmall]
+%%   [|(:)|, alignmentSmall, s sep=4mm
+%%     [,change,s sep=0mm, [b,metavar] [|Rose| [|"nest"|] [|(:)| [b,metavar] [|[]|]]]]
+%%     [,change,s sep=0mm, [|(:)| [b,metavar] [|(:)| [|Rose "rm" []|] [|[]|]]] [|[]|]]
+%%   ]]
+%% \end{myforest}}
+%% \vspace*{6.4em}
+%% \begin{myhsFig}
+%% \begin{code}
+%% data Rose = Rose String [Rose]
+%% 
+%% a = Rose "x" [Rose "keep" []]
+%% o = Rose "x" [Rose "keep" [] , Rose "keep" [] , Rose "rm" []]
+%% b = Rose "x" [Rose "nest" [Rose "keep" []]]
+%% \end{code}
+%% \end{myhsFig}
+%% 
+%% \caption{Intricate example where we ignoring the difference
+%% between |inst| and |eqs| in |MergeState| would yeild a conflict.}
+%% \label{fig:pepatches:inst-not-eqs}
+%% \end{figure}
 
   Conflicts and errors stemming from the arguments to |mergeAl|
 \emph{not} forming a span will be distinguished by the |MergeErr| datatype,
@@ -2941,7 +3020,8 @@ mergeAlM p q = do
 \end{code}
 \end{myhs}
 
-  The first pass is computed by the |mergePhase1| function, which will
+\subsubsection{First Phase}
+The first pass is computed by the |mergePhase1| function, which will
 populate the state with instantiations and equivalences and place
 values of type |Phase2| in-place in the alignment. These values instruct
 the second phase on how to proceed on that particular location.
@@ -2968,7 +3048,8 @@ data Phase2 kappa fam at where
   Deciding which instruction should be performed depends on the
 structure of the alignments under synchronization.
 The |mergePhase1| function is shown in its entirety
-in \Cref{fig:pepathes:mergePhase1} but discussed in detail next.
+in \Cref{fig:pepathes:mergePhaseOne} but we will discussed the
+individual cases one by one, next.
 
 \begin{myhs}
 \begin{code}
@@ -2983,7 +3064,8 @@ all we need to do is modify the tree according to |q| at the
 current location. We might need to refine |q| according to
 other constraints we discovered in other parts of the alignment
 in question, so the final instruction is to \emph{instantiate}
-the |Chg| that comes from forgetting the alignment |q|.
+the |Chg| that comes from forgetting the alignment |q|. Recall
+|disalign| returns a |Chg|.
 
 \begin{myhs}
 \begin{code}
@@ -3044,25 +3126,25 @@ the alignment flagged it as a permutation.
 \begin{code}
 mrgPrm  :: Metavar kappa fam x -> Metavar kappa fam x -> Chg kappa fam x
         -> MergeM kappa fam (Phase2 kappa fam x)
-mrgPrm x y c  =   addToIota "prm-chg" x c
+mrgPrm x y c  =   addToInst "prm-chg" x c
               >>  return (P2Instantiate (Chg (Hole x) (Hole y)) Nothing)
 \end{code}
 \end{myhs}
 
-  The |addToIota| function inserts the |(x, c)| entry in |iota| if |x|
+  The |addToInst| function inserts the |(x, c)| entry in |inst| if |x|
 is not yet a member. It raises a conflict with the supplied label
-if |x| is already in |iota| with a value that is different than |c|.
+if |x| is already in |inst| with a value that is different than |c|.
 \digress{I believe that we could develop a better algorithm if instead
 of forbidding values different than |c| we check to see whether the
 two different values can also be merged. I ran into many difficulties
 tracking how subtrees were moved and opted for the easy and pragmatic
 option of not doing anything difficult here.}
 
-  The call to |addToIota| in |mrgPrm|, above, will never raise a
+  The call to |addToInst| in |mrgPrm|, above, will never raise a
 |"prm-chg"| conflict. This is because |metavar x| and |metavar y| are
 classified as a permutation hence, each variable occurs exactly once
 in the deletion and once in the insertion contexts.  Therefore, it is
-impossible that |x| above was already a member of |iota|.  \digress{In
+impossible that |x| above was already a member of |inst|.  \digress{In
 fact, throughout our experiments, in \Cref{chap:experiments}, we
 observed that |"prm-chg"| never showed up as a conflict in our whole
 dataset, as expected.}
@@ -3160,7 +3242,7 @@ hand.
 \begin{code}
 instM :: (All Eq kappa) => HolesMV kappa fam at -> Al kappa fam at -> MergeM kappa fam ()
 instM _           (Cpy _)  = return ()
-instM (Hole v)    a        = addToIota "inst-contr" v (disalign a)
+instM (Hole v)    a        = addToInst "inst-contr" v (disalign a)
 -- Del ctx and spine must form a span; cannot reference different constructors or primitives.
 instM x@(Prim _)  d        = when (x /= chgDel (disalign d)) throwNotASpan
 instM (Roll r)    (Spn s)  = case zipSRep r s of
@@ -3285,7 +3367,6 @@ than arbitrary modifications, they are easier to handle.
 
   Merging duplications is straightforward, if |p'| or |q'|
 above are a duplication, that is, of the form |Chg (metavar x) (metavar y)|
-where |metavar x| or |metavar y| appears three or more times globally,
 we attempt to instantiate them with according to the
 how this subtree was changed and move on.
 
@@ -3293,7 +3374,7 @@ how this subtree was changed and move on.
 \begin{code}
 mrgChgDup  :: Chg kappa fam x -> Chg kappa fam x -> MergeM kappa fam (Phase2 kappa fam x)
 mrgChgDup dup@(Chg (Hole v) _) q' = do
-  addToIota "chg-dup" v q'
+  addToInst "chg-dup" v q'
   return (P2Instantiate dup Nothing)
 \end{code}
 \end{myhs}
@@ -3314,7 +3395,9 @@ mrgChgChg p' q'  | isDup p'   = mrgChgDup p' q'
 \end{code}
 \end{myhs}
 
-  \Cref{fig:pepatches:mergePhase1} collects all the cases discussed
+\subsubsection{Second Phase}
+
+  \Cref{fig:pepatches:mergePhaseOne} collects all the cases discussed
 above and illustrates the full definition of |mergePhase1|.
 Once the first pass is done and we have collected information
 about how each subtree has been changed and potential subtree
@@ -3362,17 +3445,17 @@ mrgPhase1 p q = case (p , q) of
 \end{code}
 \end{myhs}
 \caption{Full implementation of |mergePhase1|.}
-\label{fig:pepatches:mergePhase1}
+\label{fig:pepatches:mergePhaseOne}
 \end{figure}
 
-  Splitting |iota| and |eqvs| require some attention. For example,
-imagine there exists an entry in |iota| that assigns |metavar x|
+  Splitting |inst| and |eqvs| require some attention. For example,
+imagine there exists an entry in |inst| that assigns |metavar x|
 to |Chg (Hole (metavar y)) (: 42 (Hole (metavar y)))|, this tells us that
 the tree identified by |metavar x| is the same as the tree identified
 by |metavar y|, and it became |(: 42 (metavar y))|. Now suppose that
 |metavar x| was duplicated somewhere else, and we come across
 an equivalence that says |metavar y == metavar x|. We cannot simply insert
-this equivalence into |iota| because the merge algorithm made the decision to
+this equivalence into |inst| because the merge algorithm made the decision to
 remove all occurrences of |metavar x|, not of |metavar y|, even
 though they identify the same subtree. This is important to ensure
 we produce patches that can be applied. \digress{This is yet
@@ -3381,7 +3464,7 @@ disciplined approach. Will have to be future work, nevertheless.}
 
   The |splitDelInsMaps| function is responsible for synthesizing the
 information gathered in the first pass of the synchronization
-algorithm. First we split |iota| into the deletion and insertion
+algorithm. First we split |inst| into the deletion and insertion
 components of each of its points. Next, we partition the equivalences into rigid
 equivalences, of the form |(metavar v , t)| where |t| has no holes, and
 non-rigid equivalences. The rigid equivalences are added to both
@@ -3400,8 +3483,8 @@ splitDelInsMaps  :: MergeState kappa fam
                            (  Subst kappa fam (Metavar kappa fam) ,  Subst kappa fam (Metavar kappa fam))
 splitDelInsMaps (MergeState iot eqvs) = do
     let e' = splitEqvs eqvs
-    d <- addEqvsAndSimpl (map (exMap chgDel) iota) e'
-    i <- addEqvsAndSimpl (map (exMap chgIns) iota) e'
+    d <- addEqvsAndSimpl (map (exMap chgDel) inst) e'
+    i <- addEqvsAndSimpl (map (exMap chgIns) inst) e'
     return (d , i)
 \end{code}
 \end{myhs}
@@ -3488,7 +3571,12 @@ isEqChg di ca cb =  let  ca' = refineChg di ca
 %% \label{fig:pepatches:merge-02}
 %% \end{figure}
 
-\victor{Add some closing notes to merging?}
+  The merging algorithm presented in this section is involved. It
+must deal with a number of corner cases and use advanced techniques
+to do so generically. Most of the difficulties come from having to
+deal with arbitrary duplications and contractions. If we instead chose
+to use only linear patches, that is, patches where each metavariable must
+be declared and used exactly once, the merge algorithm could be simplified.
 
 \section{Discussion and Further Work}
 \label{sec:pepatches:discussion}
@@ -3503,13 +3591,18 @@ transformations involving arbitrary permutations and duplications. As
 a consequence, we have a more involved merge algorithm. For one, we
 cannot easily generalize our three-way merge to $n$-way merge. More
 importantly, though, there are subtleties in the algorithm that arose
-purely from practical necessities. It can certainly benefit from
-further work. Nevertheless, \texttt{hdiff} has shown a strong
-potential for practical use, as we will see shortly in
-\Cref{chap:experiments}.  The current state of \texttt{hdiff},
-however, is still that of a \emph{proof-of-concept} as opposed to a
-practical implementation of a tool. In this section we will discuss a
-number aspects that were left as future work.
+purely from practical necessities. Our posterior empirical evaluation
+(\Cref{chap:experiments}) does indicate that the best success ratio
+comes from merging linear patches -- where metavariables occur exactly
+twice, obtained with the |Patience| extraction mode. This does suggest
+that the soft-spot in the design space might well be allowing
+arbitrary permutations, enabling a fast differencing algorithm,
+but forbiding arbitrary duplications and contractions, which could
+enable a simpler merging algorithm. Besides the merging
+algorithm, we will discuss a number of other important aspects
+that were left as future work and would need to
+be addressed to bring \texttt{hdiff} from a prototype to
+a production tool.
 
 \subsubsection{Refining Matching and Sharing Control}
   The matching engine underlying \texttt{hdiff} uses hashes
@@ -3622,7 +3715,8 @@ metavariables.  For example, take the change below.
 
   The list of metavariables in the deletion context is |[metavar x ,
 metavar x , metavar z , metavar x]|, but in the insertion context we
-have |[metavar x , metavar z , metavar x]|. Computing the LCS between
+have |[metavar x , metavar z , metavar x]|. Computing the longest
+common subsequence between
 these lists yields |[Del x , Cpy , Cpy , Cpy]|. The first |Del|
 suggests a contraction is really necessary, but the last copy shows
 that we could \emph{break} the sharing by renaming |(metavar x)| to
@@ -3674,6 +3768,8 @@ aspects of the algorithms. Two of those immediately jump to mind:
 generalizing the merge function to merge $n$ patches and
 generalizing alignments insertions and deletions zippers to be
 of arbitrary depth, instead of a single layer.
+Finally, a formalization also provides important value in better
+understanding the merge algorithm.
 
 %%% Local Variables:
 %%% mode: latex
