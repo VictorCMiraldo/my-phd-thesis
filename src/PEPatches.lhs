@@ -1588,8 +1588,10 @@ constructors in the deletion context are, in fact, just being copied
 over in the insertion context. Take \Cref{fig:pepatches:example-04},
 where one change operates exclusively on the right child of a binary
 tree whereas the other alters the left child and duplicates the right
-child in-place.  These changes are \emph{disjoint} and should be possible to
-be automatically synchronized.  To recognize them as \emph{disjoint}
+child in-place.  These changes are clearly \emph{disjoint}, since they
+modify the content of different subtrees of the source. Consequently
+it should be possible to be automatically synchronize them.
+To recognize them as \emph{disjoint} changes, though
 will require more information than what is provided by |Chg|.
 
   Observing the definition of |Chg| reveals that the deletion context
@@ -1627,15 +1629,10 @@ evident \emph{spine}.}
 \label{fig:pepatches:example-02}
 \end{figure}
 
-  A \emph{patch}, then, is precisely the idea of many individual
-changes operating in separate parts of the source tree. It consists in
-a spine that contains changes in its leaves and is defined by the type
-|Patch| below.  \Cref{fig:pepatches:example-02} illustrates the
-difference between patches and changes graphically.  In
-\Cref{fig:pepatches:example-02:chg} we see |Bin (Leaf 42)| being
-repeated in both contexts -- whereas in
-\Cref{fig:pepatches:example-02:patch} it has been placed in the spine
-and consequently, is clearly identified as a copy.
+  A \emph{patch}, then, captures the idea of many individual
+changes operating over separate parts of the source tree. It consists in
+a spine that leads to changes in its leaves, and is defined by the type
+|Patch| below.
 
 \begin{myhs}
 \begin{code}
@@ -1643,6 +1640,12 @@ type Patch kappa fam = Holes kappa fam (Chg kappa fam)
 \end{code}
 \end{myhs}
 
+  \Cref{fig:pepatches:example-02} illustrates the
+difference between patches and changes graphically.  In
+\Cref{fig:pepatches:example-02:chg} we see |Bin (Leaf 42)| being
+repeated in both contexts -- whereas in
+\Cref{fig:pepatches:example-02:patch} it has been placed in the spine
+and consequently, is clearly identified as a copy.
 
 % Two changes that operate on disjoint
 % subtrees -- have different paths from the root -- are trivially
@@ -1793,7 +1796,6 @@ chgDistr p  = Chg  (holesJoin (holesMap chgDel p)) (holesJoin (holesMap chgIns p
 \end{code}
 \end{myhs}
 
-
   The application semantics of |Patch| is independent of the scope
 choices, and is easily defined in terms of |chgApply|. First we
 computing a global change that corresponds to the patch in question,
@@ -1819,13 +1821,15 @@ independently of one another in the tree.  This is particularly
 important for being able to develop an industrial synchronizer at some
 point, as it keeps \emph{conflicts} small and isolated.
 
-  We propose that the actual solution will consist in using a combination of
-both scopings variants. First we will produce a locally-scoped
-patch, which forbids situations as in
-\Cref{fig:pepatches:misalignment}.  This gives us an opportunity of
-identifying deletions and insertions that could cause copies to be
-misaligned, essentially producing a globally-scoped \emph{alignment},
-we will discuss this in more detail shortly
+  We propose that the actual solution will consist in using a
+combination of both scopings variants. First we will produce a
+locally-scoped patch, which forbids situations as in
+\Cref{fig:pepatches:misalignment}. This patch will consist in an
+\emph{outer} spine leading to closed localy-scoped changes.  This
+gives us an opportunity to identifying deletions and insertions that
+could cause copies to be misaligned, essentially producing a
+globally-scoped \emph{alignment} inside each of those
+changes. Alignments will be discussed in more detail shortly
 (\Cref{sec:pepatches:alignments}).
 
 \subsection{Computing Closures}
@@ -1835,16 +1839,38 @@ we will discuss this in more detail shortly
 \centering
 \subfloat[Not minimal; |Bin| is repeated and not necessary
 to maintain scope.]{%
-\quad
+\enspace
 \begin{myforest}
 [,change
   [|Bin| [|Leaf| [|42|]] [x,metavar]]
   [|Bin| [|Leaf| [|84|]] [x,metavar]]
 ]
 \end{myforest}
-\quad
+\enspace
 \label{fig:pepatches:example-minimal:A}}%
-\quad\quad
+\quad
+\subfloat[Patch with minimal changes that results from |close| applied to \ref{fig:pepatches:example-minimal:A}]{%
+\enspace
+\begin{myforest}
+[|Bin|, s sep=2mm
+  [|Leaf| [,change [|42|] [|84|]]]
+  [,change [x,metavar] [x,metavar]]
+]
+\end{myforest}
+\enspace
+\label{fig:pepatches:example-minimal:B}}%
+\quad
+\subfloat[Minimal; |Bin| is necessary to maintain scope.]{%
+\enspace
+\begin{myforest}
+[,change, s sep=2mm
+  [|Bin| [x,metavar] [y,metavar]]
+  [|Bin| [y,metavar] [x,metavar]]
+]
+\end{myforest}
+\enspace
+\label{fig:pepatches:example-minimal:C}}%
+
 \subfloat[Minimal; root constructor modified.]{%
 \quad
 \begin{myforest}
@@ -1854,81 +1880,91 @@ to maintain scope.]{%
 ]
 \end{myforest}
 \quad
-\label{fig:pepatches:example-minimal:B}}%
-
-\subfloat[Minimal; |Bin| is necessary to maintain scope.]{%
-\quad
-\begin{myforest}
-[,change
-  [|Bin| [x,metavar] [y,metavar]]
-  [|Bin| [y,metavar] [x,metavar]]
-]
-\end{myforest}
-\quad
-\label{fig:pepatches:example-minimal:C}}%
-\quad\quad
-\subfloat[Patch with minimal changes that results from |close| applied to \ref{fig:pepatches:example-minimal:A}]{%
-\quad
-\begin{myforest}
-[|Bin|, s sep=5mm
-  [|Leaf| [,change [|42|] [|84|]]]
-  [,change [x,metavar] [x,metavar]]
-]
-\end{myforest}
-\quad
 \label{fig:pepatches:example-minimal:D}}%
+\quad\quad
+\subfloat[Not closed; |metavar x| appears in two separate changes.]{%
+\quad
+\begin{myforest}
+[|Bin| , s sep=4mm
+ [,change
+  [|Bin| [x,metavar] [y,metavar]]
+  [|Bin| [y,metavar] [x,metavar]]]
+ [,change [x,metavar] [x,metavar]]]
+\end{myforest}
+\quad
+\label{fig:pepatches:example-minimal:E}}%
+
 \caption{Some non-minimal-closed and minimal-closed changes examples.}
 \label{fig:pepatches:example-minimal}
 \end{figure}
 
   Computing locally-scoped patches consists in first computing
-the largest possible spine, like with globally-scoped patches, then
+the largest possible spine, like we did with globally-scoped patches, then
 enlarging the resulting changes until they are well-scoped and closed.
 \Cref{fig:pepatches:example-03} actually
 illustrates this process well. Computing the closure of
 \Cref{fig:pepatches:example-03:A} is done by computing
-\Cref{fig:pepatches:example-03:B}, then \emph{pushing} the the |Bin|
-constructor down the changes, fixing their scope, resulting in
-\Cref{fig:pepatches:example-03:C}.
+\Cref{fig:pepatches:example-03:B}, then \emph{enlarging} the changes
+to contain the |Bin| constructor, which fixes their scope (resulting in
+\Cref{fig:pepatches:example-03:C}).
 
-%{
-%format dn = "\HSVar{d_n}"
-%format in = "\HSVar{i_n}"
-%format dj = "\HSVar{d_j}"
-%format ij = "\HSVar{i_j}"
+  We say a change is closed when it has no free metavariables and,
+additionally, its metavariables occur nowhere else globally. By this
+definition, the changes that are produced by the |chg| function are all
+closed, but they are certainly not as small as they could be, in general.
+We say a change is in \emph{minimal} form when the root constructors
+in its deletion and insertion context are either different
+or necessary to maintain scope. \Cref{fig:pepatches:example-minimal}
+illustrates different combinations of \emph{closed} and \emph{minimal}
+changes. The intuition behind \emph{minimal-closed} changes is that
+two such changes should not interfere with one another.
 
-  We say a change |c| is in \emph{minimal-closed}
-form if and only if it is closed with respect to some global scope
-and, either: (A) |chgDel c| and |chgIns c| have different constructors
-at their root or (B) they contain the same constructor to maintain
-well-scopedness. More formally, when |chgDel c| and |chgIns c| contain
-the same constructor, let |chgDel c == X d0 dots dn| and |chgIns c == X
-i0 dots in|, we say |X| is necessary to maintain well-scopedness if
-there exists an index |j| and variable |v| such that |v| occurs in
-|ij| but is not defined in |dj|.  This means we cannot place |X| in
-the spine whilst maintaining all changes
-well-scoped. \Cref{fig:pepatches:example-minimal} illustrates some
-cases.
-%}
+%% %{
+%% %format dn = "\HSVar{d_n}"
+%% %format in = "\HSVar{i_n}"
+%% %format dj = "\HSVar{d_j}"
+%% %format ij = "\HSVar{i_j}"
+%% 
+%%   Formally, we say a change |c| is in \emph{minimal-closed}
+%% form if and only if it is closed with respect to some global scope
+%% and, either: (A) |chgDel c| and |chgIns c| have different constructors
+%% at their root or (B) they contain the same constructor to maintain
+%% well-scopedness. More formally, when |chgDel c| and |chgIns c| contain
+%% the same constructor, let |chgDel c == X d0 dots dn| and |chgIns c == X
+%% i0 dots in|, we say |X| is necessary to maintain well-scopedness if
+%% there exists an index |j| and variable |v| such that |v| occurs in
+%% |ij| but is not defined in |dj|.  This means we cannot place |X| in
+%% the spine whilst maintaining all changes
+%% well-scoped.
+%% %}
 
-  Defining whether a change is closed or not has its nuances. Firstly,
-we can only know that a change is in fact closed if we know, at least,
-how many times each variable is used globally.  Say a variable |x| is
-used |n + m| times in total within a change |c|, and it has |n| and
-|m| occurrences in the deletion and insertion contexts of |c|,
-respectively.  Then |x| does not occur anywhere else but within |c|,
-in other words, |x| is \emph{local} to |c|. If all variables of |c|
-are \emph{local} to |c|, we say |c| is closed.  Given a multiset of
-variables |g :: Map Int Arity| for the global scope, we can define
-|isClosedChg| in Haskell as:
+  Producing locally-scoped minimal-closed changes can be difficult under
+arbitrary renamings. Take \Cref{fig:pepatches:example-minimal:E}, one
+could argue that: if the |metavar x| that occur in each individual
+change are, in fact, different, then the changes are
+minimal-closed. To avoid these In our case, however, we always start
+from a large well-scoped change produced with |chg|. Consequently, we
+know that every occurence of |metavar x| refers to \emph{the same}
+tree in the source of the patch. This is another technicality of
+dealing with names explicitly and provides good reason to enforce that
+names are always different, even when occuring in separate scopes.
+
+  In general, then, we can only know that a change is in fact closed
+if we know how many times each variable is used globally.  Say a
+variable |metavar z| is used |n + m| times in total within a change
+|c|, and it has |n| and |m| occurrences in the deletion and insertion
+contexts of |c|, respectively.  Then |metavar z| does not occur
+anywhere else but within |c|, in other words, |metavar z| is
+\emph{local} to |c|. If all variables of |c| are \emph{local} to |c|
+with respect to some global scope, we say |c| is closed.
+Given a multiset of variables for the global scope, we
+can define |isClosedChg| in Haskell as:
 
 \begin{myhs}
 \begin{code}
-isClosed :: Map Int Arity -> Map Int Arity -> Map Int Arity -> Bool
-isClosed global ds us = unionWith (+) ds us `isSubmapOf` global
-
 isClosedChg :: Map Int Arity -> Chg kappa fam at -> Bool
 isClosedChg global (Chg d i) = isClosed global (vars d) (vars i)
+  where isClosed global ds us = unionWith (+) ds us `isSubmapOf` global
 \end{code}
 \end{myhs}
 
@@ -2100,17 +2136,16 @@ explicit representation of that information.}
 
   As we have seen in the previous sections, locally-scoped changes
 avoid the problem of misaligning copies by not recognizing insertions
-or deletions (\Cref{fig:pepatches:misalignment}), but the problem
-remains. In fact, being able to recognize which constructors in
-the deletion context correspond to which construtors in the insertion
-context is crucial for synchronization: no merging algorithm can be
+or deletions (\Cref{fig:pepatches:misalignment}), but this does
+not help us in actually identifying the insertions and deletions.
+Being able to recognize insertion and deletion of constructors
+is crucial for synchronization: no merging algorithm can be
 possibly work if we cannot distinguish old information from new information.
 In this section we will look into a datatype and an algorithm for
-representing and computing alignments, which are crucial for
+representing and computing alignments, which make the backbone of
 synchronization.
 
-
-  Take \Cref{fig:pepatches:alignment-01:A}, which was the very change that
+  Take \Cref{fig:pepatches:alignment-01:A}, which was the change that
 motivated locally-scoped patches (\Cref{fig:pepatches:misalignment}).
 This time, howerver, we explicitly
 drew information about which constructors, albeit duplicated,
@@ -2643,9 +2678,10 @@ merge  :: PatchAl kappa fam at -> PatchAl kappa fam al -> Maybe (PatchC kappa fa
           A & & B \\
             & M &}
 \]
-\caption{Illustration of a span of patches, |p| and |q|, which have
+\caption{Illustration of a span of patches, |p| (transforming $O$ into $A$)
+and |q| (transforming $O$ into $B$). Both patches have
 a common element $O$ in their domain. The patch |merge p q| applies to
-the common ancestor $O$ and can be thought of as the \emph{union} of the
+this common ancestor $O$ and can be thought of as the \emph{union} of the
 changes of |p| and |q|.}
 \label{fig:pepatches:mergesquare}
 \end{figure}
@@ -3604,7 +3640,7 @@ that were left as future work and would need to
 be addressed to bring \texttt{hdiff} from a prototype to
 a production tool.
 
-\subsubsection{Refining Matching and Sharing Control}
+\subsubsection*{Refining Matching and Sharing Control}
   The matching engine underlying \texttt{hdiff} uses hashes
 indiscriminately, all information under a subtree is used to compute
 its hash, which can be undesirable. Imagine a parser that annotates
@@ -3662,12 +3698,12 @@ hashes, since we would have used |["m"]| to salt the hashes for the
 source tree, but |["x"]| for the destination, yielding different
 hashes.
 
-  This problem is twofold, however. Besides identifying the algorithmic
-means to ensure \texttt{hdiff} could be scope-aware and respect said scopes,
-we must also engineer an interface to enable the user to easily define
-said scopes. I envisioned a design with a custom version of the \genericssimpl{}
-library, with an added alias for the identity functor that could receive special treatment,
-for example:
+  This problem is twofold, however. Besides identifying the
+algorithmic means to ensure \texttt{hdiff} could be scope-aware and
+respect said scopes, we must also engineer an interface to enable the
+user to easily define said scopes. I envisioned a design with a custom
+version of the \genericssimpl{} library, with an added alias for the
+identity functor that could receive special treatment, for example:
 
 \begin{myhs}
 \begin{code}
@@ -3687,9 +3723,14 @@ will not use a modification of the matching mechanism: if we use
 scope names, renamings will case problems; if we use the order which
 scopes have been seen (De Bruijn-like), permutations will cause problems.
 Controlling on the height of the trees and minimizing this issue was
-the best option to move forward in an early stage.
+the best option to move forward in an early stage. Unfortunately,
+I did not have time to explore how scope graphs~\cite{Neron2015} could
+help us here, but it is certainly a good place to start looking.
+It might be possible to use scope graphs to write a more intricate
+|close| function, that will properly break sharing where necessary,
+for example.
 
-\subsubsection{Extraction Methods, \emph{Best} Patch and Edit-Scripts}
+\subsubsection*{Extraction Methods, \emph{Best} Patch and Edit-Scripts}
 
 We have presented three extraction methods, which we called
 |NoNested|, |ProperShare| and |Patience|.  Computing the diff between
@@ -3756,7 +3797,7 @@ nearly quadratic time~\cite{backurs2015}, it might be worth looking into
 how good an approximation we might be able to compute in linear time.
 \victor{fact-check the above reference more carefully}
 
-\subsubsection{Formalizations and Generalizations}
+\subsubsection*{Formalizations and Generalizations}
 Formalizing and proving properties about our |diff| and |merge| functions
 was also one of my priorities. As it turns out, the extensional nature
 of |Patch| makes for a difficult Agda formalization, which is the reason
