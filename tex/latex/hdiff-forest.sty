@@ -108,7 +108,7 @@
   },
   change/.default={hdiff-change-border}{$\mapsto$},
 %%%%%%%%%%%%%%%
-  ctx/.style n args={3}{%
+  ctx/.style n args={3}{% #1 is a severe trick; its tikz name
     text=#3,
     before typesetting nodes={%
       before computing xy={for children={l=7mm}, for 1={l-=3mm}},
@@ -134,8 +134,12 @@
   },
   delctx'/.style n args={1}{ctx={#1}{\textit{del}}{delctx-border}},
   insctx'/.style n args={1}{ctx={#1}{\textit{ins}}{insctx-border}},
+% if you need more than one del/ins ctx per picture use the delctx'
+% version and pass different names as the first argument
   delctx/.style={delctx'={D}},
   insctx/.style={insctx'={I}},
+% gray zipper
+  zipper/.style={ctx={Z}{\textit{zipper}}{black!30!white}},
 %%%%%%%%%%%%%%%
   alignment/.style 2 args={%
     tikz+={%

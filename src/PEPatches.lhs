@@ -1909,10 +1909,10 @@ to contain the |Bin| constructor, which fixes their scope (resulting in
 \Cref{fig:pepatches:example-03:C}).
 
   We say a change is closed when it has no free metavariables and,
-additionally, its metavariables occur nowhere else globally. By this
-definition, the changes that are produced by the |chg| function are all
-closed, but they are certainly not as small as they could be, in general.
-We say a change is in \emph{minimal} form when the root constructors
+additionally, its metavariables occur nowhere else globally.
+The changes produced by the |chg| function are
+closed, for example, but they might not be as small as they could.
+We say a change is \emph{minimal} when the root constructors
 in its deletion and insertion context are either different
 or necessary to maintain scope. \Cref{fig:pepatches:example-minimal}
 illustrates different combinations of \emph{closed} and \emph{minimal}
@@ -2108,11 +2108,11 @@ producing a patch with locally scoped changes and copies in its spine.}
   [|(:)|,name=ica [x,metavar,name=ix]
     [|(:)|,name=icb [y,metavar,name=iy] [z,metavar,name=iz]]]
 ]
-\draw [->,dashed,thick,black!20!white] (dca) -- (ica);
-\draw [->,dashed,thick,black!20!white] (dcb) -- (icb);
-\draw [->,dashed,thick,black!20!white] (dx)  -- (ix);
-\draw [->,dashed,thick,black!20!white] (dy)  -- (iy);
-\draw [->,dashed,thick,black!20!white] (dz)  -- (iz);
+\draw [<->,densely dotted,thick,black!20!white] (dca) -- (ica);
+\draw [<->,densely dotted,thick,black!20!white] (dcb) -- (icb);
+\draw [<->,densely dotted,thick,black!20!white] (dx)  -- (ix);
+\draw [<->,densely dotted,thick,black!20!white] (dy)  -- (iy);
+\draw [<->,densely dotted,thick,black!20!white] (dz)  -- (iz);
 \end{myforest}
 \label{fig:pepatches:alignment-01:A}}
 \qquad\qquad
@@ -2134,39 +2134,39 @@ explicit representation of that information.}
 \label{fig:pepatches:alignment-01}
 \end{figure}
 
-  As we have seen in the previous sections, locally-scoped changes
-avoid the problem of misaligning copies by not recognizing insertions
-or deletions (\Cref{fig:pepatches:misalignment}), but this does
-not help us in actually identifying the insertions and deletions.
-Being able to recognize insertion and deletion of constructors
-is crucial for synchronization: no merging algorithm can be
-possibly work if we cannot distinguish old information from new information.
-In this section we will look into a datatype and an algorithm for
-representing and computing alignments, which make the backbone of
-synchronization.
+  As we have seen in the previous sections, locally-scoped changes can
+avoid misaligning changes (\Cref{fig:pepatches:misalignment}), but
+they still do not help us in identifying the insertions and
+deletions. As a matter of fact, identifying these insertions and
+deletions is crucial for synchronization.  In this section we will
+look into a datatype and an algorithm for representing and computing
+alignments, which make the backbone of synchronization. Untyped
+synchronizers, such as \texttt{harmony}~\cite{Foster2007}, must employ
+schemas to identify insertions and deletions avoiding misalignments
+(\Cref{fig:pepatches:misalignment}). In our case, the type information
+enable us to identify insertions and deletions naturally by ensuring that
+they delete one layer of a \emph{recursive type} at a time, never altering
+the type of the value under scrutiny.
 
   Take \Cref{fig:pepatches:alignment-01:A}, which was the change that
-motivated locally-scoped patches (\Cref{fig:pepatches:misalignment}).
-This time, howerver, we explicitly
-drew information about which constructors, albeit duplicated,
-represent \emph{the same information} in each respective context.
-The |Chg| datatype by itself is insufficient to make it clear that
-|(: 42)| at the root of the deletion context, in
-\Cref{fig:pepatches:alignment-01:A}, has no countertart in the
-insertion context.  Computing and representing an alignment is,
-intuitively, the process of computing and representing this
-association between subtrees of the deletion and insertion contexts.
-
- The aligned version of \Cref{fig:pepatches:alignment-01:A} is shown in
-\Cref{fig:pepatches:alignment-01:B}, where the |Al| border marks
-scoping for metavariables, a spine within its scope, subsequent
-copies, and the deletion of |(: 42)| are all represented explicitly.
-It is worth noting that untyped synchronizers, such as
-\texttt{harmony}~\cite{Foster2007}, must employ schemas to overcome
-issues similar to that of \Cref{fig:pepatches:misalignment}. In our
-case, the type information enable us to identify insertions and
-deletions easily by ensuring that they delete one layer of a recursive
-type at a time, never altering the type of the value under scrutiny.
+motivated locally-scoped patches (\Cref{fig:pepatches:misalignment})
+in the first place. This time, howerver, we explicitly drew arrows
+connecting which constructors, albeit duplicated, represent \emph{the
+same information} in each respective context.  This makes it clear
+that |(: 42)| has no counterpart in the insertion context and,
+consequently, should be identified as a deletion.  The |Chg| datatype
+by itself is insufficient to represent all this information. Therefore
+we need a new datatype for \emph{alignments}, |Al|, and a function
+that translates a |Chg| into an |Al|.  Computing and representing an
+alignment is, intuitively, the process of computing and representing
+this association between subtrees of the deletion and insertion
+contexts. The aligned version of \Cref{fig:pepatches:alignment-01:A}
+is shown in \Cref{fig:pepatches:alignment-01:B}, where the |Al| border
+marks scoping for metavariables. The constructors that are paired up
+in the deletion and insertion are placed in a spine; those without a
+correspondent are flagged as deletions or insertions depending on
+which context they belong. Finally, |Cpy (metavar SQ)| is an
+abbreviation for |Chg (metavar SQ) (metavar SQ)|.
 
   An aligned patch consists in a spine of copied constructors leading
 to a \emph{well-scoped alignment}. This alignment, in turn, consists
@@ -2281,14 +2281,14 @@ predecessor |Almu| from \texttt{stdiff}
 and spines over a fixpoint. Insertions and deletions will be
 represented with |Zipper|s~\cite{Huet1997}. A zipper over a datatype
 |t| is the type of \emph{one-hole-contexts} over |t|, where the hole
-indicates a selected position. We will use the zippers provided
+indicates a focused position. We will use the zippers provided
 directly by the \genericssimpl{} library
 (\Cref{sec:gp:simplistic-zipper}).  These zippers encode a
 \emph{single} layer of a fixpoint at a time, for example, a zipper
 over the |Bin| constructor is either |Bin SQ u| or |Bin u SQ|,
-indicating a selected position is in the left or the right subtree. It
-\emph{does not} enable us to specify a hole inside the left or right
-subtree, like in |Bin (Bin SQ t) u|.
+indicating the focus is in either the left or the right subtree. It
+\emph{does not} enable us specify a nested focus point, like in |Bin
+(Bin SQ t) u|.
 
   A value of type |Zipper c g h at| is then equivalent to a constructor
 of type |at| with one of its recursive positions replaced by a value
@@ -2376,81 +2376,119 @@ metavariables. If we can delete the root, we flag it as a deletion and
 continue through the recursive \emph{non-rigid} field. If we cannot
 perform a deletion at the root of |chgDel c| nor an insertion at the
 root of |chgIns c| but they are constructed with the same constructor,
-we identify the constructor as being part of the alignments' spine
-. If |chgDel c| and |chgIns c| do not even
+we identify the constructor as being part of the alignments' spine.
+If |chgDel c| and |chgIns c| do not even
 have the same constructor at the root, nor are copies or permutations,
 we finally fallback and flag an unclassified modification.
 
   To check whether constructors can be deleted or inserted efficiently,
 we must annotate rigidity information throughout our trees.
 The |IsRigid| datatype captures whether a tree contains
-any metavariables or not whereas
-the |annotRigidity| function computes the annotated tree. The relevant
-code is shown in \Cref{fig:pepatches:rigidity}.
+any metavariables or not and is placed in every node
+of a tree with the |annotRigidity| function.
 
-\begin{figure}
 \begin{myhs}
 \begin{code}
 type IsRigid = Const Bool
-
-isRigid :: HolesAnn kappa fam IsRigid h x -> Bool
-isRigid = getConst . getAnn
-
-annotRigidity  :: Holes     kappa fam          h x
-               -> HolesAnn  kappa fam IsRigid  h x
-annotRigidity = synthesize  aggr                    -- aggregate recursive values
-                            (\ _ _ -> Const True)   -- primitives are rigid
-                            (\ _ _ -> Const False)  -- holes are not!
-  where
-    aggr :: U1 b -> SRep IsRigid (Rep b) -> Const Bool b
-    aggr _ = Const . repLeaves getConst (&&) True
+annotRigidity :: Holes kappa fam h x -> HolesAnn  kappa fam IsRigid  h x
 \end{code}
 \end{myhs}
-\caption{Annotating a tree augmented with holes with information
-about whether or not it actually contains a hole.}
-\label{fig:pepatches:rigidity}
+
+% The relevant
+% code is shown in \Cref{fig:pepatches:rigidity}.
+%
+% \begin{figure}
+% \begin{myhs}
+% \begin{code}
+% type IsRigid = Const Bool
+% 
+% isRigid :: HolesAnn kappa fam IsRigid h x -> Bool
+% isRigid = getConst . getAnn
+% 
+% annotRigidity  :: Holes     kappa fam          h x
+%                -> HolesAnn  kappa fam IsRigid  h x
+% annotRigidity = synthesize  aggr                    -- aggregate recursive values
+%                             (\ _ _ -> Const True)   -- primitives are rigid
+%                             (\ _ _ -> Const False)  -- holes are not!
+%   where
+%     aggr :: U1 b -> SRep IsRigid (Rep b) -> Const Bool b
+%     aggr _ = Const . repLeaves getConst (&&) True
+% \end{code}
+% \end{myhs}
+% \caption{Annotating a tree augmented with holes with information
+% about whether or not it actually contains a hole.}
+% \label{fig:pepatches:rigidity}
+% \end{figure}
+
+  After annotatins the trees with rigidity information, we
+extract the zippers that witness potential insertions
+or deletions. This is done by the |hasRigidZipper| function, which is
+implemented by extracting \emph{all} possible zippers from the root
+and checking whether there is one such that all of its fields are
+rigid except for the focus of the zipper. If we find such a zipper, we
+return it wrapped in a |Just|. When a rigid zipper exists it is
+unique by definition, hence there is no choice involved in detecting
+insertions and deletions, which keeps our algorithms efficient
+and deterministic.
+
+\Cref{fig:pepatches:hasrigidzipper} exemplifies two possible arguments
+to |hasRigidZipper|. The tree in \Cref{fig:pepatches:hasrigidzipper:A}
+has three possible zippers: focusin on either of its recursive positions.
+Neither of them, however, would have all its subtrees rigid except the focus
+point. \Cref{fig:pepatches:hasrigidzipper:B} on the other hand has one
+of its zippers (the one with focus on |Bin (metavar k) (metavar l)|,
+\Cref{fig:pepatches:hasrigidzipper:C})
+rigid, that is, none of the trees within the zipper has any
+metavariables.  We omit the full implementation of |hasRigidZipper|
+but invite the interested reader should check |Data.HDiff.Diff.Align|
+in the source code (\Cref{chap:where-is-the-code}).
+
+% \begin{myhs}
+% \begin{code}
+% hasRigidZipper  :: HolesAnn kappa fam IsRigid (Metavar kappa fam) t
+%                 -> Maybe (Zipper  (CompoundCnstr kappa fam t) (SFix kappa fam)
+%                                   (HolesAnn kappa fam IsRigid (Metavar kappa fam)) t)
+% \end{code}
+% \end{myhs}
+
+\begin{figure}
+\centering
+\subfloat[No rigid zipper exists]{%
+\quad
+\begin{myforest}
+[|Tri| [|Leaf| [|42|]] [a,metavar] [b,metavar]]
+\end{myforest}\label{fig:pepatches:hasrigidzipper:A}\quad}\qquad
+\subfloat[Has a rigid zipper]{%
+\begin{myforest}
+  [|Tri| [|Leaf| [|42|]] [|Leaf| [|21|]] [|Bin| [k,metavar] [l,metavar]]]
+\end{myforest}\label{fig:pepatches:hasrigidzipper:B}}\qquad
+\subfloat[Rigid zipper of \ref{fig:pepatches:hasrigidzipper:B}]{%
+\begin{myforest}
+[,zipper
+  [|Tri| [|Leaf| [|42|]] [|Leaf| [|21|]] [SQ]]
+  [|Bin| [k,metavar] [l,metavar]]]
+\end{myforest}\label{fig:pepatches:hasrigidzipper:C}}
+\caption{Example calls to |hasRigidZipper| and their respective return values
+where applicable.}
+\label{fig:pepatches:hasrigidzipper}
 \end{figure}
 
-  Once our trees have been annotated with rigidity information,
-we proceed to the extraction of a zippers to witness
-potential insertions or deletions. This
-is done by the |hasRigidZipper| function. It is implemented
-by extracting \emph{all} possible zippers from the root and
-checking whether there is a single one that has all of its fields
-rigid except for a single recursive one. If we find such a zipper,
-we return it wrapped in a |Just|. Note that requiring that there
-is \emph{a single} zipper satisfying the criteria means there
-is no choice point involved in detecting insertions and deletions,
-which maintains the efficiency of our algorithms.
-We omit the full implementation of |hasRigidZipper| here but invite
-the interested reader to check |Data.HDiff.Diff.Align| in the
-source code (\Cref{chap:where-is-the-code}).
-
-\begin{myhs}
-\begin{code}
-hasRigidZipper  :: HolesAnn kappa fam IsRigid (Metavar kappa fam) t
-                -> Maybe (Zipper  (CompoundCnstr kappa fam t)
-                                  (SFix kappa fam)
-                                  (HolesAnn kappa fam IsRigid (Metavar kappa fam)) t)
-\end{code}
-\end{myhs}
-
-  Checking for deletions, for example, can be easily done by first checking
+  Checking for deletions, then, can be easily done by first checking
 whether the root can has a rigid zipper, if so, we can flag the
-deletion. The sketch of |alD| below illustrates this process.
-The |rest| variable is the single \emph{non-rigid} recursive
+deletion. In the excerpt of |alD| below, if |d| was the tree in
+\Cref{fig:pepatches:hasrigidzipper:B}, |focus| would be |Bin (metavar
+k) (metavar l)|, which is the single \emph{non-rigid} recursive
 subtree of |d|.
 
 \begin{myhs}
 \begin{code}
 alD d i = case hasRigidZipper d of
-    Just (Zipper zd rest) -> Del delZ (continueAligning rest i)
-    dots
+    Just (Zipper zd focus) -> Del zd (continueAligning focus i)
 \end{code}
 \end{myhs}
 
-  The full |alD| is naturally more complex. For one, we must check whether
-|i| also has a rigid zipper but when both |d| and |i| have rigid zippers,
+  The complete |alD| is more involved. For one, we must check whether
+|i| also has a rigid zipper and when both |d| and |i| have rigid zippers,
 we must check whether they are the same constructor and, if so, mark
 it as part of the spine instead. The |al| function encapsulates the |alD|
 above and is shown in \Cref{fig:pepatches:align-fulldef}. A call to |al|
@@ -2458,10 +2496,9 @@ will attempt to extract deletions, then insertions, then finally falling
 back to copies, permutations, modifications or recursively calling itself
 inside spines.
 
-  We are now ready to define |alignChg| in its entirety.  We
-start computing the multiset of variables used throughout a patch,
-annotate the deletion and insertion context with |IsRigid| and proceed
-to actually align them with the |al| function.
+  To compute an alignment, then, we start computing the multiset of
+variables used throughout a patch, annotate the deletion and insertion
+context with |IsRigid| and pass everything to the |al| function.
 
 \begin{myhs}
 \begin{code}
@@ -2506,8 +2543,8 @@ al vars d i = alD (alS vars (al vars)) d i
    alS :: Map Int Arity -> Aligner kappa fam -> Aligned kappa fam
    alS vars f d@(Roll' _ sd) i@(Roll' _ si) =
      case zipSRep sd si of
-       Nothing -> alMod vars d i
-       Just r  -> Spn (repMap (uncurry' f) r)
+       Nothing  -> alMod vars d i
+       Just r   -> Spn (repMap (uncurry' f) r)
    syncSpine vars _ d i = alMod vars d i
 
    -- Records a modification, copy or permutation.
@@ -2660,7 +2697,7 @@ both |p| and |q| modify the same subtree in two distinct ways.
 If |p| and |q| do \emph{not} make a span |merge p q| returns |Nothing|.
 \Cref{fig:pepatches:mergesquare} illustrates a span of patches |p|
 and |q| and their merge which is supposed to be applied to their
-common ancestor and produces a tree which combines the
+common ancestor producing a tree which combines the
 modifications performed by |p| and |q|, when possible.
 
 \begin{myhs}
@@ -2674,12 +2711,12 @@ merge  :: PatchAl kappa fam at -> PatchAl kappa fam al -> Maybe (PatchC kappa fa
 \footnotesize
 \centering
 \[
-\xymatrix{ & O \ar[dl]_{|p|} \ar[dr]^{|q|} \ar[dd]^(0.8){|merge p q|} & \\
+\xymatrix{ & O \ar[dl]_{|p|} \ar[dr]^{|q|} \ar[dd]^(0.7){|merge p q|} & \\
           A & & B \\
             & M &}
 \]
-\caption{Illustration of a span of patches, |p| (transforming $O$ into $A$)
-and |q| (transforming $O$ into $B$). Both patches have
+\caption{Span of patches, |p| (transforms $O$ into $A$)
+and |q| (transforms $O$ into $B$). Both patches have
 a common element $O$ in their domain. The patch |merge p q| applies to
 this common ancestor $O$ and can be thought of as the \emph{union} of the
 changes of |p| and |q|.}
@@ -2687,12 +2724,12 @@ changes of |p| and |q|.}
 \end{figure}
 
   Recall our patches consist of a spine which leads to
-locally-scoped alignments, which in turn also
+locally-scoped alignments, which in turn
 have an inner spine that ultimately leads to changes. The distinction
 between the \emph{outer} spine and the spine inside the
 alignments is the scope. Consequently, we can map a pure
 function over the outer spine without having to carry information
-about local scopes delimited by our alignments to the next call.
+about local scopes to the next call.
 When manipulating the \emph{inner} spine, however, we must
 keep track of which variables have or have not been declared
 or used. Take the example in
@@ -2747,21 +2784,21 @@ alignments guarantees |metavar x| will not appear elsewhere.
 \label{fig:pepatches:merge-00}
 \end{figure}
 
-  It helps to think about the metavariables in a change as
-a unique identifier for a subtree in the source. For example, if one
-change modifies a subtree |metavar x| into a different
-subtree |k|, but some other change moves |metavar x| to a different
-location in the tree, the result of synchronizing these should be
-the transport of |k| into the new location -- which is
-exactly where |metavar x| appears in the insertion context.
-The example in \Cref{fig:pepatches:merge-01} illustrates this very
-situation: the source tree identified by |metavar x| in
-the deletion context of \Cref{fig:pepatches:merge-01:B} was
-changed, by \Cref{fig:pepatches:merge-01:A}, from |Leaf 42| into
-|Leaf 84|. Since |p| altered the content of a subtree, but |q|
-altered its location, they are \emph{disjoint} -- they
-alter different aspects of the common ancestor. Hence, the
-synchronization is possible and results in \Cref{fig:pepatches:merge-01:C}.
+  It helps to think about metavariables in a change as a unique
+identifier for a subtree in the source. For example, if one change
+modifies a subtree |x| into a different subtree |x'|, but some other
+change moves |x|, identified by |metavar x|, to a different location
+in the tree, the result of synchronizing these should be the transport
+of |x'| into the new location -- which is exactly where |metavar x|
+appears in the insertion context.  The example in
+\Cref{fig:pepatches:merge-01} illustrates this very situation: the
+source tree identified by |metavar x| in the deletion context of
+\Cref{fig:pepatches:merge-01:B} was changed, by
+\Cref{fig:pepatches:merge-01:A}, from |Leaf 42| into |Leaf 84|. Since
+|p| altered the content of a subtree, but |q| altered its location,
+they are \emph{disjoint} -- they alter different aspects of the common
+ancestor. Hence, the synchronization is possible and results in
+\Cref{fig:pepatches:merge-01:C}.
 
 \begin{figure}
 \centering
