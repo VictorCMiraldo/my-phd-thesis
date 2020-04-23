@@ -2942,8 +2942,6 @@ will be stored under |eqs|.
 
 \begin{myhs}
 \begin{code}
-type Subst kappa fam phi = Map (Exists phi)
-
 data MergeState kappa fam = MergeState
   { inst  :: Map (Exists (Metavar kappa fam)) (Exists (Chg      kappa fam))
   , eqs   :: Map (Exists (Metavar kappa fam)) (Exists (HolesMV  kappa fam))
@@ -2951,15 +2949,46 @@ data MergeState kappa fam = MergeState
 \end{code}
 \end{myhs}
 
-\victor{I simplified the explanation and removed the remark below; is this fine?}
-
   It is important to keep track of equivalences in |eqs|. Say, for
-example, we are to merge two changes that were left as \emph{unclassified}
-by our alignment algorithm. Naturally, their deletion contexts must
-be unifiable, yielding a series of equivalences between their metavariables
-but since we do not possess information about exactly how each of
-those metavariables were transformed, we cannot register how they
-changed in |inst|.
+example, we are to merge two changes that were left as
+\emph{unclassified} by our alignment algorithm. Naturally, their
+deletion contexts must be unifiable, yielding a series of equivalences
+between their metavariables but since we do not possess information
+about exactly how each of those metavariables were transformed, we
+cannot register how they changed in
+|inst|. \Cref{fig:pepatches:eqs-not-inst} provides a simple such
+example. When unifying the deletion contexts of
+\Cref{fig:pepatches:eqs-not-inst:A} and
+\Cref{fig:pepatches:eqs-not-inst:B}, we learn that |{metavar x == Leaf
+42, metavar a == metavar x; metavar b == metavar y}|, which enable us
+to conclude both changes are compatible and perform the same action
+modulo a contraction and can be merged, yielding \Cref{fig:pepatches:eqs-not-inst:C}
+
+\begin{figure}
+\centering
+\subfloat[Change |p|]{%
+\begin{myforest}
+[,change, s sep=0mm,
+  [|Tri| [x,metavar] [|Leaf| [|42|]] [y,metavar]]
+  [|Bin| [x,metavar] [y,metavar]]]
+\end{myforest}\label{fig:pepatches:eqs-not-inst:A}}\quad
+\subfloat[Change |q|]{%
+\begin{myforest}
+[,change, s sep=0mm
+  [|Tri| [a,metavar] [a,metavar] [b,metavar]]
+  [|Bin| [a,metavar] [b,metavar]]]
+\end{myforest}\label{fig:pepatches:eqs-not-inst:B}}\quad
+\subfloat[|merge p q|]{%
+\begin{myforest}
+[,change,s sep=0mm
+  [|Tri| [|Leaf| [|42|]] [|Leaf| [|42|]]  [b,metavar]]
+  [|Bin| [|Leaf| [|42|]] [b,metavar]]]
+\end{myforest}\label{fig:pepatches:eqs-not-inst:C}}
+\caption{Merging arbitrary changes requires knowledge of equivalences between
+metavariables and trees.}
+\label{fig:pepatches:eqs-not-inst}
+\end{figure}
+
 
 %% 
 %%   The equivalences in |eqs| are different from instantiations in
@@ -3084,16 +3113,15 @@ it then makes a second pass computing the final result.
 \begin{myhs}
 \begin{code}
 mergeAlM  :: Al kappa fam at -> Al kappa fam at -> MergeM kappa fam (Al kappa fam at)
-mergeAlM p q = do
-  phase1  <- mergePhase1 p q
-  info    <- get
-  case splitDelInsMap info of
-    Left   _   -> throwConf "failed-contr"
-    Right  di  -> alignedMapM (mergePhase2 di) phase1
+mergeAlM p q = do  phase1  <- mergePhase1 p q
+                   info    <- get
+                   case splitDelInsMap info of
+                     Left   _   -> throwConf "failed-contr"
+                     Right  di  -> alignedMapM (mergePhase2 di) phase1
 \end{code}
 \end{myhs}
 
-\subsubsection{First Phase}
+\paragraph{First Phase}
 The first pass is computed by the |mergePhase1| function, which will
 populate the state with instantiations and equivalences and place
 values of type |Phase2| in-place in the alignment. These values instruct
@@ -3127,25 +3155,20 @@ individual cases one by one, next.
 \begin{myhs}
 \begin{code}
 mergePhase1  :: Al kappa fam x -> Al kappa fam x -> MergeM kappa fam (Al' kappa fam (Phase2 kappa fam) x)
-mergePhase1 p q = case (p , q) of dots
-\end{code}
-\end{myhs}
-
-  The first cases we have to handle are copies, which should be
-the identity of synchronization. That is, if |p| is a copy,
-all we need to do is modify the tree according to |q| at the
-current location. We might need to refine |q| according to
-other constraints we discovered in other parts of the alignment
-in question, so the final instruction is to \emph{instantiate}
-the |Chg| that comes from forgetting the alignment |q|. Recall
-|disalign| returns a |Chg|.
-
-\begin{myhs}
-\begin{code}
+mergePhase1 p q = case (p , q) of
    (Cpy _ , _)  -> return (Mod (P2Instantiate (disalign q)))
    (_ , Cpy _)  -> return (Mod (P2Instantiate (disalign p)))
 \end{code}
 \end{myhs}
+
+  The first cases we have to handle are copies, shown above, which
+should be the identity of synchronization. That is, if |p| is a copy,
+all we need to do is modify the tree according to |q| at the current
+location. We might need to refine |q| according to other constraints
+we discovered in other parts of the alignment in question, so the
+final instruction is to \emph{instantiate} the |Chg| that comes from
+forgetting the alignment |q|. Recall |disalign| maps alignments
+back into changes.
 
   Next we look at permutations, which are almost copies
 in the sense that they do not modify the \emph{content}
@@ -3213,11 +3236,11 @@ two different values can also be merged. I ran into many difficulties
 tracking how subtrees were moved and opted for the easy and pragmatic
 option of not doing anything difficult here.}
 
-  The call to |addToInst| in |mrgPrm|, above, will never raise a
+  The call to |addToInst| in |mrgPrm| never raises a
 |"prm-chg"| conflict. This is because |metavar x| and |metavar y| are
-classified as a permutation hence, each variable occurs exactly once
+classified as a permutation -- each variable occurs exactly once
 in the deletion and once in the insertion contexts.  Therefore, it is
-impossible that |x| above was already a member of |inst|.  \digress{In
+impossible that |x| was already a member of |inst|.  \digress{In
 fact, throughout our experiments, in \Cref{chap:experiments}, we
 observed that |"prm-chg"| never showed up as a conflict in our whole
 dataset, as expected.}
@@ -3238,13 +3261,19 @@ be able to decide which insertion come first in this situation.
 \end{code} %
 \end{myhs}
 
-  Deletions must be \emph{executed}. That is, if one patch
+  Deletions must be preserved and \emph{executed}. That is, if one patch
 deletes a constructor but the other modifies the fields the
-constructor, we must ensure that none of the deleted fields
-have been modified by the other patch. This is done by the |tryDel|
-function, which attempts to delete a zipper from an alignment, and,
-if successful, returns the pair of alignments we should continue
-to merge.
+constructor, we must first ensure that none of the deleted fields
+have been modified but the deletion should be preserved in the merge.
+The |tryDel| function attempts to execute the deletion of a zipper
+over an alignment, and, if successful, returns the pair of
+alignments we should continue to merge. It essentially overlaps
+the deletion zipper with |a| and observe whether |a| performs no
+modifications anywhere except on the focus of the zipper.
+When its not possible to execute the deletion
+we can continue. \Cref{fig:pepatches:trydel-examples} illustrate some
+example calls to |tryDel|, whose complete generic definition is shown
+in \Cref{fig:pepatches:trydel}.
 
 \begin{myhs}
 \begin{code}
@@ -3258,11 +3287,50 @@ of arguments. \digress{Let me rephrase that. The |merge| \emph{should}
 be symmetric, and \texttt{QuickCheck} tests were positive of this, but
 I have not come to the point of proving this yet.}
 
-  The |tryDel| function matches on the possible cases for |q| (resp. |p|)
-and checks whether there are any modifications to the locations the
-zipper wants to delete. If there are, we throw a conflict, otherwise
-we can continue.
+\begin{figure}
+\subfloat[Call to |tryDel| succeeds; The |Bin| at the root can be deleted
+as it only overlaps with copies. |tryDel| returns the focus of the deletion
+and the part of the alignment |a| that overlaps with it.]{
+\begin{myforest}
+[,phantom,s sep=12mm, l=0mm,for children={no edge}
+  [,phantom,l=0mm,for children={no edge}
+    [,delctx,name=ZD [|Bin| [|Leaf| [|42|]] [SQ]] [|Cpy (metavar a)|]]
+    [|Bin|,alignmentSmall,name=A
+      [|Cpy (metavar x)|]
+      [|Bin| [|Prm (metavar w) (metavar z)|]
+             [|Prm (metavar z) (metavar w)|]]]]
+  [,phantom
+    [|tryDel zd a = (Cpy (metavar a) , Bin (Prm dots) (Prm dots))|, no edge,name=RES]]]
+\node (DEST) at ($ (RES.parent first) + (2em,0) $) {};
+\node (NZD)  at ($ (ZD.parent anchor) + (0,20pt) $) {|zd|};
+\node (NA)   at ($ (A.parent anchor)  + (0,20pt) $) {|a|};
+\draw[->,black!30!white] (NZD.east) to[out=20,in=90] (DEST);
+\draw[->,black!30!white] (NA.east)   to[out=10,in=90] (DEST);
+\end{myforest}}
 
+\subfloat[Call to |tryDel| fails; Although the |Bin| at the root could
+be deleted, the alignment |a| is changing the |42| present in the
+leaf. This is a conflict.]{
+\begin{myforest}
+[,phantom,s sep=12mm, l=0mm,for children={no edge}
+  [,phantom,l=4mm,for children={no edge}
+    [,delctx,name=ZD [|Bin| [|Leaf| [|42|]] [SQ]] [|Cpy (metavar a)|]]
+    [|Bin|,alignmentSmall,name=A
+      [|Leaf| [,change [|42|] [|84|]]]
+      [|Cpy (metavar x)|]]]
+  [,phantom
+    [|tryDel zd a = throwConf "del-spn"|, no edge,name=RES]]]
+\node (DEST) at ($ (RES.parent first) + (2em,0) $) {};
+\node (NZD)  at ($ (ZD.parent anchor) + (0,20pt) $) {|zd|};
+\node (NA)   at ($ (A.parent anchor)  + (0,20pt) $) {|a|};
+\draw[->,black!30!white] (NZD.east) to[out=20,in=90] (DEST);
+\draw[->,black!30!white] (NA.east)   to[out=10,in=90] (DEST);
+\end{myforest}}
+\caption{Two example calls to |tryDel|.}
+\label{fig:pepatches:trydel-examples}
+\end{figure}
+
+\begin{figure}
 \begin{myhs}
 \begin{code}
 tryDel  :: Zipper (CompoundCnstr kappa fam x) (SFix kappa fam) (Al kappa fam (Chg kappa fam)) x
@@ -3271,11 +3339,9 @@ tryDel  :: Zipper (CompoundCnstr kappa fam x) (SFix kappa fam) (Al kappa fam (Ch
 tryDel (Zipper z h) (Del (Zipper z' h'))
   | z == z'    = return (h , h')
   | otherwise  = throwConf "del-del"
-tryDel (Zipper z h) (Spn rep) =
-  case zipperRepZip z rep of
+tryDel (Zipper z h) (Spn rep) = case zipperRepZip z rep of
     Nothing  -> throwNotASpan
-    Just r   ->  let hs = repLeavesList r
-                 in case partition (exElim isInR1) hs of
+    Just r   -> case partition (exElim isInR1) (repLeavesList r) of
                       ([Exists (InL Refl :*: x)] , xs)
                         | all isCpyL1 xs  -> return (h , x)
                         | otherwise       -> throwConf "del-spn"
@@ -3283,14 +3349,14 @@ tryDel (Zipper z h) (Spn rep) =
 tryDel (Zipper _ _) _ = throwConf "del-mod"
 \end{code}
 \end{myhs}
+\caption{Complete generic definition of the |tryDel| function.}
+\label{fig:pepatches:trydel}
+\end{figure}
 
-  Next we have spines versus modifications, which is one of the most
-intricate cases we have to manage. Intuitively, we want to match the
+  Next we have spines versus modifications. Intuitively, we want to match the
 deletion context of the change against the spine and, when successful,
 return the result of instantiating the insertion context of the
-change. Yet, we must later check that we did \emph{not} introduce
-duplications by doing so, as illustrated in
-\Cref{fig:pepatches:merge-03}.
+change.
 
 \begin{myhs}
 \begin{code}
@@ -3298,6 +3364,10 @@ duplications by doing so, as illustrated in
    (Spn p', Mod q')  -> Mod <$$> mrgChgSpn q' p'
 \end{code}
 \end{myhs}
+
+  If we are not careful, however, we might introduce duplications,
+as illustrated in \Cref{fig:pepatches:merge-03}. Consequently, we have to
+employ one extra check for that.
 
   The |mrgChgSpn| function, below, matches the deletion context of the
 |Chg| against the spine and and returns a |P2Instantiate| instruction.
@@ -3379,7 +3449,7 @@ variable that occurs in the insertion contexts of the
 spine. \Cref{fig:pepatches:merge-03} illustrates a case where failing
 to perform this check would result in an erroneous duplication of the
 value |2|. Matching the deletion context of |chg = Chg (metavar c) (metavar
-a : metavar c)| against the spine |spn = Spn (Cpy : Chg (metavar z)
+a : metavar c)| against the spine |spn = Spn (Cpy (metavar o) : Chg (metavar z)
 (metavar x : (metavar z)))| yields |metavar c| equal to |spn|, which
 correctly identifies that the subtree at |metavar c| was modified according to |spn|.
 The observation, however, is that the insertion
@@ -3468,8 +3538,7 @@ mrgChgChg p' q'  | isDup p'   = mrgChgDup p' q'
 \end{code}
 \end{myhs}
 
-\subsubsection{Second Phase}
-
+\paragraph{Second Phase}
   \Cref{fig:pepatches:mergePhaseOne} collects all the cases discussed
 above and illustrates the full definition of |mergePhase1|.
 Once the first pass is done and we have collected information
