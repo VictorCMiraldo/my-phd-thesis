@@ -3300,7 +3300,7 @@ and the part of the alignment |a| that overlaps with it.]{
       [|Bin| [|Prm (metavar w) (metavar z)|]
              [|Prm (metavar z) (metavar w)|]]]]
   [,phantom
-    [|tryDel zd a = (Cpy (metavar a) , Bin (Prm dots) (Prm dots))|, no edge,name=RES]]]
+    [|tryDel zd a == (Cpy (metavar a) , Bin (Prm dots) (Prm dots))|, no edge,name=RES]]]
 \node (DEST) at ($ (RES.parent first) + (2em,0) $) {};
 \node (NZD)  at ($ (ZD.parent anchor) + (0,20pt) $) {|zd|};
 \node (NA)   at ($ (A.parent anchor)  + (0,20pt) $) {|a|};
@@ -3319,7 +3319,7 @@ leaf. This is a conflict.]{
       [|Leaf| [,change [|42|] [|84|]]]
       [|Cpy (metavar x)|]]]
   [,phantom
-    [|tryDel zd a = throwConf "del-spn"|, no edge,name=RES]]]
+    [|tryDel zd a == throwConf "del-spn"|, no edge,name=RES]]]
 \node (DEST) at ($ (RES.parent first) + (2em,0) $) {};
 \node (NZD)  at ($ (ZD.parent anchor) + (0,20pt) $) {|zd|};
 \node (NA)   at ($ (A.parent anchor)  + (0,20pt) $) {|a|};
@@ -3365,37 +3365,76 @@ change.
 \end{code}
 \end{myhs}
 
-  If we are not careful, however, we might introduce duplications,
-as illustrated in \Cref{fig:pepatches:merge-03}. Consequently, we have to
-employ one extra check for that.
-
   The |mrgChgSpn| function, below, matches the deletion context of the
 |Chg| against the spine and and returns a |P2Instantiate| instruction.
-The instantiation function here, |instM| (\Cref{fig:pepatches:instm}),
-receives a deletion context and an alignment and attempts to assign
-the variables in the deletion context to changes inside the
-spine. This is only possible, though, when the modifications in the
-spine occur further from the root than the variables in the deletion
-context. Otherwise, we have a conflict where some constructors flagged
-for deletion on the one hand, also lead to modifications on the other
-hand.
+The instantiation function |instM|, exemplified in
+\Cref{fig:pepatches:instm-examples} and defined in
+\Cref{fig:pepatches:instm}, receives a deletion context and an
+alignment and attempts to assign the variables in the deletion context
+to changes inside the alignment. This is only possible, though, when the
+modifications in the spine occur \emph{further} from the root than the
+variables in the deletion context. Otherwise, we have a conflict where
+some constructors flagged for deletion are also marked
+as modifications.
+
+\begin{figure}
+\subfloat[Call to |instM| succeeds and registers that the
+subtree identified by |metavar x| has had its left child delted,
+according to the alignment.]{%
+\begin{myforest}
+[,phantom,s sep=10mm, l=0mm,for children={no edge}
+  [,phantom,l=0mm,for children={no edge},s sep=2mm
+    [|Bin|,name=DD [|Leaf| [|42|]] [x,metavar]]
+    [|Bin|,alignmentSmall,name=AL,s sep=12mm
+      [|Cpy (metavar a)|]
+      [,delctx [|Bin| [|Leaf| [|21|]] [SQ]] [|Cpy (metavar k)|]]]]
+  [,phantom
+    [|instM d al == addToInst (metavar x) (Chg (Bin (Leaf 42) (metavar k)) (metavar k)))|, no edge,name=RES]]]
+\node (DEST) at ($ (RES.parent first) + (2em,0) $) {};
+\node (NDD)  at ($ (DD.parent anchor) + (0,20pt) $) {|d|};
+\node (NAL)  at ($ (AL.parent anchor) + (0,20pt) $) {|al|};
+\draw[->,black!30!white] (NDD.east) to[out=20,in=90] (DEST);
+\draw[->,black!30!white] (NAL.east) to[out=10,in=90] (DEST);
+\end{myforest}}
+
+\subfloat[Call to |instM| returns a conflict; The deletion context, |d|,
+wants to match against the value |42| but the alignment modifies it.]{%
+\begin{myforest}
+[,phantom,s sep=10mm, l=0mm,for children={no edge}
+  [,phantom,l=0mm,for children={no edge},s sep=10mm
+    [|Bin|,name=DD [|Leaf| [|42|]] [x,metavar]]
+    [|Bin|,alignmentSmall,name=AL
+      [|Leaf| [,change [|42|] [|21|]]]
+      [|Cpy (metavar l)|]]]
+  [,phantom
+    [|instM d al == throwConf "inst-mod"|, no edge,name=RES]]]
+\node (DEST) at ($ (RES.parent first) + (2em,0) $) {};
+\node (NDD)  at ($ (DD.parent anchor) + (0,20pt) $) {|d|};
+\node (NAL)  at ($ (AL.parent anchor) + (0,20pt) $) {|al|};
+\node (HACK) at ($ (DEST) + (6cm,0) $) {};
+\draw[->,black!30!white] (NDD.east) to[out=20,in=90] (DEST);
+\draw[->,black!30!white] (NAL.east) to[out=10,in=90] (DEST);
+\end{myforest}}
+\caption{Two example calls to |instM|.}
+\label{fig:pepatches:instm-examples}
+\end{figure}
 
 \begin{figure}
 \begin{myhs}
 \begin{code}
 instM :: (All Eq kappa) => HolesMV kappa fam at -> Al kappa fam at -> MergeM kappa fam ()
-instM _           (Cpy _)  = return ()
-instM (Hole v)    a        = addToInst "inst-contr" v (disalign a)
+
+instM _           (Cpy _)    = return ()
+instM (Hole v)    a          = addToInst "inst-contr" v (disalign a)
+instM _           (Mod _)    = throwConf "inst-mod"
+instM _           (Prm _ _)  = throwConf "inst-perm"
 -- Del ctx and spine must form a span; cannot reference different constructors or primitives.
 instM x@(Prim _)  d        = when (x /= chgDel (disalign d)) throwNotASpan
 instM (Roll r)    (Spn s)  = case zipSRep r s of
     Nothing   -> throwNotASpan
     Just res  -> void (repMapM (\x -> uncurry' instM x >> return x) res)
--- Spine wants to change a portion of the tree that is deleted by the deletion context.
-instM _         (Mod _)    = throwConf "inst-mod"
-instM _         (Prm _ _)  = throwConf "inst-perm"
-instM (Roll _)  (Ins _)    = throwConf "inst-ins"
-instM (Roll _)  (Del _)    = throwConf "inst-del"
+instM (Roll _)    (Ins _)  = throwConf "inst-ins"
+instM (Roll _)    (Del _)  = throwConf "inst-del"
 \end{code}
 \end{myhs}
 \caption{Implementation of |instM|, which receives a deletion context and
@@ -3403,6 +3442,7 @@ an alignment and attempts to instantiate the variables in the deletion
 context with changes in the alignment.}
 \label{fig:pepatches:instm}
 \end{figure}
+
 \begin{figure}
 \begin{minipage}{.65\textwidth}
 \centering
@@ -3427,7 +3467,7 @@ context with changes in the alignment.}
 }
 \end{displaymath}
 \end{minipage}
-\caption{Example of two conflicting patches for moving
+\caption{Example of two conflicting patches that move
 the same subtree into two different locations. The patches
 here are operating over pairs of lists.}
 \label{fig:pepatches:merge-03}
@@ -3443,22 +3483,21 @@ here are operating over pairs of lists.}
 \end{code}
 \end{myhs}
 
-  In |mrgChgSpn| we must check that the variables that would show up
-in the result, after the second phase is done, do not mention any
-variable that occurs in the insertion contexts of the
-spine. \Cref{fig:pepatches:merge-03} illustrates a case where failing
-to perform this check would result in an erroneous duplication of the
-value |2|. Matching the deletion context of |chg = Chg (metavar c) (metavar
-a : metavar c)| against the spine |spn = Spn (Cpy (metavar o) : Chg (metavar z)
-(metavar x : (metavar z)))| yields |metavar c| equal to |spn|, which
-correctly identifies that the subtree at |metavar c| was modified according to |spn|.
-The observation, however, is that the insertion
-context of |chg| mentions |metavar a|, which is a subtree that comes
-from outside the deletion context of |chg|. If we do not perform
-any further check and proceed naively, we would end up
-substituting |metavar c| for |ctxDel (disalign spn)|
-and for |ctxIns (disalign spn)| in |ctxDel chg| and |ctxIns chg|, respectively,
-which would result in:
+  The |Just| in the return value above indicate we must check that we
+will not introduce extra duplications.  In
+\Cref{fig:pepatches:merge-03} illustrates a case where failing to
+perform this check would result in an erroneous duplication of the
+value |2|. Matching the deletion context of |chg = Chg (metavar c)
+(metavar a : metavar c)| against the spine |spn = Spn (Cpy (metavar o)
+: Chg (metavar z) (metavar x : (metavar z)))| yields |metavar c| equal
+to |spn|, which correctly identifies that the subtree at |metavar c|
+was modified according to |spn|.  The observation, however, is that
+the insertion context of |chg| mentions |metavar a|, which is a
+subtree that comes from outside the deletion context of |chg|. If we
+do not perform any further check and proceed naively, we would end up
+substituting |metavar c| for |ctxDel (disalign spn)| and for |ctxIns
+(disalign spn)| in |ctxDel chg| and |ctxIns chg|, respectively, which
+would result in:
 
 \begin{minipage}{.8\textwidth}
 \centering
@@ -3474,15 +3513,15 @@ which would result in:
 merging the left hand side of |(,)|, in
 \Cref{fig:pepatches:merge-03:A,fig:pepatches:merge-03:B}, it becomes
 clear that |metavar a| was erroneously duplicated. Our implementation
-will reject this by performing a check that ensures the set of
+will reject this by checking that the set of
 subtrees that appear in the result of instantiating |chg| is disjoint
-from the set of subtrees that were moved around by |spn|. \digress{I
+from the set of subtrees moved by |spn|. \digress{I
 dislike this aspect of this synchronization algorithm quite a lot, it
 feels unnecessarily complex and with no really good justification
 besides the example in \Cref{fig:pepatches:merge-03}, which was
 distilled from real conflicts. I believe that further work would
 uncover a more disciplined way of disallowing duplications to be
-introduced without this check.}
+introduced.}
 
 
   Merging two spines is simple. We know they must
@@ -3538,9 +3577,8 @@ mrgChgChg p' q'  | isDup p'   = mrgChgDup p' q'
 \end{code}
 \end{myhs}
 
-\paragraph{Second Phase}
-  \Cref{fig:pepatches:mergePhaseOne} collects all the cases discussed
-above and illustrates the full definition of |mergePhase1|.
+%   \Cref{fig:pepatches:mergePhaseOne} collects all the cases discussed
+% above and illustrates the full definition of |mergePhase1|.
 Once the first pass is done and we have collected information
 about how each subtree has been changed and potential subtree
 equivalences we might have discovered. The next step is to synthesize
@@ -3549,48 +3587,50 @@ what a subtree \emph{was} and a insertion map that informs us
 what a subtree \emph{became}, so we can perform the |P2Instante|
 and |P2TestEq| instructions.
 
-\begin{figure}
-\begin{myhs}[.99\textwidth]
-\begin{code}
-mrgPhase1 p q = case (p , q) of
-   (Cpy _ , _)  -> return (Mod (P2Instantiate (disalign q)))
-   (_ , Cpy _)  -> return (Mod (P2Instantiate (disalign p)))
+% \begin{figure}
+% \begin{myhs}[.99\textwidth]
+% \begin{code}
+% mrgPhase1 p q = case (p , q) of
+%    (Cpy _ , _)  -> return (Mod (P2Instantiate (disalign q)))
+%    (_ , Cpy _)  -> return (Mod (P2Instantiate (disalign p)))
+% 
+%    (Prm x y, Prm x' y')  -> Mod <$$> mrgPrmPrm x y x' y'
+%    (Prm x y, _)          -> Mod <$$> mrgPrm x y (disalign q)
+%    (_, Prm x y)          -> Mod <$$> mrgPrm x y (disalign p)
+% 
+%    -- Insertions are preserved as long as they are not simultaneous.
+%    (Ins (Zipper z p'), Ins (Zipper z' q'))
+%      | z == z'   -> Ins . Zipper z <$$> mergePhase1 p' q'
+%      | otherwise -> throwConf "ins-ins"
+%    (Ins (Zipper z p'), _) -> Ins . Zipper z <$$> mrgPhase1 p' q
+%    (_ ,Ins (Zipper z q')) -> Ins . Zipper z <$$> mrgPhase1 p q'
+% 
+%    -- Deletions need to be checked for compatibility: we try
+%    -- and "apply" the deletion to the other alignment
+%    (Del zp@(Zipper z _), _) -> Del . Zipper z <$$> (tryDel zp q >>= uncurry mrgPhase1)
+%    (_, Del zq@(Zipper z _)) -> Del . Zipper z <$$> (tryDel zq p >>= uncurry mrgPhase1 . swap)
+% 
+%    -- Spines mean that on one hand a constructor was copied; but the mod
+%    -- indicates this constructor changed.
+%    (Mod p', Spn q') -> Mod <$$> mrgChgSpn p' q'
+%    (Spn p', Mod q') -> Mod <$$> mrgChgSpn q' p'
+% 
+%    -- Two spines it is easy, just pointwise merge their recursive positions
+%    (Spn p', Spn q') -> case zipSRep p' q' of
+%        Nothing -> throwNotASpan
+%        Just r  -> Spn <$$> repMapM (uncurry' mrgPhase1) r
+% 
+%    -- Finally, modifications sould be instantiated, if possible.
+%    (Mod p', Mod q') -> Mod <$$> mrgChgChg p' q'
+% \end{code}
+% \end{myhs}
+% \caption{Full implementation of |mergePhase1|.}
+% \label{fig:pepatches:mergePhaseOne}
+% \end{figure}
 
-   (Prm x y, Prm x' y')  -> Mod <$$> mrgPrmPrm x y x' y'
-   (Prm x y, _)          -> Mod <$$> mrgPrm x y (disalign q)
-   (_, Prm x y)          -> Mod <$$> mrgPrm x y (disalign p)
-
-   -- Insertions are preserved as long as they are not simultaneous.
-   (Ins (Zipper z p'), Ins (Zipper z' q'))
-     | z == z'   -> Ins . Zipper z <$$> mergePhase1 p' q'
-     | otherwise -> throwConf "ins-ins"
-   (Ins (Zipper z p'), _) -> Ins . Zipper z <$$> mrgPhase1 p' q
-   (_ ,Ins (Zipper z q')) -> Ins . Zipper z <$$> mrgPhase1 p q'
-
-   -- Deletions need to be checked for compatibility: we try
-   -- and "apply" the deletion to the other alignment
-   (Del zp@(Zipper z _), _) -> Del . Zipper z <$$> (tryDel zp q >>= uncurry mrgPhase1)
-   (_, Del zq@(Zipper z _)) -> Del . Zipper z <$$> (tryDel zq p >>= uncurry mrgPhase1 . swap)
-
-   -- Spines mean that on one hand a constructor was copied; but the mod
-   -- indicates this constructor changed.
-   (Mod p', Spn q') -> Mod <$$> mrgChgSpn p' q'
-   (Spn p', Mod q') -> Mod <$$> mrgChgSpn q' p'
-
-   -- Two spines it is easy, just pointwise merge their recursive positions
-   (Spn p', Spn q') -> case zipSRep p' q' of
-       Nothing -> throwNotASpan
-       Just r  -> Spn <$$> repMapM (uncurry' mrgPhase1) r
-
-   -- Finally, modifications sould be instantiated, if possible.
-   (Mod p', Mod q') -> Mod <$$> mrgChgChg p' q'
-\end{code}
-\end{myhs}
-\caption{Full implementation of |mergePhase1|.}
-\label{fig:pepatches:mergePhaseOne}
-\end{figure}
-
-  Splitting |inst| and |eqvs| require some attention. For example,
+\paragraph{Second Phase}
+The second phase starts with splitting |inst| and |eqvs|, which
+requires some attention. For example,
 imagine there exists an entry in |inst| that assigns |metavar x|
 to |Chg (Hole (metavar y)) (: 42 (Hole (metavar y)))|, this tells us that
 the tree identified by |metavar x| is the same as the tree identified
@@ -3625,8 +3665,8 @@ splitDelInsMaps  :: MergeState kappa fam
                            (  Subst kappa fam (Metavar kappa fam) ,  Subst kappa fam (Metavar kappa fam))
 splitDelInsMaps (MergeState iot eqvs) = do
     let e' = splitEqvs eqvs
-    d <- addEqvsAndSimpl (map (exMap chgDel) inst) e'
-    i <- addEqvsAndSimpl (map (exMap chgIns) inst) e'
+    d <-  addEqvsAndSimpl (map (exMap chgDel) inst) e'
+    i <-  addEqvsAndSimpl (map (exMap chgIns) inst) e'
     return (d , i)
 \end{code}
 \end{myhs}
