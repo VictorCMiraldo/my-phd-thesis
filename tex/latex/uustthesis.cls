@@ -335,7 +335,7 @@ I'll pass it to 'book' just in case.}
   (met een samenvatting in het Nederlands)
   \end{Large}
 
-  \vspace*{0.17\paperheight} %
+  \vspace*{0.15\paperheight} %
 
   Proefschrift
 
