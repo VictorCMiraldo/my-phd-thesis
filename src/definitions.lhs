@@ -67,10 +67,12 @@
 
 
 \newenvironment{myhs}[1][0.95\textwidth]{%
+\stopparnum%
 % \nopagebreak[3]%Denies latex to pagebreak before code blocks!
 \begin{myhs*}[#1]  %\par\noindent\begin{minipage}{#1}\small%
 }{%
 \end{myhs*}%
+\startparnum
 }
 
 \newenvironment{myforest}{%

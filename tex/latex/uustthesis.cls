@@ -527,6 +527,8 @@ project \@NWOproject{} (\@NWOgrantnumber).
 \newcommand*{\numberedparagraph}{%
 \refstepcounter{para}%
 \marginpar[\qquad\formatparnum]{\quad\formatparnum}}
+\newcommand*{\stopparnum}{\everypar{}}
+\newcommand*{\startparnum}{\everypar{\numberedparagraph}}
 \preto\chapter{\everypar{}}
 \preto\section{\everypar{}}
 \preto\subsection{\everypar{}}
