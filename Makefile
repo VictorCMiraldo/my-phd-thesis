@@ -96,6 +96,10 @@ nix-install: default
 images:
 	make -C src/img
 
+sample: tex/latex/uustthesis.cls tex/latex/uustthesis.sample.tex
+	export TEXMFHOME=".:$(TEXMFHOME)" && \
+	$(LATEX) tex/latex/uustthesis.sample.tex
+
 ## Installs the math fonts locally
 ## Unfortunately, this is necessary for
 ## loading mathfonts, even with XeTeX.

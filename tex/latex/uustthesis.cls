@@ -69,7 +69,7 @@
 I'll pass it to 'book' just in case.}
   \PassOptionsToClass{\CurrentOption}{book}%
 }
-\ProcessOptions\relax 
+\ProcessOptions\relax
 %% This finishes the 'options' section
 
 %% We'll build on top of the 'book' class.
@@ -90,7 +90,7 @@ I'll pass it to 'book' just in case.}
 
 %% Font Confiruation using unicode-math package
 %% https://tex.stackexchange.com/questions/30049/how-to-select-math-font-in-document#30066
-%% 
+%%
 \usepackage{unicode-math}
 \defaultfontfeatures{Scale=MatchLowercase}
 \setmainfont[
@@ -99,7 +99,7 @@ I'll pass it to 'book' just in case.}
     ItalicFont     = STIXTwoText-Italic.otf,
     BoldItalicFont = STIXTwoText-BoldItalic.otf,
 ]{STIXTwoText-Regular.otf}
-\setmathfont{STIX Two Math} 
+\setmathfont{STIX Two Math}
 
 %%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%
@@ -273,7 +273,7 @@ I'll pass it to 'book' just in case.}
   \end{small}
 
   \vfill
-  
+
   \begin{LARGE}
   {\bf \@title}
   \end{LARGE}
@@ -290,14 +290,14 @@ I'll pass it to 'book' just in case.}
 
   Supervised by:
 
-  \@promotor 
+  \@promotor
 
   \
 
   \ifx\@copromotor\empty
   \else
     Cosupervised by:
-    
+
     \@copromotor
   \fi
 \end{center}
@@ -322,21 +322,21 @@ I'll pass it to 'book' just in case.}
 \begin{center}
 %%%%%%%%%%%%%
 %% Headings
-  \vspace*{0.08\paperheight} % 
+  \vspace*{0.08\paperheight} %
   \begin{LARGE}
   {\bf \@title}
   \end{LARGE}
   \vspace*{0.08\paperheight} %
-  
+
   \begin{Large}
   \@titleDUTCH
-  \vspace{0.008\paperheight} % 
+  \vspace{0.008\paperheight} %
 
   (met een samenvatting in het Nederlands)
   \end{Large}
 
   \vspace*{0.17\paperheight} %
-  
+
   Proefschrift
 
   \
@@ -440,7 +440,7 @@ project \@NWOproject{} (\@NWOgrantnumber).
 \begin{flushright}
 \begin{tikzpicture}
   \draw (1cm, 1cm) node { \drawseaweed{black}{\c@chapter} };
-  \draw node {% 
+  \draw node {%
     \contourlength{.4mm}
     \fontsize{105}{130}\selectfont{\contour[64]{white}{%
        \protect\color{black}\thechapter}}
@@ -497,7 +497,7 @@ project \@NWOproject{} (\@NWOgrantnumber).
 
 %% Theorems and Definitions
 \usepackage{amsthm}
- 
+
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
 
@@ -518,7 +518,35 @@ project \@NWOproject{} (\@NWOgrantnumber).
 \usepackage[shortlabels]{enumitem}
 \setlist[enumerate]{label=\alph*)}
 
-\ifPHD@isdraft
-\usepackage[displaymath,mathlines]{lineno}
-\linenumbers
-\fi
+%% paragraph numbers; based on https://www.dickimaw-books.com/latex/admin/html/exercises/numberedpar.shtml
+\usepackage{etoolbox}
+\newcounter{para}[chapter]
+\newcommand*{\formatparnum}[1]{$\color{gray}\S_{\thepara}$}
+\geometry{marginparsep=0em,marginparwidth=4em}
+\reversemarginpar
+\newcommand*{\numberedparagraph}{%
+\refstepcounter{para}%
+\marginpar[\qquad\formatparnum]{\quad\formatparnum}}
+\preto\chapter{\everypar{}}
+\preto\section{\everypar{}}
+\preto\subsection{\everypar{}}
+\preto\subsubsection{\everypar{}}
+\preto\paragraph{\everypar{}}
+\preto\subparagraph{\everypar{}}
+\renewcommand{\@afterheading}{%
+  \@nobreaktrue
+  \everypar{%
+    \if@nobreak
+      \@nobreakfalse
+      \clubpenalty\@M
+      \if@afterindent
+      \else
+        {\setbox\z@\lastbox}%
+      \fi
+    \else
+      \clubpenalty\@clubpenalty
+      \everypar{\numberedparagraph}%
+    \fi
+    \numberedparagraph
+  }%
+}
