@@ -820,7 +820,8 @@ context makes it clear that |sigma| is a substitution. Finally, we
 will abide by the Barendregt convention~\cite{Barendregt1984} in our
 proofs and metatheory -- that is, all changes that appear in in some
 mathematical context have their bound variable names independent of
-each other, or, no two changes share a variable name.
+each other, to put it differently, no two changes will accidentally 
+share a variable name.
 
 
 \begin{figure}
@@ -876,7 +877,7 @@ deleted by |q|. Our composition algorithm posses no information
 that this |t| is to be treated as a copy. This also occurs in
 the edit-script universe: composing patches yields worse patches
 than recomputing differences. We can imagine that a more complicated
-composition algorithm could work around and recognize the copies
+composition algorithm might be able to recover the copies
 in those situations.
 
   We do not particularly care whether composition produces \emph{the best}
@@ -886,7 +887,7 @@ is, the composition of two patches is indistinguishable from
 the composition of their application functions.
 
 \begin{lemma}[Composition Correct] \label{lemma:pepatches:comp-correct}
-For any changes |p| and |q| and trees |x| and |y| aptly typed;
+For any changes |p| and |q| and trees |x| and |y| aptly typed; we have
 |app (after p q) x == Just y| if and only if
 |exists z dot (app q) x == Just z && app p z == Just y|.
 \end{lemma}
@@ -899,7 +900,7 @@ be the result of |unify (chgDel p) (chgIns q)|, witnessing |after p q|;
 let |gamma| be the result of |unify (sigma (chgDel q)) x|, witnessing the
 application.
 
-Take |z = (gamma . sigma) (ctxIns q)|, and let us prove it
+Take |z = (gamma . sigma) (ctxIns q)|, and let us prove |gamma . sigma|
 unifies |ctxDel p| and |z|.
 \begin{squiggol}[tight]
 |(gamma . sigma) (ctxDel p) == (gamma . sigma) z|
@@ -907,8 +908,8 @@ unifies |ctxDel p| and |z|.
 |(gamma . sigma) (ctxDel p) == z|
 \reasonRel{\iff}{\text{definition of } |z|}
 |(gamma (sigma (ctxDel p)) == gamma (sigma (ctxIns q))|
-\noreasonRel{\;\Longleftarrow\;}
-|sigma (ctxDel p) == sigma (ctx ins q)|
+\reasonRel{\;\Longleftarrow\;}{\text{hypothesis}}
+|sigma (ctxDel p) == sigma (ctxIns q)|
 \end{squiggol}
 
 Hence, |p| can be applied to |z|, and the result is |(gamma . sigma) (ctxIns p)|,
@@ -922,9 +923,11 @@ Let |beta| be such that |beta (ctxDel p) == z|, hence |y == beta (ctxIns p)|.
 \begin{enumerate}
 \item First we prove that |after p q| is defined, that is,
 there exists |sigma'| that unifies |ctxIns q| and |ctxDel p|.
-Take |sigma' = alpha ++ beta|, and recall |alpha| and |beta|
-have disjoint supports because we assume |p| and |q| have a
-disjoint set of names.
+Recall |alpha| and |beta| have disjoint variables
+because we assume |p| and |q| have a
+disjoint set of names. Let |sigma' = alpha `union` beta|,
+which corresponds to |alpha . beta| or
+|beta . alpha| because of they have disjoint set of names.
 %
 \begin{squiggol}[tight]
 |sigma'  (ctxIns q)  ==  sigma'  (ctxDel p)|
@@ -1036,7 +1039,7 @@ Let |p| be a change, then |cpy = Chg (metavar x) (metavar x)| is
 the identity of composition. That is, |after p cpy ~~ p ~~ after cpy p|.
 \end{lemma}
 \begin{proof}
-Trivial; |cpy| unifies with anything.
+Trivial; |cpy| unifies with all possible terms.
 \end{proof}
 
   \Cref{lemma:pepatches:comp-assoc,lemma:pepatches:comp-id} establish
@@ -1898,20 +1901,19 @@ to maintain scope.]{%
 \label{fig:pepatches:example-minimal}
 \end{figure}
 
-  Computing locally-scoped patches consists in first computing
-the largest possible spine, like we did with globally-scoped patches, then
+  Computing locally-scoped patches consists of first computing the
+largest possible spine, like we did with globally-scoped patches, then
 enlarging the resulting changes until they are well-scoped and closed.
-\Cref{fig:pepatches:example-03} actually
-illustrates this process well. Computing the closure of
-\Cref{fig:pepatches:example-03:A} is done by computing
+\Cref{fig:pepatches:example-03} illustrates this process. Computing
+the closure of \Cref{fig:pepatches:example-03:A} starts with
 \Cref{fig:pepatches:example-03:B}, then \emph{enlarging} the changes
-to contain the |Bin| constructor, which fixes their scope (resulting in
-\Cref{fig:pepatches:example-03:C}).
+to so that they contain the |Bin| constructor, which fixes their scope
+(resulting in \Cref{fig:pepatches:example-03:C}).
 
   We say a change is closed when it has no free metavariables and,
-additionally, its metavariables occur nowhere else globally.
+additionally, its metavariables occur nowhere else.
 The changes produced by the |chg| function are
-closed, for example, but they might not be as small as they could.
+closed, for example, but they might not be as small as they could be.
 We say a change is \emph{minimal} when the root constructors
 in its deletion and insertion context are either different
 or necessary to maintain scope. \Cref{fig:pepatches:example-minimal}
@@ -1940,9 +1942,9 @@ two such changes should not interfere with one another.
 
   Producing locally-scoped minimal-closed changes can be difficult under
 arbitrary renamings. Take \Cref{fig:pepatches:example-minimal:E}, one
-could argue that: if the |metavar x| that occur in each individual
+could argue that: if the occurrences of |metavar x| in each individual
 change are, in fact, different, then the changes are
-minimal-closed. To avoid these In our case, however, we always start
+minimal-closed. To avoid these. In our case, however, we always start
 from a large well-scoped change produced with |chg|. Consequently, we
 know that every occurence of |metavar x| refers to \emph{the same}
 tree in the source of the patch. This is another technicality of
@@ -2137,9 +2139,9 @@ explicit representation of that information.}
   As we have seen in the previous sections, locally-scoped changes can
 avoid misaligning changes (\Cref{fig:pepatches:misalignment}), but
 they still do not help us in identifying the insertions and
-deletions. As a matter of fact, identifying these insertions and
+deletions. As it will turn out, identifying these insertions and
 deletions is crucial for synchronization.  In this section we will
-look into a datatype and an algorithm for representing and computing
+define a datatype and an algorithm for representing and computing
 alignments, which make the backbone of synchronization. Untyped
 synchronizers, such as \texttt{harmony}~\cite{Foster2007}, must employ
 schemas to identify insertions and deletions avoiding misalignments
@@ -2148,13 +2150,13 @@ enable us to identify insertions and deletions naturally by ensuring that
 they delete one layer of a \emph{recursive type} at a time, never altering
 the type of the value under scrutiny.
 
-  Take \Cref{fig:pepatches:alignment-01:A}, which was the change that
+  Take \Cref{fig:pepatches:alignment-01:A}, illustrating the change that
 motivated locally-scoped patches (\Cref{fig:pepatches:misalignment})
-in the first place. This time, howerver, we explicitly drew arrows
-connecting which constructors, albeit duplicated, represent \emph{the
+in the first place. This time, however, arrows
+connect constructors that represent \emph{the
 same information} in each respective context.  This makes it clear
 that |(: 42)| has no counterpart in the insertion context and,
-consequently, should be identified as a deletion.  The |Chg| datatype
+consequently, corresponds to a deletion.  The |Chg| datatype
 by itself is insufficient to represent all this information. Therefore
 we need a new datatype for \emph{alignments}, |Al|, and a function
 that translates a |Chg| into an |Al|.  Computing and representing an
@@ -2168,9 +2170,9 @@ correspondent are flagged as deletions or insertions depending on
 which context they belong. Finally, |Cpy (metavar SQ)| is an
 abbreviation for |Chg (metavar SQ) (metavar SQ)|.
 
-  An aligned patch consists in a spine of copied constructors leading
+  An aligned patch consists of a spine of copied constructors leading
 to a \emph{well-scoped alignment}. This alignment, in turn, consists
-in a sequence of insertions, deletions or spines, which finally lead
+of a sequence of insertions, deletions or spines, which finally lead
 to a |Chg|. These |Chg| in the leaves of the alignment are
 globally-scoped with respect to the alignment they belong.
 We also add explicit information about copies and permutations to aid
