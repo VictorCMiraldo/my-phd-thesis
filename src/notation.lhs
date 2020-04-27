@@ -76,10 +76,11 @@
 
 %%% HDiff Notation
 
-\definecolor{hdiff-metavar-text}{RGB}{0,112,33}
+\providecolor{hdiff-metavar}{RGB/cmyk}{0,112,33/1,0,0.7,0.56}
+
 
 %format PatchPE     = "\HTNI{\mathit{Patch}_\textsc{pe}}"
-%format (metavar i) = "\HSCustomNC{hdiff-metavar-text}{\hdiffFormatMetavar{" i "}}"
+%format (metavar i) = "\HSCustomNC{hdiff-metavar}{\hdiffFormatMetavar{" i "}}"
 %format MV_Prim i   = "\HTNI{\hdiffFormatMetavarKappaFam{\kappa}{" i "}}"
 %format MV_Comp i   = "\HTNI{\hdiffFormatMetavarKappaFam{\mathit{fam}}{" i "}}"
 

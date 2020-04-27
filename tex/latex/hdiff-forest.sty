@@ -13,9 +13,9 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{hdiff-forest}[2020/03/14 hdiff Forest]
 
-\RequirePackage{forest}
+\RequirePackage[cmyk]{xcolor}
 \RequirePackage{tikz}
-\RequirePackage{xcolor}
+\RequirePackage{forest}
 
 \ProcessOptions\relax
 
@@ -27,18 +27,14 @@
 %%darker: \definecolor{hdiff-metavar}{RGB}{108,40,23}
 %%purple:\definecolor{hdiff-metavar}{RGB}{56,25,110}
 
-\definecolor{hdiff-constr}{RGB}{80,88,113}
-\definecolor{hdiff-change-bg}{RGB}{220,224,238}
-\definecolor{hdiff-black}{RGB}{97,108,132}
-\definecolor{hdiff-gray}{RGB}{117,128,152}
+\definecolor{hdiff-black}{RGB/cmyk}{97,108,132/0.26,0.18,0,0.48}
+\definecolor{hdiff-gray}{RGB/cmyk}{117,128,152/0.23,0.15,0,0.4}
 
-\definecolor{hdiff-change-border}{RGB}{0,112,33}
-\definecolor{hdiff-metavar}{RGB}{0,112,33}
+\definecolor{hdiff-change-border}{RGB/cmyk}{0,112,33/0.9,0,0.7,0.52}
+\colorlet{hdiff-metavar}{hdiff-change-border}
 
-\definecolor{delctx-bg}{RGB}{240,190,190}
-\definecolor{delctx-border}{RGB}{205,81,81}
-\definecolor{insctx-bg}{RGB}{190,240,225}
-\definecolor{insctx-border}{RGB}{81,205,165}
+\definecolor{delctx-border}{RGB/cmyk}{205,81,81/0,0.7,0.6,0.19}
+\definecolor{insctx-border}{RGB/cmyk}{81,205,165/0.7,0,0.19,0.19}
 
 
 \newcommand{\hdiffFormatMetavar}[1]{\ensuremath{\#_{#1}}}
@@ -48,8 +44,7 @@
 \forestset{%
   debug=nodewalks,
   default preamble={%
-      for tree={text=hdiff-constr,
-                edge=hdiff-black},
+      for tree={edge=hdiff-black},
     },
 %%%%%%%%%%%%%%%%
   metavar/.style={%
@@ -83,9 +78,7 @@
         [\phantom{} , append, fit=rectangle, no edge, before drawing tree={%
             tikz+={%
               \begin{scope}[on background layer]
-                \node (n) [ %fill=hdiff-change-bg,
-                           % inner sep=\savedinnerysep,
-                           dashed, draw=#1,
+                \node (n) [dashed, draw=#1,
                            rounded corners, fit to=tree] {};
               \end{scope}
             },

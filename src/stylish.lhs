@@ -5,17 +5,13 @@
 %% TODO: Figure out spacing!
 
 %% Colors (from duo-tone light syntax)
-\definecolor{hsblack}{RGB}{45,32,3}
-\definecolor{hsgold1}{RGB}{179,169,149}
-\definecolor{hsgold2}{RGB}{177,149,90}
-\definecolor{hsgold3}{RGB}{190,106,13}%{192,96,4}%{132,97,19}
-\definecolor{hsblue1}{RGB}{173,176,182}
-\definecolor{hsblue2}{RGB}{113,142,205}
-\definecolor{hsblue3}{RGB}{0,33,132}
-\definecolor{hsblue4}{RGB}{97,108,132}
-\definecolor{hsblue5}{RGB}{34,50,68}
-\definecolor{hsred2}{RGB}{191,121,103}
-\definecolor{hsred3}{RGB}{171,72,46}
+\definecolor{hsgold2}{RGB/cmyk}{177,149,90/0,0.16,0.49,0.3}
+\definecolor{hsgold3}{RGB/cmyk}{190,106,13/0,0.44,0.93,0.25}
+\definecolor{hsblue3}{RGB/cmyk}{0,33,132/1,0.65,0,0.35}
+\definecolor{hsblue4}{RGB/cmyk}{97,108,132/0.26,0.18,0,0.48}
+\definecolor{hsblue5}{RGB/cmyk}{34,50,68/0.5,0.26,0,0.73}
+\definecolor{hsred2}{RGB/cmyk}{191,121,103/0,0.4,0.49,0.23}
+\definecolor{hsred3}{RGB/cmyk}{171,72,46/0,0.58,0.73,0.33}
 
 % TODO: make all color names upercase so it
 %       all wors in headings too!

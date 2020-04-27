@@ -76,8 +76,8 @@ I'll pass it to 'book' just in case.}
 \LoadClass{book}
 
 %% Necessary Packags
+\RequirePackage[cmyk]{xcolor}
 \RequirePackage{tikz}
-\RequirePackage{xcolor}
 \RequirePackage{ccaption}
 \RequirePackage{graphicx}
 \RequirePackage{setspace}
