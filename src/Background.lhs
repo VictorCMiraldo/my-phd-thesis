@@ -293,7 +293,7 @@ the Levenshtein distance. For example, there are only two edit-scripts
 with minimum cost on |lcs ["a", "b"] ["b" , "a"]|. This, in fact,
 is a general problem with any \emph{edit-script} based approaches.
 
-  A practical implementation of \unixdiff{} uses a number of
+  The \unixdiff{} implementation uses a number of
 algorithmic techniques that make it performant. First, it is
 essential to use a memoized |lcs| function to avoid recomputing
 sub-problems. It is also common to hash the data being compared to have

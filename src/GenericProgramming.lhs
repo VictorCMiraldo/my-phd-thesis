@@ -1064,10 +1064,8 @@ topmost type of the family, passed to |deriveFamily|:
 
 \begin{myhs}
 \begin{code}
-type  FamRoseInt
-      = P [ Rose Int                    , [Rose Int] ]
-type  CodesRoseInt
-      = P [ (P [P [K KInt , I (S Z)]])  , P [ P [] , P [I Z , I (S Z) ] ] ]
+type  FamRoseInt    = P [ Rose Int                    , [Rose Int] ]
+type  CodesRoseInt  = P [ (P [P [K KInt , I (S Z)]])  , P [ P [] , P [I Z , I (S Z) ] ] ]
 \end{code}
 \end{myhs}
 
@@ -1169,9 +1167,12 @@ scenario:
 
 \begin{myhs}
 \begin{code}
-data DatatypeInfo  :: [  [  Atom kon ]]  -> Star where dots
-data ConstrInfo    ::    [  Atom kon ]   -> Star where dots
-data FieldInfo     ::       Atom kon     -> Star where dots
+data DatatypeInfo  :: [  [  Atom kon ]]  -> Star where
+  dots
+data ConstrInfo    ::    [  Atom kon ]   -> Star where
+  dots
+data FieldInfo     ::       Atom kon     -> Star where
+  dots
 \end{code}
 \end{myhs}
 
@@ -1597,7 +1598,7 @@ in the |Eq| typeclass. This would require to ultimately compare
 values of type |y|, for some |y| such that |Elem y kappa|.  Naturally,
 this can only be done if all elements of |kappa| are members of the
 |Eq| typeclass. We specify that all elements of |kappa| satisfy
-a constraint with the |All|~\cite{deVries2004} type family:
+a constraint with the |All|~\cite{deVries2014} type family:
 
 \begin{myhs}
 \begin{code}

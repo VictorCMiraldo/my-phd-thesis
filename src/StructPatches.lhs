@@ -144,14 +144,14 @@ The \texttt{generics-mrsop} library (\Cref{chap:generic-programming})
 will be used throughout the exposition.
 
   Recall that a datatype, when seen through its initial
-algebra~\cite{initial-algebra} semantics, can be seen as an infinite
+algebra semantics~\cite{vanHorebeek1989}, can be seen as an infinite
 succession of applications of its pattern functor, call it $F$, to
 itself: $\mu F = F (\mu F)$. The |PatchST| type will describe the differences
 between values of $\mu F$ by successively applying the description of differences between
 values of type $F$, closely following the initial algebra semantics of
 datatypes.
 
-\subsection*{Functorial Patches}
+\subsection{Functorial Patches}
 \label{sec:stdiff:diff:functor}
 
   Handling \emph{one layer} of recursion is done by addressing the possible
@@ -382,7 +382,7 @@ applyAt (AtFix px) (NA_I x) = NA_I <$$> applyAlmu px x
 recursive structure of our value, defining |Almu| and |applyAlmu|,
 which will be our next concern.
 
-\subsection*{Recursive Changes}
+\subsection{Recursive Changes}
 \label{sec:stdiff:diff:fixpoint}
 
   In the previous section, we presented patches describing changes to
@@ -559,8 +559,8 @@ results on type-safe differences~\cite{Lempsink2009}.
 }\qquad
 \subfloat[Graphical Representation of patch]{%
 \begin{forest}
-[|Bin| [|StIns (Tri m SQ n)| [|Cpy x|]]
-       [|StTO Tri Bin| [|Cpy a|] [|Cpy b|] [|Del c|]]]
+[|Bin| [|StIns (Tri m SQ n)| [|StCpy x|]]
+       [|StTO Tri Bin| [|StCpy a|] [|StCpy b|] [|StDel c|]]]
 \end{forest}}
 
 \vspace{6em}
