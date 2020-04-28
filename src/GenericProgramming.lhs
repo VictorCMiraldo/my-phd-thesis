@@ -227,28 +227,19 @@ type family Lkup (ls :: [k]) (n :: Nat) :: k where
 \end{code}
 \end{myhs}
 
-  Now we are able to pattern match and inject into
-generic values.  Unfortunately, matching on |Tag| requires describing
-in full detail the shape of the generic value using the elements of
-|Constr|. Using pattern synonyms~\cite{Pickering2016} we can define
-those patterns once and for all, and give them more descriptive names.
-For example, here are the synonyms describing the constructors |Bin|
-and |Leaf|.
+  With the help of |sop| and |inj|, declared below, we are
+able to pattern match and inject into generic values.
+Unfortunately, matching on |Tag| directly can be cumbersome,
+but we can always use pattern synonyms~\cite{Pickering2016} to circumvent that.
+For example, the synonyms below describe the constructors |Bin| and |Leaf|.
 
 \begin{myhs}
 \begin{code}
 pattern (Pat Leaf)  x    = Tag CZ       (NA_K x :* NP0)
 pattern (Pat Bin)   l r  = Tag (CS CZ)  (NA_I l :* NA_I r :* NP0)
-\end{code}
-\end{myhs}
 
-The functions that perform the pattern matching and injection are the
-|inj| and |sop| below.
-
-\begin{myhs}
-\begin{code}
-inj  :: View    sop  x  -> RepFix  sop  x
-sop  :: RepFix  sop  x  -> View    sop  x
+inj  :: View    sop  x  -> RepFix  sop   x
+sop  :: RepFix  sop  x  -> View    sop   x
 \end{code}
 \end{myhs}
 
@@ -319,12 +310,11 @@ fold f = f . fmap (fold f) . unFix
 \begin{code}
 crush :: (GenericFix a) => (forall x dot Int -> b) -> ([b] -> b) ->  a -> b
 crush k cat = crushFix . deepFrom
-  where
-    crushFix :: Fix (RepFix a) -> b
-    crushFix = cat . elimNS (elimNP go) . unFix
+  where  crushFix :: Fix (RepFix a) -> b
+         crushFix = cat . elimNS (elimNP go) . unFix
 
-    go (NA_I x) = crushFix x
-    go (NA_K i) = k i
+         go (NA_I x) = crushFix x
+         go (NA_K i) = k i
 \end{code}
 \end{myhs}
 \caption{Generic |crush| combinator}
@@ -340,7 +330,8 @@ is defined by (1) how to turn atoms into the output
 type |b| -- in this case we only have integer atoms, and thus
 we require an |Int -> b| function -- and (2) how to combine
 the values bubbling up from each member of a product.
-Finally, we come full circle to our running |gsize| example
+
+  Finally, we come full circle to our running |gsize| example
 as it was promised in the introduction. This is noticeably the smallest
 implementation so far, and very straight to the point.
 
@@ -411,7 +402,8 @@ The code of this recursive family of datatypes can be described as:
 type FamRose           = P [Rose Int, [Rose Int]]
 
 type CodeMRec FamRose  = (P  [ (P [ (P [ KInt, I (S Z)])])
-                             , (P [ (P []), P [ I Z, I (S Z)]])])
+                             , (P [ (P []), P [ I Z, I (S Z)]])
+                             ])
 \end{code}
 \end{myhs}
 
@@ -515,7 +507,7 @@ specify how to translate \emph{each} of the members of the family
 \emph{to} and \emph{from} their generic representation.
 This translation needs to know
 which is the index of the datatype we are converting between in each
-case, hence the additional |SNat ix| parameter. Pattern matching on
+case, hence the additional singleton |SNat ix| parameter. Pattern matching on
 this singleton~\cite{Eisenberg2012} type informs the compiler about
 the shape of the |Nat| index. Its definition is:
 
@@ -527,14 +519,16 @@ data SNat (n :: Nat) where
 \end{code}
 \end{myhs}
 
-  For example, in the case of
-our family of rose trees, |fromMRec| has the following shape:
+  Which in turn, enables us to write the definition of |fromMRec| for
+the family of rose trees.
 
 \begin{myhs}
 \begin{code}
+-- First type in the family
 fromMRec SZ       (El (Fork x ch))  = Rep (Here (NA_K x :* NA_I ch :* NP0))
-fromMRec (SS SZ)  (El [])        = Rep (          Here NP0 ))
-fromMRec (SS SZ)  (El (x : xs))  = Rep ( There (  Here (NA_I x :* NA_I xs :* NP0)))
+-- Second type in the family
+fromMRec (SS SZ)  (El [])           = Rep (          Here NP0 ))
+fromMRec (SS SZ)  (El (x : xs))     = Rep ( There (  Here (NA_I x :* NA_I xs :* NP0)))
 \end{code}
 \end{myhs}
 
@@ -670,7 +664,7 @@ representations and pattern matches which should never be reached?
 \end{enumerate}
 
 Our solution is to \emph{parameterize} |Atom|,
-giving programmers the choice of opaque types:
+giving users the choice of opaque types:
 
 \begin{myhs}
 \begin{code}
@@ -698,8 +692,7 @@ data NA :: (kon -> Star) -> (Nat -> Star) -> Atom kon -> Star where
   NA_I  :: phi    n  -> NA kappa phi (I  n)
   NA_K  :: kappa  k  -> NA kappa phi (K  k)
 
-type  RepMRec (kappa :: kon -> Star) (phi :: Nat -> Star) (c :: [[Atom kon]])
-      = NS (NP (NA kappa phi)) c
+type  RepMRec (kappa :: kon -> Star) (phi :: Nat -> Star) (c :: [[Atom kon]]) = NS (NP (NA kappa phi)) c
 \end{code}
 \end{myhs}
 
@@ -744,7 +737,10 @@ mean that we can use only closed universes of opaque types. It is
 possible to provide an \emph{open} representation by choosing |(Star)|
 -- the whole kind of Haskell's ground types -- as argument to
 |Atom|. As a consequence, the interpretation ought to be of kind |Star
--> Star|, as follows:
+-> Star|, as given by |Value|, below. To use |(Star)| as an argument to a type, we must enable
+the \texttt{TypeInType} language extension~\cite{Weirich2013,Weirich2017}.
+
+
 
 \begin{myhs}
 \begin{code}
@@ -753,9 +749,6 @@ data Value :: Star -> Star where
 \end{code}
 \end{myhs}
 
-  To use |(Star)| as an argument to a type, we must enable
-the \texttt{TypeInType} language extension~\cite{Weirich2013,Weirich2017}.
-
 %  All the generic operations implemented use
 %parametrized version of |Atom|s and representations described in this section.
 %For convenience we also provide a basic set of opaque types which includes the
@@ -763,6 +756,11 @@ the \texttt{TypeInType} language extension~\cite{Weirich2013,Weirich2017}.
 
 \subsubsection{Selection of Useful Combinators}
 \label{sec:gp:combinators}
+
+%{
+%format f_K  = "\HV{f_k}"
+%format f_I  = "\HV{f_I}"
+%format eq_K = "\HV{eq_k}"
 
   The advantages or a \emph{code based} approach to generic programming
 becomes evident when we look at the generic combinators that
@@ -785,8 +783,7 @@ representation and a way of combining these results.
 
 \begin{myhs}
 \begin{code}
-elimRep  ::  (forall k   dot kappa  k   -> a)  ->  (forall ix  dot phi    ix  -> a)  ->  ([a] -> b)
-         ->  RepMRec kappa phi c -> b
+elimRep  ::  (forall k   dot kappa  k   -> a)  ->  (forall ix  dot phi    ix  -> a)  ->  ([a] -> b) ->  RepMRec kappa phi c -> b
 elimRep f_K f_I cat = elimNS cat (elimNP (elimNA f_K f_I))
 \end{code}
 \end{myhs}
@@ -990,7 +987,6 @@ with the topmost (that is, the first) type of the family. For example:
 \begin{code}
 data Exp   var = dots
 data Stmt  var = dots
-data Decl  var = dots
 data Prog  var = dots
 deriveFamily (tht (Prog String))
 \end{code}
@@ -1136,10 +1132,8 @@ closely how \texttt{generics-sop} handles metadata.
 \begin{myhs}
 \begin{code}
 data DatatypeInfo :: [[Star]] -> Star where
-  ADT  :: ModuleName -> DatatypeName -> NP  ConstrInfo cs
-       -> DatatypeInfo cs
-  New  :: ModuleName -> DatatypeName ->     ConstrInfo (P [c])
-       -> DatatypeInfo (P [ P [ c ]])
+  ADT  :: ModuleName -> DatatypeName -> NP  ConstrInfo cs       -> DatatypeInfo cs
+  New  :: ModuleName -> DatatypeName ->     ConstrInfo (P [c])  -> DatatypeInfo (P [ P [ c ]])
 
 data ConstrInfo :: [Star] -> Star where
   Constructor  :: ConstrName                             -> ConstrInfo xs
@@ -1167,12 +1161,9 @@ scenario:
 
 \begin{myhs}
 \begin{code}
-data DatatypeInfo  :: [  [  Atom kon ]]  -> Star where
-  dots
-data ConstrInfo    ::    [  Atom kon ]   -> Star where
-  dots
-data FieldInfo     ::       Atom kon     -> Star where
-  dots
+data DatatypeInfo  :: [  [  Atom kon ]]  -> Star where dots
+data ConstrInfo    ::    [  Atom kon ]   -> Star where dots
+data FieldInfo     ::       Atom kon     -> Star where dots
 \end{code}
 \end{myhs}
 
@@ -1187,19 +1178,17 @@ which can describe applications, as required.
 
 \begin{myhs}
 \begin{code}
-data TypeName  =  ConT ModuleName DatatypeName
-               |  TypeName :@: TypeName
+data TypeName = ConT ModuleName DatatypeName | TypeName :@: TypeName
+
 data DatatypeInfo :: [[Atom kon]] -> Star where
-  ADT  ::  TypeName  -> NP  ConstrInfo cs
-       ->  DatatypeInfo cs
-  New  ::  TypeName  ->     ConstrInfo (P [c])
-       ->  DatatypeInfo (P [ P [ c ]])
+  ADT  ::  TypeName  -> NP  ConstrInfo cs       ->  DatatypeInfo cs
+  New  ::  TypeName  ->     ConstrInfo (P [c])  ->  DatatypeInfo (P [ P [ c ]])
 \end{code}
 \end{myhs}
 
-  The most important difference to \texttt{generics-sop}, perhaps,
+  An important difference to \texttt{generics-sop}
 is that the metadata is not defined for a single type, but
-for a type \emph{within} a family. This is can be seen in the new signature of
+for a type \emph{within} a family. This can be seen in the signature of
 |datatypeInfo|, which receives proxies for both the family and the type.
 The type equalities in that signature reflect the fact that the given type
 |ty| is included with index |ix| within the family |fam|. This step is needed
@@ -1207,45 +1196,39 @@ to look up the code for the type in the right position of |codes|.
 
 \begin{myhs}
 \begin{code}
-class (Family kappa fam codes)
-       =>  HasDatatypeInfo kappa fam codes ix
-       |   fam -> kappa codes where
-  datatypeInfo  ::  (ix ~ Idx ty fam , Lkup ix fam ~ ty)
-                =>  Proxy fam -> Proxy ty
+class (Family kappa fam codes) => HasDatatypeInfo kappa fam codes ix | fam -> kappa codes where
+  datatypeInfo  ::  (ix ~ Idx ty fam , Lkup ix fam ~ ty) =>  Proxy fam -> Proxy ty
                 ->  DatatypeInfo (Lkup ix codes)
 \end{code}
 \end{myhs}
 
-  Template Haskell will then generate something similar to
-the instance below for the first type in the family, |Rose Int|:
+  Template Haskell would generate the instance below for |Rose Int|:
 
 \begin{myhs}
 \begin{code}
 instance HasDatatypeInfo Singl FamRose CodesRose Z where
-  datatypeInfo _ _
-    =  ADT (ConT "E" "Rose" :@: ConT "Prelude" "Int")
-    $  (Constructor "Fork") :* NP0
+  datatypeInfo _ _  = ADT (ConT "E" "Rose" :@: ConT "Prelude" "Int")
+                    $ (Constructor "Fork") :* NP0
 \end{code} %$
 \end{myhs}
 
 \subsection{Example: Well-Typed Classical Tree Differencing}
 \label{sec:gp:well-typed-tree-diff}
 
-  Next we look into a detailed implementation of a type-safe
-adaptation of tree edit distance due to Eelco Lempsink~\cite{Lempsink2009}.
-In order to make the constructions from \Cref{sec:background:tree-edit-distance}
-type-safe by construction we must lift edit-scripts from kind |Star|
-to kind |[Star] -> [Star] -> Star|, enabling us to index the types of the
-source trees and the destination trees of particular edit-scripts.
-Consequently, instead of differencing a list of trees, we will
-difference an $n$-ary product, |NP|, indexed by the type of each tree.
+  This section, based on the work of Lempsink~\cite{Lempsink2009} which
+originally implemented in the \texttt{gdiff} library, is the
+related work that is closest to ours in the sense that it is the only
+\emph{typed} approach to differencing. The presentation provided here
+is adapted from Van Putten's~\cite{Putten2019} master thesis and is
+available as the \texttt{generics-mrsop-gdiff} library.
 
-  The work of Eelco Lempsink~\cite{Lempsink2009} is closest to ours in the
-sense that it is the only \emph{typed} approach to differencing. Its original
-implementation~\cite{Lempsink2009} can be found on the
-\texttt{gdiff} library. The presentation provided here is adapted from
-Van Putten's~\cite{Putten2019} master thesis and is available as the
-\texttt{generics-mrsop-gdiff} library, also on Hackage.
+  Next, we discuss how to make tree edit-scripts (\Cref{sec:background:tree-edit-distance}),
+type-safe following the work of Lempsink~\cite{Lempsink2009}.
+We start by lifting edit-scripts to kind |[Star] -> [Star] -> Star|, which enables
+the indexing of the types for the source and destination forests of
+particular edit-scripts.  Consequently, instead of differencing a list
+of trees, we will difference an $n$-ary product, |NP|, indexed by the
+type of each tree.
 
 \begin{myhs}
 \begin{code}
@@ -1307,11 +1290,9 @@ take the first |n| elements of that forest and use as the arguments to
 \begin{myhs}
 \begin{code}
 insCof  :: Cof kappa codes a t
-        -> NP (NA kappa (Fix kappa codes)) (t :++: xs)
-        -> NP (NA kappa (Fix kappa codes)) (a Pcons xs)
+        -> NP (NA kappa (Fix kappa codes)) (t :++: xs) -> NP (NA kappa (Fix kappa codes)) (a Pcons xs)
 insCof (ConstrK k)        xs =  NA_K k :* xs
-insCof (ConstrI c ispoa)  xs =  let (poa, xs') = split ispoa xs
-                                in NA_I (Fix $$ inj c poa) :* xs'
+insCof (ConstrI c ispoa)  xs =  let (poa, xs') = split ispoa xs in NA_I (Fix $$ inj c poa) :* xs'
 \end{code}
 \end{myhs}
 
@@ -1911,11 +1892,8 @@ leave them annotated in the tree, in the second we run the algorithm.
 Moreover, we can compute all the necessary synthesized attributes an algorithm
 needs in a single preprocessing phase. This is a crucial maneuver to
 make sure our generic programs can scale to real-world inputs.
-
-  It is worth mentioning that |cata| and |synthesize| are
-actually implemented in their monadic form and over |HolesAnn| for maximal
-generality. We invite the interested reader to check the source code
-for the gory details.
+Naturally, |cata| and |synthesize| are actually implemented in their monadic
+form and over |HolesAnn| for maximal generality.
 
 \subsection{Practical Features}
 
@@ -1929,21 +1907,15 @@ gives an overview of those features.
 \label{sec:gp:simplistic-zipper}
 
   Zippers~\cite{Huet1997} are a well established technique for traversing a recursive
-data structure keeping track a current focus point. Defining
-generic zippers is nothing new, this has been done by many authors
+data structure keeping track of a focus point. Defining
+generic zippers is not new, this has been done by many authors
 \cite{Adams2010,Hinze2004,Yakushev2009} for many different classes of datatypes
-in the past. Nevertheless, different generic programming libraries will
-yield different variations of zippers.
-
-  In our particular case, we are not interested in traversing a generic
+in the past. In our particular case, we are not interested in traversing a generic
 representation by means of the usual zipper traversals -- up, down, left and
 right -- which move the focus point. Instead, we just want a datatype that
-encodes a one-hole context over a representation, encoded by |SZip| below.
-The |Zipper| datatype will later ensure that the hole lies in a recursive position.
+encodes a context with one focus, encoded by |SZip| below.
 A value of type |SZip ty w f| represents a value of type |SRep w f|
-with one \emph{hole} in a position with type |ty|. Its definition is given
-below. Be aware that the hole in a zipper is a different thing from
-the holes inside a free monad (|HolesAnn|).
+with one \emph{hole}, or \emph{focus}, in a position with type |ty|.
 
 \begin{myhs}
 \begin{code}
@@ -1959,7 +1931,8 @@ data SZip ty w f where
 \end{code}
 \end{myhs}
 
-  The |Zipper| datatype encapsulates the |ty| above as an existential
+The |Zipper| datatype will ensure that the focus lies in a recursive position.
+Its definition is given below. It encapsulates the |ty| above as an existential
 type and keeps the focus point accessible. We also pass around a
 constraint-kinded variable to enable one to specify custom constraints
 about the types in question.
