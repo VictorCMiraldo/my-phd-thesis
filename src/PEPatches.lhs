@@ -11,7 +11,7 @@ arbitrarily permuted, duplicated or contracted (contractions are
 dual to duplications).
 
   Classical tree differencing algorithms start by computing tree
-matchings (\Cref{sec:background:tree-edit-distnace}), which identify
+matchings (\Cref{sec:background:tree-edit-distance}), which identify
 the subtrees that should be copied. These tree matchings, however, must
 be restricted to order-preserving partial injections to be
 efficiently translated to edit-scripts later.  The \texttt{hdiff}
@@ -1126,7 +1126,7 @@ will not work, however.
 denoted |p ~ q|, by estabilishing whether |p| and |q| are comparable
 under |<=|. Since |<=| is not total, however. this would not yield
 an equivalence relation (transitivity does not hold, illustrated in
-\Cref{pepatches:approx-not-equiv}).
+\Cref{fig:pepatches:approx-not-equiv}).
 
 \begin{figure}
 \centering
@@ -3151,10 +3151,9 @@ data Phase2 kappa fam at where
 \end{myhs}
 
   Deciding which instruction should be performed depends on the
-structure of the alignments under synchronization.
-The |mergePhase1| function is shown in its entirety
-in \Cref{fig:pepatches:mergePhaseOne} but we will discussed the
-individual cases one by one, next.
+structure of the alignments under synchronization, and is
+done by the |mergePhase1| function, whose cases will be
+discussed one by one, next.
 
 \begin{myhs}
 \begin{code}

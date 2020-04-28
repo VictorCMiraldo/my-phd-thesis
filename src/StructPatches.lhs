@@ -84,7 +84,7 @@ and copies.
     [|StCpy b|]
     [|StDel c|]]
   [|StIns (Bin SQ e)| [|StCpy d|]]]
-\end{forest}}
+\end{forest}\label{fig:stdiff:patch0-c}}
 \caption{Graphical representation of a simple transformation. Copies,
 insertinos and deletions around the tree are represented with |StCpy|,
 |StIns| and |StDel| respectively.  Modifications are denoted |StTO|.}
@@ -138,8 +138,8 @@ complexity.
 
   Next we look at the |PatchST| type, starting with
 a single layer of datatype, \ie, a single application of the datatypes pattern functor.
-Later, in \Cref{sec:stdiff:diff:fixpoints} we extend this treatment to recursive datatypes,
-essentially by taking the fixpoint of the constructions in \Cref{sec:stdiff:diff:functors}.
+Later, in \Cref{sec:stdiff:diff:fixpoint} we extend this treatment to recursive datatypes,
+essentially by taking the fixpoint of the constructions in \Cref{sec:stdiff:diff:functor}.
 The \texttt{generics-mrsop} library (\Cref{chap:generic-programming})
 will be used throughout the exposition.
 
@@ -975,8 +975,7 @@ enabling us to annotate every node of the source and destination trees
 with a information about whether that node was copied or not.  This
 strategy was translated into Haskell by A. van
 Putten~\cite{Putten2019} as part of his MSc work. The gist of it
-is that we can use annotated fixpoints -- provided by \texttt{generics-mrsop},
-\Cref{sec:gp:mrsop:holes} -- to tag each constructor
+is that we can use annotated fixpoints to tag each constructor
 of a tree with added information. In this case, we are interested
 in whether this node would be copied or not by \texttt{gdiff}:
 

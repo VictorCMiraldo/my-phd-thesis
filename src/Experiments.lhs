@@ -360,7 +360,7 @@ analyzed \qManualMDiffAnal{} randomly selected cases. We witnessed that
 attributed to the human performing more operations than a structural
 merge would have performed. \Cref{fig:eval:mdif-suc-01}, illustrates
 one such example, distilled from the manually analyzed cases. We will
-shortly discuss two cases, illustrate in \Cref{fig:eval:nn-pt-01:fig:eval:nn-pt-02},
+shortly discuss two cases, illustrate in \Cref{fig:eval:nn-pt-01,fig:eval:nn-pt-02},
 where \texttt{hdiff} behaved unexpectedly.
 
   It is worth noting that even though 100\% success

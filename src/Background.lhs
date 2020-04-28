@@ -1,5 +1,5 @@
   The most popular tool for computing differences
-between two files is the \unixdiff{}~\cite{McIlroy1974},
+between two files is the \unixdiff{}~\cite{McIlroy1976},
 it works by comparing files in a \emph{line-by-line} basis and
 attempts to match lines from the source file to lines
 in the destination file. For example, consider the
@@ -423,7 +423,7 @@ The notion of \emph{tree mapping} often comes in handy. It works as
 a \emph{normal form} version of edit-scripts and represents only the
 nodes that are either relabeled or copied. We must impose a series of
 restrictions on these mappings to maintain the ability to
-produce edit-scripts out of it. \Cref{fig:brackground:tree-mapping}
+produce edit-scripts out of it. \Cref{fig:background:tree-mapping}
 illustrates four invalid and one valid such mappings.
 
 \begin{definition}[Tree Mapping] \label{def:background:tree-mapping}
