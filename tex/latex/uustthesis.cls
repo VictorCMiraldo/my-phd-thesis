@@ -62,6 +62,8 @@
 \PassOptionsToClass{draft}{book}
 }
 
+\DeclareOption{cmyk}{\PassOptionsToPackage{cmyk}{xcolor}}
+
 %% Here we can pass undeclared options to some class
 %% or package
 \DeclareOption*{%
@@ -76,7 +78,7 @@ I'll pass it to 'book' just in case.}
 \LoadClass{book}
 
 %% Necessary Packags
-\RequirePackage[cmyk]{xcolor}
+\RequirePackage{xcolor}
 \RequirePackage{tikz}
 \RequirePackage{ccaption}
 \RequirePackage{graphicx}
@@ -518,37 +520,48 @@ project \@NWOproject{} (\@NWOgrantnumber).
 \usepackage[shortlabels]{enumitem}
 \setlist[enumerate]{label=\alph*)}
 
+\ifPHD@isdraft
+\usepackage[mathlines]{lineno}
+\linenumbers
+\fi
+
 %% paragraph numbers; based on https://www.dickimaw-books.com/latex/admin/html/exercises/numberedpar.shtml
-\usepackage{etoolbox}
-\newcounter{para}[chapter]
-\newcommand*{\formatparnum}[1]{$\color{gray}\S_{\thepara}$}
-\geometry{marginparsep=0em,marginparwidth=4em}
-\reversemarginpar
-\newcommand*{\numberedparagraph}{%
-\refstepcounter{para}%
-\marginpar[\qquad\formatparnum]{\quad\formatparnum}}
-\newcommand*{\stopparnum}{\everypar{}}
-\newcommand*{\startparnum}{\everypar{\numberedparagraph}}
-\preto\chapter{\everypar{}}
-\preto\section{\everypar{}}
-\preto\subsection{\everypar{}}
-\preto\subsubsection{\everypar{}}
-\preto\paragraph{\everypar{}}
-\preto\subparagraph{\everypar{}}
-\renewcommand{\@afterheading}{%
-  \@nobreaktrue
-  \everypar{%
-    \if@nobreak
-      \@nobreakfalse
-      \clubpenalty\@M
-      \if@afterindent
-      \else
-        {\setbox\z@\lastbox}%
-      \fi
-    \else
-      \clubpenalty\@clubpenalty
-      \everypar{\numberedparagraph}%
-    \fi
-    \numberedparagraph
-  }%
-}
+%%
+%% update: something is not working quite right with para numbers; sometimes they are not
+%% being displayed. I'll just go to back to line numbers.
+\newcommand*{\stopparnum}{}
+\newcommand*{\startparnum}{}
+%%
+% \usepackage{etoolbox}
+% \newcounter{para}[chapter]
+% \newcommand*{\formatparnum}[1]{$\color{gray}\S_{\thepara}$}
+% \geometry{marginparsep=0em,marginparwidth=4em}
+% \reversemarginpar
+% \newcommand*{\numberedparagraph}{%
+% \refstepcounter{para}%
+% \marginpar[\qquad\formatparnum]{\quad\formatparnum}}
+% \newcommand*{\stopparnum}{\everypar{}}
+% \newcommand*{\startparnum}{\everypar{\numberedparagraph}}
+% \preto\chapter{\everypar{}}
+% \preto\section{\everypar{}}
+% \preto\subsection{\everypar{}}
+% \preto\subsubsection{\everypar{}}
+% \preto\paragraph{\everypar{}}
+% \preto\subparagraph{\everypar{}}
+% \renewcommand{\@afterheading}{%
+%   \@nobreaktrue
+%   \everypar{%
+%     \if@nobreak
+%       \@nobreakfalse
+%       \clubpenalty\@M
+%       \if@afterindent
+%       \else
+%         {\setbox\z@\lastbox}%
+%       \fi
+%     \else
+%       \clubpenalty\@clubpenalty
+%       \everypar{\numberedparagraph}%
+%     \fi
+%     \numberedparagraph
+%   }%
+% }

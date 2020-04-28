@@ -13,11 +13,14 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{hdiff-forest}[2020/03/14 hdiff Forest]
 
-\RequirePackage[cmyk]{xcolor}
+\DeclareOption{cmyk}{\PassOptionsToPackage{cmyk}{xcolor}}
+
+\ProcessOptions\relax
+
+\RequirePackage{xcolor}
 \RequirePackage{tikz}
 \RequirePackage{forest}
 
-\ProcessOptions\relax
 
 \usetikzlibrary{fit}
 \usetikzlibrary{backgrounds}

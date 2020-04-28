@@ -1,4 +1,4 @@
-\documentclass[10pt,b5paper,draft,noseaweed]{uustthesis}
+\documentclass[10pt,b5paper,cmyk,draft,noseaweed]{uustthesis}
 %% Remove the 'noseaweed' option to draw the fractal
 %% at the section headings. This slows compilation down, though.
 
@@ -6,7 +6,7 @@
 %% in the text, plus its faster to compile
 
 %% My internal packages:
-\usepackage{hdiff-forest}
+\usepackage[cmyk]{hdiff-forest}
 \usepackage{squiggol}
 
 \usepackage{supertabular}
