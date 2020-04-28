@@ -272,13 +272,10 @@ lcs :: [String] -> [String] -> [EditOp]
 lcs []      []      = []
 lcs (x:xs)  []      = Del x : lcs xs []
 lcs []      (y:ys)  = Ins y : lcs [] ys
-lcs (x:xs)  (y:ys)  =
-  let  i = Ins y      : lcs (x:  xs)      ys
-       d = Del x      : lcs      xs  (y:  ys)
-       s = if x == y
-           then [Cpy  : lcs      xs       ys]
-           else []
-   in minimumBy cost (s ++ [i , d])
+lcs (x:xs)  (y:ys)  =  let  i  = Ins y      : lcs (x:  xs)      ys
+                            d  = Del x      : lcs      xs  (y:  ys)
+                            s  = if x == y then [Cpy : lcs xs ys] else []
+                       in minimumBy cost (s ++ [i , d])
 \end{code}
 \end{myhs}
 \caption{Specification of the \unixdiff{}.}
@@ -380,9 +377,8 @@ apply :: [EOp] -> [Tree] -> Maybe [Tree]
 apply []                           []   = Just []
 apply (Cpy    : ops)               ts   = apply (Ins l : Del l : ops) ts
 apply (Del l  : ops) (Node l' xs:  ts)  = guard (l == l') >> apply ops (xs ++ ts)
-apply (Ins l  : ops)               ts
-  = (\(args , rs) -> Node l args : rs) . takeDrop (arity l)
-    <$$> apply ops ts
+apply (Ins l  : ops) ts
+  = (\(args , rs) -> Node l args : rs) . takeDrop (arity l) <$$> apply ops ts
 \end{code}
 \end{myhs}
 \caption{Definition of |apply| for tree edit operations}
@@ -882,13 +878,14 @@ separately~\cite{Bravenboer2008,Klint2009}, whereas others
 brackets and hence, can be applied to a plethora of programming
 languages out-of-the-box.
 
+\pagebreak
 \section{Generic Programming}
 \label{sec:background:generic-programming}
 
   We would like to consider richer datatypes than \emph{lines-of-text},
 without having to define separate |diff| functions for each of them.
-\emph{(Datatype-)generic programming}\index{Generic Programming}
-provides exactly this mechanism of writing functions by induction on
+\emph{(Datatype-)generic programming}
+provides a mechanism for writing functions by induction on
 the \emph{structure} of algebraic datatypes~\cite{Gibbons2006}.
 A widely used example is the |deriving| mechanism in Haskell, which
 frees the programmer from writing repetitive functions such as
@@ -935,8 +932,8 @@ Rep (Bin a) = K1 R a :+: (K1 R (Bin a) :*: K1 R (Bin a))
 
   The |Rep (Bin a)| above is a direct translation
 of |Either a (Bin a , Bin a)|, but using
-the combinators provided by \texttt{GHC.Generics}, namely |:+:| and
-|:*:|. In addition, we also have two conversion functions |from :: a ->
+the combinators provided by \texttt{GHC.Generics}.
+In addition, we also have two conversion functions |from :: a ->
 Rep a| and |to :: Rep a -> a| which form an isomorphism between |Bin
 a| and |Rep (Bin a)|.  The interface ties everything unser
 a typeclass:
@@ -959,7 +956,6 @@ for any type via |gsize|:
 \begin{code}
 class Size (a :: Star) where
   size :: a -> Int
-
 instance (Size a) => Size (Bin a) where
   size = gsize . fromGen
 \end{code}
@@ -1024,6 +1020,8 @@ we just need an instance for |Size Int| to compute the final
 result. Literals of type |Int| illustrate what we often call \emph{opaque
 types}: those types that constitute the base of the universe
 and are \emph{opaque} to the representation language.
+
+\
 
 \subsection{Explicit Sums of Products}
 \label{sec:background:explicitsop}
