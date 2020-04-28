@@ -92,12 +92,14 @@ works on the pattern functor spectrum of generic programming.
 \section{The \texttt{generics-mrsop} library}
 \label{sec:gp:mrsop}
 
-  The \texttt{generics-mrsop} library is an intersection of
+  The \texttt{generics-mrsop} library is an intersection of the
 \texttt{multirec} and \texttt{generics-sop} libraries. It uses
 explicit codes in the sums of products style to guide the
 representation of datatypes. This enables a simple explicit fixpoint
 construction and a variety of recursion schemes, which makes the
 development of generic programs fairly straightforward.
+
+\vspace*{2cm}
 
 \subsection{Explicit Fixpoints with Codes}
 \label{sec:gp:explicitfix}
