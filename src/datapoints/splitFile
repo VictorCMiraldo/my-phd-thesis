@@ -1,0 +1,19 @@
+#! /bin/bash
+
+if [[ "$#" -ne "3" ]]; then
+  echo "I need three files"
+fi
+
+orig=$1
+fa=$2
+fb=$3
+
+while IFS= read -r line; do
+  res=$(( RANDOM % 2 ))
+  case "$res" in
+    0) echo "$line" >> $fa ;;
+    1) echo "$line" >> $fb ;;
+  esac
+done < $orig
+
+exit 0

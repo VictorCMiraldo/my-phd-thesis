@@ -1,4 +1,4 @@
-\documentclass[10pt,b5paper,cmyk,draft,noseaweed]{uustthesis}
+\documentclass[10pt,b5paper,cmyk,noseaweed]{uustthesis}
 %% Remove the 'noseaweed' option to draw the fractal
 %% at the section headings. This slows compilation down, though.
 
@@ -63,8 +63,13 @@
 \lhsinclude{Abstract.lhs}
 %include src/Abstract.lhs
 
+
 %% Starts the mainmatter
 \mainmatter
+
+%% shows measurements when in draft-mode
+\displaymeasurespage
+
 
 %% The marker below is used by our mock-chapter
 %% script to know where to crop the file.
@@ -144,6 +149,7 @@ Sommige goed samenvatting in het Nederlands.
 Sommige goed samenvatting in het Nederlands.
 Sommige goed samenvatting in het Nederlands.
 Sommige goed samenvatting in het Nederlands.
+
 
 
 

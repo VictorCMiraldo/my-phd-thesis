@@ -120,8 +120,8 @@ being between linear and quadratic]{%
 \includegraphics[width=0.45\textwidth]{src/img/runtimes-hdiff.pdf}
 \label{fig:eval:perf:hdiff}}
 \caption{Performance measurements of \texttt{stdiff} and \texttt{hdiff}
-differencing functions. The horizontal axis has the sum of the number
-of constructors in the source and destination trees.}
+differencing functions. The vertical axis represents seconds and the horizontal
+axis has the sum of the number of constructors in the source and destination trees.}
 \label{fig:eval:perf}
 \end{figure}
 
@@ -293,11 +293,11 @@ Language & \emph{success} & (ratio) & \emph{mdif} & (ratio) & total ratio & \emp
  Lua        & 185    & (0.25) & 101 & (0.14) & 0.39 & 462 & 0 \\
  Python     & 907    & (0.21) & 561 & (0.13) & 0.34 & 2\,829 & 1 \\
 \midrule
-\emph{Total}& \qSolvedConf{} & 0.26 & 1626 & 0.13 & 0.39 & 7\,614 & 12 \\
+\emph{Total}& \qSolvedConf{} & (0.26) & 1626 & (0.13) & 0.39 & 7\,614 & 12 \\
 \bottomrule
 \end{tabular}
 \caption{Best synchronization success rate per language. No \emph{apply-fail}
-was encountered in the entire dataset and the timeouts where negligible.}
+was encountered in the entire dataset and the number of timeouts was negligible.}
 \label{tbl:eval:merge-hdiff-aggr}
 \end{table}
 
@@ -335,7 +335,7 @@ Language & Mode & Height & \emph{success} & (ratio) & \emph{mdif} & (ratio) & \e
 indicates the minum height a subtree must have to qualify for sharing,
 configured with the \texttt{--min-height} option. All of the above results
 were obtained with \emph{locally-scoped} patches, \emph{globally-scoped}
-success rates were consistently lower than their \emph{locally-scoped} counterpat.}
+success rates were consistently lower than their \emph{locally-scoped} counterpart.}
 \label{tbl:eval:merge-hdiff}
 \end{table}
 

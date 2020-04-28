@@ -21,11 +21,11 @@ export GNUPLOT_FONTPATH=$myfonts
 
 # http://triclinic.org/2015/04/publication-quality-plots-with-gnuplot/
 gnuplot <<GNUPLOTSCRIPT
-set terminal svg enhanced size 500,500 font 'STIX Two Math, 12'
+set terminal svg enhanced size 500,500 font 'STIX Two Math, 16'
 set output '../img/runtimes-stdiff.svg'
 set encoding iso_8859_1
-set xlabel 'AST Size (n + m)'
-set ylabel 'Time (s)'
+# set xlabel 'AST Size (n + m)'
+# set ylabel 'Time (s)'
 set logscale y 
 set logscale x
 
@@ -37,7 +37,7 @@ set xrange [100:60000]
 # set yrange [0:1000]
 set format x "%2.0t{/Symbol \327}10^{%L}"
 set format y "10^{%L}"
-plot '$aux' using 2:1 w dots lc 6 notitle\
+plot '$aux' using 2:1 w p pt 1 ps 0.3 lc 6 notitle\
    , 1.2e-7*x*x title '  c{/Symbol \327}x^2'\
    , 1.2e-7*x   title '  c{/Symbol \327}x'
 GNUPLOTSCRIPT

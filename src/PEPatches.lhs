@@ -3125,7 +3125,7 @@ mergeAlM p q = do  phase1  <- mergePhase1 p q
 \end{code}
 \end{myhs}
 
-\paragraph{First Phase}
+\paragraph{First Phase.}
 The first pass is computed by the |mergePhase1| function, which will
 populate the state with instantiations and equivalences and place
 values of type |Phase2| in-place in the alignment. These values instruct
@@ -3632,7 +3632,7 @@ and |P2TestEq| instructions.
 % \label{fig:pepatches:mergePhaseOne}
 % \end{figure}
 
-\paragraph{Second Phase}
+\paragraph{Second Phase.}
 The second phase starts with splitting |inst| and |eqvs|, which
 requires some attention. For example,
 imagine there exists an entry in |inst| that assigns |metavar x|

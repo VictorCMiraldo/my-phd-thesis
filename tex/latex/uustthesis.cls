@@ -520,10 +520,27 @@ project \@NWOproject{} (\@NWOgrantnumber).
 \usepackage[shortlabels]{enumitem}
 \setlist[enumerate]{label=\alph*)}
 
-\ifPHD@isdraft
 \usepackage[mathlines]{lineno}
 \linenumbers
+
+\ifPHD@isdraft
+\usepackage{layouts}
+\newcommand{\displaymeasurespage}{%
+\newpage
+\thispagestyle{empty}
+\begin{center}
+\begin{tabular}{rl}
+  \texttt{\textbackslash{}textwitdh} & \printinunitsof{cm}\prntlen{\textwidth} \\
+  \texttt{\textbackslash{}paperwidth} & \printinunitsof{cm}\prntlen{\paperwidth} \\
+  \texttt{\textbackslash{}paperheigth} & \printinunitsof{cm}\prntlen{\paperheight} \\
+\end{tabular}
+\end{center}
+}
+\else
+\newcommand{\displaymeasurespage}{}
 \fi
+
+
 
 %% paragraph numbers; based on https://www.dickimaw-books.com/latex/admin/html/exercises/numberedpar.shtml
 %%

@@ -823,13 +823,11 @@ of kind |k -> Star|, defined below. The library also provide
 \begin{figure}
 \begin{myhs}
 \begin{code}
-geq  ::  (EqHO kappa , Family kappa fam codes)
-     =>  (forall k dot kappa k -> kappa k -> Bool)
+geq  ::  (EqHO kappa , Family kappa fam codes) => (forall k dot kappa k -> kappa k -> Bool)
      ->  El fam ix -> El fam ix -> Bool
-geq eq_K x y = go (deepFrom x) (deepFrom y)
+geq eqK x y = go (deepFrom x) (deepFrom y)
   where go (Fix x) (Fix y)
-      =  maybe False (elimRep (uncurry eq_K) (uncurry go) and)
-      $  zipRep x y
+      =  maybe False (elimRep (uncurry eqK) (uncurry go) and) $  zipRep x y
 \end{code} %$
 \end{myhs}
 \caption{Generic equality}
