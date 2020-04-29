@@ -73,6 +73,7 @@
 %format enumAlmu   = "\HVNI{\mathit{enumAl}\mu}"
 %format PatchGDiff = "\HTNI{\mathit{Patch}_\textsc{gd}}"
 %format PatchST    = "\HTNI{\mathit{Patch}_\textsc{st}}"
+%format applyST    = "\HVNI{\mathit{apply}_\textsc{st}}"
 
 %%% HDiff Notation
 

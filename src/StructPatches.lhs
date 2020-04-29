@@ -86,7 +86,7 @@ and copies.
   [|StIns (Bin SQ e)| [|StCpy d|]]]
 \end{forest}\label{fig:stdiff:patch0-c}}
 \caption{Graphical representation of a simple transformation. Copies,
-insertinos and deletions around the tree are represented with |StCpy|,
+insertions and deletions around the tree are represented with |StCpy|,
 |StIns| and |StDel| respectively.  Modifications are denoted |StTO|.}
 \label{fig:stdiff:patch0}
 \end{figure}
@@ -95,7 +95,7 @@ insertinos and deletions around the tree are represented with |StCpy|,
 saw previously, using the shape of the datatype in question to
 define a structured notion of patch. As we will see in the remainder
 of this chapter, however, \emph{computing} these patches is
-intractable. This lead us to abandon this approach in favour of the
+intractable. This lead us to abandon this approach in favor of the
 differencing algorithm presented in \Cref{chap:pattern-expression-patches}.
 Nonetheless, we believe there is value in studying this approach.
 For one it explores a different part in the design space compared to the \texttt{gdiff}
@@ -119,7 +119,7 @@ repository}%
 \footnote{https://github.com/VictorCMiraldo/stdiff}.
 Later, we collaborated closely with a MSc student, Arian van Putten, in translating
 the Agda code to Haskell, extending its scope to mutually recursive
-datatypes. The code presented here, however, is loosely based on van
+datatypes. The code presented here, however, is loosely based on Van
 Putten's translation of our Agda repository to Haskell as part of his
 Master thesis work~\cite{Putten2019}.  We chose to present all of our
 work in a single programming language to keep the thesis consistent
@@ -128,9 +128,9 @@ throughout.
   In this chapter we will delve into the construction of |PatchST| and its
 respective components. Firstly, we familiarize ourselves with |PatchST|
 and is application function, \Cref{sec:stdiff:patches}. Next we look into
-merging and its cummutativity proof in \Cref{sec:stdiff:merging}. Lastly,
+merging and its commutativity proof in \Cref{sec:stdiff:merging}. Lastly,
 we discuss the |diff| function in \Cref{sec:stdiff:diff}, which comprises
-a significant drawback of the \texttt{stdiff} approach for its computational 
+a significant drawback of the \texttt{stdiff} approach for its computational
 complexity.
 
 \section{The Type of Patches}
@@ -192,7 +192,7 @@ Alignments will be introduced shortly, for the time being,
 let us continue to focus on spines. Intuitively, spines act on sums and capture
 the ``largest shared coproduct structure''.
 Recall |kappa :: kon -> Star| interprets the opaque types
-in the mutualy recursive family in question and |codes :: [[[Atom kon]]]| lists
+in the mutually recursive family in question and |codes :: [[[Atom kon]]]| lists
 all the sums-of-products in the family, both come from \texttt{generics-mrsop}
 representation of mutually recursive datatypes, discussed in \Cref{sec:gp:mrsop}.
 
@@ -245,15 +245,13 @@ and has type |f a -> f b -> Maybe (a :~: b)|. Also note that we must
 pass two |SNat| arguments to disambiguate the |ix| and |iy| type
 variables. Without those arguments, these variables would only appear
 as an argument to a type family, which may not be injective and would
-trigger a type error.  This solution of using the |SNat|
+trigger a type error.  Using the |SNat|
 singleton~\cite{Eisenberg2012} is the standard Haskell type-level
 programming workaround to this problem.
 
 \begin{myhs}
 \begin{code}
-data SNat :: Nat -> Star where
-  SZ  ::            SNat  (P Z)
-  SS  :: SNat n ->  SNat  ((P S) n)
+data SNat :: Nat -> Star where dots
 \end{code}
 \end{myhs}
 
@@ -382,6 +380,8 @@ applyAt (AtFix px) (NA_I x) = NA_I <$$> applyAlmu px x
 recursive structure of our value, defining |Almu| and |applyAlmu|,
 which will be our next concern.
 
+\
+
 \subsection{Recursive Changes}
 \label{sec:stdiff:diff:fixpoint}
 
@@ -448,6 +448,7 @@ to ensure the transformation is on the right direction.
 \begin{myhs}
 \begin{code}
 type InsCtx kappa codes  = Ctx kappa codes        (Almu kappa codes)
+
 type DelCtx kappa codes  = Ctx kappa codes (Flip  (Almu kappa codes))
 
 newtype Flip f ix iy = Flip { unFlip :: f iy ix }
@@ -531,8 +532,7 @@ a value of type |PatchST| that transforms two concrete trees.
 \begin{code}
 type PatchST kappa codes ix = Almu kappa codes ix ix
 
-applyST  :: (IsNat ix , EqHO kappa) => PatchST kappa codes ix -> Fix codes ix
-         -> Maybe (Fix codes ix)
+applyST  :: (IsNat ix , EqHO kappa) => PatchST kappa codes ix -> Fix codes ix -> Maybe (Fix codes ix)
 applyST  = applyAlmu
 \end{code}
 \end{myhs}
@@ -890,6 +890,9 @@ our Agda model, we need to know over which element of the mutually
 recursive family we are operating. This will dictate which
 constructors from |Spine| we are allowed to use. We gather this
 information through two auxiliary |SNat| parameters.
+The choice of which spine constructor to use is
+deterministic, that is,each case is uniquely determined by a |Spine|
+constructor.
 
 \begin{myhs}
 \begin{code}
@@ -910,15 +913,25 @@ enumSpn six siy x y =
 \end{code} %$
 \end{myhs}
 
-  Note how the choice of the spine operation is deterministic. Each
-case is uniquely determined by a |Spine| constructor. Enumerating
-atoms, |enumAt|, is trivial. Atoms are either opaque types or recursive
-positions. Opaque types are handled by |TrivialK| and recursive positions
-are handled recursively by |enumAlmu|. Finally, alignments of products is analogous
-to the longest common subsequence, except that we must make sure that we only
-synchronize atoms with |AX| if they have the same type.
-The |enumAl| below illustrates the non-deterministic enumeration
-of alignments over two products-of-atoms.
+
+  Enumerating atoms, |enumAt|, is trivial. Atoms are either
+opaque types or recursive positions. Opaque types are handled by
+|TrivialK| and recursive positions are handled recursively by
+|enumAlmu|.
+
+\begin{myhs}
+\begin{code}
+enumAt :: NA ki (Fix ki codes) at -> NA ki (Fix ki codes) at -> [At ki codes at]
+enumAt (NA_I x) (NA_I y)  = AtFix <$$> enumAlmu x y
+enumAt (NA_K x) (NA_K y)  = return $$ AtSet (Trivial x y)
+\end{code}
+\end{myhs}
+
+  Finally, alignments of products is analogous to the
+longest common subsequence, except that we must make sure that we only
+synchronize atoms with |AX| if they have the same type.  The |enumAl|
+below illustrates the non-deterministic enumeration of alignments over
+two products-of-atoms.
 
 
 \begin{myhs}
@@ -936,12 +949,13 @@ enumAl (x :* xs)  (y :* ys)  =    (ADel x <$> enumAl xs (y :* ys))
 \end{myhs}
 
 
-  Looking at |enumAlmu| and |enumAl|, we can see why this algorithm
-explodes and becomes intractable quickly. In |enumAlmu| we must
+  From the definitinos of |enumAlmu| and |enumAl|, it is clear why this algorithm
+explodes and becomes intractable. In |enumAlmu| we must
 choose between inserting, deleting or copying a recursive constructor.
-In case we chose to copy, we then might call |enumAl|, where
+In case we chose to copy a constructor, we then might call |enumAl|, where
 we must chose between inserting, deleting or copying fields
-of constructors.
+of constructors. We must enumerate these options for virtually each
+pair of constructors in the source and destination trees.
 
 
 \subsection{Translating from \texttt{gdiff}}
@@ -957,12 +971,12 @@ filter the unintersting patches out and optimize the search space.
 (private communication), was to use the already existing \unixdiff{}
 tool as some sort of \emph{oracle}.  That is, we should only consider
 inserting and deleting elements that fall on lines marked as such by
-\unixdiff{}. This idea was translated into Haskell by Giovani
+\unixdiff{}. This idea was translated into Haskell by
 Garuffi~\cite{Garuffi2018}, but the performance was still very poor
 and computing the |PatchST| of two real-world Clojure files still
 required several minutes.
 
-  From these experiments \cite{Garuffi2018} we learnt that simply restricting
+  From Garuffi's experiments \cite{Garuffi2018} we learnt that simply restricting
 the search space was not sufficient.
 Besides the complexity introduced by arbitrary heuristics,
 using the \unixdiff{} to flag elements of the AST was still too
@@ -970,14 +984,14 @@ coarse. For one, the \unixdiff{} can insert and delete the same line
 in some situations. Secondly, many elements of the AST may fall on the same line.
 
   The second option is related, but instead of using a line-based
-oracle, we can use \texttt{gdiff}~\Cref{sec:gp:well-typed-tree-diff} as the oracle,
-enabling us to annotate every node of the source and destination trees
-with a information about whether that node was copied or not.  This
-strategy was translated into Haskell by A. van
-Putten~\cite{Putten2019} as part of his MSc work. The gist of it
-is that we can use annotated fixpoints to tag each constructor
-of a tree with added information. In this case, we are interested
-in whether this node would be copied or not by \texttt{gdiff}:
+oracle, we can use \texttt{gdiff}~\Cref{sec:gp:well-typed-tree-diff}
+as the oracle, enabling us to annotate every node of the source and
+destination trees with a information about whether that node was
+copied or not.  This strategy was translated into Haskell by Van
+Putten~\cite{Putten2019} as part of his MSc work. The gist of it is
+that we can use annotated fixpoints to tag each constructor of a tree
+with added information. In this case, we are interested in whether
+this node would be copied or not by \texttt{gdiff}:
 
 \begin{myhs}
 \begin{code}
