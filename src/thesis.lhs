@@ -46,8 +46,8 @@
 \newcommand{\qSolvedPerc}{$26\%$}
 
 %% How many merge-diff cases have I seen so far?
-\newcommand{\qManualMDiffAnal}{???}
-\newcommand{\qManualMDiffOk}{???}
+\newcommand{\qManualMDiffAnal}{16}
+\newcommand{\qManualMDiffOk}{13}
 
 \begin{document}
 \maketitle

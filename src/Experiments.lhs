@@ -90,17 +90,17 @@ dataset~\cite{Miraldo2020_Dataset}.
 \centering
 \begin{tabular}{@@{}llll@@{}} \toprule
 Language & Repositories & Parseable Conflicts & Non-parseable Conflicts \\ \midrule
-Clojure    & 31 & 1213 & 16  \\
-Java       & 19 & 2901 & 851 \\
-JavaScript & 28 & 3392 & 965 \\
+Clojure    & 31 & 1\,213 & 16  \\
+Java       & 19 & 2\,901 & 851 \\
+JavaScript & 28 & 3\,392 & 965 \\
 Lua        & 27 & 748  & 91 \\
-Python     & 27 & 4298 & 848 \\  \midrule
+Python     & 27 & 4\,298 & 848 \\  \midrule
 \emph{Totals} & 132 & \qTotalUsableConf & \qTotalParseErrorConf \\
 \bottomrule
 \end{tabular}
 \caption{Distribution of datapoints within our dataset~\cite{Miraldo2020_Dataset}.
 The repositories were chosen manually by searching each respective language in GitHub.
-Our criteria for seleting repositories to mine was based on number of forks
+Our criteria for selecting repositories to mine was based on number of forks
 and commits, in an attempt to maximize pull requests.}
 \label{tbl:eval:summary-data}
 \end{table}
@@ -332,7 +332,7 @@ Language & Mode & Height & \emph{success} & (ratio) & \emph{mdif} & (ratio) & \e
 \bottomrule
 \end{tabular}
 \caption{Best results for each extraction mode. The \emph{height} column
-indicates the minum height a subtree must have to qualify for sharing,
+indicates the minimum height a subtree must have to qualify for sharing,
 configured with the \texttt{--min-height} option. All of the above results
 were obtained with \emph{locally-scoped} patches, \emph{globally-scoped}
 success rates were consistently lower than their \emph{locally-scoped} counterpart.}
@@ -354,14 +354,14 @@ success rate per language.
 are to be expected.  Different parameters used with \texttt{hdiff}
 yield different patches, which might be easier or harder to merge. Out
 of the datapoints that resulted in \emph{mdif} we have manually
-analyzed \qManualMDiffAnal{} randomly selected cases. We witnessed that
-\qManualMDiffOk{} of those
-\texttt{hdiff} behaved as we expect, and the \emph{mdif} result was
-attributed to the human performing more operations than a structural
-merge would have performed. \Cref{fig:eval:mdif-suc-01}, illustrates
-one such example, distilled from the manually analyzed cases. We will
-shortly discuss two cases, illustrate in \Cref{fig:eval:nn-pt-01,fig:eval:nn-pt-02},
-where \texttt{hdiff} behaved unexpectedly.
+analyzed \qManualMDiffAnal{} randomly selected cases. We witnessed
+that \qManualMDiffOk{} of those \texttt{hdiff} behaved as we expect,
+and the \emph{mdif} result was attributed to the human performing more
+operations than a structural merge would have performed, as
+exemplified in \Cref{fig:eval:mdif-suc-01}, which was distilled from
+the manually analyzed cases. We will shortly discuss two cases,
+illustrate in \Cref{fig:eval:nn-pt-01,fig:eval:nn-pt-02}, where
+\texttt{hdiff} behaved unexpectedly.
 
   It is worth noting that even though 100\% success
 rate is unachievable -- some conflicts really come from a subtree being
