@@ -1346,7 +1346,7 @@ rather quite common for tree differencing algorithms. They often belong
 to complexity classes that make them impractical.
 
   Another downside comes to the surface when we want to look into merging
-these edit-scripts. Marco Vassena~\cite{Vassena2016} developed a merging
+these edit-scripts. Vassena~\cite{Vassena2016} developed a merging
 algorithm but notes some difficult setbacks, mainly due to
 the heterogeneity of |ES|. Suppose, for example, we want to merge |p : ES xs ys|
 and |q : ES xs zs|. This means producing an edit-script |r : ES xs ks|.
@@ -1354,7 +1354,7 @@ But how can we determine |ks| here? It is not always the case that
 there is a solution. In fact, the merge algorithm~\cite{Vassena2016}
 for |ES| might fail due to conflicting changes \emph{or} the
 inability to find a suitable |ks|.
-Regardless, th work of Marco Vassena~\cite{Vassena2016}
+Regardless, the work of Vassena~\cite{Vassena2016}
 was of great inspiration for this thesis in
 showing that there definitely is a place for type-safe approaches
 to differencing.

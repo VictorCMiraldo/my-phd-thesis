@@ -267,11 +267,9 @@ patches given two concrete values.
 
   \item \Cref{chap:pattern-expression-patches} is the refinement
 of our paper~\cite{Miraldo2019} on an efficient algorithm for
-computing patches, where we attempt to tackle the problems from
+computing patches, where we tackle the problems from
 \Cref{chap:structural-patches} with a different representation
 for patches altogether.
-
-  \item \victor{Hopefully we will publish something on experiments?}
 \end{enumerate}
 
   Other contributions that have not been peer-reviewed include:
@@ -281,6 +279,10 @@ for patches altogether.
 \texttt{generics-simplistic} library, a different approach to generic
 programming that overcomes an important space leak in the Haskell compiler,
 which rendered \texttt{generics-mrsop} unusable in large, real-world, examples.
+
+  \item \Cref{chap:pattern-expression-patches} introduces a merging
+algorithm and \Cref{chap:experiments} discusses its empirical evaluation
+over a dataset of real conflicts extracted from \texttt{GitHub}.
 \end{enumerate}
 
 
