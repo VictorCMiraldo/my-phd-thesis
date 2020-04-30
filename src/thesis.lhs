@@ -1,4 +1,4 @@
-\documentclass[10pt,b5paper,cmyk,noseaweed]{uustthesis}
+\documentclass[10pt,b5paper,cmyk]{uustthesis}
 %% Remove the 'noseaweed' option to draw the fractal
 %% at the section headings. This slows compilation down, though.
 
@@ -9,7 +9,9 @@
 \usepackage[cmyk]{hdiff-forest}
 \usepackage{squiggol}
 
-\usepackage{supertabular}
+\usepackage{longtable}
+% \usepackage{supertabular}
+% \usepackage{multicol}
 \usepackage[all]{xy}
 
 \title{Type-Safe Generic Differencing of Mutually Recursive Families}
@@ -136,22 +138,17 @@
 \bibliographystyle{acm}
 \bibliography{references}
 
-\printindex
-
-\chapter{Curriculum Vitae}
-
-\chapter{Sammenvatting}
-Sommige goed samenvatting in het Nederlands.
-Sommige goed samenvatting in het Nederlands.
-Sommige goed samenvatting in het Nederlands.
-Sommige goed samenvatting in het Nederlands.
-Sommige goed samenvatting in het Nederlands.
-Sommige goed samenvatting in het Nederlands.
-Sommige goed samenvatting in het Nederlands.
-Sommige goed samenvatting in het Nederlands.
-
-
-
+%\chapter{Curriculum Vitae}
+%
+%\chapter{Sammenvatting}
+%Sommige goed samenvatting in het Nederlands.
+%Sommige goed samenvatting in het Nederlands.
+%Sommige goed samenvatting in het Nederlands.
+%Sommige goed samenvatting in het Nederlands.
+%Sommige goed samenvatting in het Nederlands.
+%Sommige goed samenvatting in het Nederlands.
+%Sommige goed samenvatting in het Nederlands.
+%Sommige goed samenvatting in het Nederlands.
 
 \end{document}
 

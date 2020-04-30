@@ -463,9 +463,9 @@ project \@NWOproject{} (\@NWOgrantnumber).
 %%%%%%%%%%%%%%%%%%%%%%
 
 %% Indexing
-\usepackage{imakeidx}
-\makeindex[options=-s tex/latex/index_style.ist]
-\newcommand{\withindex}[1]{#1\index{#1}}
+% \usepackage{imakeidx}
+% \makeindex[options=-s tex/latex/index_style.ist]
+% \newcommand{\withindex}[1]{#1\index{#1}}
 
 \usepackage{alltt}
 \usepackage{microtype}

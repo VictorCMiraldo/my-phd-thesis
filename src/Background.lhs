@@ -177,7 +177,7 @@ This ensures that the algorithm looking for the list of edit operations
 with the minimum cost will prefer substitutions over deletions
 and insertions.
 
-  We can compute the \emph{edit-script}\index{edit-script}, i.e. a
+  We can compute the \emph{edit-script}, i.e. a
 list of edit operations, with the minimum cost quite easily with a
 brute-force and inefficient implementation.
 \Cref{fig:background:string-leveshtein} shows the

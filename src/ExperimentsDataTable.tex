@@ -11,174 +11,174 @@
 
 %% Recommented to give more professionally-looking tables.
 
-
-\twocolumn
 \let\oldarraystretch\arraystretch
 \renewcommand{\arraystretch}{1.0}
+
+
+\begin{multicols*}{2}
+\let\mcnewpage=\newpage
+\makeatletter
+\renewcommand\newpage{%
+        \if@firstcolumn
+                \hrule width\linewidth height0pt
+                \columnbreak
+        \else
+                \mcnewpage
+        \fi
+}
+\makeatother
 \begin{center}
 \tiny
+\captionof{table}{Repositories used for data collection divided by language.}\label{tbl:repos}
 \begin{supertabular}{llll}\toprule
-\multicolumn{4}{c}{Clojure} \\ 
 Repository & Conflicts & Commits & Forks \\ \midrule
+\multicolumn{4}{c}{Clojure} \\ \midrule
+metabase/metabase & 411 & 18697 & 25 \\
+onyx-platform/onyx & 189 & 6828 & 209 \\
 incanter/incanter & 96 & 1593 & 286 \\
-jonase/kibit & 9 & 436 & 124 \\
-bhauman/lein-figwheel & 9 & 1833 & 221 \\
-dakrone/clj-http & 9 & 1198 & 368 \\
-korma/Korma & 7 & 491 & 232 \\
-riemann/riemann & 7 & 1717 & 512 \\
 nathanmarz/cascalog & 68 & 1366 & 181 \\
 overtone/overtone & 65 & 3070 & 413 \\
 technomancy/leiningen & 46 & 4736 & 15 \\
-clojure/core.async & 4 & 564 & 181 \\
 ring-clojure/ring & 44 & 1027 & 441 \\
 ztellman/aleph & 43 & 1398 & 213 \\
-metabase/metabase & 411 & 18697 & 25 \\
-status-im/status-react & 3 & 5224 & 723 \\
 pedestal/pedestal & 35 & 1581 & 248 \\
 circleci/frontend & 33 & 18857 & 170 \\
 arcadia-unity/Arcadia & 25 & 1716 & 95 \\
-cemerick/friend & 2 & 227 & 122 \\
 walmartlabs/lacinia & 19 & 991 & 105 \\
-onyx-platform/onyx & 189 & 6828 & 209 \\
 clojure/clojurescript & 18 & 5706 & 730 \\
-plumatic/schema & 1 & 825 & 244 \\
 oakes/Nightcode & 17 & 1914 & 119 \\
 weavejester/compojure & 16 & 943 & 245 \\
-cgrand/enlive & 1 & 321 & 144 \\
-krisajenkins/yesql & 1 & 285 & 112 \\
-clojure-liberator/liberator & 12 & 406 & 144 \\
 boot-clj/boot & 12 & 1331 & 169 \\
+clojure-liberator/liberator & 12 & 406 & 144 \\
+originrose/cortex & 11 & 1045 & 103 \\
+dakrone/clj-http & 9 & 1198 & 368 \\
+bhauman/lein-figwheel & 9 & 1833 & 221 \\
+jonase/kibit & 9 & 436 & 124 \\
+riemann/riemann & 7 & 1717 & 512 \\
+korma/Korma & 7 & 491 & 232 \\
+clojure/core.async & 4 & 564 & 181 \\
+status-im/status-react & 3 & 5224 & 723 \\
+cemerick/friend & 2 & 227 & 122 \\
 LightTable/LightTable & 1 & 1265 & 927 \\
-originrose/cortex & 11 & 1045 & 103 \\ 
+krisajenkins/yesql & 1 & 285 & 112 \\
+cgrand/enlive & 1 & 321 & 144 \\
+plumatic/schema & 1 & 825 & 244 \\
 \midrule
-\multicolumn{4}{c}{Java} \\ 
-Repository & Conflicts & Commits & Forks \\ \midrule
-spring-projects/spring-security & 7 & 8339 & 36 \\
-junit-team/junit4 & 77 & 2427 & 29 \\
+\multicolumn{4}{c}{Java} \\ \midrule
+% Repository & Conflicts & Commits & Forks \\ \midrule
 spring-projects/spring-boot & 760 & 24545 & 284 \\
 elastic/elasticsearch & 746 & 49920 & 158 \\
-aws/aws-sdk-java & 7 & 2340 & 24 \\
-eclipse/deeplearning4j & 6 & 572 & 48 \\
-square/okhttp & 5 & 4407 & 78 \\
-skylot/jadx & 52 & 1165 & 24 \\
-naver/pinpoint & 51 & 10931 & 3 \\
 apereo/cas & 363 & 15834 & 31 \\
-apache/beam & 34 & 25062 & 22 \\
-baomidou/mybatis-plus & 31 & 3640 & 21 \\
 jenkinsci/jenkins & 296 & 29141 & 6 \\
-mybatis/mybatis-3 & 21 & 3164 & 83 \\
-dropwizard/dropwizard & 20 & 5229 & 31 \\
-SeleniumHQ/selenium & 18 & 24627 & 54 \\
 xetorthio/jedis & 147 & 1610 & 32 \\
 google/ExoPlayer & 133 & 7694 & 44 \\
 apache/storm & 117 & 10204 & 4 \\
+junit-team/junit4 & 77 & 2427 & 29 \\
+skylot/jadx & 52 & 1165 & 24 \\
+naver/pinpoint & 51 & 10931 & 3 \\
+apache/beam & 34 & 25062 & 22 \\
+baomidou/mybatis-plus & 31 & 3640 & 21 \\
+mybatis/mybatis-3 & 21 & 3164 & 83 \\
+dropwizard/dropwizard & 20 & 5229 & 31 \\
+SeleniumHQ/selenium & 18 & 24627 & 54 \\
 code4craft/webmagic & 11 & 1015 & 37 \\
+aws/aws-sdk-java & 7 & 2340 & 24 \\
+spring-projects/spring-security & 7 & 8339 & 36 \\
+eclipse/deeplearning4j & 6 & 572 & 48 \\
+square/okhttp & 5 & 4407 & 78 \\
 \midrule
-\multicolumn{4}{c}{JavaScript} \\ 
-Repository & Conflicts & Commits & Forks \\ \midrule
+\multicolumn{4}{c}{JavaScript} \\ \midrule
+% Repository & Conflicts & Commits & Forks \\ \midrule
+meteor/meteor & 1208 & 22501 & 51 \\
+adobe/brackets & 699 & 17782 & 66 \\
+mrdoob/three.js & 403 & 31473 & 22 \\
+moment/moment & 141 & 3724 & 65 \\
+RocketChat/Rocket.Chat & 125 & 17445 & 55 \\
+serverless/serverless & 118 & 12278 & 39 \\
 nodejs/node & 99 & 29302 & 159 \\
-axios/axios & 8 & 900 & 6 \\
-lodash/lodash & 8 & 7992 & 46 \\
 twbs/bootstrap & 86 & 19261 & 679 \\
-jashkenas/underscore & 8 & 2447 & 55 \\
 photonstorm/phaser & 80 & 13958 & 61 \\
 emberjs/ember.js & 76 & 19460 & 42 \\
-adobe/brackets & 699 & 17782 & 66 \\
 atom/atom & 63 & 37335 & 137 \\
 TryGhost/Ghost & 50 & 10374 & 7 \\
 jquery/jquery & 44 & 6453 & 19 \\
 mozilla/pdf.js & 41 & 12132 & 69 \\
-mrdoob/three.js & 403 & 31473 & 22 \\
 Leaflet/Leaflet & 37 & 6810 & 44 \\
 expressjs/express & 36 & 5558 & 79 \\
-chartjs/Chart.js & 3 & 2966 & 101 \\
-select2/select2 & 3 & 2573 & 58 \\
 hexojs/hexo & 27 & 3146 & 38 \\
-facebook/jest & 2 & 4595 & 41 \\
 videojs/video.js & 17 & 3509 & 63 \\
-moment/moment & 141 & 3724 & 65 \\
-nwjs/nw.js & 1 & 3913 & 38 \\
-vuejs/vue & 1 & 3076 & 234 \\
-RocketChat/Rocket.Chat & 125 & 17445 & 55 \\
-meteor/meteor & 1208 & 22501 & 51 \\
-serverless/serverless & 118 & 12278 & 39 \\
 facebook/react & 10 & 12732 & 273 \\
+jashkenas/underscore & 8 & 2447 & 55 \\
+lodash/lodash & 8 & 7992 & 46 \\
+axios/axios & 8 & 900 & 6 \\
+select2/select2 & 3 & 2573 & 58 \\
+chartjs/Chart.js & 3 & 2966 & 101 \\
+facebook/jest & 2 & 4595 & 41 \\
+vuejs/vue & 1 & 3076 & 234 \\
+nwjs/nw.js & 1 & 3913 & 38 \\
 \midrule
-\multicolumn{4}{c}{Lua} \\ 
-Repository & Conflicts & Commits & Forks \\ \midrule
-Olivine-Labs/busted & 9 & 950 & 139 \\
-lcpz/awesome-copycats & 8 & 821 & 412 \\
-Element-Research/rnn & 8 & 622 & 318 \\
-Tieske/Penlight & 6 & 743 & 190 \\
-awesomeWM/awesome & 5 & 9990 & 360 \\
-yagop/telegram-bot & 5 & 729 & 519 \\
+\multicolumn{4}{c}{Lua} \\ \midrule
+% Repository & Conflicts & Commits & Forks \\ \midrule
+Kong/kong & 209 & 5494 & 31 \\
+hawkthorne/hawkthorne-journey & 155 & 5538 & 370 \\
+snabbco/snabb & 119 & 9456 & 295 \\
 tarantool/tarantool & 54 & 13542 & 224 \\
 luarocks/luarocks & 45 & 2325 & 296 \\
-luvit/luvit & 4 & 2897 & 330 \\
-torch/nn & 4 & 1839 & 967 \\
-alexazhou/VeryNginx & 3 & 604 & 810 \\
-GUI/lua-resty-auto-ssl & 3 & 318 & 119 \\
 luakit/luakit & 28 & 4186 & 219 \\
-leafo/moonscript & 2 & 738 & 162 \\
-sailorproject/sailor & 2 & 640 & 128 \\
-Kong/kong & 209 & 5494 & 31 \\
 pkulchenko/ZeroBraneStudio & 20 & 3945 & 447 \\
 CorsixTH/CorsixTH & 16 & 3355 & 250 \\
-luafun/luafun & 1 & 55 & 88 \\
-hawkthorne/hawkthorne-journey & 155 & 5538 & 370 \\
-koreader/koreader & 14 & 7256 & 710 \\
-rxi/json.lua & 1 & 46 & 144 \\
 OpenNMT/OpenNMT & 14 & 1684 & 455 \\
-skywind3000/z.lua & 1 & 367 & 59 \\
-nrk/redis-lua & 1 & 327 & 193 \\
+koreader/koreader & 14 & 7256 & 710 \\
 bakpakin/Fennel & 12 & 689 & 59 \\
-snabbco/snabb & 119 & 9456 & 295 \\
+Olivine-Labs/busted & 9 & 950 & 139 \\
+Element-Research/rnn & 8 & 622 & 318 \\
+lcpz/awesome-copycats & 8 & 821 & 412 \\
+Tieske/Penlight & 6 & 743 & 190 \\
+yagop/telegram-bot & 5 & 729 & 519 \\
+awesomeWM/awesome & 5 & 9990 & 360 \\
+torch/nn & 4 & 1839 & 967 \\
+luvit/luvit & 4 & 2897 & 330 \\
+GUI/lua-resty-auto-ssl & 3 & 318 & 119 \\
+alexazhou/VeryNginx & 3 & 604 & 810 \\
+sailorproject/sailor & 2 & 640 & 128 \\
+leafo/moonscript & 2 & 738 & 162 \\
+nrk/redis-lua & 1 & 327 & 193 \\
+skywind3000/z.lua & 1 & 367 & 59 \\
+rxi/json.lua & 1 & 46 & 144 \\
+luafun/luafun & 1 & 55 & 88 \\
 \midrule
-\multicolumn{4}{c}{Python} \\ 
-Repository & Conflicts & Commits & Forks \\ \midrule
+\multicolumn{4}{c}{Python} \\ \midrule
+% Repository & Conflicts & Commits & Forks \\ \midrule
 python/cpython & 891 & 106167 & 131 \\
 sympy/sympy & 864 & 41009 & 29 \\
-waditu/tushare & 8 & 407 & 35 \\
-scrapy/scrapy & 74 & 7705 & 83 \\
-odoo/odoo & 7448 & 132201 & 116 \\
-keras-team/keras & 70 & 5342 & 176 \\
-tornadoweb/tornado & 60 & 4144 & 51 \\
-pallets/flask & 56 & 3799 & 132 \\
 matplotlib/matplotlib & 515 & 32949 & 47 \\
-ipython/ipython & 51 & 24203 & 39 \\
 home-assistant/home-assistant & 496 & 23812 & 91 \\
-pandas-dev/pandas & 48 & 21596 & 92 \\
-quantopian/zipline & 45 & 6032 & 31 \\
-facebook/prophet & 4 & 445 & 26 \\
-Theano/Theano & 44 & 28099 & 25 \\
 bokeh/bokeh & 326 & 18196 & 32 \\
-psf/requests & 32 & 5927 & 75 \\
-jakubroztocil/httpie & 3 & 1145 & 29 \\
-ansible/ansible & 29 & 48864 & 18 \\
 certbot/certbot & 272 & 9524 & 28 \\
 scikit-learn/scikit-learn & 192 & 25044 & 19 \\
 explosion/spaCy & 163 & 11141 & 27 \\
-zulip/zulip & 1 & 34149 & 35 \\
 docker/compose & 129 & 5590 & 29 \\
-Jack-Cherish/python-spider & 1 & 279 & 39 \\
-binux/pyspider & 1 & 1174 & 34 \\
+scrapy/scrapy & 74 & 7705 & 83 \\
+keras-team/keras & 70 & 5342 & 176 \\
+tornadoweb/tornado & 60 & 4144 & 51 \\
+pallets/flask & 56 & 3799 & 132 \\
+ipython/ipython & 51 & 24203 & 39 \\
+pandas-dev/pandas & 48 & 21596 & 92 \\
+quantopian/zipline & 45 & 6032 & 31 \\
+Theano/Theano & 44 & 28099 & 25 \\
+psf/requests & 32 & 5927 & 75 \\
+ansible/ansible & 29 & 48864 & 18 \\
 nvbn/thefuck & 11 & 1555 & 26 \\
-\midrule
-\multicolumn{4}{c}{Bash} \\ 
-Repository & Conflicts & Commits & Forks \\ \midrule
-Neilpang/acme.sh & 7 & 3102 & 21 \\
-nvm-sh/nvm & 5 & 1858 & 38 \\
-andsens/homeshick & 3 & 477 & 121 \\
-cfenollosa/bashblog & 3 & 290 & 146 \\
-kvz/bash3boilerplate & 2 & 386 & 163 \\
-magicmonty/bash-git-prompt & 15 & 609 & 799 \\
-avleen/bashttpd & 1 & 54 & 162 \\
-huyng/bashmarks & 1 & 47 & 257 \\
-riobard/bash-powerline & 1 & 45 & 160 \\
-Bash-it/bash-it & 1 & 2588 & 2 \\
+waditu/tushare & 8 & 407 & 35 \\
+facebook/prophet & 4 & 445 & 26 \\
+jakubroztocil/httpie & 3 & 1145 & 29 \\
+binux/pyspider & 1 & 1174 & 34 \\
+Jack-Cherish/python-spider & 1 & 279 & 39 \\
+zulip/zulip & 1 & 34149 & 35 \\
 \bottomrule
 \end{supertabular}
 \end{center}
+\end{multicols*}
+
 
 \renewcommand{\arraystretch}{\oldarraystretch}
-\onecolumn
