@@ -10,7 +10,7 @@ differencing algorithms. In this section we will explore the
 arbitrarily permuted, duplicated or contracted (contractions are
 dual to duplications).
 
-  Classical tree differencing algorithms start by computing tree
+  Classical tree differencing algorithms start with the computation of tree
 matchings (\Cref{sec:background:tree-edit-distance}), which identify
 the subtrees that should be copied. These tree matchings, however, must
 be restricted to order-preserving partial injections to be
@@ -116,9 +116,7 @@ instantiated for a type of 2-3-trees:
 
 \begin{myhs}
 \begin{code}
-data Tree  =  Leaf Int
-           |  Bin Tree Tree
-           |  Tri Tree Tree Tree
+data Tree  =  Leaf Int |  Bin Tree Tree |  Tri Tree Tree Tree
 \end{code}
 \end{myhs}
 
@@ -1137,8 +1135,7 @@ of its domain.
 |after p (inv p) <= cpy| and |after (inv p) p <= cpy|. Attempting
 to identify |after p (inv p)| as somehow equivalent to |cpy| using |<=|
 will not work, however.
-
-  We could think of defining a notion of \emph{approximate changes},
+We could think of defining a notion of \emph{approximate changes},
 denoted |p ~ q|, by whether |p| and |q| are comparable under
 |<=|. This would not yield an equivalence relation since |~| is not
 transitive, as illustrated in \Cref{fig:pepatches:approx-not-equiv}).
