@@ -57,8 +57,8 @@ default : $(BUILD_DEPENDS) tex/latex/uustthesis.cls images
 	$(LATEX) $(MAIN_FILE)
 
 ## Builds the index
-index: 
-	makeindex -s tex/latex/index_style.ist dist/thesis.idx 
+index:
+	makeindex -s tex/latex/index_style.ist dist/thesis.idx
 
 ## forces rebuild for bibliography.
 dist/$(TGT).aux: default
@@ -68,12 +68,12 @@ mock: $(BUILD_DEPENDS) tex/latex/uustthesis.cls images
 	lhs2TeX $(LHSOPTS) -o dist/mock-chapter.tex dist/mock-chapter.lhs
 	export TEXMFHOME=".:$(TEXMFHOME)" && \
 	$(LATEX) dist/mock-chapter.tex
-	
+
 remock: $(BUILD_DEPENDS) tex/latex/uustthesis.cls images
 	lhs2TeX $(LHSOPTS) -o dist/mock-chapter.tex dist/mock-chapter.lhs
 	export TEXMFHOME=".:$(TEXMFHOME)" && \
 	$(LATEX) dist/mock-chapter.tex
-	
+
 cover: cover/cover.svg default
 	$(MAKE) -C cover/
 	pdftk cover/frontcover.pdf dist/thesis.pdf cat output dist/with-cover.pdf

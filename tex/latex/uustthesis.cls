@@ -521,7 +521,6 @@ project \@NWOproject{} (\@NWOgrantnumber).
 \setlist[enumerate]{label=\alph*)}
 
 \usepackage[mathlines]{lineno}
-\linenumbers
 
 \ifPHD@isdraft
 \usepackage{layouts}

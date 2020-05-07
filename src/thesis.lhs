@@ -25,7 +25,7 @@
 \NWOproject{Revision Control of Structured Data}
 \NWOgrantnumber{612.001.401}
 
-\defensedate{October 5, 2020}
+\defensedate{October 5, 2020, te 11:00 uur}
 \authorbirthdate{October 16, 1991}
 \authorbirthplace{S\~{a}o Paulo, Brasil}
 
@@ -50,6 +50,9 @@
 %% How many merge-diff cases have I seen so far?
 \newcommand{\qManualMDiffAnal}{16}
 \newcommand{\qManualMDiffOk}{13}
+
+
+%% \linenumbers
 
 \begin{document}
 \maketitle
