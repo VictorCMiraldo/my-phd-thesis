@@ -47,9 +47,9 @@ then go to where it says something like: `maim_memory = ...` and increase those
 values. I have:
 
 ```
-main_memory   = 15000000
-extra_mem_top = 5000000
-extra_mem_bot = 5000000
+main_memory.xelatex   = 15000000
+extra_mem_top.xelatex = 5000000
+extra_mem_bot.xelatex = 5000000
 ```
 
 After that, run `sudo texhash` and you should be good. 
