@@ -19,15 +19,15 @@
 
 \author{Victor Cacciari Miraldo}
 
-\promotor{Prof.dr. G. Keller}
-\copromotor{Dr. W. Swierstra}
+\promotor{Prof.dr. G.K. Keller}
+\copromotor{Dr. W.S. Swierstra}
 
 \NWOproject{Revision Control of Structured Data}
 \NWOgrantnumber{612.001.401}
 
-\defensedate{October 5, 2020, te 11:00 uur}
-\authorbirthdate{October 16, 1991}
-\authorbirthplace{S\~{a}o Paulo, Brasil}
+\defensedate{maandag 5 oktober 2020 des ochtends te 11:00 uur}
+\authorbirthdate{16 oktober 1991}
+\authorbirthplace{S\~{a}o Paulo, Brazili\"{e}}
 
 % Include my definitions
 % \input{src/my-tikz-defs}

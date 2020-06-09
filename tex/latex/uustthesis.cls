@@ -343,9 +343,9 @@ I'll pass it to 'book' just in case.}
 
   \
 
-  \begin{tabular}{p{0.8\textwidth}}
+  \begin{tabular}{p{0.83\textwidth}}
   ter verkrijging van de graad van doctor aan de Universiteit Utrecht op
-  gezag van de rector magnificus, prof. dr. G.J. van der Zwaan, ingevolge
+  gezag van de rector magnificus, prof. dr. H.R.B.M. Kummeling, ingevolge
   het besluit van het college voor promoties in het openbaar te verdedigen
   op \@defensedate
   % op maandag 23 april 2018 des ochtends te 10.30 uur

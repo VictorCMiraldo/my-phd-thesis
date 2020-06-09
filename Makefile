@@ -78,6 +78,9 @@ cover: cover/cover.svg default
 	$(MAKE) -C cover/
 	pdftk cover/frontcover.pdf dist/thesis.pdf cat output dist/with-cover.pdf
 
+get-titlepage: default
+	pdfjam -o dist/titlepage.pdf dist/thesis.pdf 1,2
+
 ## Runs bibtex and builds the target with bibliography.
 bib: references.bib dist/$(TGT).aux
 	bibtex dist/$(TGT).aux
