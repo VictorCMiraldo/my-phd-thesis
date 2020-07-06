@@ -251,17 +251,17 @@ X 436: "notion of tree mapping". Is that standard terminology?
 
 Yes.
 
-> 444-445: "ancestor". It would be reassuring to have this formally
+D 444-445: "ancestor". It would be reassuring to have this formally
   defined.
 
-> 449-451: case (i) describes, respectively, Fig.2.5(B) and Fig.2.5(C)
+D 449-451: case (i) describes, respectively, Fig.2.5(B) and Fig.2.5(C)
   but it is less clear for case (ii) : "not enable trees to be
   permuted" does not seem to be covered in Fig.2.5 while "moved across
   ancestor boundaries" seems to cover both Fig.2.5(A) and
   Fig.2.5(D). It would be useful to pin exactly the relationship with
   the examples.
 
-> 455: Fig 2.5 has wrong labels: (B) shows a non-functional mapping,
+D 455: Fig 2.5 has wrong labels: (B) shows a non-functional mapping,
   and (C) a non-injective one.
 
 > 458: GRAMMAR: missing space

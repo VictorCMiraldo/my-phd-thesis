@@ -443,24 +443,13 @@ nodes of a flattened representation of |t| and |u| according
 to their preorder traversal. Moreover, it preserves the
 ancestral order of nodes. That is, given two subtrees |x| and |y| in
 the domain of the mapping |m|, then |x| is an ancestor of |y| if and only if
-|m x| is an ancestor of |m y|.
+|m x| is an ancestor of |m y|. We say that |x| is an ancestor of |y| if 
+|x| is reachable from |y| proceeding exclusively from child to parent.
 \end{definition}
 
 \begin{figure}
 \centering
-\subfloat[non order preserving]{%
-\begin{forest}
-[, change={white}{} , s sep=8mm
-  [b,name=sb [c [d] [e, name=se]] [f , name=sf]]
-  [g,name=df [b , name=db] [e, name=de]]]
-\draw [->,dashed,thick,black!20!white] (sb) -- (db);
-\draw [->,dashed,thick,black!20!white] (sf) -- (df);
-% this edge makes it non-acestry preserving too!
-% \draw [->,dashed,thick,black!20!white] (se) -- (de);
-\end{forest}%
-\label{fig:background:tree-mapping-a}}%
-\qquad%
-\subfloat[non injective]{%
+\subfloat[non functional]{%
 \raisebox{9mm}{
 \begin{forest}
 [, change={white}{} , s sep=8mm
@@ -469,9 +458,9 @@ the domain of the mapping |m|, then |x| is an ancestor of |y| if and only if
 \draw [->,dashed,thick,black!20!white] (sb) -- (db);
 \draw [->,dashed,thick,black!20!white] (sb) -- (dbb);
 \end{forest}%
-\label{fig:background:tree-mapping-b}}}%
+\label{fig:background:tree-mapping-a}}}%
 \qquad%
-\subfloat[non surjective]{%
+\subfloat[non injective]{%
 \begin{forest}
 [, change={white}{} , s sep=8mm
   [b,name=sb [c] [d,name=sd]]
@@ -479,10 +468,24 @@ the domain of the mapping |m|, then |x| is an ancestor of |y| if and only if
 \draw [->,dashed,thick,black!20!white] (sb) -- (df);
 \draw [->,dashed,thick,black!20!white] (sd) -- (df);
 \end{forest}%
-\label{fig:background:tree-mapping-c}}%
+\label{fig:background:tree-mapping-b}}%
+\qquad%
+\subfloat[non order preserving]{%
+\raisebox{6mm}{
+\begin{forest}
+[, change={white}{} , s sep=8mm
+  [a [b,name=sb] [c,name=sc]]
+  [a [c,name=dc] [b,name=db]]]
+\draw [->,dashed,thick,black!20!white] (sb) to[in=220,out=320] (db);
+\draw [->,dashed,thick,black!20!white] (sc) to[in=220,out=320] (dc);
+% this edge makes it non-acestry preserving too!
+% \draw [->,dashed,thick,black!20!white] (se) -- (de);
+\end{forest}%
+\label{fig:background:tree-mapping-c}}}%
 \qquad%
 \subfloat[non ancestral preserving]{%
 \raisebox{9mm}{%
+\quad
 \begin{forest}
 [, change={white}{} , s sep=8mm
   [a,name=sb [b [c] [d,name=sd]] [e,name=se]]
@@ -490,8 +493,9 @@ the domain of the mapping |m|, then |x| is an ancestor of |y| if and only if
 \draw [->,dashed,thick,black!20!white] (sd) -- (df);
 \draw [->,dashed,thick,black!20!white] (se) -- (dg);
 \end{forest}%
-\label{fig:background:tree-mapping-d}}}%
-\qquad\qquad\qquad\qquad\qquad%
+\label{fig:background:tree-mapping-d}}
+\quad}%
+\qquad\qquad\qquad\qquad%
 \subfloat[valid tree mapping]{%
 \begin{forest}
 [, change={white}{}, s sep=8mm
@@ -511,9 +515,9 @@ example.}
 must be performed. Everything else must be deleted or inserted and the
 order of deletions and insertions is irrelevant, which removes the redundancy
 of edit-scripts. Nevertheless, the definition of tree mapping is still very restrictive:
-(i) the ``bijective mapping'' does not enable trees to be duplicated or contracted;
-(ii) the ``order preserving'' does not enable trees to be permuted or moved
-across ancestor boundaries. These restrictions are there to ensure that
+the ``bijective mapping'' does not enable trees to be duplicated or contracted, as seen in \Cref{fig:background:tree-mapping-a,fig:background:tree-mapping-b};
+the ``order preserving'' does not enable trees to be permuted or moved
+across ancestor boundaries, as seen in \Cref{fig:background:tree-mapping-c,fig:background:tree-mapping-d}. These restrictions are there to ensure that
 one can always compute an edit-script from a tree mapping.
 
   Most tree differencing algorithms start by producing a tree mapping and
