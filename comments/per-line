@@ -1,0 +1,1027 @@
+> Fig.2.5.(A) "order preserving" is bizarre since we have not quite
+  defined an order.
+
+> Fig.2.5.(D) s/f/d/ and s/g/e/, no?
+
+> Figure 2.3 - caption does not end with full stop, unlike Figure 2.5
+  and many others. Check all captions in this respect.
+
+> Figure 2.4 - I think the first clause should be "apply [] ts = ts";
+  where does the "l" come from in the clause below?
+
+> Figure 2.4: 'Tree' should perhaps explicitly be called
+  'RoseTree'. Also, much of the talk around here is about the fact
+  that the representation is somewhat "untyped". The story would be
+  much more natural if you were dealing with S-exp.
+
+> Figure 2.7 - is "diff O B" what is shown in (E)? "sum := 0"
+  (resp. "sum := sum + i") is added, not "prod := 1" (resp. "prod :=
+  prod * i"). Main text to be checked too (page 17).
+
+> Figure 5.28 - "fails; Although" -> "fails. Although"
+
+> Figure 5.28 - "succeeds, The" -> "succeeds. The"
+
+> Figure 5.30 - "conflict," -> "conflict."
+
+> Figure 6.3(F) - "; The" -> ". The"
+
+> Section 2.1.3: it seems to me that all these problems already
+  existed on text-based diffs. It seems that the message is that
+  having more structure to work with (as input to the problem) lead us
+  to try and preserve them further down the line. This is the key
+  difference with line-based diffs, which is not so worries about
+  losing structure it didn't have in the first place.
+
+> Section 3.1.2.2. Why call these 'combinators', isn't it just the
+  algebra of functors and their fixpoint?
+
+> Section 3.3. It's a bit weird to present one library and then
+  another to workaround a bug while not giving a take-away comparison
+  between the two.
+
+> Section 4. That section was not a pleasant read: it's a shitload of
+  (literate) programs!
+
+> Section 5.1.2 up to Section 5.4 (excluded). Struggle again.
+
+> Section 5.4. the term "accidental sharing" should perhaps be
+  mentioned there.
+
+> Section 6.3. about Patience. duplication in a patch ought to be
+  occuring only on small atoms (typically, variables) since it would
+  be a significant code smell otherwise (actual code duplication).
+
+> Section 7.2 - The decision of the candidate to spread pointers to
+  future work across the dissertation in the form of "personal
+  comments" empties this chapter to just three pages, which is rather
+  weak a "coda" for an interesting dissertation. I can accept that
+  giving such pointers "in place" saves quoting context, but future
+  readers who jump to the last chapter searching for inspiration on
+  how to continue the work will find very little there. As already
+  suggested in (*) and elsewhere, such side comments should slide into
+  something like section 7.3 - "Future work" or something similar. In
+  doing this, first person singular should be avoided because it is
+  not standard in scientific writing.
+
+> Table 6.3 - "patches, globally" -> "patches. Globally"
+
+> 100: "at least 26% of the conflicts [..] could have been
+  automatically merge".  Taking into account the weight you had to
+  lift, that seems disappointingly low. Ha, well.. :(
+
+> 101: s/an everyday basis/a day-to-day basis/ perhaps
+
+> 117: I should have thought that a third important aspect of
+  reconciling changes is (C) detecting whether two patches are
+  orthogonal, or in conflict.
+
+> 126: "git, mercurial and darcs" -> "Git, Mercurial and Darcs"
+
+> 139: GRAMMAR: "the following diff ... that adds"
+
+> 155: GRAMMAR: "changes in the objects being compared"
+
+> 175: Shouldn't the left-hand assertion be "assert(obj, hasSize(5))",
+  as on l177?
+
+> 186: It would be helpful to instantiate this generic schema for Unix
+  diff: type parameter a is [String], and Patch a is...?
+
+> 198-200: "It represents patches [..] works by enumerating all
+  possible patches [..]". written like this, this sounds like `diff`
+  is a silly brute-force tool.
+
+> 207: GRAMMAR: "diff and apply functions"
+
+> 217: GRAMMAR: "there exist conflicts"
+
+> 217: "there exists" -> "there exist"
+
+> 223: GRAMMAR: "we want values ... to carry"
+
+> 223: "want that values of type Patch to carry" s/that//
+
+> 226: "The better" -> "A better"
+
+> 228-232: "arbitrary datatypes" vs. "type-safety that a language like
+  Haskell provides". This paragraph is confusing because we were
+  talking about `diff` of ASTs and now move to `diff` of ADTs while
+  talking about languages.
+
+> 232: GRAMMAR: "XML" was in typewriter font on l194
+
+> 233: "exists differencing tools" -> "exist differencing tools"
+
+> 233: GRAMMAR: "there exist tools"
+
+> 235: GRAMMAR: "in contrast to"
+
+> 237: "generic programming algorithms". Having 'programming' and
+  'algorithms' next to each other looks terrible. s/programming// ?
+
+> 240: s/etc -/etc. -/
+
+> 243: s/belong in/belong to/
+
+> 246: GRAMMAR: "Happily" (not a synonym for "gladly" in this
+  context!)
+
+> 255: "published with [69] with" -> "[69] published with"
+
+> 273: GRAMMAR: "is Unix diff", or "is the Unix diff program"; also
+  l295
+
+> 274: "it works" -> "which works"
+
+> 310-311: "This makes the results computed by these algorithms hard
+  to predict." Why would we bother trying to predict a diff?
+
+> 311: GRAMMAR: "another issue ... is the algorithms"
+
+> 311, l.323: "the cost of the least cost". Terrible phrasing.
+
+> 312: "the algorithms [..] are inherently slow". We are only talking
+  about algorithms on trees, right?
+
+> 319: GRAMMAR: "second half ... presents"
+
+> 319: "this chapter is the state-of-the-art" s/is/describes/
+
+> 325: It's only a very simplistic instance of minimum edit distance
+  (least-cost edit script) that counts the insertion and deletion
+  operations; more generally (eg in Zhang and Shasha), each operation
+  has a cost or weight, and perhaps different operations have
+  different costs.
+
+> 338: Most of this paragraph is about the structure of S2.1, so it's
+  odd to have a mention of S3.1.4 here.
+
+> 341: "mistakes[74]" -> "mistakes [74]"
+
+> 348: GRAMMAR: "Each of those operations has"
+
+> 353: I think the first clause should be "apply [] ss = ss"
+
+> 356: "there is not an issue". s/there/this/
+
+> 358-359: "We can compute the edit-script [..] with a brute-force and
+  inefficient implementation". Well, let's call it a 'specification',
+  then :)
+
+> 358: "view, ,"
+
+> 362: GRAMMAR: "the edit-script witinessing it is"
+
+> 363: "is not" -> "are not"
+
+> 366: GRAMMAR: "an edit distance point of view"
+
+> 368: GRAMMAR: double comma
+
+> 368: ", , i.e." -> ", i.e."
+
+> 380: I wouldn't say that diff is a "generalization" of LCS; it's
+  essentially the same problem, whether on sequences of characters or
+  sequences of strings. I suppose you can reduce LCS to diff, on files
+  consisting solely of singleton strings; but reduction is not
+  generalization.
+
+> 391: GRAMMAR: "any edit-script based approach"
+
+> 392-398: you may want to mention "dynamic programming" somewhere in
+  this paragraph and give the complexity bounds of the classical
+  algorithms.
+
+> 401: "being that we must be able to compare this data" -> "is that
+  we must be able to compare these data"
+
+> 402: "trees instead of lists". It would be useful to have a somewhat
+  formal definition early on about the objects you are interested in.
+
+> 408: What have types to do with trees? This seems a non-sequitur.
+
+> 410: "Section 2.1.5" -> "as addressed in Section 2.1.5"
+
+> 416: GRAMMAR: "there exist edit-scripts"
+
+> 416: "there exists edit-scripts" -> "there exist edit-scripts"
+
+> 418: You could make apply (Ins l : []) [] = Nothing if arity l /= 0,
+  and more generally guard your use of takeDrop within the Maybe
+  monad.
+
+> 419: "to abide by a certain schema". s/by/to/ ?
+
+> 421: "wants the ability" -> "needs"
+
+> 426: "in a way that". s/a way/such a way/
+
+> 429: "expects. edit" -> "expects. Edit"
+
+> 429: GRAMMAR: "Edit scripts will then be indexed"
+
+> 429: "indexes by" -> "indexed by"
+
+> 429: "will then be indexes". s/indexes/indexed/
+
+> 433: "Although edit-scripts provide a very intuitive notion of local
+  transformations over a tree". I don't think we had defined
+  'edit-scripts for trees' at this stage. So it's hard to tell it they
+  are intuitive or not.
+
+> 434: Give an example of two different edit scripts that perform the
+  same transformation.
+
+> 435: "do no matter" -> "does not matter"
+
+> 435: GRAMMAR: "does not matter"
+
+> 436: "notion of tree mapping". Is that standard terminology?
+
+> 444-445: "ancestor". It would be reassuring to have this formally
+  defined.
+
+> 449-451: case (i) describes, respectively, Fig.2.5(B) and Fig.2.5(C)
+  but it is less clear for case (ii) : "not enable trees to be
+  permuted" does not seem to be covered in Fig.2.5 while "moved across
+  ancestor boundaries" seems to cover both Fig.2.5(A) and
+  Fig.2.5(D). It would be useful to pin exactly the relationship with
+  the examples.
+
+> 455: Fig 2.5 has wrong labels: (B) shows a non-functional mapping,
+  and (C) a non-injective one.
+
+> 458: GRAMMAR: missing space
+
+> 469: "two distinct edit-scripts". This language has not been defined
+  before.
+
+> 476: "hard to predict". Same remark as before.
+
+> 479: "according to some arbitrary schema". Phrasing could be
+  improved: there is a schema that says "anything goes in"
+
+> 482-484: "lack of expressivity". This is not specific to trees.
+
+> 485: Edit scripts only lack expressivity because you have provided
+  them with few operations (also l2031). You could have provided
+  duplicate, contract, and permute operations too - what then? It's
+  only "Levenshtein distance" that counts inserts, deletes, and
+  copies; other variants (eg Damerau, Wagner) allow transposition.
+
+> 494: GRAMMAR: "responsible for identifying"
+
+> 500: "it is a state-based that calls". Some word missing?
+
+> 500: "state-based that" -> "state-based tool that"
+
+> 501: I think Fig 2.7(E) is wrong: there is no mention of "prod" in
+  the originals!
+
+> 510: "based on actual residual systems". A few words on what an
+  "actual residual system" is could be useful: we were not all born in
+  the 70s.
+
+> 511: GRAMMAR: "proving that the laws"
+
+> 511: proving the that the laws"
+
+> 514: "provide a desirable metatheoretical foundation." Such as?
+
+> 524: Explain "Alice" and "Bob" to the caption of Figure 2.8;
+  otherwise remove these names and refer to "a" and "b", as in the
+  Figure.
+
+> 527: GRAMMAR: "essentially"
+
+> 529: "its on" -> "it is on"
+
+> 535: "enjoyed by diff3 [44]". Repeated reference, not necessary.
+
+> 539: GRAMMAR: "establish", "invariably"
+
+> 539: "Other criteria will". What are these other criteria from [44]?
+  It would be useful to have them in the text.
+
+> 544-545: "we briefly look over some of the relevant literature on
+  the topic". This is the literature for trees, right?
+
+> 545: GRAMMAR: "were perhaps"
+
+> 545: "where perhaps" -> "were perhaps"
+
+> 565: "Most of then" -> "Most of them"
+
+> 569-572: long sentence, please rephrase.
+
+> 574: "This is perhaps the closest". s/perhaps//
+
+> 575: "which is applicable in practice". Would that be a paraphrase
+  for 'practical'?
+
+> 591: "which shows that .. might ...". bit contradictory: if it is
+  'shown', then it ought to be a 'must'.
+
+> 601: "only parenthesis" -> "only parentheses"
+
+> 603: why the newpage here?
+
+> 606: "(Datatype-)generic". s/(// s/)//
+
+> 615: GRAMMAR: "discuss"
+
+> 617: "7.2 and defines" -> "7.2, defines"
+
+> 625: GRAMMAR: "written"
+
+> 630: GRAMMAR: "under"?
+
+> 630: "unser"
+
+> 630: "unser a" -> "under a"
+
+> 662: "this code is" -> "this code being"
+
+> 662: "this \emph{code} is a type-level list". This 'emph' does not
+  seem necessary.
+
+> 724: GRAMMAR: "such a library"
+
+> 725: move "are" to the end of the sentence.
+
+> 761: "functors The" -> "functors. The"
+
+> 772: "different than the representation. The latter being" ->
+  "different from the representation, the latter being"
+
+> 789: "Which are" -> "These are"
+
+> 790: "being a nested type". In that sense
+  http://www.cs.ox.ac.uk/people/richard.bird/online/BirdMeertens98Nested.pdf
+  ?
+
+> 817-822: about losing internal sum-of-products structure: you never
+  talk explicitly about what is gained/losed by each representation.
+
+> 817: "Turns out" -> "It turns out"
+
+> 817: "Turns out we can sacrifice". 'It ... that ...' would be less
+  informal.
+
+> 818: "but still maintaining". s/but/while/
+
+> 821: "which still maintains". 'which' is always a bit
+  heavy-handed. Either you break the sentence in 2 or it's a 'that'.
+
+> 835: why the vertical blank space between this and line 836?
+
+> 850: "deep generic representation". Is that a technical term? Later
+  on, you develop a systematic 'deep' vs. 'shallow' discussion but, at
+  this point, no one knows what you are aiming to.
+
+> 895: "lets look" -> "let us look"
+
+> 915-920: about crush. This is feels like some sort of `traverse`,
+  especially if [b] where generalized to 't b' for an arbitrary
+  applicative 't'.
+
+> 928-929: "frees us [..] within the topmost constructor". I didn't
+  understand this sentence.
+
+> 1001: "know which is the" -> "know the"
+
+> 1006: "Which in turn" -> "This, in turn"
+
+> 1018: there is a 'RoseFam' and a 'FamRose', I guess that one of them
+  is a bug.
+
+> 1075: "why bother ourselves with" s/ourselves//. Maybe avoid
+  'bother' altogether.
+
+> 1090: "represent, this" -> "represent. This"
+
+> 1131: "down datatypes" -> "downto datatypes"
+
+> 1140: GRAMMAR: something wrong here
+
+> 1140: "hdiff Chapter 5 possible" -> "hdiff (Chapter 5) possible"
+
+> 1147: GRAMMAR: "is of paramount importance"
+
+> 1172: GRAMMAR: "we have seen"
+
+> 1172: "we seen the" -> "we have seen about the"
+
+> 1186: "same that" -> "same as that"
+
+> 1198: GRAMMAR: "we must maintain"
+
+> 1198: "We must to maintain"
+
+> 1209: "following the structure". Unclear
+
+> 1243: "(Section 2.1.2), type-safe" -> "(Section 2.1.2) type-safe"
+
+> 1253: "constructor-of, and" -> "constructor-of. This"
+
+> 1265: "tn" -> "t_n"
+
+> 1266: "use as the" -> "use them as" (?)
+
+> 1293: "Suppose, for example, [..] suitable $ks$". This description
+  is too obscure to be useful.
+
+> 1298: "on large inputs". What qualifies as 'large'?
+
+> 1302: "but at the time [..] have not been resolved".  -> "but have
+  not been resolved at the time of writing"
+
+> 1304: GRAMMAR: "an alternative"
+
+> 1305-1313 (*) - I find this "informal note", or "side comment" if
+  you wish, written in first person singular (and several others to
+  come) rather non standard in a PhD dissertation. Perhaps this could
+  be given in a footnote? Or moved to the conclusions / future work
+  section? In any case, the use of first person singular should be
+  avoided.
+
+> 1305: I don't think these "notes to self" belong peppered throughout
+  the objective scientific content of the dissertation. I recommend
+  collecting them together in your conclusions: changes of plan,
+  surprises, things you ran out of time for, things you'd do
+  differently if you were to do it again, etc, are all useful to the
+  reader and follow-up researcher, but you should clearly distinguish
+  the personal from the scientific.
+
+> 1324: "is stored" -> "stored"
+
+> 1335: "uses" -> "use"
+
+> 1340: "being" -> "are"
+
+> 1344: "being having clear"
+
+> 1348: "be parameterize" -> "be parameterized"
+
+> 1354: ", which would" -> ". This would" (sentence too long)
+
+> 1358: "if two types where" -> "should two types be"
+
+> 1361: "here: define a family as two disjoint lists: A" -> "here and
+  define a family as two disjoint lists: a"
+
+> 1435: "where" -> "where ..." (?)
+
+> 1444: GRAMMAR: "we would need(?) an augmented"
+
+> 1444: "We would an" -> "We would need an" (?)
+
+> 1449: GRAMMAR: wrong font for "a"
+
+> 1477: "[34], in fact" -> "[34]. In fact"
+
+> 1505: "defining a type-indexes" s/indexes/indexed/
+
+> 1510-1511: "but let us not get ahead of ourselves". Doesn't seem
+  necessary.
+
+> 1514: "list of possible zippers for a value with holes". It feels
+  like the comonad presentation of zipper could be useful here.
+
+> 1516: "details, Appendix A." -> "details (Appendix A)."
+
+> 1520: "did need" -> "need"
+
+> 1532: "computing these patches is intractable." Is that in a formal
+  sense?
+
+> 1532: please see (*) above
+
+> 1544: "and occurs check" -> "and check" (?)
+
+> 1545: "code in Agda [77] Agda repository"
+
+> 1545: "substitution, for" -> "substitution. For"
+
+> 1559: GRAMMAR: double "the"
+
+> 1559: "the the longest prefixes"
+
+> 1559: "the the" -> "the"
+
+> 1560: "that two terms agree". What does that mean?
+
+> 1605: GRAMMAR: "type-indexed"
+
+> 1616: GRAMMAR: inconsistent fonts in Fig 4.1
+
+> 1623: "Which can" -> "This can"
+
+> 1634: GRAMMAR: "For one thing"
+
+> 1644: The disclaimer about joint work should not be buried here; it
+  should be declared up front, in Ch 1 or earlier.
+
+> 1645: GRAMMAR: duplicate "Agda", and missing space
+
+> 1646: "a MSc student, Arian" -> "Arian"
+
+> 1652: GRAMMAR: "and its application"
+
+> 1652: "is application function, Section 4.1" -> "its application
+  function (Section 4.1)"
+
+> 1688: "shortly, for" -> "shortly. For"
+
+> 1692: "family, both" -> "family. Both"
+
+> 1719: "definition follow" -> "definition follows"
+
+> 1719: GRAMMAR: "whose definition follows"
+
+> 1741: GRAMMAR: "Given a partial embedding"
+
+> 1744: GRAMMAR: Give page references for times and eps
+
+> 1763: "products, and" -> "products and"
+
+> 1801: "indicate find": choose either "indicate" or "find"
+
+> 1806: "makes clear": move "clear" towards the end of the sentence.
+
+> 1844: "being having" -> "having"
+
+> 1864: "merging,Section 2.1.4" -> "merging (Section 2.1.4)"
+
+> 1878: "element than" -> "element as"
+
+> 1896: GRAMMAR: "in and of itself"
+
+> 1897: perhaps you want to say "domain specific language" instead of
+  "programming language"?
+
+> 1906: "approaches however, we will always" -> "approaches, however,"
+
+> 1906: GRAMMAR: "All these approaches ... will always"
+
+> 1908: GRAMMAR: "much more difficult to write"
+
+> 1908: "to be written" -> "to write"
+
+> 1908: "will always be a computationally inefficient process". Is
+  that proved? Feels strongly worded.
+
+> 1909: GRAMMAR: "unusable"
+
+> 1924: GRAMMAR: "omitted"
+
+> 1932: "is,each" -> "is, each"
+
+> 1938: "alignments of products is" -> "product alignment is"
+
+> 1943: "definitinos" -> "definitions"
+
+> 1943: GRAMMAR: "From the definitions of"
+
+> 1946: GRAMMAR: "we must choose"
+
+> 1951: GRAMMAR: "a complex notion"
+
+> 1953: GRAMMAR: "the uninteresting patches"
+
+> 1953: "unintersting" -> "uninteresting"
+
+> 1954: "in conjunction with Pierre-Evariste Dagand". Haha, no need
+  for name dropping :) s/conjunction/collaboration/
+
+> 1960: "we learnt"
+
+> 1966: "Section 3.1.4" -> "(Section 3.1.4)"
+
+> 1967: "with a information" -> "with information"
+
+> 1981: "annotated" -> "annotate"
+
+> 2000: GRAMMAR: "deleted or inserted in their entirety"
+
+> 2009: GRAMMAR: "tends to be large"
+
+> 2009: "n tens do be"
+
+> 2009: "tens" -> "tends"
+
+> 2017: "in tree differencing this occurs often". Give some intuition
+  why?
+
+> 2021: GRAMMAR: "a patch transforms"
+
+> 2021: "patch transform two" -> "patch transforming two" (?)
+
+> 2042: "are subject to no restrictions".  -> "not subject to any
+  restriction"
+
+> 2057: "is given" -> "given"
+
+> 2071: "the the" -> "the"
+
+> 2103: GRAMMAR: double "the"
+
+> 2103: "the the insertion"
+
+> 2103: "the the" -> "the"
+
+> 2108-2110: "allow variables to appear more often". The term
+  'non-linear' from rewriting would be expected here.
+
+> 2120: GRAMMAR: "in both the ... contexts"
+
+> 2123: The program could be written more elegantly. The LeafC case is
+  neater using Control.Bool.guard': go (LeafC n) (Leaf n') = guard'
+  (n==n') and the BinC and TriC cases are neater with Kleisli
+  composition: go (BinC x y) (Bin a b) = go x a >=> go y b The Hole
+  case is probably best using do notation.
+
+> 2156: GRAMMAR: "if we adopted"
+
+> 2156: "if adopted" -> "by adopting"
+
+> 2166: GRAMMAR: "which is required"
+
+> 2166: "which required" -> "which is required"
+
+> 2183: "only share" -> "only shares"
+
+> 2183: You've made a big thing about hdiff providing more operations,
+  such as duplication. But the Patience mode prohibits duplication,
+  right?
+
+> 2199: "then search" -> "then searches"
+
+> 2206: GRAMMAR: "subtrees"
+
+> 2207: "This implementation, however, is not particularly efficient."
+  Call it a specification :D
+
+> 2209: Surely enumerating all subtrees is linear, not exponential?
+  There is one per node, at least for the definition of subtrees that
+  I know.
+
+> 2255: GRAMMAR: "Trie k u" should be "Trie k v"
+
+> 2300: full stop is missing
+
+> 2304: Why do you insist that all variables are used? Couldn't you
+  allow wellscoped (Chg d i) = keys (vars i) `subseteq` keys (vars d)
+  ?
+
+> 2315: "appear in in some mathematical"
+
+> 2321: GRAMMAR: "maps a subset of the domain of p into a subset of
+  the image of q"
+
+> 2324: do you mean "some elements in common" or "all elements in
+  common"?
+
+> 2330: GRAMMAR: "passes"? "possesses"?
+
+> 2339: Isn't this better written [[ p . q ]] = [[ q ]] >=> [[ p ]] ?
+
+> 2373: please see (*) above
+
+> 2377: "no options". s/options/option/
+
+> 2396: "a restriction of its domain" is vague - you should write
+  "when restricted to p's domain". This order coincides with the
+  refinement order among partial functions.
+
+> 2397: You have a preorder here, not a partial order.
+
+> 2430: please see (*) above
+
+> 2436: "to example" -> "to the example"
+
+> 2449: GRAMMAR: "from a unique identifier per constructor"
+
+> 2452: consider defining "hash-uniquely" as shorthand for "uniquely
+  identified, modulo hash collisions"
+
+> 2457: "[18] as our datastructure." -> "[18]."
+
+> 2457: please see (*) above
+
+> 2458: GRAMMAR: "to also implement"
+
+> 2467: "to go inspect" -> "to inspect"
+
+> 2473: "height then compute" -> "height; then we compute"
+
+> 2480: GRAMMAR: "bounded depth of the trie"
+
+> 2484: You don't need to store each tree, just the paths to their
+  roots; the whole tree need be stored only once.
+
+> 2486: please see (*) above
+
+> 2505: please see (*) above; in this case, why is this "side comment"
+  not regular text?
+
+> 2517: GRAMMAR: "it is important"
+
+> 2524: "noNested1, we" -> "noNested1. We"
+
+> 2533: "and in this case, it will always be two" -> "twice in this
+  case"
+
+> 2537: "instead of but" -> "instead of"
+
+> 2538: "instead of but bigger". weird phrasing.
+
+> 2568: "though will" -> "though, will"
+
+> 2570: "that that" -> "that"
+
+> 2573: GRAMMAR: "should be placed"
+
+> 2573: "that that are being inserted"
+
+> 2596: GRAMMAR: "(42:)", not "(:42)"! Also p110, twice.
+
+> 2599: "unpractical, we" -> "unpractical, as we"
+
+> 2600: "linearly-structured" -> "linearly structured"
+
+> 2613: please see (*) above
+
+> 2615: "correct indexes". s/indexes/indices/
+
+> 2619: "we computing" -> "we compute"
+
+> 2620: "First we computing a global"
+
+> 2627: "next, Section" -> "next in Section"
+
+> 2642: "to so" -> "so"
+
+> 2643: "the changes to so that they"
+
+> 2650: GRAMMAR: "two non-overlapping changes"
+
+> 2652: "Take Figure" -> "Taking Figure"
+
+> 2654: "To avoid these. In our case"
+
+> 2673: "scoped change change to close"
+
+> 2675: GRAMMAR: "recomputing these multisets"
+
+> 2675: "this multisets" -> "these multisets"
+
+> 2689: GRAMMAR: "it receives source and destination"
+
+> 2706: GRAMMAR: "type information enables us"
+
+> 2728: "the the" -> "the"
+
+> 2757: "followed " -> "follow a"
+
+> 2764: "The alignments here" -> "This alignment"
+
+> 2765-2773: you told the same zipper story earlier I think.
+
+> 2765: "it records" -> "as it records"
+
+> 2776: "GHC some" -> "GHC about some"
+
+> 2790: "scoping, consequently" -> "scoping. Consequently"
+
+> 2792: "be fallback" -> "resort" (?)
+
+> 2804: "with both" -> "where both"
+
+> 2811: "all the of fields" -> "all fields"
+
+> 2824: "After annotations" -> "After annotating"
+
+> 2824: GRAMMAR: "after annotating"
+
+> 2836: "reader should" -> "reader to"
+
+> 2839: "can has a rigid zipper, if" -> "has a rigid zipper. If"
+
+> 2839: "if d was" -> "should d be"
+
+> 2844: "zipper and when" -> "zipper. When"
+
+> 2853: sentence is unclear, please rephrase.
+
+> 2875: "has type." -> "has type:"
+
+> 2881: This whole approach seems very ad hoc! What properties can you
+  show of it?
+
+> 2886: "well-scoped about" -> "well-scoped fragments about"
+
+> 2891: "its easier" -> "it is easier"
+
+> 2902: "can might" -> "might"
+
+> 2933: please see (*) above; in this case, again, why is this "side
+  comment" not regular text?
+
+> 2933: "with might" -> "that might"
+
+> 2934: "merge, this" -> "merge, as this"
+
+> 2946: "driven practical" -> "driven by practical"
+
+> 2946: please see (*) above.
+
+> 2947: "was driven practical experiments"
+
+> 2951: "is happens": choose either "is" or "happens"
+
+> 2952-2953: ", Section 4.2," s/, / (/ s/,/)/
+
+> 2958: "order which" -> "order in which"
+
+> 2964: "copy, since" -> "copy. Since"
+
+> 2981: full stop is missing.
+
+> 2991: "to splits" -> "to split"
+
+> 3041: please see (*) above.
+
+> 3041: "than c" -> "from c"
+
+> 3048: please see (*) above; in this case, this could be a footnote.
+
+> 3051: "must preserved" -> "must be preserved"
+
+> 3053: "which insertion" -> "which insertions" (?)
+
+> 3056: "the fields the" -> "the fields of the"
+
+> 3060: "observe" -> "observes"
+
+> 3062: "illustrate" -> "illustrates"
+
+> 3065: please see (*) above.
+
+> 3065: "we an" -> "we can"
+
+> 3074: "exemplified" -> "illustrated"
+
+> 3080: "indicate" -> "indicates that"
+
+> 3081: "In Figure" -> "Figure"
+
+> 3093: please see (*) above. Clearly, this side comment should go to
+  a proper future work section.
+
+> 3103: "than arbitrary" -> "from arbitrary"
+
+> 3104: "they are" -> "which are"
+
+> 3118: "done and we" -> "done, we" (?)
+
+> 3130: please see (*) above. Clearly, this side comment should go to
+  a proper future work section.
+
+> 3138: "are are" -> "are"
+
+> 3166: "approaches," -> "approaches, as"
+
+> 3181: "is used" -> "being used"
+
+> 3189: GRAMMAR: "a workaround at best" ("at its best" means something
+  else!)
+
+> 3190: "at its best" s/its//
+
+> 3211: "I envisioned a design" -> "A design was envisioned" (avoid
+  first person singular)
+
+> 3215: "tells us" -> "telling us"
+
+> 3218: "case" -> "cause"
+
+> 3221: "I did not have time" -> "there was no time" (avoid first
+  person singular)
+
+> 3229: "I never had the time": avoid first person singular and move
+  to a proper future work section.
+
+> 3230: "the the" -> "the"
+
+> 3245: "its" -> "it is"
+
+> 3249: "I would have liked to look at" -> "could have been looked at"
+  (again, this is out-of-place future work)
+
+> 3257: "one of my priorities " -> "a priority"
+
+> 3259: "further work" -> "future work" (cf above)
+
+> 3272: "hdiff," -> "hdiff, in
+
+> 3284: "data" -> "such data"
+
+> 3287: GRAMMAR: "could only evaluate"
+
+> 3287: "only evaluated" -> "only evaluate"
+
+> 3293: "then attempting" -> "and attempting"
+
+> 3294: "written by a master student [33]" -> "available from [33]"
+
+> 3320: "illustrated" -> "illustrates"
+
+> 3324: GRAMMAR: "spatial"
+
+> 3331: "Let fa and fb be" -> "For fa and fb"
+
+> 3338: "929 used more than 8GB of memory". How is that even possible?
+  This should be discussed.
+
+> 3338: "have been plotted" -> "are plotted"
+
+> 3354: "in the right complexity class". It is a bit bizarre to talk
+  about 'complexity class' as if it were an experimental thing.
+
+> 3362: GRAMMAR: "produced a different result"
+
+> 3362: "was successful but produced a different than the manual" ->
+  "was successful but different from manual"
+
+> 3369-3378: about the ambiguity between "same merge" and "human made
+  changes during merge". An alternative would have been to run the
+  unit tests to check if things were right on your side.
+
+> 3381: "method, the" -> "method. The"
+
+> 3381: "the most" -> "more"
+
+> 3387: GRAMMAR: "witnessed that in"
+
+> 3390: "illustrate in" -> "illustrated in"
+
+> 3395: "and the majority of the time, it matches" -> "and most often
+  matches"
+
+> 3398: "complimentary" -> "complementary"
+
+> 3408: "since these" -> "as these" (thus avoiding "since ... since
+  ...")
+
+> 3416: GRAMMAR: "both n and o" are what?
+
+> 3424: GRAMMAR: "order of declarations matters"
+
+> 3441: GRAMMAR: "were completely ignored"
+
+> 3446: GRAMMAR: "prevent ... from being detected"
+
+> 3449: GRAMMAR: "Our decision to ignore"
+
+> 3455: "showcases two such cases, hence" -> "shows two such
+  cases. Hence"
+
+> 3458: "of if unusable in practice"
+
+> 3462: "GitHub" -> "the GitHub"
+
+> 3467: GRAMMAR: "Our suspicion of it as unusable"
+
+> 3467: "it unusable" -> "it being unusable"
+
+> 3476: "proper calculation of the probability". I don't think we can
+  formally talk about a 'probability' here.
+
+> 3485: GRAMMAR: "about our algorithms." [two changes]
+
+> 3485: text missing here? "about out algorithms" (...)?
+
+> 3490: "in field" -> "in the field"
+
+> 3497: GRAMMAR: "impractical"
+
+> 3507: Maybe the change of formatting *was* the edit!
+
+> 3518: "makes me question the" -> "makes one question about the"
+  (first person singular should be avoided in scientific writing)
+
+> 3523: GRAMMAR: "analysis requires no further"
+
+> 3545: "I conjecture" -> "our conjecture is that" (same reason)
+
+> 3592: "encoded through using" s/through//
+
+> 10000: References: capitalization
+  [7,8,10,19,22,31,36,37,53,57,62,69,73,77,83,92,95]. Pages X-Y or
+  Volume Z of what? [22,37,60,75,98]. SPJ is "Peyton Jones, Simon"
+  [43,49,95]. More data needed [59]. Duplicate "in" [78]. [102] was in
+  ICFP. Bram Cohen [17] has been filed under his first name, not
+  surname like everyone else.
+
