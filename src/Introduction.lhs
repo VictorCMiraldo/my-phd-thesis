@@ -15,10 +15,9 @@ changes between old and new versions of an object. When
 time comes to reconcile changes, it runs a \emph{merge} algorithm
 that decides whether the changes can be synchronized or not.
 At the heart of this process is (A) the representation of
-changes, usually denoted a \emph{patch} and (B) the
-computation of a \emph{patch} between two objects.
-% The merge algorithm can only be as good as how much
-% information \emph{patches} carry.
+changes, usually denoted a \emph{patch}, (B) the
+computation of a \emph{patch} between two objects and (C) 
+the ability to detect whether two patches are in conflict.
 
   Maintaining software as complex as an operating system with as
 many as several thousands contributors is a technical feat made
@@ -29,7 +28,7 @@ smallest set of insertions and deletions of lines to transform one
 file into the other. In other words, it tries to share as many lines
 between source and destination as possible.  This is, in fact, the
 most widespread representation for \emph{patches}, used by tools
-such as git, mercurial and darcs.
+such as Git, Mercurial and Darcs.
 
   The limited grammar of changes used by the \unixdiff{} works
 particularly well for programming languages that organize a program
@@ -49,7 +48,7 @@ of the elements of an array, but also compute their product:
 However, the bias towards \emph{lines} of code may lead to
 (unnecessary) conflicts when considering other programming
 languages. For instance, consider the following diff between two
-Haskell functions that add a new argument to an existing function:
+Haskell functions that adds a new argument to an existing function:
 %
 \begin{alltt}\small
  - head []        = error "?!"
@@ -74,7 +73,7 @@ function will fail, as the lines do not match -- even if both changes modify
 distinct parts of the declaration in the case of non-empty lists.
 
   The inability to identify more fine grained changes in the objects
-it compares is a consequence of the \emph{by line} granularity of
+being compared is a consequence of the \emph{by line} granularity of
 \emph{patches}. Ideally, however, the objects under comparison should
 dictate the granularity of change to be considered. This is precisely
 the goal of \emph{structural differencing} tools.
@@ -151,32 +150,36 @@ granularity.  In
 discuss two different definitions of |Patch|, both capturing changes
 at the granularity of abstract-syntax elements.
 
-  Note that the |apply| function is inherently partial, for example, when attempting
-to delete data which is not present applying the patch will fail.
-Yet when it succeeds, the |apply|
-function must return a value of type |a|. This may seem like an
-obvious design choice, but this property does not hold for the
+  Note that the |apply| function is inherently partial, for example,
+when attempting to delete data which is not present applying the patch
+will fail.  Yet when it succeeds, the |apply| function must return a
+value of type |a|. This may seem like an obvious design choice, but
+this property does not hold for the
 approaches~\cite{Asenov2017,Falleri2014} using \texttt{xml} or
-\texttt{json} to represent abstract syntax trees, where the
-result of applying a patch may produce ill-typed results, i.e.,
-schema violations.
+\texttt{json} to represent abstract syntax trees, where the result of
+applying a patch may produce ill-typed results, i.e., schema
+violations.
 
   \unixdiff{}~\cite{McIlroy1976} follows this very framework too, but
-for the specific type of lines of text, taking |a| to be |[String]|.  It
-represents patches as a series of insertions, deletions and copies of
-lines and works by enumerating all possible patches that transform the
-source into the destination and chooses the best such patch.  There
-have been several attempts at generalizing these results to handle
-arbitrary datatypes~\cite{Zhang1989,Demaine2007,Pawlik2012,Lempsink2009}, including
-our own attempt discussed in \Cref{chap:structural-patches}.
+for the specific type of lines of text, taking |a| to be |[String]|
+and |Patch a| to be a series of insertions, deletions and copies of
+lines. A naive implementation would produce patches by enumerating all
+possibilities that transform the source into the destination and then
+chooses the best such patch. The \unixdiff{} computes its patches in a
+more complex and efficient manner, but follows the above method as its
+\emph{specification}.  There have been several attempts at
+generalizing these results to handle arbitrary
+datatypes~\cite{Zhang1989,Demaine2007,Pawlik2012,Lempsink2009},
+including our own attempt discussed in \Cref{chap:structural-patches}.
 All of these follow the same recipe: enumerate all combinations of
-insertions, deletions and
-copies that transform the source into the destination and choose the
-`best' one. Consequently, they also suffer from the same
-drawbacks as classic edit-distance -- which include non-uniqueness of the best solution
-and slow algorithms. We will discuss them in more detail in \Cref{sec:background:string-edit-distance}.
+insertions, deletions and copies that transform the source into the
+destination and choose the `best' one. Consequently, they also suffer
+from the same drawbacks as classic edit-distance -- which include
+non-uniqueness of the best solution and slow algorithms. We will
+discuss them in more detail in
+\Cref{sec:background:string-edit-distance}.
 
-  Once we have a |diff| and an |apply| functions handy, we
+  Once we have the |diff| and |apply| functions handy, we
 move on to the |merge| function, which is responsible for
 synchronizing two different changes into a single
 one, when they are compatible. Naturally not all patches can be merged,
@@ -194,44 +197,43 @@ merge :: Patch a -> Patch a -> Either Conflicts (Patch a)
 to their specific locations inside the merged patch and still try to
 synchronize non-conflicting parts of the changes. This is orthogonal
 to our objective, however. The abstract idea is still the same:
-two patches can either be reconciled fully or there exists conflicts
+two patches can either be reconciled fully or there exist conflicts
 between them.
 
-  The success rate of the |merge| function -- that is, how often it
-is able to reconcile changes -- can never be 100\%. There will always be
+  The success rate of the |merge| function -- that is, how often it is
+able to reconcile changes -- can never be 100\%. There will always be
 changes that require human intervention to be synchronized.
 Nevertheless, the quality of the synchronization algorithm directly
-depends on the expressivity of the |Patch| datatype.
-If |Patch| provides information solely on which lines of the source have changed,
-there is little we can merge.  Hence, we want that values of type |Patch| to
-carry information about the structure of |a|.
-% Think of, for example,
-% |Patch JavaProg| being the type of changes that can be performed over \texttt{java}
-% programs.
-Naturally though, we do not want to build domain specific tools for each programming
-language for which we wish to have source files under version control -- which would be
-at least impractical. The better option is to use a \emph{generic representation},
-which can be used to encode arbitrary programming languages, and describe
-the |Patch| datatype generically.
+depends on the expressivity of the |Patch| datatype.  If |Patch|
+provides information solely on which lines of the source have changed,
+there is little we can merge.  Hence, we want values of type |Patch|
+to carry information about the structure of |a|.  Naturally though, we
+do not want to build domain specific tools for each programming
+language for which we wish to have source files under version control
+-- which would be at least impractical. A better option is to use a
+\emph{generic representation}, which can be used to encode arbitrary
+programming languages, and describe the |Patch| datatype generically.
 
   Structural differencing is a good example of the need for generic
-programming: we would like to have differencing algorithms to work over
-arbitrary datatypes, but maintaining the type-safety that a language
-like Haskell provides. This added safety means that all the
-manipulations we perform on the patches are guaranteed to never
-produce ill-formed elements, which is a clear advantage
-over using something like XML to represent our data, even though there
-exists differencing tools that use XML as their underlying representation
-for data.  We refer to these as \emph{untyped}
-tree differencing algorithms in contrast
-the \emph{typed} approach, which guarantees type safety by construction.
+programming. Here, we would like to have our differencing algorithms
+working over arbitrary abstract syntax trees while maintaining the
+type-safety that a language like Haskell provides: we encode these
+ASTs as algebraic datatypes and write our differencing algorithm to
+operate over these algebraic datatypes.  This added safety means that
+all the manipulations we perform on the patches are guaranteed to
+never produce ill-formed elements, which is a clear advantage over
+using something like \texttt{XML} to represent our data, even though there
+exist differencing tools that use \texttt{XML} as their underlying
+representation for data.  We refer to these as \emph{untyped} tree
+differencing algorithms in contrast to the \emph{typed} approach, which
+guarantees type safety by construction.
 
   The Haskell type-system is expressive enough to enable one to write
-\emph{typed} generic programming algorithms. These algorithms, however,
-can only be applied to datatypes that belong in the set of types
+\emph{typed} generic algorithms. These algorithms, however,
+can only be applied to datatypes that belong to the set of types
 handled by the generic programming library of choice. For example,
 the \texttt{regular}~\cite{Noort2008} approach is capable of handling types which have
-a \emph{regular} recursive structure -- lists, $n$-ary trees, etc --, but
+a \emph{regular} recursive structure -- lists, $n$-ary trees, etc. --, but
 cannot represent nested types, for example. In \Cref{sec:background:generic-programming}
 we will give an overview of existing approaches to generic programming in Haskell.
 No library, however, was capable of handling mutually recursive
@@ -239,7 +241,7 @@ types -- which is the universe of datatypes that context free languages belong i
 in a satisfactory manner. This means that to explore differencing
 algorithms for various programming languages we would have to first
 develop the generic programming functionality necessary for it.
-Gladly, Haskell's type system has evolved enough since the initial
+Happily, Haskell's type system has evolved enough since the initial
 efforts on generic programming for mutually recursive types
 (\texttt{multirec}~\cite{Yakushev2009}), enabling us to write significantly
 better libraries, as we will discuss in \Cref{chap:generic-programming}.
@@ -257,13 +259,15 @@ combinator-based generic programming for mutually recursive
 families. This work came out of close collaboration with Alejandro
 Serrano on a variety of generic programming topics.
 
-  \item \Cref{chap:structural-patches} is derived from a paper published
-with \cite{Miraldo2017} with Pierre-\'{E}variste
-Dagand. We worked closely together to define a type-indexed datatype
-used to represent changes in a more structured way than edit-scripts.
-\Cref{chap:structural-patches} goes further into developing
-a merging algorithm and exploring different ways to compute
-patches given two concrete values.
+  \item \Cref{chap:structural-patches} is derived from a paper \cite{Miraldo2017}
+published with with Pierre-\'{E}variste Dagand. We
+worked closely together to define a type-indexed datatype used to
+represent changes in a more structured way than edit-scripts.
+\Cref{chap:structural-patches} goes further into developing a merging
+algorithm and exploring different ways to compute patches given two
+concrete values. The code we present in \Cref{chap:structural-patches}
+is loosely based on Van Putten's translation of our Agda repository 
+to Haskell as part of his Master thesis work~\cite{Putten2019}.  
 
   \item \Cref{chap:pattern-expression-patches} is the refinement
 of our paper~\cite{Miraldo2019} on an efficient algorithm for

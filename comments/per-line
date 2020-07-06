@@ -66,68 +66,73 @@
 
 > Table 6.3 - "patches, globally" -> "patches. Globally"
 
-> 100: "at least 26% of the conflicts [..] could have been
+D 100: "at least 26% of the conflicts [..] could have been
   automatically merge".  Taking into account the weight you had to
   lift, that seems disappointingly low. Ha, well.. :(
 
-> 101: s/an everyday basis/a day-to-day basis/ perhaps
+I know... :(
 
-> 117: I should have thought that a third important aspect of
+D 101: s/an everyday basis/a day-to-day basis/ perhaps
+
+D 117: I should have thought that a third important aspect of
   reconciling changes is (C) detecting whether two patches are
   orthogonal, or in conflict.
 
-> 126: "git, mercurial and darcs" -> "Git, Mercurial and Darcs"
+D 126: "git, mercurial and darcs" -> "Git, Mercurial and Darcs"
 
-> 139: GRAMMAR: "the following diff ... that adds"
+D 139: GRAMMAR: "the following diff ... that adds"
 
-> 155: GRAMMAR: "changes in the objects being compared"
+D 155: GRAMMAR: "changes in the objects being compared"
 
-> 175: Shouldn't the left-hand assertion be "assert(obj, hasSize(5))",
+X 175: Shouldn't the left-hand assertion be "assert(obj, hasSize(5))",
   as on l177?
 
-> 186: It would be helpful to instantiate this generic schema for Unix
+Nope, this is correct.
+
+D 186: It would be helpful to instantiate this generic schema for Unix
   diff: type parameter a is [String], and Patch a is...?
 
-> 198-200: "It represents patches [..] works by enumerating all
+I added a comment two paras below.
+
+D 198-200: "It represents patches [..] works by enumerating all
   possible patches [..]". written like this, this sounds like `diff`
   is a silly brute-force tool.
 
-> 207: GRAMMAR: "diff and apply functions"
+Indeed; I attempted to change a little.
 
-> 217: GRAMMAR: "there exist conflicts"
+D 207: GRAMMAR: "diff and apply functions"
 
-> 217: "there exists" -> "there exist"
+D 217: GRAMMAR: "there exist conflicts"
+D 217: "there exists" -> "there exist"
 
-> 223: GRAMMAR: "we want values ... to carry"
+D 223: GRAMMAR: "we want values ... to carry"
+D 223: "want that values of type Patch to carry" s/that//
 
-> 223: "want that values of type Patch to carry" s/that//
+D 226: "The better" -> "A better"
 
-> 226: "The better" -> "A better"
-
-> 228-232: "arbitrary datatypes" vs. "type-safety that a language like
+D 228-232: "arbitrary datatypes" vs. "type-safety that a language like
   Haskell provides". This paragraph is confusing because we were
   talking about `diff` of ASTs and now move to `diff` of ADTs while
   talking about languages.
 
-> 232: GRAMMAR: "XML" was in typewriter font on l194
+D 232: GRAMMAR: "XML" was in typewriter font on l194
 
-> 233: "exists differencing tools" -> "exist differencing tools"
+D 233: "exists differencing tools" -> "exist differencing tools"
+D 233: GRAMMAR: "there exist tools"
 
-> 233: GRAMMAR: "there exist tools"
+D 235: GRAMMAR: "in contrast to"
 
-> 235: GRAMMAR: "in contrast to"
-
-> 237: "generic programming algorithms". Having 'programming' and
+D 237: "generic programming algorithms". Having 'programming' and
   'algorithms' next to each other looks terrible. s/programming// ?
 
-> 240: s/etc -/etc. -/
+D 240: s/etc -/etc. -/
 
-> 243: s/belong in/belong to/
+D 243: s/belong in/belong to/
 
-> 246: GRAMMAR: "Happily" (not a synonym for "gladly" in this
+D 246: GRAMMAR: "Happily" (not a synonym for "gladly" in this
   context!)
 
-> 255: "published with [69] with" -> "[69] published with"
+D 255: "published with [69] with" -> "[69] published with"
 
 > 273: GRAMMAR: "is Unix diff", or "is the Unix diff program"; also
   l295
@@ -520,8 +525,12 @@
 
 > 1634: GRAMMAR: "For one thing"
 
-> 1644: The disclaimer about joint work should not be buried here; it
+D 1644: The disclaimer about joint work should not be buried here; it
   should be declared up front, in Ch 1 or earlier.
+
+I'm confused; there are two disclaimers and they are mentioned
+in the /Contributions and Outline/ section in Ch 1. Anyway,
+I did try to make it clearer in Ch 1, I hope its upfront enough.
 
 > 1645: GRAMMAR: duplicate "Agda", and missing space
 

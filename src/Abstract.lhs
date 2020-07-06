@@ -28,7 +28,7 @@ have developed two new libraries for generic programming in Haskell.
   Finally, we empirically evaluate our algorithms by a number of
 experiments over real conflicts gathered from \texttt{GitHub}. Our
 evaluation reveals that at least \qSolvedPerc{} of the conflicts
-that developers face on an everyday basis could have been
+that developers face on a day-to-day basis could have been
 automatically merged. This suggests there is a benefit in using
 structural differencing tools as the basis for software version
 control.
