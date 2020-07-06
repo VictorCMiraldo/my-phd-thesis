@@ -520,8 +520,6 @@ project \@NWOproject{} (\@NWOgrantnumber).
 \usepackage[shortlabels]{enumitem}
 \setlist[enumerate]{label=\alph*)}
 
-\usepackage[mathlines]{lineno}
-
 \ifPHD@isdraft
 \usepackage{layouts}
 \newcommand{\displaymeasurespage}{%
@@ -533,51 +531,9 @@ project \@NWOproject{} (\@NWOgrantnumber).
   \texttt{\textbackslash{}paperwidth} & \printinunitsof{cm}\prntlen{\paperwidth} \\
   \texttt{\textbackslash{}paperheigth} & \printinunitsof{cm}\prntlen{\paperheight} \\
 \end{tabular}
-\end{center}
-}
+\end{center}}
+\usepackage[displaymath,mathlines]{lineno}
+\linenumbers
 \else
 \newcommand{\displaymeasurespage}{}
 \fi
-
-
-
-%% paragraph numbers; based on https://www.dickimaw-books.com/latex/admin/html/exercises/numberedpar.shtml
-%%
-%% update: something is not working quite right with para numbers; sometimes they are not
-%% being displayed. I'll just go to back to line numbers.
-\newcommand*{\stopparnum}{}
-\newcommand*{\startparnum}{}
-%%
-% \usepackage{etoolbox}
-% \newcounter{para}[chapter]
-% \newcommand*{\formatparnum}[1]{$\color{gray}\S_{\thepara}$}
-% \geometry{marginparsep=0em,marginparwidth=4em}
-% \reversemarginpar
-% \newcommand*{\numberedparagraph}{%
-% \refstepcounter{para}%
-% \marginpar[\qquad\formatparnum]{\quad\formatparnum}}
-% \newcommand*{\stopparnum}{\everypar{}}
-% \newcommand*{\startparnum}{\everypar{\numberedparagraph}}
-% \preto\chapter{\everypar{}}
-% \preto\section{\everypar{}}
-% \preto\subsection{\everypar{}}
-% \preto\subsubsection{\everypar{}}
-% \preto\paragraph{\everypar{}}
-% \preto\subparagraph{\everypar{}}
-% \renewcommand{\@afterheading}{%
-%   \@nobreaktrue
-%   \everypar{%
-%     \if@nobreak
-%       \@nobreakfalse
-%       \clubpenalty\@M
-%       \if@afterindent
-%       \else
-%         {\setbox\z@\lastbox}%
-%       \fi
-%     \else
-%       \clubpenalty\@clubpenalty
-%       \everypar{\numberedparagraph}%
-%     \fi
-%     \numberedparagraph
-%   }%
-% }
