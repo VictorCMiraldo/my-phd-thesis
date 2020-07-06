@@ -134,115 +134,122 @@ D 246: GRAMMAR: "Happily" (not a synonym for "gladly" in this
 
 D 255: "published with [69] with" -> "[69] published with"
 
-> 273: GRAMMAR: "is Unix diff", or "is the Unix diff program"; also
+D 273: GRAMMAR: "is Unix diff", or "is the Unix diff program"; also
   l295
 
-> 274: "it works" -> "which works"
+D 274: "it works" -> "which works"
 
-> 310-311: "This makes the results computed by these algorithms hard
+D 310-311: "This makes the results computed by these algorithms hard
   to predict." Why would we bother trying to predict a diff?
 
-> 311: GRAMMAR: "another issue ... is the algorithms"
+D 311: GRAMMAR: "another issue ... is the algorithms"
 
-> 311, l.323: "the cost of the least cost". Terrible phrasing.
+D 311, l.323: "the cost of the least cost". Terrible phrasing.
 
-> 312: "the algorithms [..] are inherently slow". We are only talking
+D 312: "the algorithms [..] are inherently slow". We are only talking
   about algorithms on trees, right?
 
-> 319: GRAMMAR: "second half ... presents"
+Yes, I removed this anyway.
 
-> 319: "this chapter is the state-of-the-art" s/is/describes/
+D 319: GRAMMAR: "second half ... presents"
+D 319: "this chapter is the state-of-the-art" s/is/describes/
 
-> 325: It's only a very simplistic instance of minimum edit distance
+D 325: It's only a very simplistic instance of minimum edit distance
   (least-cost edit script) that counts the insertion and deletion
   operations; more generally (eg in Zhang and Shasha), each operation
   has a cost or weight, and perhaps different operations have
   different costs.
 
-> 338: Most of this paragraph is about the structure of S2.1, so it's
+D 338: Most of this paragraph is about the structure of S2.1, so it's
   odd to have a mention of S3.1.4 here.
 
-> 341: "mistakes[74]" -> "mistakes [74]"
+D 341: "mistakes[74]" -> "mistakes [74]"
 
-> 348: GRAMMAR: "Each of those operations has"
+D 348: GRAMMAR: "Each of those operations has"
 
-> 353: I think the first clause should be "apply [] ss = ss"
+D 353: I think the first clause should be "apply [] ss = ss"
 
-> 356: "there is not an issue". s/there/this/
+I understand, but that is not how /apply/ is defined in the literature;
+I'll stick with the standard definition.
 
-> 358-359: "We can compute the edit-script [..] with a brute-force and
+D 356: "there is not an issue". s/there/this/
+
+D 358-359: "We can compute the edit-script [..] with a brute-force and
   inefficient implementation". Well, let's call it a 'specification',
   then :)
 
-> 358: "view, ,"
+D 358: "view, ,"
 
-> 362: GRAMMAR: "the edit-script witinessing it is"
+D 362: GRAMMAR: "the edit-script witinessing it is"
 
-> 363: "is not" -> "are not"
+D 363: "is not" -> "are not"
 
-> 366: GRAMMAR: "an edit distance point of view"
+D 366: GRAMMAR: "an edit distance point of view"
 
-> 368: GRAMMAR: double comma
+D 368: GRAMMAR: double comma
+D 368: ", , i.e." -> ", i.e."
 
-> 368: ", , i.e." -> ", i.e."
-
-> 380: I wouldn't say that diff is a "generalization" of LCS; it's
+D 380: I wouldn't say that diff is a "generalization" of LCS; it's
   essentially the same problem, whether on sequences of characters or
   sequences of strings. I suppose you can reduce LCS to diff, on files
   consisting solely of singleton strings; but reduction is not
   generalization.
 
-> 391: GRAMMAR: "any edit-script based approach"
+D 391: GRAMMAR: "any edit-script based approach"
 
-> 392-398: you may want to mention "dynamic programming" somewhere in
+D 392-398: you may want to mention "dynamic programming" somewhere in
   this paragraph and give the complexity bounds of the classical
   algorithms.
 
-> 401: "being that we must be able to compare this data" -> "is that
+D 401: "being that we must be able to compare this data" -> "is that
   we must be able to compare these data"
 
-> 402: "trees instead of lists". It would be useful to have a somewhat
+D 402: "trees instead of lists". It would be useful to have a somewhat
   formal definition early on about the objects you are interested in.
 
-> 408: What have types to do with trees? This seems a non-sequitur.
+D 408: What have types to do with trees? This seems a non-sequitur.
 
-> 410: "Section 2.1.5" -> "as addressed in Section 2.1.5"
+D 410: "Section 2.1.5" -> "as addressed in Section 2.1.5"
 
-> 416: GRAMMAR: "there exist edit-scripts"
+D 416: GRAMMAR: "there exist edit-scripts"
+D 416: "there exists edit-scripts" -> "there exist edit-scripts"
 
-> 416: "there exists edit-scripts" -> "there exist edit-scripts"
-
-> 418: You could make apply (Ins l : []) [] = Nothing if arity l /= 0,
+D 418: You could make apply (Ins l : []) [] = Nothing if arity l /= 0,
   and more generally guard your use of takeDrop within the Maybe
   monad.
 
-> 419: "to abide by a certain schema". s/by/to/ ?
+Indeed; but there I'm talking about untyped trees and hence we have
+no arities to decide that.
 
-> 421: "wants the ability" -> "needs"
+X 419: "to abide by a certain schema". s/by/to/ ?
 
-> 426: "in a way that". s/a way/such a way/
+D 421: "wants the ability" -> "needs"
 
-> 429: "expects. edit" -> "expects. Edit"
+D 426: "in a way that". s/a way/such a way/
 
-> 429: GRAMMAR: "Edit scripts will then be indexed"
+D 429: "expects. edit" -> "expects. Edit"
+D 429: GRAMMAR: "Edit scripts will then be indexed"
+D 429: "indexes by" -> "indexed by"
+D 429: "will then be indexes". s/indexes/indexed/
 
-> 429: "indexes by" -> "indexed by"
-
-> 429: "will then be indexes". s/indexes/indexed/
-
-> 433: "Although edit-scripts provide a very intuitive notion of local
+D 433: "Although edit-scripts provide a very intuitive notion of local
   transformations over a tree". I don't think we had defined
   'edit-scripts for trees' at this stage. So it's hard to tell it they
   are intuitive or not.
 
-> 434: Give an example of two different edit scripts that perform the
+X 434: Give an example of two different edit scripts that perform the
   same transformation.
 
-> 435: "do no matter" -> "does not matter"
+I have given this example in the previous section and 
+described it: one can shuffle insertions and deletions
+in any way we see fit until a copy occurs.
 
-> 435: GRAMMAR: "does not matter"
+D 435: "do no matter" -> "does not matter"
+D 435: GRAMMAR: "does not matter"
 
-> 436: "notion of tree mapping". Is that standard terminology?
+X 436: "notion of tree mapping". Is that standard terminology?
+
+Yes.
 
 > 444-445: "ancestor". It would be reassuring to have this formally
   defined.

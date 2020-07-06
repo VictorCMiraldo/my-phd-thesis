@@ -1,6 +1,6 @@
   The most popular tool for computing differences
-between two files is the \unixdiff{}~\cite{McIlroy1976},
-it works by comparing files in a \emph{line-by-line} basis and
+between two files is \unixdiff{}~\cite{McIlroy1976},
+which works by comparing files in a \emph{line-by-line} basis and
 attempts to match lines from the source file to lines
 in the destination file. For example, consider the
 two files below:
@@ -40,7 +40,7 @@ the source file into the destination file. For the example above,
 the edit-script would read something like: delete the first line;
 insert two new lines; copy a line; delete a line; insert a line
 and finally copy the last line. The output we would see from
-the \unixdiff{} would show deletions prefixed with a minus sign
+\unixdiff{} would show deletions prefixed with a minus sign
 and insertions prefixed with a plus sign. Copies have no prefix.
 In our case, it would look something like:%
 \begin{alltt}\footnotesize
@@ -66,19 +66,19 @@ This is precisely how most of the classic work on tree edit distance
 computes tree differences (\Cref{sec:background:tree-edit-distance}).
 
   Recycling linear edit distance into tree edit distance, however,
-also comes with its drawbacks. Linear differencing uses \emph{
+comes with its drawbacks. Linear differencing uses \emph{
 edit-scripts} to represent the differences between two objects.  Edit-scripts
 are composed of atomic operations, which traditionally include
-operations such as \emph{insert}, \emph{delete} and \emph{copy}. These
+at least \emph{insert}, \emph{delete} and \emph{copy}. These
 scripts are later interpreted by the application function, which gives
 the semantics to these operations. The notion of \emph{edit distance}
-between two objects is defined as the cost of the least cost
-\emph{edit-script} between them, where cost is some defined metric,
-often context dependent. One major drawback, for example, is the least
+between two objects is defined as the minimum possible cost associated with
+an \emph{edit-script} between them, where cost is some metric which
+is often context dependent. One major drawback, for example, is the least
 cost edit-script is chosen arbitrarily in some situations, namely,
 when it is not unique. This makes the results computed by these
-algorithms hard to predict. Another issue, perhaps even more central,
-are the algorithms that arise from this ambiguity which are inherently slow.
+algorithms hard to predict, and consequently, so is the 
+result of merging patches. 
 
   The algorithms computing edit-scripts must either
 return an approximation of the least cost edit-script or check
@@ -90,19 +90,18 @@ around this last issue by writing edit-scripts in a typed
 form~\cite{Lempsink2009}, but this requires some non-trivial generic
 programming techniques to scale.
 
-  The second half of this chapter is the
-state-of-the-art of the generic programming ecosystem in Haskell. Including
-the \texttt{GHC.Generics} and \texttt{generics-sop}
-libraries, which introduce all the necessary parts for us to build
-our own solutions later, in \Cref{chap:generic-programming}.
+  The first half of this chapter introduces some of the classical
+\emph{edit-script} based algorithms whereas the second half of presents the
+state-of-the-art of the generic programming ecosystem in Haskell. 
 
 \section{Differencing and Edit Distance}
 \label{sec:background:tree-edit-dist}
 
   The \emph{edit distance} between two objects is
-defined as the cost of the least-cost edit-script that transforms
-the source object into the target object -- that is,
-the edit-script with the least insertions and deletions.
+defined as the least possible cost of an edit-script that transforms
+the source object into the target object -- in its simplest form,
+it can be seen as the cost of the edit-script with the 
+least insertions and deletions.
 Computing edit-scripts is often referred to as \emph{differencing} objects.
 Where edit distance computation is only concerned with how
 \emph{similar} one object is to another, \emph{differencing},
@@ -123,15 +122,15 @@ edit distance (\Cref{sec:background:string-edit-distance}) and then
 generalize this to untyped trees (\Cref{sec:background:tree-edit-distance}),
 as it is classically portrayed in the literature, which
 is reviewed in \Cref{sec:background:literature-review}.
-Finally, we discuss some of the consequences of working with
-typed trees in \Cref{sec:gp:well-typed-tree-diff}.
+% Finally, we discuss some of the consequences of working with
+% typed trees in \Cref{sec:gp:well-typed-tree-diff}.
 
 \subsection{String Edit Distance and \unixdiff{}}
 \label{sec:background:string-edit-distance}
 
    In this section we look at two popular notions of edit distance.  The
 \emph{Levenshtein Distance}~\cite{Levenshtein1966,Bergroth2000}, for
-example, works well for detecting spelling mistakes\cite{Navarro2001}
+example, works well for detecting spelling mistakes \cite{Navarro2001}
 or measuring how similar two languages are \cite{Thije2007}.
 It considers insertions, deletions and substitutions of
 characters as its edit operations. The \emph{Longest Common
@@ -143,7 +142,7 @@ suited for identifying shared sequences between strings.
 The Levenshtein distance regards insertions, deletions and
 substitutions of characters as edit operations, which can
 be modeled in Haskell by the |EditOp| datatype below. Each of those
-operations have a predefined \emph{cost} metric.
+operations has a predefined \emph{cost} metric.
 
 \begin{myhs}
 \begin{code}
@@ -168,8 +167,11 @@ apply []                  []         = Just []
 apply (Ins c      : ops)        ss   = (c :) <$$> apply ops ss
 apply (Del c      : ops)  (s :  ss)  = guard (c == s) >> apply ops ss
 apply (Subst c d  : ops)  (s :  ss)  = guard (c == s) >> (d :) <$$> apply ops ss
+apply _                   _          = Nothing
 \end{code}
 \end{myhs}
+
+  
 
   The |cost| metric associated with these edit operations is defined
 to force substitutions to cost less than insertions and deletions.
@@ -179,10 +181,8 @@ and insertions.
 
   We can compute the \emph{edit-script}, i.e. a
 list of edit operations, with the minimum cost quite easily with a
-brute-force and inefficient implementation.
-\Cref{fig:background:string-leveshtein} shows the
-implementation of the edit-script with the minimum Levenshtein
-distance.
+brute-force and inefficient specification, illustrated in 
+\Cref{fig:background:string-leveshtein}. 
 
 \begin{figure}
 \begin{myhs}
@@ -209,7 +209,7 @@ levenshteinDist s d = cost (head (lev s d))
 \end{code}
 \end{myhs}
 
-  Note that although the Levenshtein distance is unique, the edit-scripts
+  Note that although the Levenshtein distance is unique, the edit-script
 witnessing it is \emph{not}. Consider the case of |lev "ab" "ba"|
 for instance. All of the edit-scripts below have cost 2, which is the
 minimum possible cost.
@@ -222,10 +222,10 @@ lev "ab" "ba" `elem` [ [ Del 'a' , Subst 'b' 'b' , Ins 'a']
 \end{code}
 \end{myhs}
 
-  From a edit distance point of view, there is not an issue. The Levenshtein
+  From an edit distance point of view, this is not an issue. The Levenshtein
 distance between |"ab"| and |"ba"| is 2, regardless of the edit-script.
-But from an operational point of view,
-, \ie, transforming one string into another, this ambiguity
+But from an operational point of view, \ie, transforming one string 
+into another, this ambiguity
 poses a problem. The lack of criteria to favor one edit-script over another
 means that the result of the differencing algorithm is hard to predict.
 Consequently, developing a predictable diff and merging algorithm
@@ -244,10 +244,9 @@ we end up with a function that computes the classic longest common
 subsequence. Note that this is different from the longest common
 substring problem, as subsequences need not be contiguous.
 
-  \unixdiff{}~\cite{McIlroy1976} performs a slight generalization
-of the LCS problem by considering the distance between two
-\emph{files}, seen as a list of \emph{strings}, opposed to a list of
-\emph{characters}. Hence, the edit operations become:
+  \unixdiff{}~\cite{McIlroy1976} is computes a solution to the
+LCS problem between two \emph{files}, seen as a list of \emph{strings}, 
+opposed to a list of \emph{characters}. Hence, the edit operations become:
 
 \begin{myhs}
 \begin{code}
@@ -288,39 +287,51 @@ common subsequence of |x| and |y|. Note that the ambiguity problem is
 still present, however to a lesser degree than with
 the Levenshtein distance. For example, there are only two edit-scripts
 with minimum cost on |lcs ["a", "b"] ["b" , "a"]|. This, in fact,
-is a general problem with any \emph{edit-script} based approaches.
+is a general problem with any \emph{edit-script} based approach.
 
-  The \unixdiff{} implementation uses a number of
-algorithmic techniques that make it performant. First, it is
-essential to use a memoized |lcs| function to avoid recomputing
-sub-problems. It is also common to hash the data being compared to have
-amortized constant time comparison. More complicated, however, is the
-adoption of a number of heuristics that tend to perform well in practice.
-One example is the \texttt{diff --patience} algorithm~\cite{patienceDiff},
+  We can implementing the |lcs| function efficiently using
+dynamic programming techniques
+
+  The original \unixdiff{} implementation was based on Hirschberg's
+dynamic algorithm~\cite{Hirschberg1975}, which uses a memoized |lcs|
+to avoid recomputing sub-problems and has a quadratic runtime. The
+current implementation is based on Myers algorihm~\cite{Myers1986} and
+runs in $\mathcal{O}(d(n+m))$, where $n$ and $m$ are the size of the
+input files and $d$ is the edit distance between them. Actual
+implementations also employs a number of algorithmic tricks to make it
+more performant, for instance, it is common to hash the data being
+compared to have amortized constant time comparison.  There is also a
+number of heuristics that tend to perform well in practice.  One
+example is the \texttt{diff --patience} algorithm~\cite{patienceDiff},
 that will emphasize the matching of lines that appear only once in the
 source and destination files.
 
 \subsection{Classic Tree Edit Distance}
 \label{sec:background:tree-edit-distance}
 
-  \unixdiff{} can be generalized to compute an edit-script
-between lists containing data of arbitrary types.
-The only requirement being that we must be able to
-compare this data for equality. Generalizing over the shape of the data
--- trees instead of lists -- gives rise to the notion of (untyped) tree edit
-distance~\cite{Akutsu2010,Demaine2007,Klein1998,%
-Bille2005,Autexier2015,Chawathe1997}.
-It considers \emph{arbitrary} trees as the objects under
-scrutiny. This added degree of freedom carries over to the choice of
-edit operations. Suddenly, there are more edit operations one
-could use to create edit-scripts. To name a few, we can have
-flattening insertions and deletions, where the children of the deleted
-node are inserted or removed in-place in the parent node. Another
-operation that only exists in the untyped world is node relabeling.
-This degree of variation is responsible for the high
-number of different approaches and techniques we see in
+  Tree edit-distance is a generalization of the (linear)
+edit-distance problem. Instead of computing a distance between
+two lists of values, we are interested in a distance between
+two \emph{trees} of values. The classical algorithms~\cite{Akutsu2010,%
+Demaine2007,Klein1998,Bille2005,Autexier2015,Chawathe1997} consider
+\emph{untyped} trees -- directed acyclic graphs where each vertex
+has at most one parent -- as the objects under scrutiny. We call
+them \emph{untyped} in the sense that they do not abide by any schema: nodes
+can have a label and an arbitrary number of children, opposed to
+a \emph{typed} tree which must abide by a given schema, i.e., it can 
+be seen as a value of a family of ADTs in Haskell, where the
+type signatures provide the schema.
+
+  There is an added degree of freedom that comes from considering
+trees instead of lists, and this carries over to the choice of edit
+operations. Suddenly, there are more edit operations one could use to
+create edit-scripts. To name a few, we can have flattening insertions
+and deletions, where the children of the deleted node are inserted or
+removed in-place in the parent node, or node relabeling. This degree
+of variation is responsible for the high number of different
+approaches and techniques we see in
 practice~\cite{Farinier2015,Hashimoto2008,Falleri2014,Paassen2018,Finis2013},
-\Cref{sec:background:literature-review}.
+as addressed in \Cref{sec:background:literature-review}.
 
 \begin{figure}
 \centering
@@ -385,14 +396,16 @@ apply (Ins l  : ops) ts
 \label{fig:background:apply-tree-edit}
 \end{figure}
 
-  We label these approaches as \emph{untyped} because there exists edit-scripts
+  We label these approaches as \emph{untyped} because there exist edit-scripts
 that yield non-well formed trees. For example, imagine |l| is
 a label with arity 2 -- supposed to receive two
 arguments. Now consider the edit-script |Ins l : []|, which will yield
 the tree |Node l []| once applied to the empty forest. If the objects
 under differencing are required to abide by a certain schema, such as
-abstract syntax trees for example, this becomes an issue.  This is
-particularly important when one wants the ability to manipulate
+abstract syntax trees for example, this becomes an issue. Granted
+we could define |apply| to take arities into account, this is not the
+case for the classical algorithms in the literature. This issue becomes
+particularly relevant when one needs to manipulate
 patches independently of the objects they have been created from.
 Imagine a merge function that needs to construct a patch
 based on two other patches. A wrong implementation of said merge function
@@ -400,27 +413,28 @@ can yield invalid trees for some given schema. In the context of
 abstract-syntax, this could be unparseable programs.
 
   It is possible to use the Haskell type system to our advantage and
-write |EOp| in a way that it is guaranteed to return well-typed
+write |EOp| in such a way that it is guaranteed to return well-typed
 results. Labels will be the different constructors of the family of
 types in question and their arity comes from how many fields each
-constructor expects. edit-scripts will then be indexes by two lists of
+constructor expects. Edit-scripts will then be indexed by two lists of
 types: the types of the trees it consumes and the types of the trees
 it produces. We will come back to this in more detail in
 \Cref{sec:gp:well-typed-tree-diff}, where we review the approach of
 Lempsink and L\"{o}h~\cite{Lempsink2009} at adapting this untyped framework
 to be type-safe by construction.
 
-  Although edit-scripts provide a very intuitive notion of local
-transformations over a tree, there are many different edit-scripts
-that perform the same transformation: the order of
-insertions and deletions do no matter. This makes it hard to
-develop algorithms based solely on edit-scripts.
-The notion of \emph{tree mapping} often comes in handy. It works as
-a \emph{normal form} version of edit-scripts and represents only the
-nodes that are either relabeled or copied. We must impose a series of
-restrictions on these mappings to maintain the ability to
-produce edit-scripts out of it. \Cref{fig:background:tree-mapping}
-illustrates four invalid and one valid such mappings.
+  Although edit-scripts (\Cref{fig:background:apply-tree-edit})
+provide a very intuitive notion of local transformations over a tree,
+there are many different edit-scripts that perform the same
+transformation: the order of insertions and deletions does not
+matter. This makes it hard to develop algorithms based solely on
+edit-scripts.  The notion of \emph{tree mapping} often comes in
+handy. It works as a \emph{normal form} version of edit-scripts and
+represents only the nodes that are either relabeled or copied. We must
+impose a series of restrictions on these mappings to maintain the
+ability to produce edit-scripts out of
+it. \Cref{fig:background:tree-mapping} illustrates four invalid and
+one valid such mappings.
 
 \begin{definition}[Tree Mapping] \label{def:background:tree-mapping}
 Let |t| and |u| be two trees, a tree mapping
