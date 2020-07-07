@@ -216,9 +216,9 @@ minimum possible cost.
 
 \begin{myhs}
 \begin{code}
-lev "ab" "ba" `elem` [ [ Del 'a' , Subst 'b' 'b' , Ins 'a']
-                     , [ Ins 'b' , Subst 'a' 'a' , Del 'b']
-                     , [ Subst 'a' 'b' , Subst 'b' 'a' ]]
+lev "ab" "ba" `elem`  [  [ Del 'a' , Subst 'b' 'b' , Ins 'a']
+                      ,  [ Ins 'b' , Subst 'a' 'a' , Del 'b']
+                      ,  [ Subst 'a' 'b' , Subst 'b' 'a' ]]
 \end{code}
 \end{myhs}
 
@@ -250,12 +250,12 @@ opposed to a list of \emph{characters}. Hence, the edit operations become:
 
 \begin{myhs}
 \begin{code}
-data EditOp = Ins String | Del String | Cpy
+data EditOp = Ins String | Del String | Cpy String
 
 cost :: EditOp -> Int
 cost (Ins _)  = 1
 cost (Del _)  = 1
-cost Cpy      = 0
+cost (Cpy _)  = 0
 \end{code}
 \end{myhs}
 
@@ -273,7 +273,7 @@ lcs (x:xs)  []      = Del x : lcs xs []
 lcs []      (y:ys)  = Ins y : lcs [] ys
 lcs (x:xs)  (y:ys)  =  let  i  = Ins y      : lcs (x:  xs)      ys
                             d  = Del x      : lcs      xs  (y:  ys)
-                            s  = if x == y then [Cpy : lcs xs ys] else []
+                            s  = if x == y then [Cpy x : lcs xs ys] else []
                        in minimumBy cost (s ++ [i , d])
 \end{code}
 \end{myhs}
@@ -363,7 +363,7 @@ as addressed in \Cref{sec:background:literature-review}.
           ($ (f1.east) - (0,0.15) $);
 \end{tikzpicture}
 \caption{Insertion and Deletion of node |x|, with arity 2
-on a forest}
+on a forest.}
 \label{fig:background:tree-es-operations}
 \end{figure}
 
@@ -379,20 +379,20 @@ on forests is shown in \Cref{fig:background:apply-tree-edit}.
 \begin{figure}
 \begin{myhs}
 \begin{code}
-data EOp  = Ins Label | Del Label | Cpy
+data EOp  = Ins Label | Del Label | Cpy Label
 data Tree = Node Label [Tree]
 
 arity :: Label -> Int
 
 apply :: [EOp] -> [Tree] -> Maybe [Tree]
 apply []                           []   = Just []
-apply (Cpy    : ops)               ts   = apply (Ins l : Del l : ops) ts
-apply (Del l  : ops) (Node l' xs:  ts)  = guard (l == l') >> apply ops (xs ++ ts)
+apply (Cpy l  : ops)                ts   = apply (Ins l : Del l : ops) ts
+apply (Del l  : ops) (Node l'  xs:  ts)  = guard (l == l') >> apply ops (xs ++ ts)
 apply (Ins l  : ops) ts
   = (\(args , rs) -> Node l args : rs) . takeDrop (arity l) <$$> apply ops ts
 \end{code}
 \end{myhs}
-\caption{Definition of |apply| for tree edit operations}
+\caption{Definition of |apply| for tree edit operations.}
 \label{fig:background:apply-tree-edit}
 \end{figure}
 
@@ -526,7 +526,7 @@ decisions on how to produce a mapping and often the domain of application
 of the tool will enable one to impose extra restrictions to attempt to squeeze
 maximum performance out of the algorithm. The \texttt{LaDiff}~\cite{Chawathe1996} tool,
 for example, works for hierarchically structured trees -- used primarily for
-\LaTeX source files -- and uses a variant of the LCS to compute matchings of elements
+\LaTeX{} source files -- and uses a variant of the LCS to compute matchings of elements
 appearing in the same order, starting at the leaves of the document.
 Tools such as \texttt{XyDiff}~\cite{Marian2002}, used to identify changes in XML documents,
 use hashes to produce matchings efficiently.
@@ -548,24 +548,25 @@ Consider the tree-edit-scripts between the following two trees:
 \end{center}
 
   From an \emph{edit distance} point of view, their distance is
-2. This fact can be witnessed by two distinct edit-scripts: either
-|[Cpy Bin , Del T , Cpy U , Ins T]| or |[Cpy Bin , Ins U , Cpy T , Del
-U]| transform the target into the destination correctly. Yet, from
-a \emph{differencing} point of view, these two edit-scripts are fairly different.
-Do we care more about |U| or |T|? What if |U| and |T| are also
-trees, but happen to have the same size (so that inserting one or the
-other yields edit-scripts with equal costs)? Ultimately,
-differencing algorithms that support no \emph{swap} operation
-must choose to copy |T| or |U| arbitrarily. This decision is often
-guided by heuristics, which makes the result of different algorithms
-hard to predict. Moreover, the existence of this type of choice point inherently
-slows algorithms down since the algorithm \emph{must decide} which
-tree to copy.
+2. This fact can be witnessed by two (propositionally) different
+edit-scripts: both |[Cpy Bin , Del T , Cpy U , Ins T]| and |[Cpy Bin
+, Ins U , Cpy T , Del U]| transform the target into the destination
+correctly. Yet, from a \emph{differencing} point of view, these two
+edit-scripts are distinct.  Do we care more about |U| or |T|?
+What if |U| and |T| are also trees, but happen to have the same size
+(so that inserting one or the other yields edit-scripts with equal
+costs)? Ultimately, differencing algorithms that support no
+\emph{swap} operation must choose to copy |T| or |U| arbitrarily. This
+decision is often guided by heuristics, which makes the result of
+different algorithms hard to predict and reason about. 
+Moreover, the existence of this
+type of choice point inherently slows algorithms down since the
+algorithm \emph{must decide} which tree to copy.
 
   Another issue when dealing with edit-script is
 that they are type unsafe. It is quite easy to write an edit-script
-that produces an \emph{ill-formed} tree, according to some
-arbitrary schema. Even when writing the edit operations in a
+that produces an \emph{ill-formed} tree, regardless of the schema.
+Even when writing the edit operations in a
 type-safe way~\cite{Lempsink2009} the synchronization of said changes
 is not guaranteed to be type-safe~\cite{Vassena2016}.
 
@@ -580,12 +581,18 @@ from the \emph{differencing} point of view. Consider the trees below,
 \end{forest}
 \end{center}
 
-  Optimal edit-scripts oblige us to chose between copying |A|
-as the left or the right subtree. There is no possibility to represent
+  Optimal edit-scripts oblige us to chose between copying |A| as the
+left or the right subtree. There is no possibility to represent
 duplications, permutations or contractions of subtrees. This means
 that a number of common changes, such as refactorings, yield
-edit-scripts with a very high cost even though a good part of the information
-being deleted or inserted should really have been copied.
+edit-scripts with a very high cost even though a good part of the
+information being deleted or inserted should really have been
+copied. Even though there exists other edit-distances that support
+more edit operations, they are not very useful when adapted to
+trees. Take the Damerau-Leveshtein distance~\cite{Damerau1964}, which
+allows for the transposition of adjacent characters in a string, when
+instantiated to trees it would only allow for the transposition of labels
+that are adjacent in the preorder traversal of the tree.
 
 \subsection{Synchronizing Changes}
 \label{sec:background:synchronizing-changes}
@@ -595,7 +602,7 @@ version control systems, one is inevitably faced with the problem of
 \emph{synchronizing}~\cite{Balasubramaniam1998} or \emph{merging}
 changes -- when an offline machine goes online with new versions,
 when two changes happened simultaneously, etc. The \emph{synchronizer}
-is responsible to identify what has changed and reconcile these
+is responsible for identify what has changed and reconcile these
 changes when possible.  Most modern synchronizers operate over the
 diverging replicas and last common version, without knowledge of the
 history of the last common version -- these are often denoted
@@ -604,7 +611,7 @@ synchronizers, which access the whole history of modifications.
 
    The \texttt{diff3}~\cite{Smith1988} tool, for example, is the
 most widely used synchronizer for textual data.
-It is a \emph{state-based} that calls the \unixdiff{} to compute
+It is a \emph{state-based} synchronizer that calls the \unixdiff{} to compute
 the differences between the common ancestor and each diverging replica,
 then tries to produce an edit-script that when applied to the common
 ancestor produces a new file, containing the union of changes introduced
@@ -641,13 +648,13 @@ that act directly on the images of $p$ and $q$,
 \Cref{fig:background:mergesquare-resid}.  We often call the former
 a \emph{three-way merge} and the later a \emph{residual} merge.
 
-  Residual merges, specially if based on actual residual
-systems~\cite{Terese2003} pose a few technical challenges --- proving
-the that the laws required for establishing an actual residual system
-is non-trivial. Moreover, they tend to be harder to generalize
-to $n$-ary inputs. They do have the advantage of enabling one to
-model merges as pushouts~\cite{Mimram2013}, which could provide a desirable
-metatheoretical foundation.
+  Residual merges can pose a few technical challenges. For one, if we
+want the merge to form a (term rewritting) residual
+system~\cite{Terese2003} we must prove a number of non-trivial
+properties.  Secondly, they tend to be harder to generalize to $n$-ary
+inputs. They do have the advantage of enabling one to model merges as
+pushouts~\cite{Mimram2013}, which could provide a desirable
+metatheoretical foundation on Category Theory.
 
 \begin{figure}
 \footnotesize \centering
@@ -675,10 +682,10 @@ metatheoretical foundation.
 \begin{minipage}[t]{\textwidth}
 \begin{verbatim}
   res := 0;
-  sum := 0;
+  prod := 1;
   for (i in is) {
     res := res + i;
-    sum := sum + i;
+    prod := prod * i;
   }
 \end{verbatim}
 \end{minipage}}
@@ -768,14 +775,14 @@ b & 1 & 4,5 & 2 & 4,5,3 & 6 \\
 
   \Cref{fig:background:example-diff3} illustrates a run of \texttt{diff3}
 in a simple example, borrowed from Khanna et al.~\cite{Khanna2007}, where
-Alice swaps $2,3$ for $4,5$ in the original file but Bob moves $3$ before $6$.
+|a| swaps $2,3$ for $4,5$ in the original file but |b| moves $3$ before $6$.
 In a very simplified way, the first thing that happens if we run \texttt{diff3} in the inputs
 (\Cref{fig:background:example-diff3:inputs}) is that \texttt{diff3}
-will compute the longest common subsequences between the objects, essentialy
+will compute the longest common subsequences between the objects, essentially
 yielding the alignments it needs (\Cref{fig:background:example-diff3:align}).
 The next step is to put the copies side by side and understand which regions
 are \emph{stable} or \emph{unstable}. The stable regions are those where
-no replicas changed. In our case, its on $1$, $2$ and $6$ (\Cref{fig:background:example-diff3:parse}).
+no replicas changed. In our case, it is on $1$, $2$ and $6$ (\Cref{fig:background:example-diff3:parse}).
 Finally, \texttt{diff3} can decide which changes to propagate and which
 changes are a conflict. In our case, the $4,5$ was only changed in one replica,
 so it is safe to propagate (\Cref{fig:background:example-diff3:propagate}).
@@ -783,24 +790,27 @@ so it is safe to propagate (\Cref{fig:background:example-diff3:propagate}).
   Different synchronization algorithms will naturally offer
 slightly different properties, yet, one that seems to be central to
 synchronization is locality~\cite{Khanna2007} -- which is enjoyed by
-\texttt{diff3}~\cite{Khanna2007}.  Locality states that changes to
-distinct locations of a given object can always be synchronized
+\texttt{diff3}.  Locality states that well-separated changes 
+of a given object can always be synchronized
 without conflicts. In fact, we argue this is the only property we can
 expect out of a general purpose generic synchronizer.  The reason
 being that said synchronizer can rely solely on propositional
 equality of trees and structural disjointness as the criteria to
-estabilish changes as synchronizable.  Other criteria will invariantly
+estabilish changes as synchronizable.  Any other criteria would
 require knowledge of the semantics of the data under
-synchronization. It is worth noting that although ``distinct locations''
-is difficult to define for an underlying list, tree shaped data has
-the advantage of possessing simpler such notions.
+synchronization. It is worth noting that although ``well-separated changes''
+is difficult to define for an underlying list~\cite{Khanna2007}, 
+tree shaped data has the advantage of possessing simpler such 
+notions. We often refer to well-separated changes as \emph{disjoint}
+changes.
 
 \subsection{Literature Review}
 \label{sec:background:literature-review}
 
   With some basic knowledge of differencing and edit-distances under
 our belt, we briefly look over some of the relevant literature on the
-topic. Zhang and Sasha~\cite{Zhang1989} where perhaps the first to
+topic of tree differencing. Zhang and Sasha~\cite{Zhang1989} were perhaps 
+the first to
 provide a number of algorithms which were later improved on by Klein
 et al.~\cite{Klein1998} and Dulucq et al.~\cite{Dulucq2003}. Finally,
 Demaine et al.~\cite{Demaine2007} presents an algorithm of cubic
@@ -833,7 +843,7 @@ influences the complexity of the |diff| algorithm. Allowing a
 \emph{move} operation already renders string differencing
 NP-complete~\cite{Shapira2002}. Tree differencing algorithms,
 therefore, tend to run approximations of the best edit distance. Most
-of then still suffer from at least quadratic time complexity, which is
+of them still suffer from at least quadratic time complexity, which is
 prohibitive for most pratical applications or are defined for domain
 specific data, such as the \texttt{latexdiff}~\cite{LatexDiff} tool.
 A number of algorithms specific for XML and imposing different
@@ -841,16 +851,16 @@ requirements on the schemas have been developped~\cite{Peters2005}.
 \texttt{LaDiff}~\cite{Chawathe1996}, for example, imposes restrictions on the
 hierarchy between labels, it is implemented into the
 \texttt{DiffXML}~\cite{Mouat2002} and
-\texttt{GumTree}~\cite{Falleri2014} tools and is responsible
-from deducing an edit-script given tree matchings, the tree matching
-phase differs in each tool. A notable mention is the
+\texttt{GumTree}~\cite{Falleri2014} tools. \texttt{LaDiff} is responsible
+for computing an edit-script given tree matchings.
+A notable mention is the
 \texttt{XyDiff}~\cite{Marian2002}, which uses hashes to compute
 matchings and, therefore, supports \emph{move} operations maintaining
-almost linear complexity.  This is perhaps the closest to our approach
+almost linear complexity.  This is the closest to our approach
 in \Cref{chap:pattern-expression-patches}. The
 \texttt{RWS-Diff}~\cite{Finis2013} uses approximate matchings by
 finding trees that are not necessarily equal but \emph{similar}. This
-yields a robust algorithm, which is applicable in practice.
+yields a robust algorithm, which is practical.
 Most of these techniques recycle list differencing and can be seen
 as some form of string differencing over the preorder (or postorder)
 traversal of trees, which has quadratic upper bound~\cite{Guha2002}.
@@ -875,7 +885,7 @@ representation.
 
    Also worth mentioning is the generalization of \texttt{diff3} to
 tree structured data using well-typed approaches due to
-Vassena~\cite{Vassena2016}, which shows that typed edit-scripts might
+Vassena~\cite{Vassena2016}, which supports that typed edit-scripts might
 not be the best underlying framework for this, as one needs to
 manually type-check the resulting edit-scripts.
 
@@ -892,17 +902,16 @@ of $P_0, \cdots, P_n$. Refactoring and Rewritting Tools
 tools define each supported language AST
 separately~\cite{Bravenboer2008,Klint2009}, whereas others
 \cite{Tonder2019} support a universal approach similar to
-\emph{S-expressions}. They identify only parenthesis, braces and
+\emph{S-expressions}. They identify only parentheses, braces and
 brackets and hence, can be applied to a plethora of programming
 languages out-of-the-box.
 
-\pagebreak
 \section{Generic Programming}
 \label{sec:background:generic-programming}
 
   We would like to consider richer datatypes than \emph{lines-of-text},
 without having to define separate |diff| functions for each of them.
-\emph{(Datatype-)generic programming}
+\emph{Datatype-generic programming}
 provides a mechanism for writing functions by induction on
 the \emph{structure} of algebraic datatypes~\cite{Gibbons2006}.
 A widely used example is the |deriving| mechanism in Haskell, which
@@ -916,14 +925,14 @@ of datatypes can be described in a uniform fashion.  Hence, if a
 programmer were to write programs that work over this uniform
 representation, these programs would immediately work over a variety
 of datatypes. In this section we look into two modern approaches
-to generic programming which are widely used, then discus their
+to generic programming which are widely used, then discuss their
 design space and drawbacks.
 
 \subsection{GHC Generics}
 \label{sec:background:patternfunctors}
 
   The \texttt{GHC.Generics}~\cite{Magalhaes2010} library, which
-comes bundled with GHC since version $7.2$ and
+comes bundled with GHC since version $7.2$,
 defines the representation of datatypes in terms of uniform
 \emph{pattern functors}. Consider the following datatype of binary trees
 with data stored in their leaves:
@@ -940,7 +949,7 @@ constructors.  For the first choice, it also contains a value of type
 means that the |Bin a| type is isomorphic to |Either a (Bin a , Bin
 a)|. Different libraries differ on how they define their underlying
 representations. The representation of |Bin a| in
-terms of \emph{pattern functors} is writen as:
+terms of \emph{pattern functors} is written as:
 
 \begin{myhs}
 \begin{code}
@@ -953,7 +962,7 @@ of |Either a (Bin a , Bin a)|, but using
 the combinators provided by \texttt{GHC.Generics}.
 In addition, we also have two conversion functions |from :: a ->
 Rep a| and |to :: Rep a -> a| which form an isomorphism between |Bin
-a| and |Rep (Bin a)|.  The interface ties everything unser
+a| and |Rep (Bin a)|.  The interface ties everything under
 a typeclass:
 
 \begin{myhs}
@@ -1056,7 +1065,7 @@ sizes of the fields inside a value, ignoring the constructor.
 
   Unlike \texttt{GHC.Generics}, the representation of values is
 defined by induction on the \emph{code} of a datatype, this
-\emph{code} is a type-level list of lists of kind |Star|, whose
+code being a type-level list of lists of kind |Star|, whose
 semantics is consonant to a formula in disjunctive normal form.  The
 outer list is interpreted as a sum and each of the inner lists as a
 product.  This section provides an overview of \texttt{generic-sop} as
@@ -1188,15 +1197,19 @@ by enforcing this structure.
   There are still downsides to this approach. A notable
 one is the need to carry constraints around: the actual |gsize|
 written with the \texttt{generics-sop} library and no sugar
-reads as follows.
+is shown in \Cref{fig:background:generics-sop:gsize}.
 
-\begin{myhs}
+\begin{figure}
+\begin{myhsFig}
 \begin{code}
 gsize :: (GenericSOP a , All2 Size (CodeSOP a)) => a -> Int
 gsize  =  sum  .  hcollapse
        .  hcmap (Proxy :: Proxy Size) (mapIK size) .  fromSOP
 \end{code}
-\end{myhs}
+\end{myhsFig}
+\caption{Definition of |gsize| in the \texttt{generics-sop} style.}
+\label{fig:background:generics-sop:gsize}
+\end{figure}
 
   Where |hcollapse| and |hcmap| are analogous to the |elim| and |map|
 combinators defined above. The |All2 Size (CodeSOP a)| constraint
@@ -1217,8 +1230,8 @@ in \Cref{chap:generic-programming}.
   Most other generic programming libraries follow a similar pattern of
 defining the \emph{description} of a datatype in the provided uniform
 language by some type-level information, and two functions witnessing
-an isomorphism. The most important feature of such library is how this
-description is encoded and which are the primitive operations for
+an isomorphism. The most important feature of such a library is how this
+description is encoded and which primitive operations are used for
 constructing such encodings. Some libraries,
 mainly deriving from the \texttt{SYB}
 approach~\cite{Lammel2003,Mitchell2007}, use the |Data| and |Typeable|
@@ -1292,7 +1305,7 @@ type is atomic and should not be expanded further; (2) \emph{products}
 constructors. The |Rep (Bin a)| shown before is expressed in this
 form. Note, however, that there is no restriction on \emph{how} these
 can be combined. These combinators are usually referred to as
-\emph{pattern functors} The \emph{pattern
+\emph{pattern functors}. The \emph{pattern
 functor}-based libraries are too permissive though, for instance, |K1
 R Int :*: Maybe| is a perfectly valid \texttt{GHC.Generics}
 \emph{pattern functor} but will break generic functions, i.e., |Maybe|
@@ -1315,8 +1328,8 @@ CodeSOP (Bin a) = P [ P [a], P [Bin a, Bin a] ]
 Haskell datatypes, and make it easier to implement generic
 functionality.
 
-  Note how the \emph{codes} are different than the
-\emph{representation}.  The latter being defined by induction on the
+  Note how the \emph{codes} are different from the the
+\emph{representation}, the latter being defined by induction on the
 former.  This is quite a subtle point and it is common to see both
 terms being used interchangeably.  Here, the \emph{representation} is
 mapping the \emph{codes}, of kind |P [ P [ Star ] ]|, into |Star|. The

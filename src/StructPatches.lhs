@@ -95,7 +95,8 @@ insertions and deletions around the tree are represented with |StCpy|,
 saw previously, using the shape of the datatype in question to
 define a structured notion of patch. As we will see in the remainder
 of this chapter, however, \emph{computing} these patches is
-intractable. This lead us to abandon this approach in favor of the
+intractable as the number of possible patches explodes. This lead 
+us to abandon this approach in favor of the
 differencing algorithm presented in \Cref{chap:pattern-expression-patches}.
 Nonetheless, we believe there is value in studying this approach.
 For one it explores a different part in the design space compared to the \texttt{gdiff}
@@ -114,8 +115,7 @@ seen in \Cref{sec:gp:well-typed-tree-diff}.
 
   The contributions in this chapter arise from joint work
 with Pierre-Evariste Dagand, published in TyDe 2017~\cite{Miraldo2017} and
-coded in Agda~\cite{Norell2008}\href{https://github.com/VictorCMiraldo/stdiff}{Agda
-repository}%
+coded in Agda~\cite{Norell2008}\href{https://github.com/VictorCMiraldo/stdiff}{repository}%
 \footnote{https://github.com/VictorCMiraldo/stdiff}.
 Later, we collaborated closely with a MSc student, Arian van Putten, in translating
 the Agda code to Haskell, extending its scope to mutually recursive

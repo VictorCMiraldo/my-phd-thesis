@@ -1,20 +1,26 @@
-> Fig.2.5.(A) "order preserving" is bizarre since we have not quite
+D Fig.2.5.(A) "order preserving" is bizarre since we have not quite
   defined an order.
 
-> Fig.2.5.(D) s/f/d/ and s/g/e/, no?
+We have an order. the def reads "order preserving partial 
+bijection between the nodes of a flattened representation
+of t and u according to their preorder traversal"
 
-> Figure 2.3 - caption does not end with full stop, unlike Figure 2.5
+D Fig.2.5.(D) s/f/d/ and s/g/e/, no?
+
+No
+
+**> Figure 2.3 - caption does not end with full stop, unlike Figure 2.5
   and many others. Check all captions in this respect.
 
-> Figure 2.4 - I think the first clause should be "apply [] ts = ts";
+D Figure 2.4 - I think the first clause should be "apply [] ts = ts";
   where does the "l" come from in the clause below?
 
-> Figure 2.4: 'Tree' should perhaps explicitly be called
+**> Figure 2.4: 'Tree' should perhaps explicitly be called
   'RoseTree'. Also, much of the talk around here is about the fact
   that the representation is somewhat "untyped". The story would be
   much more natural if you were dealing with S-exp.
 
-> Figure 2.7 - is "diff O B" what is shown in (E)? "sum := 0"
+D Figure 2.7 - is "diff O B" what is shown in (E)? "sum := 0"
   (resp. "sum := sum + i") is added, not "prod := 1" (resp. "prod :=
   prod * i"). Main text to be checked too (page 17).
 
@@ -26,19 +32,24 @@
 
 > Figure 6.3(F) - "; The" -> ". The"
 
-> Section 2.1.3: it seems to me that all these problems already
+**> Section 2.1.3: it seems to me that all these problems already
   existed on text-based diffs. It seems that the message is that
   having more structure to work with (as input to the problem) lead us
   to try and preserve them further down the line. This is the key
   difference with line-based diffs, which is not so worries about
   losing structure it didn't have in the first place.
 
-> Section 3.1.2.2. Why call these 'combinators', isn't it just the
+D Section 3.1.2.2. Why call these 'combinators', isn't it just the
   algebra of functors and their fixpoint?
 
-> Section 3.3. It's a bit weird to present one library and then
+It is standard to call them combinators.
+
+D Section 3.3. It's a bit weird to present one library and then
   another to workaround a bug while not giving a take-away comparison
   between the two.
+
+Added one paragraph; but the biggest take-away is that one works and
+the other doesn't (because of the GHC bug), I guess.
 
 > Section 4. That section was not a pleasant read: it's a shitload of
   (literate) programs!
@@ -264,201 +275,200 @@ D 449-451: case (i) describes, respectively, Fig.2.5(B) and Fig.2.5(C)
 D 455: Fig 2.5 has wrong labels: (B) shows a non-functional mapping,
   and (C) a non-injective one.
 
-> 458: GRAMMAR: missing space
+D 458: GRAMMAR: missing space
 
-> 469: "two distinct edit-scripts". This language has not been defined
+**> 469: "two distinct edit-scripts". This language has not been defined
   before.
 
-> 476: "hard to predict". Same remark as before.
+I don't understand this remark
 
-> 479: "according to some arbitrary schema". Phrasing could be
+**> 476: "hard to predict". Same remark as before.
+
+D 479: "according to some arbitrary schema". Phrasing could be
   improved: there is a schema that says "anything goes in"
 
-> 482-484: "lack of expressivity". This is not specific to trees.
-
-> 485: Edit scripts only lack expressivity because you have provided
+D 482-484: "lack of expressivity". This is not specific to trees.
+D 485: Edit scripts only lack expressivity because you have provided
   them with few operations (also l2031). You could have provided
   duplicate, contract, and permute operations too - what then? It's
   only "Levenshtein distance" that counts inserts, deletes, and
   copies; other variants (eg Damerau, Wagner) allow transposition.
 
-> 494: GRAMMAR: "responsible for identifying"
+D 494: GRAMMAR: "responsible for identifying"
 
-> 500: "it is a state-based that calls". Some word missing?
+D 500: "it is a state-based that calls". Some word missing?
+D 500: "state-based that" -> "state-based tool that"
 
-> 500: "state-based that" -> "state-based tool that"
-
-> 501: I think Fig 2.7(E) is wrong: there is no mention of "prod" in
+D 501: I think Fig 2.7(E) is wrong: there is no mention of "prod" in
   the originals!
 
-> 510: "based on actual residual systems". A few words on what an
+D 510: "based on actual residual systems". A few words on what an
   "actual residual system" is could be useful: we were not all born in
   the 70s.
 
-> 511: GRAMMAR: "proving that the laws"
+D 511: GRAMMAR: "proving that the laws"
+D 511: proving the that the laws"
+D 514: "provide a desirable metatheoretical foundation." Such as?
 
-> 511: proving the that the laws"
-
-> 514: "provide a desirable metatheoretical foundation." Such as?
-
-> 524: Explain "Alice" and "Bob" to the caption of Figure 2.8;
+D 524: Explain "Alice" and "Bob" to the caption of Figure 2.8;
   otherwise remove these names and refer to "a" and "b", as in the
   Figure.
 
-> 527: GRAMMAR: "essentially"
+D 527: GRAMMAR: "essentially"
+D 529: "its on" -> "it is on"
 
-> 529: "its on" -> "it is on"
+D 535: "enjoyed by diff3 [44]". Repeated reference, not necessary.
+D 539: GRAMMAR: "establish", "invariably"
 
-> 535: "enjoyed by diff3 [44]". Repeated reference, not necessary.
-
-> 539: GRAMMAR: "establish", "invariably"
-
-> 539: "Other criteria will". What are these other criteria from [44]?
+D 539: "Other criteria will". What are these other criteria from [44]?
   It would be useful to have them in the text.
 
-> 544-545: "we briefly look over some of the relevant literature on
+D 544-545: "we briefly look over some of the relevant literature on
   the topic". This is the literature for trees, right?
 
-> 545: GRAMMAR: "were perhaps"
+D 545: GRAMMAR: "were perhaps"
+D 545: "where perhaps" -> "were perhaps"
 
-> 545: "where perhaps" -> "were perhaps"
+D 565: "Most of then" -> "Most of them"
 
-> 565: "Most of then" -> "Most of them"
+D 569-572: long sentence, please rephrase.
 
-> 569-572: long sentence, please rephrase.
+D 574: "This is perhaps the closest". s/perhaps//
 
-> 574: "This is perhaps the closest". s/perhaps//
-
-> 575: "which is applicable in practice". Would that be a paraphrase
+D 575: "which is applicable in practice". Would that be a paraphrase
   for 'practical'?
 
-> 591: "which shows that .. might ...". bit contradictory: if it is
+D 591: "which shows that .. might ...". bit contradictory: if it is
   'shown', then it ought to be a 'must'.
 
-> 601: "only parenthesis" -> "only parentheses"
+D 601: "only parenthesis" -> "only parentheses"
 
-> 603: why the newpage here?
+D 603: why the newpage here?
 
-> 606: "(Datatype-)generic". s/(// s/)//
+Good question!
 
-> 615: GRAMMAR: "discuss"
+D 606: "(Datatype-)generic". s/(// s/)//
 
-> 617: "7.2 and defines" -> "7.2, defines"
+D 615: GRAMMAR: "discuss"
 
-> 625: GRAMMAR: "written"
+D 617: "7.2 and defines" -> "7.2, defines"
 
-> 630: GRAMMAR: "under"?
+D 625: GRAMMAR: "written"
 
-> 630: "unser"
+D 630: GRAMMAR: "under"?
+D 630: "unser"
+D 630: "unser a" -> "under a"
 
-> 630: "unser a" -> "under a"
-
-> 662: "this code is" -> "this code being"
-
-> 662: "this \emph{code} is a type-level list". This 'emph' does not
+D 662: "this code is" -> "this code being"
+D 662: "this \emph{code} is a type-level list". This 'emph' does not
   seem necessary.
 
-> 724: GRAMMAR: "such a library"
+D 724: GRAMMAR: "such a library"
 
-> 725: move "are" to the end of the sentence.
+D 725: move "are" to the end of the sentence.
 
-> 761: "functors The" -> "functors. The"
+D 761: "functors The" -> "functors. The"
 
-> 772: "different than the representation. The latter being" ->
+D 772: "different than the representation. The latter being" ->
   "different from the representation, the latter being"
 
-> 789: "Which are" -> "These are"
+D 789: "Which are" -> "These are"
 
-> 790: "being a nested type". In that sense
+D 790: "being a nested type". In that sense
   http://www.cs.ox.ac.uk/people/richard.bird/online/BirdMeertens98Nested.pdf
   ?
 
-> 817-822: about losing internal sum-of-products structure: you never
+**> 817-822: about losing internal sum-of-products structure: you never
   talk explicitly about what is gained/losed by each representation.
 
-> 817: "Turns out" -> "It turns out"
+Hmmm... I will think about this.
 
-> 817: "Turns out we can sacrifice". 'It ... that ...' would be less
+D 817: "Turns out" -> "It turns out"
+
+D 817: "Turns out we can sacrifice". 'It ... that ...' would be less
   informal.
 
-> 818: "but still maintaining". s/but/while/
+D 818: "but still maintaining". s/but/while/
 
-> 821: "which still maintains". 'which' is always a bit
+D 821: "which still maintains". 'which' is always a bit
   heavy-handed. Either you break the sentence in 2 or it's a 'that'.
 
-> 835: why the vertical blank space between this and line 836?
+D 835: why the vertical blank space between this and line 836?
 
-> 850: "deep generic representation". Is that a technical term? Later
+Because LaTeX; will get fixed.
+
+**> 850: "deep generic representation". Is that a technical term? Later
   on, you develop a systematic 'deep' vs. 'shallow' discussion but, at
   this point, no one knows what you are aiming to.
 
-> 895: "lets look" -> "let us look"
+It is a technical term. I will try to rephrase this.
 
-> 915-920: about crush. This is feels like some sort of `traverse`,
+D 895: "lets look" -> "let us look"
+
+D 915-920: about crush. This is feels like some sort of `traverse`,
   especially if [b] where generalized to 't b' for an arbitrary
   applicative 't'.
 
-> 928-929: "frees us [..] within the topmost constructor". I didn't
+I'd say its more like a fold; generalizing to an applicative 't' is
+not easy here. (I think!)
+
+D 928-929: "frees us [..] within the topmost constructor". I didn't
   understand this sentence.
 
-> 1001: "know which is the" -> "know the"
+D 1001: "know which is the" -> "know the"
 
-> 1006: "Which in turn" -> "This, in turn"
+D 1006: "Which in turn" -> "This, in turn"
 
-> 1018: there is a 'RoseFam' and a 'FamRose', I guess that one of them
+D 1018: there is a 'RoseFam' and a 'FamRose', I guess that one of them
   is a bug.
 
-> 1075: "why bother ourselves with" s/ourselves//. Maybe avoid
+D 1075: "why bother ourselves with" s/ourselves//. Maybe avoid
   'bother' altogether.
 
-> 1090: "represent, this" -> "represent. This"
+D 1090: "represent, this" -> "represent. This"
 
-> 1131: "down datatypes" -> "downto datatypes"
+D 1131: "down datatypes" -> "downto datatypes"
 
-> 1140: GRAMMAR: something wrong here
+D 1140: GRAMMAR: something wrong here
+D 1140: "hdiff Chapter 5 possible" -> "hdiff (Chapter 5) possible"
 
-> 1140: "hdiff Chapter 5 possible" -> "hdiff (Chapter 5) possible"
+D 1147: GRAMMAR: "is of paramount importance"
 
-> 1147: GRAMMAR: "is of paramount importance"
+D 1172: GRAMMAR: "we have seen"
+D 1172: "we seen the" -> "we have seen about the"
 
-> 1172: GRAMMAR: "we have seen"
+D 1186: "same that" -> "same as that"
 
-> 1172: "we seen the" -> "we have seen about the"
+D 1198: GRAMMAR: "we must maintain"
+D 1198: "We must to maintain"
 
-> 1186: "same that" -> "same as that"
+D 1209: "following the structure". Unclear
 
-> 1198: GRAMMAR: "we must maintain"
+D 1243: "(Section 2.1.2), type-safe" -> "(Section 2.1.2) type-safe"
 
-> 1198: "We must to maintain"
+D 1253: "constructor-of, and" -> "constructor-of. This"
 
-> 1209: "following the structure". Unclear
+D 1265: "tn" -> "t_n"
 
-> 1243: "(Section 2.1.2), type-safe" -> "(Section 2.1.2) type-safe"
+D 1266: "use as the" -> "use them as" (?)
 
-> 1253: "constructor-of, and" -> "constructor-of. This"
-
-> 1265: "tn" -> "t_n"
-
-> 1266: "use as the" -> "use them as" (?)
-
-> 1293: "Suppose, for example, [..] suitable $ks$". This description
+D 1293: "Suppose, for example, [..] suitable $ks$". This description
   is too obscure to be useful.
 
-> 1298: "on large inputs". What qualifies as 'large'?
+D 1298: "on large inputs". What qualifies as 'large'?
 
-> 1302: "but at the time [..] have not been resolved".  -> "but have
+D 1302: "but at the time [..] have not been resolved".  -> "but have
   not been resolved at the time of writing"
 
-> 1304: GRAMMAR: "an alternative"
+D 1304: GRAMMAR: "an alternative"
 
-> 1305-1313 (*) - I find this "informal note", or "side comment" if
+**> 1305-1313 (*) - I find this "informal note", or "side comment" if
   you wish, written in first person singular (and several others to
   come) rather non standard in a PhD dissertation. Perhaps this could
   be given in a footnote? Or moved to the conclusions / future work
   section? In any case, the use of first person singular should be
   avoided.
-
-> 1305: I don't think these "notes to self" belong peppered throughout
+**> 1305: I don't think these "notes to self" belong peppered throughout
   the objective scientific content of the dissertation. I recommend
   collecting them together in your conclusions: changes of plan,
   surprises, things you ran out of time for, things you'd do
@@ -466,61 +476,66 @@ D 455: Fig 2.5 has wrong labels: (B) shows a non-functional mapping,
   reader and follow-up researcher, but you should clearly distinguish
   the personal from the scientific.
 
-> 1324: "is stored" -> "stored"
+D 1324: "is stored" -> "stored"
 
-> 1335: "uses" -> "use"
+D 1335: "uses" -> "use"
 
-> 1340: "being" -> "are"
+D 1340: "being" -> "are"
 
-> 1344: "being having clear"
+**> 1344: "being having clear"
 
-> 1348: "be parameterize" -> "be parameterized"
+I did not find this on line 1344
 
-> 1354: ", which would" -> ". This would" (sentence too long)
+D 1348: "be parameterize" -> "be parameterized"
 
-> 1358: "if two types where" -> "should two types be"
+D 1354: ", which would" -> ". This would" (sentence too long)
 
-> 1361: "here: define a family as two disjoint lists: A" -> "here and
+D 1358: "if two types where" -> "should two types be"
+
+D 1361: "here: define a family as two disjoint lists: A" -> "here and
   define a family as two disjoint lists: a"
 
-> 1435: "where" -> "where ..." (?)
+D 1435: "where" -> "where ..." (?)
 
-> 1444: GRAMMAR: "we would need(?) an augmented"
+D 1444: GRAMMAR: "we would need(?) an augmented"
+D 1444: "We would an" -> "We would need an" (?)
 
-> 1444: "We would an" -> "We would need an" (?)
+D 1449: GRAMMAR: wrong font for "a"
 
-> 1449: GRAMMAR: wrong font for "a"
+D 1477: "[34], in fact" -> "[34]. In fact"
 
-> 1477: "[34], in fact" -> "[34]. In fact"
+X 1505: "defining a type-indexes" s/indexes/indexed/
 
-> 1505: "defining a type-indexes" s/indexes/indexed/
+Didn't find this in there.
 
-> 1510-1511: "but let us not get ahead of ourselves". Doesn't seem
+D 1510-1511: "but let us not get ahead of ourselves". Doesn't seem
   necessary.
 
-> 1514: "list of possible zippers for a value with holes". It feels
+**> 1514: "list of possible zippers for a value with holes". It feels
   like the comonad presentation of zipper could be useful here.
 
-> 1516: "details, Appendix A." -> "details (Appendix A)."
+How so? I can't immediatly see this.
 
-> 1520: "did need" -> "need"
+D 1516: "details, Appendix A." -> "details (Appendix A)."
 
-> 1532: "computing these patches is intractable." Is that in a formal
+D 1520: "did need" -> "need"
+
+D 1532: "computing these patches is intractable." Is that in a formal
   sense?
 
-> 1532: please see (*) above
+**> 1532: please see (*) above
 
-> 1544: "and occurs check" -> "and check" (?)
+Ok; I will get rid of those.
 
-> 1545: "code in Agda [77] Agda repository"
+D 1544: "and occurs check" -> "and check" (?)
 
-> 1545: "substitution, for" -> "substitution. For"
+D 1545: "code in Agda [77] Agda repository"
 
-> 1559: GRAMMAR: double "the"
+D 1545: "substitution, for" -> "substitution. For"
 
-> 1559: "the the longest prefixes"
-
-> 1559: "the the" -> "the"
+D 1559: GRAMMAR: double "the"
+D 1559: "the the longest prefixes"
+D 1559: "the the" -> "the"
 
 > 1560: "that two terms agree". What does that mean?
 

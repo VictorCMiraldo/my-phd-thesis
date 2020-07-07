@@ -12,9 +12,9 @@ data Stmt  = Assign Var Expr | Let Var Expr
 \end{code}
 \end{myhs}
 
-  Another example is found in HTML and XML documents.
-Which are easily described by a Rose tree, which albeit
-being a nested type, is naturally encoded
+  Another example is found in \texttt{HTML} and \texttt{XML} documents.
+These are easily described by a Rose tree, which albeit
+being a nested type \cite{Bird1998}, is naturally encoded
 in the mutually recursive family of datatypes below.
 
 \begin{myhs}
@@ -69,13 +69,13 @@ packages. This frustrating outcome meant that a different approach --
 which did not rely as heavily on type families -- was necessary
 to look at real-world software version control conflict data.
 
-  Turns out we can sacrifice the sums-of-products
+  It turns out that we can sacrifice the sums-of-products
 structure of \texttt{generics-mrsop}, significantly decreasing
-the reliance of type families, but still maintaining a combinator-based
-approach, which still enables us to write the algorithms underlying
+the reliance of type families, while maintaining a combinator-based
+approach. This would still enables us to write the algorithms underlying
 the \texttt{hdiff} tool (\Cref{chap:pattern-expression-patches}).
 This lead us to develop the \genericssimpl{} library, \Cref{sec:gp:simplistic},
-which still maintains a list of the types that belong in the family,
+that still maintains a list of the types that belong in the family,
 but does not record their internal sum-of-products structure.
 
   This chapter, then, is concerned with explaining our work
@@ -98,8 +98,6 @@ explicit codes in the sums of products style to guide the
 representation of datatypes. This enables a simple explicit fixpoint
 construction and a variety of recursion schemes, which makes the
 development of generic programs fairly straightforward.
-
-\vspace*{2cm}
 
 \subsection{Explicit Fixpoints with Codes}
 \label{sec:gp:explicitfix}
@@ -247,7 +245,7 @@ sop  :: RepFix  sop  x  -> View    sop   x
 we can turn our attention to writing the combinators that the programmer
 will use. These will naturally be defined by induction on the |CodeFix| instead of
 having to rely on instances, like in \Cref{sec:background:patternfunctors}.
-For instance, lets look at |compos|, which applies a function |f| everywhere
+For instance, let us look at |compos|, which applies a function |f| everywhere
 on the recursive structure.
 
 \begin{myhs}
@@ -342,17 +340,18 @@ gsize = crush (const 1) sum
 \end{code}
 \end{myhs}
 
-  At this point we have combined the insight from
-the \texttt{regular} library of keeping track of recursive positions
-with the convenience of the \texttt{generics-sop} for enforcing a
-specific \emph{normal form} on representations. By doing so, we were
-able to provide a deep encoding for free. This essentially frees
-us from the burden of maintaining complicated constraints needed for
-handling the types within the topmost constructor. The information
-about the recursive position allows us to write neat combinators like
-|crush| and |compos| together with a convenient |View| type for
-easy generic pattern matching. The only thing keeping us from
-handling real life applications is the limited form of recursion.
+  At this point we have combined the insight from the \texttt{regular}
+library of keeping track of recursive positions with the convenience
+of the \texttt{generics-sop} for enforcing a specific \emph{normal
+form} on representations. By doing so, we were able to provide a deep
+encoding for free. This essentially frees us from the burden of
+maintaining constraints. Compare the |gsize| above with its
+\texttt{generics-sop} variation, in
+\Cref{fig:background:generics-sop:gsize}.  The information about the
+recursive position allows us to write neat combinators like |crush|
+and |compos| together with a convenient |View| type for easy generic
+pattern matching. The only thing keeping us from handling real life
+applications is the limited form of recursion.
 
 \subsection{Mutual Recursion}
 \label{sec:gp:family}
@@ -506,7 +505,7 @@ Since now |fromMRec| and |toMRec| operate on families, we have to
 specify how to translate \emph{each} of the members of the family
 \emph{to} and \emph{from} their generic representation.
 This translation needs to know
-which is the index of the datatype we are converting between in each
+the index of the datatype we are converting between in each
 case, hence the additional singleton |SNat ix| parameter. Pattern matching on
 this singleton~\cite{Eisenberg2012} type informs the compiler about
 the shape of the |Nat| index. Its definition is:
@@ -519,7 +518,7 @@ data SNat (n :: Nat) where
 \end{code}
 \end{myhs}
 
-  Which in turn, enables us to write the definition of |fromMRec| for
+  This, in turn, enables us to write the definition of |fromMRec| for
 the family of rose trees.
 
 \begin{myhs}
@@ -550,7 +549,7 @@ it. The |into| function injects a value into the corresponding |El|:
 into  :: forall fam ty ix dot (ix ~ Idx ty fam , Lkup fam ix ~ ty) => ty -> El fam ix
 into  = El
 
-intoRose :: Rose Int -> El RoseFam (P Z)
+intoRose :: Rose Int -> El FamRose (P Z)
 intoRose = into (TApp FamRose)
 \end{code}
 \end{myhs}
@@ -659,8 +658,8 @@ useless to them.
 \item The choice of opaque types might be too wide. If we try to
 encompass any possible situation, we end up with a huge |Atom|
 type. But for a specific use case, we might be interested only in
-|Int|s and |Float|s, so why bother ourselves with possibly ill-formed
-representations and pattern matches which should never be reached?
+|Int|s and |Float|s. This means we have to worry about possibly ill-formed
+representations and pattern matches which should never be reached.
 \end{enumerate}
 
 Our solution is to \emph{parameterize} |Atom|,
@@ -700,7 +699,7 @@ The |NA_K| constructor in |NA| makes use of an additional argument |kappa|.
 The problem is that we are defining the code for the set of opaque types by
 a specific kind, such as |Numeric| above. On the other hand, values which
 appear in a field must have a type whose kind is |Star|. Thus, we require a mapping
-from each of the codes to the actual opaque type they represent, this
+from each of the codes to the actual opaque type they represent. This
 is exactly the \emph{opaque type interpretation} |kappa|. Here is the
 datatype interpreting |NumericK| into ground types:
 
@@ -849,7 +848,7 @@ we wrote \texttt{generics-mrsop-2.2.0} using the extension and
 defining |EqHO f| as a synonym to |forall x . Eq (f x)|.  Developing
 applications on top of \texttt{generics-mrsop} became more difficult.
 The user now would have to reason about and pass around complicated
-constraints down datatypes and auxiliary functions. Moreover, our use
+constraints down to datatypes and auxiliary functions. Moreover, our use
 case was very simple, not extracting any of the advantages of
 quantified constraints. Eventually we decided to rollback to the lifted
 |EqHO| presented above in \texttt{generics-mrsop-2.3.0}.
@@ -958,7 +957,7 @@ interesting in their own right and round off the presentation of
 
   The development of the \texttt{generics-mrsop} library started
 primarily to enable us to write
-\texttt{hdiff}~\Cref{chap:pattern-expression-patches} possible.  This
+\texttt{hdiff} (\Cref{chap:pattern-expression-patches}) possible.  This
 was a great expressivity test for our generic programming library and
 led us to develop overall useful features that, although not novel,
 make the adoption of a generic programming library much more likely.
@@ -970,9 +969,9 @@ the engineering effort that was put in the library.
 \label{sec:gp:templatehaskell}
 
   Having a convenient and robust way to get the |Family| instance for
-a given selection of datatypes is paramount for the usability of our
-library. In a real scenario, a mutually recursive family
-may consist of many datatypes with dozens of
+a given selection of datatypes is of paramount importance for the
+usability of our library. In a real scenario, a mutually recursive
+family may consist of many datatypes with dozens of
 constructors. Sometimes these datatypes are written with parameters,
 or come from external libraries.
 
@@ -1025,7 +1024,7 @@ deriveFamily (tht (Rose Int))
 \end{code}
 \end{myhs}
 
-  The first thing that happens is registering that we seen the type
+  The first thing that happens is registering that we have seen the type
 |Rose Int|.  Since it is the first type to be discovered, it is
 assigned index zero within the family.  Next we need to reify the
 definition of |Rose|. At this point, we query \emph{Template Haskell}
@@ -1046,7 +1045,7 @@ KInt, I (S Z)]]|.
 
   We now go into |[Rose Int]| for processing.  Once again we need to
 perform some amount of $\beta$-reduction at the type-level before
-inspecting its fields.  The rest of the process is the same that for
+inspecting its fields.  The rest of the process is the same as that for
 |Rose Int|.  However, when we encounter the field of type |Rose Int|
 this is already registered, so we just need to use the index |Z| in
 that position.
@@ -1099,7 +1098,7 @@ instance Family Singl FamRoseInt CodesRoseInt where dots
 \label{sec:gp:metadata}
 
   There is one final ingredient missing to make
-\texttt{generics-mrsop} fully usable in practice. We must to maintain
+\texttt{generics-mrsop} fully usable in practice. We must maintain
 the \emph{metadata} information of our datatypes.  This metadata
 includes the datatype name, the module where it was defined, and the
 name of the constructors. Without this information we would never be
@@ -1117,9 +1116,9 @@ simplified version of their handling of metadata, and then outline the
 differences to our approach.
 
   The general idea is to store the meta information following the
-structure of the datatype itself. Instead of data, we keep track
-of the names of the different parts and other meta information that
-can be useful. It is advantageous to keep metadata separate from the
+sum-of-products structure of the datatype itself. Instead of data, 
+we keep track of the names of the different parts and other meta information 
+that can be useful. It is advantageous to keep metadata separate from the
 generic representation as it would only clutter the definition of
 generic functionality.  This information is tied to a datatype by
 means of an additional typeclass |HasDatatypeInfo|.  Generic
@@ -1222,7 +1221,7 @@ related work that is closest to ours in the sense that it is the only
 is adapted from Van Putten's~\cite{Putten2019} master thesis and is
 available as the \texttt{generics-mrsop-gdiff} library.
 
-  Next, we discuss how to make tree edit-scripts (\Cref{sec:background:tree-edit-distance}),
+  Next, we discuss how to make tree edit-scripts (\Cref{sec:background:tree-edit-distance})
 type-safe following the work of Lempsink~\cite{Lempsink2009}.
 We start by lifting edit-scripts to kind |[Star] -> [Star] -> Star|, which enables
 the indexing of the types for the source and destination forests of
@@ -1246,7 +1245,7 @@ version of tree differencing
 (\Cref{sec:background:tree-edit-distance}), where everything is a
 label. Consequently, writing the edit operations requires a uniform
 treatment of recursive constructors and opaque values, which is done
-by the |Cof| type, read as \emph{constructor-of}, and represents the
+by the |Cof| type, read as \emph{constructor-of}. This represents the
 \emph{unit of modification} of each edit operation.  A value of type
 |Cof kappa codes at tys| represents a constructor of atom |at|, which
 expects arguments whose type is |NP I tys|, for the family |codes|
@@ -1282,9 +1281,10 @@ data ES kappa codes :: [Atom kon] -> [Atom kon] -> Star where
 \end{code}
 \end{myhs}
 
+%format tn = "\HV{t_n}"
   Let us take |Ins|, for example. Inserting a constructor |c :: t1 ->
 dots -> tn -> (P I ix)| in a forest |x1 :* x2 :* dots :* Nil| will
-take the first |n| elements of that forest and use as the arguments to
+take the first |n| elements of that forest and use them as arguments to
 |c|. This is realized by the |insCof| function, shown below.
 
 \begin{myhs}
@@ -1341,15 +1341,16 @@ computing edit-scripts, with memoization, still takes $\mathcal{O}(n
 the source and destination trees. This means this is at least
 quadratic in the size of the smaller input, which is not practical for
 a tool that is supposed to be run multiple times per commit on large
-inputs. This downside is not specific to this approach, but
-rather quite common for tree differencing algorithms. They often belong
-to complexity classes that make them impractical.
+inputs (hundreds to thousands of lines). This downside is not specific 
+to this approach, but rather quite common for tree differencing 
+algorithms. They often belong to complexity classes that make them impractical.
 
   Another downside comes to the surface when we want to look into merging
 these edit-scripts. Vassena~\cite{Vassena2016} developed a merging
 algorithm but notes some difficult setbacks, mainly due to
 the heterogeneity of |ES|. Suppose, for example, we want to merge |p : ES xs ys|
-and |q : ES xs zs|. This means producing an edit-script |r : ES xs ks|.
+and |q : ES xs zs|. This means producing an edit-script |r| that
+transforms the forest |xs| into some other forest |ks|.
 But how can we determine |ks| here? It is not always the case that
 there is a solution. In fact, the merge algorithm~\cite{Vassena2016}
 for |ES| might fail due to conflicting changes \emph{or} the
@@ -1368,9 +1369,9 @@ mutually recursive families. The bugs have been reported
 in the GHC bug tracker\footnote{
 \url{https://gitlab.haskell.org/ghc/ghc/issues/17223} and
 \url{https://gitlab.haskell.org/ghc/ghc/issues/14987}}
-but at the time of writing of this thesis, have not been resolved.
+but have not been resolved at the time of writing.
 This means that if we wish to collect large scale real data
-for our experiments, we must develop and alternative approach.
+for our experiments, we must develop an alternative approach.
 
   \digress{After realizing that the differencing algorithms presented in
 \Cref{chap:pattern-expression-patches} did not explicitly require
@@ -1411,7 +1412,7 @@ data SRep (phi :: Star -> Star) :: (Star -> Star) -> Star where
 
   The handling of metadata is borrowed entirely from \texttt{GHC.Generics}
 and captured by the |SMeta| datatype, which records the kind of
-meta-information is stored at the type-level.
+meta-information stored at the type-level.
 
 \begin{myhs}
 \begin{code}
@@ -1446,13 +1447,13 @@ into their closed representation, |SRep phi (GHC.Generics.Rep f)| and
 make some choice for |phi|. We could use |K1 R| as |phi|, essentially
 translating only the first layer into a generic representation,
 but as we shall see in \Cref{sec:gp:simplistic-deep}, we can also
-translate the entire value and uses a fixpoint combinator in |phi|.
+translate the entire value and use a fixpoint combinator in |phi|.
 
   Even though |SRep| lacks a \emph{codes-based} approach, that is,
 it can be defined for arbitrary types like \texttt{GHC.Generics},
 it still admits some combinators that greatly assist a
 programmer when writing their generic code, unlike \texttt{GHC.Generics}.
-The most useful being |repMap|, |repZip| and |repLeaves|, that map, zip
+The most useful are |repMap|, |repZip| and |repLeaves|, that map, zip
 and collect the leaves of a |SRep| respectively. These can easily
 be generalized to a monadic version.
 
@@ -1476,14 +1477,14 @@ way to interact with potentially recursive subtrees through the
 |phi| functor. To write a deep representation,
 all we have to do is define a mutually recursive family to be
 any type that is \emph{not} a primitive type, where
-the choice of primitive type shall be parameterize through
+the choice of primitive type shall be parameterized through
 the usual |kappa| parameter. The pseudo-code below illustrates
 this idea.
 
 \begin{myhs}
 \begin{code}
 data SFix kappa :: Star -> Star where
-  Prim  :: (x `elem` kappa) => x -> SFix kappa fam x
+  Prim  :: (x `elem` kappa)                  => x -> SFix kappa fam x
   SFix  :: (not (x`elem` kappa), Generic x)  => SRep (SFix prim) (Rep x)  -> SFix kappa fam x
 \end{code}
 \end{myhs}
@@ -1492,18 +1493,18 @@ data SFix kappa :: Star -> Star where
 mutually recursive family in an \emph{open} fashion, \ie{}, |t| is an
 element iff |not (t `elem` kappa)|, for some list |kappa| of types
 regarded as primitive, we would only be able to check for index equality
-through the |Typeable| machinery~\cite{PeytonJones2016},
-which would have to spread across the library, inherently breaking
+through the |Typeable| machinery~\cite{PeytonJones2016}.
+This would have to spread across the library, inherently breaking
 parametricity of maps and catamorphisms besides polluting the interface.
 Checking for index equality is crucial for the definition of many
 generic concepts -- zippers being a prominent example, \Cref{sec:gp:simplistic-zipper} --
 and was trivial to define  in \texttt{generics-mrsop}, thanks
-to its \emph{closed} approach: if two types where identified by the same index
+to its \emph{closed} approach: should two types be identified by the same index
 into a list containing all members of the family, then they are the same type.
 
   To avoid having to spread |Typeable|s around but still maintaining decidable
-type index equality we will apply the same trick here: define a family as two
-disjoint lists: A type-level list |fam| for the elements that belong
+type index equality we will apply the same trick here and define a family as two
+disjoint lists: a type-level list |fam| for the elements that belong
 in the family and one for the primitive types, usually denoted |kappa|.
 Note that unlike \texttt{generics-mrsop}, |kappa| here has kind |P [ Star ]|.
 
@@ -1739,7 +1740,7 @@ variation of the |GDeepAtom|:
 
 \begin{myhs}
 \begin{code}
-instance (GDeepAtom kappa fam (IsElem a prim) a) => GDeep kappa fam (K1 R a) where
+instance (GDeepAtom kappa fam (IsElem a prim) a) => GDeep kappa fam (K1 R a) dots
 \end{code}
 \end{myhs}
 
@@ -1755,16 +1756,16 @@ by providing all necessary type parameters.
 data Rose  a  =  Fork a [Rose a]
   deriving (Eq , Show , Generic)
 
-type RosePrims  = P [ Int ]
-type RoseFam    = P [ Rose Int , [Rose Int] ]
+type PrimsRose  = P [ Int ]
+type FamRose    = P [ Rose Int , [Rose Int] ]
 
-instance Deep RosePrims RoseFam (Rose Int)
-instance Deep RosePrims RoseFam [ Rose Int ]
+instance Deep PrimsRose FamRose (Rose Int)
+instance Deep PrimsRose FamRose [ Rose Int ]
 
-dfromRose :: Rose Int -> SFix RosePrims RoseFam (Rose Int)
+dfromRose :: Rose Int -> SFix PrimsRose FamRose (Rose Int)
 dfromRose = dfrom
 
-dtoRose :: SFix RosePrims RoseFam (Rose Int) -> Rose Int
+dtoRose :: SFix PrimsRose FamRose (Rose Int) -> Rose Int
 dtoRose = dto
 \end{code}
 \end{myhs}
@@ -1779,14 +1780,14 @@ dtoRose = dto
 it does not give us much flexibility: it does not support
 annotations nor holes. For example, suppose we want to define
 a generic unification algorithm: how would we represent
-unification variables within |SFix|? We would an augmented
+unification variables within |SFix|? We would need an augmented
 |SFix| which would carry one extra constructor for unification variables.
 Another example would be annotating an |SFix| with some auxiliary
 values to make certain computations more efficient.
 These variations over fixpoints can be achieved by
 combining the free monad and the cofree comonad in the same type,
 which we name |HolesAnn kappa fam phi h a|. A value of type |HolesAnn kappa fam phi h a|
-is isomorphic to a value of type a, where each constructor is annotated
+is isomorphic to a value of type |a|, where each constructor is annotated
 with |phi| and we might have holes of type |h|.
 
 \begin{myhs}
@@ -1873,8 +1874,8 @@ based on the height of the (generic) trees it handles. Calling
 |height| at each of those decision points is time consuming.
 It is much better to compute the height of a tree only once and keep
 the intermediary results annotated in their respective subtrees.
-We can easily do so with our |SFixAnn| \emph{cofree comonad}~\cite{Ghani2001},
-in fact, we would say that the height is a synthesized attribute in
+We can easily do so with our |SFixAnn| \emph{cofree comonad}~\cite{Ghani2001}.
+In fact, we would say that the height is a synthesized attribute in
 \emph{attribute grammar}~\cite{Knuth1990} lingo.
 
 \begin{myhs}
@@ -1954,7 +1955,7 @@ because it works over |HolesAnn| (and therefore also for |SFix|, |SFixAnn| and |
 but it is conceptually simple: given a test for whether a hole of type |phi a|
 is actually a hole in a recursive position, we return the list of possible
 zippers for a value with holes. The definition is standard and we encourage the
-interested reader to check the source code for more details, \Cref{chap:where-is-the-code}.
+interested reader to check the source code for more details (\Cref{chap:where-is-the-code}).
 
 \begin{myhs}
 \begin{code}
@@ -1971,7 +1972,7 @@ zippers  :: (forall a dot (Elem t fam) => h a -> Maybe (a :~: t))
 
   Both unification and anti-unification algorithms make up an
 important part of the vernacular of term-manipulation.
-Unsurprisingly, we will also did need to implement these features
+Unsurprisingly, we will also need to implement these features
 into \genericssimpl{}. We use them extensively
 in \Cref{chap:pattern-expression-patches}. This section provides an
 overview of the (anti-)unification provided by \genericssimpl{}.
@@ -2018,8 +2019,8 @@ substLkup    :: (Ord (Exists phi)) => Subst kappa fam phi -> phi at -> Maybe (Ho
   When attempting to solve a unification problem, there are two types
 of failures that can occur: symbol clashes happen when we try to
 unify different symbols, for example, |c x| is not unifiable with |c'
-x| because |c /= c'|; and occurs check errors are raised when there is
-a loop in the substitution, for example, if we try to unify |c (c' x)|
+x| because |c /= c'|; and occurs-check errors are raised when there is
+a loop in the substitution, For example, if we try to unify |c (c' x)|
 with |c x|, we would have to substitute |x| for |c' x|, but this would
 never terminate.  We encode these errors in the |UnifyErr| datatype,
 making it easy for users of the library to catch these errors and
@@ -2058,8 +2059,8 @@ unification algorithm and refer the reader to the existing literature~\cite{Robi
 % |[(x,z) , (y,z)]|.
 
   Anti-unification~\cite{Plotkin1971} is dual to unification. It is
-the process of identifying the the longest prefixes that two terms
-agree. For example, take |x = Bin (Bin 1 2) Leaf| and |y = Bin (Bin 1 3) (Bin 4
+the process of identifying the longest common prefixes of two terms
+For example, take |x = Bin (Bin 1 2) Leaf| and |y = Bin (Bin 1 3) (Bin 4
 5)|, the term |Bin (Bin 1 a) b| is the least general generalization of
 |x| and |y|. That is, there exist two instantiations of |a| and |b|
 yielding |x| or |y|. The term |Bin c b| is also a generalization of
@@ -2094,7 +2095,7 @@ producing the least general generalization of two trees.}
   In this chapter we explored two different ways of writing generic
 programs that must work over mutually recursive families. Looking back
 at the spectrum of generic programming libraries, in
-\Cref{fig:background:gplibraries}, we had a unfilled hole for
+\Cref{fig:background:gplibraries}, we had a open hole for
 \emph{code-based} approach with explicit recursion of any type, which
 can be filled by \texttt{generics-mrsop}. When it comes to pattern
 functors, although \texttt{regular} and \texttt{multirec} already
@@ -2112,6 +2113,21 @@ work around that by dropping the sums of products structure but
 maintaining a combinator-based approach in \genericssimpl{}, which
 enabled us to run our experiments with real-world data, as discussed
 in \Cref{chap:experiments}.
+
+  Although both \texttt{generics-mrsop} and \genericssimpl{} are
+quite similar, the sums-of-products structure of \texttt{generics-mrsop}
+is more convenient to program with. We must pattern match on less
+cases (first on sums, then on products) and we have access to more
+combinators to disect the sums-of-products structure. Now, that being said,
+not all generic programming applications will require that level of
+control and some could still get by without it. The \texttt{hdiff} 
+(\Cref~{chap:pattern-expression-patches}) is an example of the later.
+Our first implementation with \texttt{generics-mrsop} was more natural,
+but we were still able to implement it using \genericssimpl{}. 
+The advantages of \genericssimpl{} are twofold: (A) it uses significantly less
+type families and does not run into the bugs that \texttt{generics-mrsop} did
+and (B) it is simpler to use and it piggybacks on a number of
+familiar features from \texttt{GHC.Generics}.
 
   While developing the \texttt{generics-mrsop} and \genericssimpl{} libraries,
 which happened under close collaboration with Alejandro Serrano, we also
