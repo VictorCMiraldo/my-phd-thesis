@@ -537,15 +537,15 @@ D 1559: GRAMMAR: double "the"
 D 1559: "the the longest prefixes"
 D 1559: "the the" -> "the"
 
-> 1560: "that two terms agree". What does that mean?
+D 1560: "that two terms agree". What does that mean?
 
-> 1605: GRAMMAR: "type-indexed"
+D 1605: GRAMMAR: "type-indexed"
 
-> 1616: GRAMMAR: inconsistent fonts in Fig 4.1
+D 1616: GRAMMAR: inconsistent fonts in Fig 4.1
 
-> 1623: "Which can" -> "This can"
+D 1623: "Which can" -> "This can"
 
-> 1634: GRAMMAR: "For one thing"
+D 1634: GRAMMAR: "For one thing"
 
 D 1644: The disclaimer about joint work should not be buried here; it
   should be declared up front, in Ch 1 or earlier.
@@ -554,100 +554,93 @@ I'm confused; there are two disclaimers and they are mentioned
 in the /Contributions and Outline/ section in Ch 1. Anyway,
 I did try to make it clearer in Ch 1, I hope its upfront enough.
 
-> 1645: GRAMMAR: duplicate "Agda", and missing space
+D 1645: GRAMMAR: duplicate "Agda", and missing space
 
-> 1646: "a MSc student, Arian" -> "Arian"
+D 1646: "a MSc student, Arian" -> "Arian"
 
-> 1652: GRAMMAR: "and its application"
-
-> 1652: "is application function, Section 4.1" -> "its application
+D 1652: GRAMMAR: "and its application"
+D 1652: "is application function, Section 4.1" -> "its application
   function (Section 4.1)"
 
-> 1688: "shortly, for" -> "shortly. For"
+D 1688: "shortly, for" -> "shortly. For"
 
-> 1692: "family, both" -> "family. Both"
+D 1692: "family, both" -> "family. Both"
 
-> 1719: "definition follow" -> "definition follows"
+D 1719: "definition follow" -> "definition follows"
+D 1719: GRAMMAR: "whose definition follows"
 
-> 1719: GRAMMAR: "whose definition follows"
+D 1741: GRAMMAR: "Given a partial embedding"
 
-> 1741: GRAMMAR: "Given a partial embedding"
+D 1744: GRAMMAR: Give page references for times and eps
 
-> 1744: GRAMMAR: Give page references for times and eps
+D 1763: "products, and" -> "products and"
 
-> 1763: "products, and" -> "products and"
+D 1801: "indicate find": choose either "indicate" or "find"
 
-> 1801: "indicate find": choose either "indicate" or "find"
+D 1806: "makes clear": move "clear" towards the end of the sentence.
 
-> 1806: "makes clear": move "clear" towards the end of the sentence.
+D 1844: "being having" -> "having"
 
-> 1844: "being having" -> "having"
+D 1864: "merging,Section 2.1.4" -> "merging (Section 2.1.4)"
 
-> 1864: "merging,Section 2.1.4" -> "merging (Section 2.1.4)"
+D 1878: "element than" -> "element as"
 
-> 1878: "element than" -> "element as"
+D 1896: GRAMMAR: "in and of itself"
 
-> 1896: GRAMMAR: "in and of itself"
-
-> 1897: perhaps you want to say "domain specific language" instead of
+D 1897: perhaps you want to say "domain specific language" instead of
   "programming language"?
 
-> 1906: "approaches however, we will always" -> "approaches, however,"
+D 1906: "approaches however, we will always" -> "approaches, however,"
 
-> 1906: GRAMMAR: "All these approaches ... will always"
+D 1906: GRAMMAR: "All these approaches ... will always"
 
-> 1908: GRAMMAR: "much more difficult to write"
+D 1908: GRAMMAR: "much more difficult to write"
 
-> 1908: "to be written" -> "to write"
+D 1908: "to be written" -> "to write"
 
-> 1908: "will always be a computationally inefficient process". Is
+**> 1908: "will always be a computationally inefficient process". Is
   that proved? Feels strongly worded.
 
-> 1909: GRAMMAR: "unusable"
+D 1909: GRAMMAR: "unusable"
 
-> 1924: GRAMMAR: "omitted"
+D 1924: GRAMMAR: "omitted"
 
-> 1932: "is,each" -> "is, each"
+D 1932: "is,each" -> "is, each"
 
-> 1938: "alignments of products is" -> "product alignment is"
+D 1938: "alignments of products is" -> "product alignment is"
 
-> 1943: "definitinos" -> "definitions"
+D 1943: "definitinos" -> "definitions"
+D 1943: GRAMMAR: "From the definitions of"
 
-> 1943: GRAMMAR: "From the definitions of"
+D 1946: GRAMMAR: "we must choose"
 
-> 1946: GRAMMAR: "we must choose"
+D 1951: GRAMMAR: "a complex notion"
 
-> 1951: GRAMMAR: "a complex notion"
+D 1953: GRAMMAR: "the uninteresting patches"
+D 1953: "unintersting" -> "uninteresting"
 
-> 1953: GRAMMAR: "the uninteresting patches"
-
-> 1953: "unintersting" -> "uninteresting"
-
-> 1954: "in conjunction with Pierre-Evariste Dagand". Haha, no need
+D 1954: "in conjunction with Pierre-Evariste Dagand". Haha, no need
   for name dropping :) s/conjunction/collaboration/
 
-> 1960: "we learnt"
+D 1960: "we learnt"
 
-> 1966: "Section 3.1.4" -> "(Section 3.1.4)"
+D 1966: "Section 3.1.4" -> "(Section 3.1.4)"
 
-> 1967: "with a information" -> "with information"
+D 1967: "with a information" -> "with information"
 
-> 1981: "annotated" -> "annotate"
+D 1981: "annotated" -> "annotate"
 
-> 2000: GRAMMAR: "deleted or inserted in their entirety"
+D 2000: GRAMMAR: "deleted or inserted in their entirety"
 
-> 2009: GRAMMAR: "tends to be large"
+D 2009: GRAMMAR: "tends to be large"
+D 2009: "n tens do be"
+D 2009: "tens" -> "tends"
 
-> 2009: "n tens do be"
-
-> 2009: "tens" -> "tends"
-
-> 2017: "in tree differencing this occurs often". Give some intuition
+D 2017: "in tree differencing this occurs often". Give some intuition
   why?
 
-> 2021: GRAMMAR: "a patch transforms"
-
-> 2021: "patch transform two" -> "patch transforming two" (?)
+D 2021: GRAMMAR: "a patch transforms"
+D 2021: "patch transform two" -> "patch transforming two" (?)
 
 > 2042: "are subject to no restrictions".  -> "not subject to any
   restriction"

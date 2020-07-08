@@ -2059,7 +2059,7 @@ unification algorithm and refer the reader to the existing literature~\cite{Robi
 % |[(x,z) , (y,z)]|.
 
   Anti-unification~\cite{Plotkin1971} is dual to unification. It is
-the process of identifying the longest common prefixes of two terms
+the process of identifying the longest common prefix of two terms
 For example, take |x = Bin (Bin 1 2) Leaf| and |y = Bin (Bin 1 3) (Bin 4
 5)|, the term |Bin (Bin 1 a) b| is the least general generalization of
 |x| and |y|. That is, there exist two instantiations of |a| and |b|
@@ -2121,7 +2121,7 @@ cases (first on sums, then on products) and we have access to more
 combinators to disect the sums-of-products structure. Now, that being said,
 not all generic programming applications will require that level of
 control and some could still get by without it. The \texttt{hdiff} 
-(\Cref~{chap:pattern-expression-patches}) is an example of the later.
+(\Cref{chap:pattern-expression-patches}) is an example of the later.
 Our first implementation with \texttt{generics-mrsop} was more natural,
 but we were still able to implement it using \genericssimpl{}. 
 The advantages of \genericssimpl{} are twofold: (A) it uses significantly less

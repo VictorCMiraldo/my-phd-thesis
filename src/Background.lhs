@@ -1155,6 +1155,7 @@ data NP :: (k -> Star) -> [k] -> Star where
   (:*)  :: f x -> NP f xs ->  NP f (x Pcons xs)
 \end{code}
 \end{myhs}
+\label{pg:background:ns-np-def}
 
   Finally, since our atoms are of kind |Star|, we can use the identity
 functor, |I|, to interpret those and define the final representation
