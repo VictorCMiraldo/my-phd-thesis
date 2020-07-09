@@ -28,6 +28,7 @@
 %format =~=          = "\HS{\approx}"
 %format intersect    = "\HS{\cap}"
 %format union        = "\HS{\cup}"
+%format subseteq     = "\HS{\subseteq}"
 %format (TApp a)     = "\HS{@}" a
 
 %%% Types

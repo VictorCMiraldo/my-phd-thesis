@@ -642,311 +642,330 @@ D 2017: "in tree differencing this occurs often". Give some intuition
 D 2021: GRAMMAR: "a patch transforms"
 D 2021: "patch transform two" -> "patch transforming two" (?)
 
-> 2042: "are subject to no restrictions".  -> "not subject to any
+D 2042: "are subject to no restrictions".  -> "not subject to any
   restriction"
 
-> 2057: "is given" -> "given"
+D 2057: "is given" -> "given"
 
-> 2071: "the the" -> "the"
+D 2071: "the the" -> "the"
 
-> 2103: GRAMMAR: double "the"
+D 2103: GRAMMAR: double "the"
+D 2103: "the the insertion"
+D 2103: "the the" -> "the"
 
-> 2103: "the the insertion"
-
-> 2103: "the the" -> "the"
-
-> 2108-2110: "allow variables to appear more often". The term
+D 2108-2110: "allow variables to appear more often". The term
   'non-linear' from rewriting would be expected here.
 
-> 2120: GRAMMAR: "in both the ... contexts"
+D 2120: GRAMMAR: "in both the ... contexts"
 
-> 2123: The program could be written more elegantly. The LeafC case is
+D 2123: The program could be written more elegantly. The LeafC case is
   neater using Control.Bool.guard': go (LeafC n) (Leaf n') = guard'
   (n==n') and the BinC and TriC cases are neater with Kleisli
   composition: go (BinC x y) (Bin a b) = go x a >=> go y b The Hole
   case is probably best using do notation.
 
-> 2156: GRAMMAR: "if we adopted"
+I want it to be the simplest Haskell at this point yet.
+Moreover, if I omit the m parm in the first clauses, I'll have to
+omit it in all clauses, which means the case for Hole will be
+pretty nasty.
 
-> 2156: "if adopted" -> "by adopting"
+D 2156: GRAMMAR: "if we adopted"
+D 2156: "if adopted" -> "by adopting"
 
-> 2166: GRAMMAR: "which is required"
+D 2166: GRAMMAR: "which is required"
 
-> 2166: "which required" -> "which is required"
+D 2166: "which required" -> "which is required"
 
-> 2183: "only share" -> "only shares"
+D 2183: "only share" -> "only shares"
 
-> 2183: You've made a big thing about hdiff providing more operations,
+D 2183: You've made a big thing about hdiff providing more operations,
   such as duplication. But the Patience mode prohibits duplication,
   right?
 
-> 2199: "then search" -> "then searches"
+Correct, but it still enables permutations.
 
-> 2206: GRAMMAR: "subtrees"
+D 2199: "then search" -> "then searches"
 
-> 2207: "This implementation, however, is not particularly efficient."
+D 2206: GRAMMAR: "subtrees"
+
+D 2207: "This implementation, however, is not particularly efficient."
   Call it a specification :D
 
-> 2209: Surely enumerating all subtrees is linear, not exponential?
+D 2209: Surely enumerating all subtrees is linear, not exponential?
   There is one per node, at least for the definition of subtrees that
   I know.
 
-> 2255: GRAMMAR: "Trie k u" should be "Trie k v"
+D 2255: GRAMMAR: "Trie k u" should be "Trie k v"
 
-> 2300: full stop is missing
+D 2300: full stop is missing
 
-> 2304: Why do you insist that all variables are used? Couldn't you
+D 2304: Why do you insist that all variables are used? Couldn't you
   allow wellscoped (Chg d i) = keys (vars i) `subseteq` keys (vars d)
   ?
 
-> 2315: "appear in in some mathematical"
+D 2315: "appear in in some mathematical"
 
-> 2321: GRAMMAR: "maps a subset of the domain of p into a subset of
+D 2321: GRAMMAR: "maps a subset of the domain of p into a subset of
   the image of q"
 
-> 2324: do you mean "some elements in common" or "all elements in
+No, the text is alright.
+
+D 2324: do you mean "some elements in common" or "all elements in
   common"?
 
-> 2330: GRAMMAR: "passes"? "possesses"?
+D 2330: GRAMMAR: "passes"? "possesses"?
 
-> 2339: Isn't this better written [[ p . q ]] = [[ q ]] >=> [[ p ]] ?
+D 2339: Isn't this better written [[ p . q ]] = [[ q ]] >=> [[ p ]] ?
 
-> 2373: please see (*) above
+It is, but I want to not rely too much on Hashell here.
 
-> 2377: "no options". s/options/option/
+D 2373: please see (*) above
 
-> 2396: "a restriction of its domain" is vague - you should write
+D 2377: "no options". s/options/option/
+
+D 2396: "a restriction of its domain" is vague - you should write
   "when restricted to p's domain". This order coincides with the
   refinement order among partial functions.
 
-> 2397: You have a preorder here, not a partial order.
+D 2397: You have a preorder here, not a partial order.
 
-> 2430: please see (*) above
+D 2430: please see (*) above
 
-> 2436: "to example" -> "to the example"
+D 2436: "to example" -> "to the example"
 
-> 2449: GRAMMAR: "from a unique identifier per constructor"
+D 2449: GRAMMAR: "from a unique identifier per constructor"
 
-> 2452: consider defining "hash-uniquely" as shorthand for "uniquely
+D 2452: consider defining "hash-uniquely" as shorthand for "uniquely
   identified, modulo hash collisions"
 
-> 2457: "[18] as our datastructure." -> "[18]."
+D 2457: "[18] as our datastructure." -> "[18]."
 
-> 2457: please see (*) above
+D 2457: please see (*) above
 
-> 2458: GRAMMAR: "to also implement"
+D 2458: GRAMMAR: "to also implement"
 
-> 2467: "to go inspect" -> "to inspect"
+D 2467: "to go inspect" -> "to inspect"
 
-> 2473: "height then compute" -> "height; then we compute"
+D 2473: "height then compute" -> "height; then we compute"
 
-> 2480: GRAMMAR: "bounded depth of the trie"
+D 2480: GRAMMAR: "bounded depth of the trie"
 
-> 2484: You don't need to store each tree, just the paths to their
+D 2484: You don't need to store each tree, just the paths to their
   roots; the whole tree need be stored only once.
 
-> 2486: please see (*) above
+D 2486: please see (*) above
 
-> 2505: please see (*) above; in this case, why is this "side comment"
+D 2505: please see (*) above; in this case, why is this "side comment"
   not regular text?
 
-> 2517: GRAMMAR: "it is important"
+D 2517: GRAMMAR: "it is important"
 
-> 2524: "noNested1, we" -> "noNested1. We"
+D 2524: "noNested1, we" -> "noNested1. We"
 
-> 2533: "and in this case, it will always be two" -> "twice in this
+D 2533: "and in this case, it will always be two" -> "twice in this
   case"
 
-> 2537: "instead of but" -> "instead of"
+D 2537: "instead of but" -> "instead of"
 
-> 2538: "instead of but bigger". weird phrasing.
+D 2538: "instead of but bigger". weird phrasing.
 
-> 2568: "though will" -> "though, will"
+D 2568: "though will" -> "though, will"
 
-> 2570: "that that" -> "that"
+D 2570: "that that" -> "that"
 
-> 2573: GRAMMAR: "should be placed"
+D 2573: GRAMMAR: "should be placed"
 
-> 2573: "that that are being inserted"
+D 2573: "that that are being inserted"
 
-> 2596: GRAMMAR: "(42:)", not "(:42)"! Also p110, twice.
+D 2596: GRAMMAR: "(42:)", not "(:42)"! Also p110, twice.
 
-> 2599: "unpractical, we" -> "unpractical, as we"
+D 2599: "unpractical, we" -> "unpractical, as we"
 
-> 2600: "linearly-structured" -> "linearly structured"
+D 2600: "linearly-structured" -> "linearly structured"
 
-> 2613: please see (*) above
+D 2613: please see (*) above
 
-> 2615: "correct indexes". s/indexes/indices/
+D 2615: "correct indexes". s/indexes/indices/
 
-> 2619: "we computing" -> "we compute"
+D 2619: "we computing" -> "we compute"
+D 2620: "First we computing a global"
 
-> 2620: "First we computing a global"
+D 2627: "next, Section" -> "next in Section"
 
-> 2627: "next, Section" -> "next in Section"
+D 2642: "to so" -> "so"
 
-> 2642: "to so" -> "so"
+D 2643: "the changes to so that they"
 
-> 2643: "the changes to so that they"
+**> 2650: GRAMMAR: "two non-overlapping changes"
 
-> 2650: GRAMMAR: "two non-overlapping changes"
+Did not find this.
 
-> 2652: "Take Figure" -> "Taking Figure"
+D 2652: "Take Figure" -> "Taking Figure"
 
-> 2654: "To avoid these. In our case"
+D 2654: "To avoid these. In our case"
 
-> 2673: "scoped change change to close"
+D 2673: "scoped change change to close"
 
-> 2675: GRAMMAR: "recomputing these multisets"
+D 2675: GRAMMAR: "recomputing these multisets"
 
-> 2675: "this multisets" -> "these multisets"
+D 2675: "this multisets" -> "these multisets"
 
-> 2689: GRAMMAR: "it receives source and destination"
+D 2689: GRAMMAR: "it receives source and destination"
 
-> 2706: GRAMMAR: "type information enables us"
+D 2706: GRAMMAR: "type information enables us"
 
-> 2728: "the the" -> "the"
+D 2728: "the the" -> "the"
 
-> 2757: "followed " -> "follow a"
+D 2757: "followed " -> "follow a"
 
-> 2764: "The alignments here" -> "This alignment"
+D 2764: "The alignments here" -> "This alignment"
 
-> 2765-2773: you told the same zipper story earlier I think.
+D 2765-2773: you told the same zipper story earlier I think.
 
-> 2765: "it records" -> "as it records"
+Probably... still, I'd repeat it here to refresh the reader's memory.
 
-> 2776: "GHC some" -> "GHC about some"
+D 2765: "it records" -> "as it records"
 
-> 2790: "scoping, consequently" -> "scoping. Consequently"
+D 2776: "GHC some" -> "GHC about some"
 
-> 2792: "be fallback" -> "resort" (?)
+D 2790: "scoping, consequently" -> "scoping. Consequently"
 
-> 2804: "with both" -> "where both"
+D 2792: "be fallback" -> "resort" (?)
 
-> 2811: "all the of fields" -> "all fields"
+D 2804: "with both" -> "where both"
 
-> 2824: "After annotations" -> "After annotating"
+D 2811: "all the of fields" -> "all fields"
 
-> 2824: GRAMMAR: "after annotating"
+D 2824: "After annotations" -> "After annotating"
+D 2824: GRAMMAR: "after annotating"
 
-> 2836: "reader should" -> "reader to"
+D 2836: "reader should" -> "reader to"
 
-> 2839: "can has a rigid zipper, if" -> "has a rigid zipper. If"
+D 2839: "can has a rigid zipper, if" -> "has a rigid zipper. If"
 
-> 2839: "if d was" -> "should d be"
+D 2839: "if d was" -> "should d be"
 
-> 2844: "zipper and when" -> "zipper. When"
+D 2844: "zipper and when" -> "zipper. When"
 
-> 2853: sentence is unclear, please rephrase.
+D 2853: sentence is unclear, please rephrase.
 
-> 2875: "has type." -> "has type:"
+D 2875: "has type." -> "has type:"
 
-> 2881: This whole approach seems very ad hoc! What properties can you
+**> 2881: This whole approach seems very ad hoc! What properties can you
   show of it?
 
-> 2886: "well-scoped about" -> "well-scoped fragments about"
+Well, it is ad-hoc! 
 
-> 2891: "its easier" -> "it is easier"
+D 2886: "well-scoped about" -> "well-scoped fragments about"
 
-> 2902: "can might" -> "might"
+D 2891: "its easier" -> "it is easier"
 
-> 2933: please see (*) above; in this case, again, why is this "side
+D 2902: "can might" -> "might"
+
+D 2933: please see (*) above; in this case, again, why is this "side
   comment" not regular text?
 
-> 2933: "with might" -> "that might"
+D 2933: "with might" -> "that might"
 
-> 2934: "merge, this" -> "merge, as this"
+D 2934: "merge, this" -> "merge, as this"
 
-> 2946: "driven practical" -> "driven by practical"
+D 2946: "driven practical" -> "driven by practical"
 
-> 2946: please see (*) above.
+D 2946: please see (*) above.
 
-> 2947: "was driven practical experiments"
+D 2947: "was driven practical experiments"
 
-> 2951: "is happens": choose either "is" or "happens"
+D 2951: "is happens": choose either "is" or "happens"
 
-> 2952-2953: ", Section 4.2," s/, / (/ s/,/)/
+D 2952-2953: ", Section 4.2," s/, / (/ s/,/)/
 
-> 2958: "order which" -> "order in which"
+D 2958: "order which" -> "order in which"
 
-> 2964: "copy, since" -> "copy. Since"
+D 2964: "copy, since" -> "copy. Since"
 
-> 2981: full stop is missing.
+D 2981: full stop is missing.
 
-> 2991: "to splits" -> "to split"
+D 2991: "to splits" -> "to split"
 
-> 3041: please see (*) above.
+D 3041: please see (*) above.
 
-> 3041: "than c" -> "from c"
+D 3041: "than c" -> "from c"
 
-> 3048: please see (*) above; in this case, this could be a footnote.
+D 3048: please see (*) above; in this case, this could be a footnote.
 
-> 3051: "must preserved" -> "must be preserved"
+D 3051: "must preserved" -> "must be preserved"
 
-> 3053: "which insertion" -> "which insertions" (?)
+D 3053: "which insertion" -> "which insertions" (?)
 
-> 3056: "the fields the" -> "the fields of the"
+No, text is alright here.
 
-> 3060: "observe" -> "observes"
+D 3056: "the fields the" -> "the fields of the"
 
-> 3062: "illustrate" -> "illustrates"
+D 3060: "observe" -> "observes"
 
-> 3065: please see (*) above.
+D 3062: "illustrate" -> "illustrates"
 
-> 3065: "we an" -> "we can"
+D 3065: please see (*) above.
 
-> 3074: "exemplified" -> "illustrated"
+D 3065: "we an" -> "we can"
 
-> 3080: "indicate" -> "indicates that"
+D 3074: "exemplified" -> "illustrated"
 
-> 3081: "In Figure" -> "Figure"
+D 3080: "indicate" -> "indicates that"
 
-> 3093: please see (*) above. Clearly, this side comment should go to
+D 3081: "In Figure" -> "Figure"
+
+**> 3093: please see (*) above. Clearly, this side comment should go to
   a proper future work section.
 
-> 3103: "than arbitrary" -> "from arbitrary"
+D 3103: "than arbitrary" -> "from arbitrary"
 
-> 3104: "they are" -> "which are"
+D 3104: "they are" -> "which are"
 
-> 3118: "done and we" -> "done, we" (?)
+D 3118: "done and we" -> "done, we" (?)
 
-> 3130: please see (*) above. Clearly, this side comment should go to
+D 3130: please see (*) above. Clearly, this side comment should go to
   a proper future work section.
 
-> 3138: "are are" -> "are"
+D 3138: "are are" -> "are"
 
-> 3166: "approaches," -> "approaches, as"
+D 3166: "approaches," -> "approaches, as"
 
-> 3181: "is used" -> "being used"
+D 3181: "is used" -> "being used"
 
-> 3189: GRAMMAR: "a workaround at best" ("at its best" means something
+D 3189: GRAMMAR: "a workaround at best" ("at its best" means something
   else!)
 
-> 3190: "at its best" s/its//
+D 3190: "at its best" s/its//
 
-> 3211: "I envisioned a design" -> "A design was envisioned" (avoid
+D 3211: "I envisioned a design" -> "A design was envisioned" (avoid
   first person singular)
 
-> 3215: "tells us" -> "telling us"
+**> 3215: "tells us" -> "telling us"
 
-> 3218: "case" -> "cause"
+Can't find it.
 
-> 3221: "I did not have time" -> "there was no time" (avoid first
+D 3218: "case" -> "cause"
+
+D 3221: "I did not have time" -> "there was no time" (avoid first
   person singular)
 
-> 3229: "I never had the time": avoid first person singular and move
+**> 3229: "I never had the time": avoid first person singular and move
   to a proper future work section.
 
-> 3230: "the the" -> "the"
+I kind of prefer the future work localized to the chapters;
+I can link to it on the thesis-wide section of future work.
 
-> 3245: "its" -> "it is"
+D 3230: "the the" -> "the"
 
-> 3249: "I would have liked to look at" -> "could have been looked at"
+D 3245: "its" -> "it is"
+
+**> 3249: "I would have liked to look at" -> "could have been looked at"
   (again, this is out-of-place future work)
 
-> 3257: "one of my priorities " -> "a priority"
+D 3257: "one of my priorities " -> "a priority"
 
-> 3259: "further work" -> "future work" (cf above)
+D 3259: "further work" -> "future work" (cf above)
 
 > 3272: "hdiff," -> "hdiff, in
 

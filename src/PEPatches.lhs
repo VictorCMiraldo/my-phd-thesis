@@ -16,7 +16,7 @@ the subtrees that should be copied. These tree matchings, however, must
 be restricted to order-preserving partial injections to be
 efficiently translated to edit-scripts later.  The \texttt{hdiff}
 approach never translates to edit-scripts, which means the tree
-matchings we compute are subject to \emph{no} restrictions.  In fact,
+matchings we compute are not subject to \emph{any} restrictions.  In fact,
 \texttt{hdiff} uses these unrestricted tree matchings as \emph{the patch},
 instead of translating them \emph{into} a
 patch.
@@ -78,7 +78,7 @@ a metavariable.}
   With the added expressivity of referring to subtrees
 with metavariables we can represent more transformations
 than before. Take, for example, the change that swaps two subtrees
--- which cannot be written using an edit-script based approach -- is
+-- which cannot be written using an edit-script based approach -- 
 given by |Chg (Bin x y) (Bin y x)|. Another helpful consequence of
 our design is that we effectively bypass the \emph{choice} phase of the
 algorithm. When computing the differences between |Bin Leaf Leaf|
@@ -110,7 +110,7 @@ to the \genericssimpl{} library.
 
   Before exploring the generic implementation of our algorithm, let us
 look at a simple, concrete instance first, which sets the stage for
-the the generic implementation that will follow.  Throughout this
+the generic implementation that will follow.  Throughout this
 section we will explore the central ideas from our algorithm
 instantiated for a type of 2-3-trees:
 
@@ -197,7 +197,7 @@ most diff algorithms.
 
   Applying a change to a tree is done by unifying the
 metavariables in the deletion context with said tree, and later
-instantiating the the insertion context with the obtained
+instantiating the insertion context with the obtained
 substitution. Later on, when we come to the generic setting,
 we will write the application function using syntactic unification~\cite{Robinson1965}. For this concrete example, we will continue with the definition below.
 
@@ -211,15 +211,15 @@ chgApply (d , i) x = del d x >>= ins i
   Naturally, if the term |x| and the deletion context |d| are
 \emph{incompatible}, this operation will fail. Contrary to regular
 pattern-matching, we allow variables to appear more than once on both
-the deletion and insertion contexts. Their semantics are dual:
-duplicate variables in the deletion context must match equal trees,
-and are referred to as contractions, whereas duplicate variables in the
-insertion context will duplicate trees.
-Given a deletion context |ctx| and source tree |t|, the |del|
-function tries to associate all the metavariables in the context with
-a subtree of the input |tree|. This can be done with standard unification
-algorithms, as will be the case in the generic setting. Here, however,
-we use a simple auxiliary function to do so.
+the deletion and insertion contexts, i.e., the contexts are
+non-linear.  Their semantics are dual: duplicate variables in the
+deletion context must match equal trees, and are referred to as
+contractions, whereas duplicate variables in the insertion context
+will duplicate trees.  Given a deletion context |ctx| and source tree
+|t|, the |del| function tries to associate all the metavariables in
+the context with a subtree of the input |tree|. This can be done with
+standard unification algorithms, as will be the case in the generic
+setting. Here, however, we use a simple auxiliary function to do so.
 
 \begin{myhs}
 \begin{code}
@@ -231,8 +231,8 @@ del ctx t = go ctx t empty
   The |go| function, defined below, closely follows the structure of trees and
 contexts. Only when we reach a |Hole| we check whether we have
 already instantiated the metavariable stored there or not. If we
-encountered this metavariable before, we check that both occurrences
-of the metavariable correspond to the same tree; if this is the first
+encountered this metavariable before, we check that its previous occurrences
+correspond to the same tree; if this is the first
 time we encounter this metavariable, we instantiate the
 metavariable with the current tree.
 
@@ -322,7 +322,7 @@ extract o t = maybe (peel t) Hole (o t)
 \end{code}
 \end{myhs}
 
-  Note that if adopted a version of |wcs| that only returns a boolean
+  Note that by adopting a version of |wcs| that only returns a boolean
 value we would not know what metavariable to use when a subtree is
 shared.  Returning a value that uniquely identifies a subtree allows
 us to keep the |extract| function linear in the number of constructors
@@ -337,7 +337,7 @@ by itself but also as a subtree of another common subtree.
 Such situation is illustrated in \Cref{fig:pepatches:extract-problem}.
 In particular, the patch shown in \Cref{fig:pepatches:extract-problem:res}
 cannot be applied since the deletion context does not instantiate
-the metavariable |metavar y|, which required by the insertion context.
+the metavariable |metavar y|, which is required by the insertion context.
 
 \begin{figure}
 \subfloat[|s|]{%
@@ -413,7 +413,7 @@ On the other hand, sharing as much as possible might capture the
 change being represented more closely.
 
   A third, perhaps less intuitive, solution to the problem in
-\Cref{fig:pepatches:extract-problem} is to only share uniquely
+\Cref{fig:pepatches:extract-problem} is to only shares uniquely
 occurring subtrees, effectively simulating the \unixdiff{} with the
 \texttt{patience} option, which only copies uniquely occurring
 lines. In fact, to make this easy to experiment with, we will parameterize
@@ -516,7 +516,7 @@ function efficiently for the concrete case of the |Tree| datatype.
 |Just i| if |x| is the $i^{\textrm{th}}$ subtree of |s| and |d| and
 |Nothing| if |x| does not appear in |s| or |d|.  One implementation of
 this function computes the intersection of all the subtrees in |s| and
-|d|, and then search for the subtree |x| the resulting list.
+|d|, and then searches for the subtree |x| the resulting list.
 Enumerating all the subtrees of any |Tree| is straightforward:
 
 \begin{myhs}
@@ -537,15 +537,17 @@ the element when it occurs in the list.
 \begin{myhs}
 \begin{code}
 wcs :: Tree -> Tree -> Tree -> Maybe Metavar
-wcs s d x = elemIndex x (subtrees s intersect sutrees d)
+wcs s d x = elemIndex x (subtrees s intersect subtrees d)
 \end{code}
 \end{myhs}
 
-This implementation, however, is not particularly efficient.  The
-inefficiency comes from two places: firstly, checking trees for
-equality is linear in the size of the tree; furthermore, enumerating
-all subtrees is exponential.  If we want our algorithm to be efficient
-we \emph{must} have an amortized constant-time |wcs|.
+This specification, however, is not particularly efficient.  The
+inefficiency comes from two places: computing |subtrees s intersect subtrees d|
+is expensive but could be cached, but the call to |elemIndex x| will be repeated
+for each subtree of |s| and |d| when extracting the contexts. This means that
+the overall algorithm will be close to exponential. In fact, given
+how often we need to call |wcs|, each call to \emph{must} run in amortized constant
+time if we want our algorithm to be efficient.
 
   Defining |wcs s d| efficiently consists, firstly, of computing a set
 of trees which contains the subtrees of |s| and |d|, and secondly, in
@@ -669,7 +671,7 @@ populate the ``database'' of common digests.
 \begin{code}
 wcs :: TreeH -> TreeH -> TreeH -> Maybe Metavar
 wcs s d = lookup (mkTrie s intersect mkTrie d) . merkleRoot
-  where  (intersect)  :: Trie k v  -> Trie k u  -> Trie k v
+  where  (intersect)  :: Trie k v  -> Trie k u  -> Trie k v -- key inter., keep left values.
          lookup       :: Trie k v  -> [k]       -> Maybe v
          mkTrie       :: TreeH     -> Trie Word Metavar
 \end{code}
@@ -788,7 +790,7 @@ the contract of |applyChg|. We throw an error in that case
 and distinguish it from a change |c| not being able to be applied to |x|
 because |x| is not an element of the domain of |c|.
 The |uninstHole| above will be called in the precise situation
-where holes were left uninstantiated in |substApply sigma (chgIns c)|
+where holes were left uninstantiated in |substApply sigma (chgIns c)|.
 
   In general, we expect a value of type |Chg| to be well-scoped, that
 is, all the variables that are present in the insertion context must
@@ -802,6 +804,13 @@ wellscoped  :: Chg kappa fam at -> Bool
 wellscoped (Chg d i) = keys (vars i) == keys (vars d)
 \end{code}
 \end{myhs}
+
+  This definition of well-scoped changes was chosen due to its
+simplicity. If we know a given
+variable has arity 2, for example, then it \emph{must} be a copy.
+Had we defined well-scoped changes by |keys (vars i) subseteq keys (vars d)|,
+a variable with arity 2 could have both its ocurrences in the deletion context.
+This would make the merging algorithm even more involved.
 
   A |Chg| is very similar to a \emph{tree matching}
 (\Cref{sec:background:tree-edit-distance}) with less restrictions. In
@@ -833,7 +842,7 @@ function of a change, |applyChg c|, as |app c|.  We will also abuse
 notation and denote |substApply sigma p| by |sigma p|, whenever the
 context makes it clear that |sigma| is a substitution. Finally, we
 will abide by the Barendregt convention~\cite{Barendregt1984} in our
-proofs and metatheory -- that is, all changes that appear in in some
+proofs and metatheory -- that is, all changes that appear in some
 mathematical context have their bound variable names independent of
 each other, to put it differently, no two changes will accidentally 
 share a variable name.
@@ -871,7 +880,7 @@ for example, illustrates two changes and their two different compositions.
 In the case of \Cref{fig:pepatches:comp-01} both |after p q| and |after q p|
 exist, but this is not the case generally.
 The composition of two changes |after p q| is defined if and only if
-the image of |app q| has elements in common with the domain of |app p|.
+the image of |app q| has some elements in common with the domain of |app p|.
 In other words, when |chgIns q| is unifiable with |chgDel p|.
 In fact, let |sigma = unify (chgIns q) (chgDel p)|, the
 composition |after p q| is given by |Chg (sigma (chgDel q)) (sigma (chgIns p))|.
@@ -888,7 +897,7 @@ after p q = case unify (chgDel p) (chgIns q) of
   Note that it is inherent that purely structural composition of two changes
 |p| after |q| yields a change, |after p q|, that potentially misses sharing
 opportunities. Imagine that |p| inserts a subtree |t| that was
-deleted by |q|. Our composition algorithm posses no information
+deleted by |q|. Our composition algorithm possesses no information
 that this |t| is to be treated as a copy. This also occurs in
 the edit-script universe: composing patches yields worse patches
 than recomputing differences. We can imagine that a more complicated
@@ -1062,7 +1071,7 @@ change equality, |~~|. As we shall see next, however, it is not
 trivial to squeeze more structure out of this change representation.
 \digress{I would have enjoyed to be able to spend more time studying
 the metatheory. Obviously, it is not because the options discussed
-next failed that there exists no options to extend the metatheory
+next failed that there exists no option to extend the metatheory
 whatsoever. It is still worth discussing the difficulties I encountered
 while trying to use standard techniques, below.}
 
@@ -1124,14 +1133,14 @@ instantiated for our particular case, yields the definition below.
 Let |p| and |q| be two aptly typed changes; we say that |q| is
 an extension of |p|, denoted |p <= q|, if and only if
 |forall x `elem` dom p dot (app p) x == (app q) x|.
-In other words, |p <= q| when |q| coincides with |p| in a restriction
-of its domain.
+In other words, |p <= q| when |q| coincides with |p| when restricted to |p|'s
+domain.
 \end{definition}
 
 %format ~  = "\HS{\sim}"
 %format /~ = "\HS{\nsim}"
 
-  This gives us a partial order on changes and it is the case that
+  This gives us a preorder on changes and it is the case that
 |after p (inv p) <= cpy| and |after (inv p) p <= cpy|. Attempting
 to identify |after p (inv p)| as somehow equivalent to |cpy| using |<=|
 will not work, however.
@@ -1255,7 +1264,7 @@ being shared.}
 
 \subsubsection{Which Common Subtree, Generically}
 
-  Similarly to example from \Cref{sec:pepatches:concrete-changes},
+  Similarly to the example from \Cref{sec:pepatches:concrete-changes},
 the first thing we must do is to annotate our trees with hashes at
 every point. The |Holes| datatype from \genericssimpl{}
 also supports annotations. Unlike the concrete example, however,
@@ -1313,7 +1322,7 @@ decorate  = synthesize dots
 %% \end{figure}
 
   The algebra used by |decorate|, above, computes a hash at each constructor
-of the tree. The hashes are computed from the a unique identifier per constructor
+of the tree. The hashes are computed from a unique identifier per constructor
 and a concatenation of the hashes of the subtrees. The hash of the
 root in \Cref{fig:pepatches:decorate-conc}, for example, is computed with
 a call to |hash (concat ["Main.Tree.Bin", "310dac", "4a32bd"])|.  This
@@ -1325,8 +1334,8 @@ every hash we see in a hash map from hashes to integers.  These
 integers count how many times we have seen a tree, indicating the
 arity of a subtree. Shared subtrees occur with arity of at least two:
 once in the deletion context and once in the insertion context.  The
-underlying datastructure is a |Int64|-indexed trie~\cite{Brass2008} as
-our datastructure. \digress{I would like to also implemented this
+underlying datastructure is a |Int64|-indexed trie~\cite{Brass2008}.
+\digress{I would like to also implement this
 algorithm with a big-endian Patricia Tree~\cite{Okasaki1998} and
 compare the results. I think the difference would be small, but worth
 considering when working on a production implementation}.
@@ -1348,7 +1357,7 @@ the source tree and destination tree, we construct the \emph{sharing}
 map, which consists in the intersection of the arity maps and a final
 pass adding a unique identifier to every key. We also keep
 track of how many metavariables were assigned, so we can always
-allocate fresh names without having to go inspect the whole map again.
+allocate fresh names without having to inspect the whole map again.
 This is just a technical consequence of working with binders explicitly.
 
 \begin{myhs}
@@ -1363,7 +1372,7 @@ buildSharingMap x y  =   T.mapAccum (\i ar -> (i+1 , MAA i ar) ) 0
 \end{myhs}
 
   The final |wcs s d| is straightforward: we preprocess the trees
-with their hash and height then compute their sharing map, which
+with their hash and height; then compute their sharing map, which
 is used to lookup the common subtrees. Yet, the whole point
 of preprocessing the trees was to avoid the unnecessary recomputation
 of their hashes. Consequently, we are better off carrying these
@@ -1384,14 +1393,14 @@ wcs s d =  let m = buildSharingMap s d
 is linear and takes $\mathcal{O}(n + m)$ time, where |n| and |m|
 are the number of constructors in |s| and |d|. A call to |f x| for
 some |x|, however, is answered in $\mathcal{O}(1)$ due to the
-bounded depth of the patricia tree.
+bounded depth of the trie.
 
   We chose to use a cryptographic hash function~\cite{Menezes1997}
 and ignore the remote possibility of hash collisions.
 Although it would not be hard to detect these collisions whilst
 computing the arity map, doing so would incur a performance
 penalty. Checking for collisions would require us to store the
-tree with its associated hash instead of only storing the hash.
+path to the tree together with its associated hash instead of only storing the hash.
 Then, on every insertion we could check
 that the inserted tree matches with the tree already in the map.
 \digress{If I had used a non-cryptographic hash, which are much faster to
@@ -1435,7 +1444,7 @@ extract  :: ExtractionMode -> CanShare kappa fam -> IsSharedMap
 \end{code}
 \end{myhs}
 
-  \digress{To some extent, we could compare context extraction to the
+  To some extent, we could compare context extraction to the
 translation of tree mappings into edit-scripts: our tree matching is
 encoded in |wcs| and instead of computing an edit-scripts, we compute
 terms with metavariables.  Classical algorithms are focused in
@@ -1446,14 +1455,14 @@ we are interested in those that merge better which might not
 necessarily be those that insert and delete the least amount of
 constructors. Consequently, there is a lot of freedom in defining our
 context extraction techniques. We will look at three particular
-examples next, but I sketch other possibilities later
-(\Cref{sec:pepatches:discussion}).}
+examples next, but we discuss other possibilities later
+(\Cref{sec:pepatches:discussion}).
 
 \paragraph{Extracting with |NoNested|.}
 Extracting contexts with the |NoNested| mode happens in two passes.
 We first extract the contexts naively, then make a second pass
 removing the variables that appear exclusively in the insertion.
-To keep the extraction algorithm linear is important to \emph{not}
+To keep the extraction algorithm linear it is important to \emph{not}
 forget which common subtrees have been substituted on the first pass.
 Hence, we create a context that contains metavariables and their
 associated tree.
@@ -1476,7 +1485,7 @@ and decides whether to transform the
 |Const Int| into a |Metavar kappa fam| or whether to forget this was a
 potential shared tree and keep the tree instead. We will omit the
 implementation of the second pass. It consists in a straightforward
-traversal of the output of |noNested1|, we direct the interested
+traversal of the output of |noNested1|. We direct the interested
 reader to check |Data.HDiff.Diff.Modes| in the source code for more
 details (\Cref{chap:where-is-the-code}).
 
@@ -1490,7 +1499,7 @@ This completely bypasses the issue with |NoNested| producing
 insertion contexts with undefined variables and requires
 no further processing. The reason for it is that the variables
 produced will appear with the same arity as the trees they abstract,
-and in this case, it will always be two: once in the deletion context
+twice in this case: once in the deletion context
 and once in the insertion context.
 
 \begin{myhs}
@@ -1509,7 +1518,7 @@ patience h sm x@(SFixAnn ann  xi)
 
 \paragraph{Extracting with |ProperShares|.}
 The |ProperShares| method prefers sharing smaller subtrees more times
-instead of but bigger subtrees, which might shadow nested commonly occurring
+instead of bigger subtrees, which might shadow nested commonly occurring
 subtrees (\Cref{fig:pepatches:extract-problem}).
 
   Given a source |s| and a destination |d|,
@@ -1596,22 +1605,22 @@ enough information for that.
 
   Synchronizing changes requires us to understand which
 constructors in the deletion context are, in fact, just being copied
-over in the insertion context. Take \Cref{fig:pepatches:example-04},
+over in the insertion context. Taking \Cref{fig:pepatches:example-04},
 where one change operates exclusively on the right child of a binary
 tree whereas the other alters the left child and duplicates the right
 child in-place.  These changes are clearly \emph{disjoint}, since they
 modify the content of different subtrees of the source. Consequently
 it should be possible to be automatically synchronize them.
-To recognize them as \emph{disjoint} changes, though
+To recognize them as \emph{disjoint} changes, though,
 will require more information than what is provided by |Chg|.
 
   Observing the definition of |Chg| reveals that the deletion context
-might \emph{delete} many constructors that that are being inserted,
+might \emph{delete} many constructors that are being inserted,
 in the same place, by the insertion context. The changes from
 \Cref{fig:pepatches:example-04}, for example, conceal the fact that the |Bin| at the root of the source tree is, in fact, being copied in both changes.
 Following the \texttt{stdiff} nomenclature, the |Bin| at
 the root of both changes in \Cref{fig:pepatches:example-04} should be
-places in the \emph{spine} of the patch.  That is, it is copied over
+placed in the \emph{spine} of the patch.  That is, it is copied over
 from source to destination but it leads to changes further down the
 tree.
 
@@ -1732,13 +1741,13 @@ globallyScopedPatch (Chg d i) = holesMap (uncurry' Chg) (lgg d i)
 little information from a synchronization point of view.  To an
 extent, it makes merging even harder. Take
 \Cref{fig:pepatches:misalignment}, where a globally scoped patch is
-produced from a change.  It is harder to understand that the |(: 42)|
+produced from a change.  It is harder to understand that the |(42 :)|
 is being deleted by looking at the globally-scoped patch than by
 looking at the change.  This is because the first |(:)| constructor is
 considered to be in the spine by the naive anti-unification algorithm,
-which proceeds top-down.  A bottom-up approach is also unpractical, we
+which proceeds top-down.  A bottom-up approach is also unpractical, as we
 would have to decide which leaves to pair together and it would suffer
-similar issues for data inserted on the tail of linearly-structured
+similar issues for data inserted on the tail of linearly structured
 data.
 
 
@@ -1790,7 +1799,7 @@ safely distributed whenever applicable. This is a usual difficulty
 when handling objects with binders, in general.
 \digress{I wonder how an
 implementation using De Bruijn indexes would look like. I'm not
-immediately sure it would be easier to enforce correct indexes. Through
+immediately sure it would be easier to enforce correct indices. Through
 the bowels of the code we ensure two changes have disjoint sets of
 names by adding the successor of the maximum variable of one over the
 other.}
@@ -1808,7 +1817,7 @@ chgDistr p  = Chg  (holesJoin (holesMap chgDel p)) (holesJoin (holesMap chgIns p
 
   The application semantics of |Patch| is independent of the scope
 choices, and is easily defined in terms of |chgApply|. First we
-computing a global change that corresponds to the patch in question,
+compute a global change that corresponds to the patch in question,
 then use |chgApply|. The |apply| function below works for locally and
 globally scoped patches, as long as we care that the precondition for
 |chgDistr| is maintained.
@@ -1825,7 +1834,7 @@ apply p = chgApply (chgDistr p)
 produce results that are difficult to understand and synchronize, as
 in \Cref{fig:pepatches:misalignment}. On the other hand,
 \emph{locally-scoped} patches are more involved to compute, as we will
-study next, \Cref{sec:pepatches:closures}, but they forbid
+study next, in \Cref{sec:pepatches:closures}, but they forbid
 misalignments and also enable us to process small changes
 independently of one another in the tree.  This is particularly
 important for being able to develop an industrial synchronizer at some
@@ -1914,7 +1923,7 @@ enlarging the resulting changes until they are well-scoped and closed.
 \Cref{fig:pepatches:example-03} illustrates this process. Computing
 the closure of \Cref{fig:pepatches:example-03:A} starts with
 \Cref{fig:pepatches:example-03:B}, then \emph{enlarging} the changes
-to so that they contain the |Bin| constructor, which fixes their scope
+so that they contain the |Bin| constructor, which fixes their scope
 (resulting in \Cref{fig:pepatches:example-03:C}).
 
   We say a change is closed when it has no free metavariables and,
@@ -1949,9 +1958,9 @@ two such changes should not interfere with one another.
 
   Producing locally-scoped minimal-closed changes can be difficult under
 arbitrary renamings. Take \Cref{fig:pepatches:example-minimal:E}, one
-could argue that: if the occurrences of |metavar x| in each individual
+could argue that if the occurrences of |metavar x| in each individual
 change are, in fact, different, then the changes are
-minimal-closed. To avoid these. In our case, however, we always start
+minimal-closed. To avoid this, we always start
 from a large well-scoped change produced with |chg|. Consequently, we
 know that every occurrence of |metavar x| refers to \emph{the same}
 tree in the source of the patch. This is another technicality of
@@ -1984,13 +1993,13 @@ auxiliary version that receives the global scope and keeps track of
 the variables it has seen so far.  The worst case scenario happens when
 the we need \emph{all} constructors of the spine to close the change,
 in which case, |close c = Hole c|; yet, if we pass a non-well-scoped
-change change to |close|, it cannot produce a result and throws
+change to |close|, it cannot produce a result and throws
 an error instead.
 
   Efficiently computing closures requires us to keep track of the
 variables that have been declared and used in a change -- that is,
 we have seen occurrences in the deletion and insertion context
-respectively.  Recomputing this multisets would result in a slower
+respectively.  Recomputing these multisets would result in a slower
 algorithm.  The |annWithVars| function below computes the variables
 that occur in two contexts and annotates a change with them:
 
@@ -2055,7 +2064,7 @@ constructors of the spine down the deletion and insertion contexts.
 \subsection{The |diff| Function}
 
   Equipped with the ability to produce changes and minimize them,
-we move on to defining the |diff| function. As usual, it receives a source and
+we move on to defining the |diff| function. As usual, it receives source and
 destination trees, |s| and |d|, and computes a patch that encodes the
 information necessary to transform the source into the
 destination. The extraction of the contexts yields a |Chg|, which is
@@ -2125,7 +2134,7 @@ producing a patch with locally scoped changes and copies in its spine.}
 \end{myforest}
 \label{fig:pepatches:alignment-01:A}}
 \qquad\qquad
-\subfloat[Alignment where the deletion of |(: 42)| is correctly identified.]{%
+\subfloat[Alignment where the deletion of |(42 :)| is correctly identified.]{%
 \begin{myforest}
 [, delctx , alignmentSmall
   [|(:)| [|42|] [SQ]]
@@ -2153,7 +2162,7 @@ alignments, which make the backbone of synchronization. Untyped
 synchronizers, such as \texttt{harmony}~\cite{Foster2007}, must employ
 schemas to identify insertions and deletions avoiding misalignments
 (\Cref{fig:pepatches:misalignment}). In our case, the type information
-enable us to identify insertions and deletions naturally by ensuring that
+enables us to identify insertions and deletions naturally by ensuring that
 they delete one layer of a \emph{recursive type} at a time, never altering
 the type of the value under scrutiny.
 
@@ -2162,7 +2171,7 @@ motivated locally-scoped patches (\Cref{fig:pepatches:misalignment})
 in the first place. This time, however, arrows
 connect constructors that represent \emph{the
 same information} in each respective context.  This makes it clear
-that |(: 42)| has no counterpart in the insertion context and,
+that |(42 :)| has no counterpart in the insertion context and,
 consequently, corresponds to a deletion.  The |Chg| datatype
 by itself is insufficient to represent all this information. Therefore
 we need a new datatype for \emph{alignments}, |Al|, and a function
@@ -2185,7 +2194,7 @@ globally-scoped with respect to the alignment they belong.
 We also add explicit information about copies and permutations to aid
 the synchronization engine later. \Cref{fig:pepatches:alignment-02}
 illustrates a value of type |Patch| and its corresponding alignment,
-of type |PatchAl| defined below. Note how the the scope from each
+of type |PatchAl| defined below. Note how the scope from each
 change in \Cref{fig:pepatches:alignment-02:A} is preserved in
 \Cref{fig:pepatches:alignment-02:B}, but the |Bin| on the left of the
 root can now be safely identified as a copy without losing information
@@ -2268,7 +2277,7 @@ where this modification must take place. Moreover, said position
 must be a recursive field of the constructor -- that is,
 the deletion or insertion must not alter the type that our patch
 operates over. This is easy to identify since we
-followed typed approach, where we always have access to type-level
+follow a typed approach, where we always have access to type-level
 information.
 
   In the remainder of this section we discuss the datatypes necessary
@@ -2284,9 +2293,9 @@ alignChg  :: Chg kappa fam at -> Al kappa fam (Chg kappa fam) at
 \end{code}
 \end{myhs}
 
-  The alignments here, encoded in the |Al| datatype, is similar to its
+  This alignment notion, encoded in the |Al| datatype, is similar to its
 predecessor |Almu| from \texttt{stdiff}
-(\Cref{sec:stdiff:diff:fixpoint}), it records insertions, deletions
+(\Cref{sec:stdiff:diff:fixpoint}), as it records insertions, deletions
 and spines over a fixpoint. Insertions and deletions will be
 represented with |Zipper|s~\cite{Huet1997}. A zipper over a datatype
 |t| is the type of \emph{one-hole-contexts} over |t|, where the hole
@@ -2303,7 +2312,7 @@ indicating the focus is in either the left or the right subtree. It
 of type |at| with one of its recursive positions replaced by a value
 of type |h at| and the other positions |at'| (recursive or not) carrying
 values of type |g at'|. The |c| above is a constraint that enables us
-to inform GHC some properties of type |at| and is mostly a technicality.
+to inform GHC about some properties of type |at| and is mostly a technicality.
 
   An alignment |Al kappa fam f at| represents a sequence of insertions
 and deletions interleaved with spines, copies and permutations which
@@ -2336,12 +2345,12 @@ the alignment, and continue to align its fields pairwise.
 \end{code}
 \end{myhs}
 
-  The |Spn| inside an alignment does not need to preserve metavariable scoping,
-consequently, it can be pushed closer to the leaves uncovering as many
+  The |Spn| inside an alignment does not need to preserve metavariable scoping.
+Consequently, it can be pushed closer to the leaves uncovering as many
 copies as possible.
 
   When no |Ins|, |Del| or |Spn| can be used,
-we must be fallback to recording a unclassified modification,
+we must resort to recording a unclassified modification,
 of type |f at|. Most of the times |f| will be simply |Chg kappa fam|,
 but we will be needing to add some extra information in the leaves
 of an alignment later. Moreover, keeping the |f| a parameter
@@ -2362,7 +2371,7 @@ synchronizes with anything whereas a contraction needs to satisfy
 additional constraints. Therefore, we will identify copies and permutations
 directly in the alignment to aid the merge function, later.
 
-  Let |c = Chg (metavar x) (metavar y)| with both |x| and |y| occur twice
+  Let |c = Chg (metavar x) (metavar y)| where both |x| and |y| occur twice
 in their global scope: once in the deletion context and once in the
 insertion context. We say |c| is a copy when |x == y| and a permutation
 when |x /= y|. These are the last two constructors of |Al|.
@@ -2378,7 +2387,7 @@ when |x /= y|. These are the last two constructors of |Al|.
 |alignChg|.  Given a change |c|, the first step of |alignChg c| is
 checking whether the root of |chgDel c| (resp. |chgIns c|) can be
 deleted (resp. inserted). A deletion (resp. insertion) of an occurrence
-of a constructor |X| can be performed when all the of fields of |X| at
+of a constructor |X| can be performed when all fields of |X| at
 this occurrence are \emph{rigid} trees with the exception of a single
 recursive field -- recall \emph{rigid} trees contains no
 metavariables. If we can delete the root, we flag it as a deletion and
@@ -2429,7 +2438,7 @@ annotRigidity :: Holes kappa fam h x -> HolesAnn  kappa fam IsRigid  h x
 % \label{fig:pepatches:rigidity}
 % \end{figure}
 
-  After annotations the trees with rigidity information, we
+  After annotating the trees with rigidity information, we
 extract the zippers that witness potential insertions
 or deletions. This is done by the |hasRigidZipper| function, which is
 implemented by extracting \emph{all} possible zippers from the root
@@ -2449,7 +2458,7 @@ of its zippers (the one with focus on |Bin (metavar k) (metavar l)|,
 \Cref{fig:pepatches:hasrigidzipper:C})
 rigid, that is, none of the trees within the zipper has any
 metavariables.  We omit the full implementation of |hasRigidZipper|
-but invite the interested reader should check |Data.HDiff.Diff.Align|
+but invite the interested reader to check |Data.HDiff.Diff.Align|
 in the source code (\Cref{chap:where-is-the-code}).
 
 % \begin{myhs}
@@ -2483,8 +2492,8 @@ where applicable.}
 \end{figure}
 
   Checking for deletions, then, can be easily done by first checking
-whether the root can has a rigid zipper, if so, we can flag the
-deletion. In the excerpt of |alD| below, if |d| was the tree in
+whether the root has a rigid zipper. If so, we can flag the
+deletion. In the excerpt of |alD| below, should |d| be the tree in
 \Cref{fig:pepatches:hasrigidzipper:B}, |focus| would be |Bin (metavar
 k) (metavar l)|, which is the single \emph{non-rigid} recursive
 subtree of |d|.
@@ -2497,7 +2506,7 @@ alD d i = case hasRigidZipper d of
 \end{myhs}
 
   The complete |alD| is more involved. For one, we must check whether
-|i| also has a rigid zipper and when both |d| and |i| have rigid zippers,
+|i| also has a rigid zipper. When both |d| and |i| have rigid zippers,
 we must check whether they are the same constructor and, if so, mark
 it as part of the spine instead. The |al| function encapsulates the |alD|
 above and is shown in \Cref{fig:pepatches:align-fulldef}. A call to |al|
@@ -2571,12 +2580,13 @@ al vars d i = alD (alS vars (al vars)) d i
 \label{fig:pepatches:align-fulldef}
 \end{figure}
 
-  Forgetting information computed |alignChg| is trivial but enables
-us to convert back into a |Chg|. The |disalign| function, sketched
-below, plugs deletion and insertion zippers casting a zipper over |SFix| into a
-zipper over |Holes| where necessary; distributes the constructors in
-the spine into both deletion and insertion contexts and translates
-|Cpy| and |Prm| as expected.
+  Forgetting the information computed by |alignChg| is trivial, as
+shown in the |disalign| function sketched below. It converts a |Al|
+back into a |Chg| in the expected way: it plugs deletion and insertion
+zippers, casting a zipper over |SFix| into a zipper over |Holes| where
+necessary, and distributes the constructors in the spine into both
+deletion and insertion contexts and translates |Cpy| and |Prm| as
+expected.
 
 \begin{myhs}
 \begin{code}
@@ -2634,7 +2644,7 @@ align' p = flip runState maxv $$ holesMapM (alRefineM cpyPrims . alignChg vars) 
   The |cpyPrims| above issues a |Cpy i|, for a fresh name |i| whenever
 it sees a modification with the form |Chg (Prim x) (Prim y)| with |x == y|.
 The |alRefineM f| applies a function in the leaves of the |Al| and
-has type.
+has type:
 
 \begin{myhs}
 \begin{code}
@@ -2657,7 +2667,7 @@ by the insertion or deletion.
 an unrestricted tree-matching, which can later be translated into
 isolated, well-scoped, fragments connected through an outer spine
 and making up a |Patch|. Finally, we have seen how to
-extract valuable information from well-scoped about which constructors
+extract valuable information from well-scoped fragments about which constructors
 have been deleted, inserted or still belong to an inner spine, giving
 rise to alignments. This representation is a mix of local and
 global alignments. The outer spine is important to isolate a
@@ -2665,7 +2675,7 @@ large change into smaller chunks, independent of one another.
 
   The |diff| function produces a |Patch| instead of a |PatchAl|
 to keep it consistent with our previously published work~\cite{Miraldo2019},
-but also because its easier to manage calls to |align| where they are
+but also because it is easier to manage calls to |align| where they are
 directly necessary, since |align| produces fresh variables and
 this can require special attention to keep names from being shadowed.
 
@@ -2701,7 +2711,7 @@ algorithm for aligned patches, witnessed by the |merge|
 function, declared below, which receives two \emph{aligned} patches
 |p| and |q| that make a span -- that is, have at least one common
 element in their domain. The result of |merge p q| is a patch that
-can might contain conflicts, denoted by |PatchC|, whenever
+might contain conflicts, denoted by |PatchC|, whenever
 both |p| and |q| modify the same subtree in two distinct ways.
 If |p| and |q| do \emph{not} make a span |merge p q| returns |Nothing|.
 \Cref{fig:pepatches:mergesquare} illustrates a span of patches |p|
@@ -2843,10 +2853,10 @@ ancestor. Hence, the synchronization is possible and results in
   Given then two aligned patches, the |merge p q| function below
 will map over the common prefix of the spines
 of |p| and |q|, captured by their least-general-generalization and
-produce a patch with might contain conflicts inside.
-\digress{In the actual implementation we receive two patches
-and align them inside |merge|, this helps ensuring they will
-have a disjoint set of names.}
+produce a patch that might contain conflicts inside.
+In the actual implementation we receive two patches
+and align them inside |merge|, as this helps ensuring they will
+have a disjoint set of names.
 
 \begin{myhs}
 \begin{code}
@@ -2878,15 +2888,15 @@ type PatchC kappa fam at    = Holes kappa fam (Sum (Conflict kappa fam) (Chg kap
 \end{myhs}
 
   Merging has a large design space. In what follows we will discuss
-our initial exploration and prototype algorithm, which was driven
+our initial exploration and prototype algorithm, which was driven by
 practical experiments (\Cref{chap:experiments}).
 \digress{Unfortunately, I never had time to come back and refine the
 merging algorithm from its prototype phase into a more polished
 version. The merging algorithm was the last aspect of the project I worked on.}
 
   The |mergeAl| function is responsible for synchronizing alignments and
-is where most of the work is happens. In broad strokes, it is similar to
-synchronizing |PatchST|'s, \Cref{sec:stdiff:merging}: insertions
+is where most of the work happens. In broad strokes, it is similar to
+synchronizing |PatchST|'s (\Cref{sec:stdiff:merging}): insertions
 are preserved as long as they do not happen simultaneously.
 Deletions must be \emph{applied} before continuing and
 copies are the identity of synchronization. In the current setting,
@@ -2903,7 +2913,7 @@ information on the current traversal, yielding a very slow merging algorithm.
 \Cref{fig:pepatches:merge-02}. We start identifying we are in a
 situation where both |diff o a| and |diff o b| are spines, that is,
 they copy the same constructor at their root. Recursing pairwise
-through their children, we see a permutation versus a copy, since a
+through their children, we see a permutation versus a copy. Since a
 copy is the identity element, we return the permutation.  On the right
 we see another spine versus an insertion, but since the insertion
 represents new information, it must be preserved.  Finally, inside the
@@ -2971,7 +2981,7 @@ example. When unifying the deletion contexts of
 \Cref{fig:pepatches:eqs-not-inst:B}, we learn that |{metavar x == Leaf
 42, metavar a == metavar x; metavar b == metavar y}|, which enable us
 to conclude both changes are compatible and perform the same action
-modulo a contraction and can be merged, yielding \Cref{fig:pepatches:eqs-not-inst:C}
+modulo a contraction and can be merged, yielding \Cref{fig:pepatches:eqs-not-inst:C}.
 
 \begin{figure}
 \centering
@@ -3112,7 +3122,7 @@ mergeAl x y = case runExcept (evalStateT (mergeAlM p q) mrgStEmpty) of
 
   Finally, the |mergeAlM| function maps over both alignments that
 we wish to merge and collects all the constraints and observations.
-It then attempts to splits these constraints and observations into
+It then attempts to split these constraints and observations into
 two maps: (A) a deletion map that contains information
 about what a subtree identified by a metavariable \emph{was}; and
 (B) an insertion map that identifies what said metavariable \emph{became}.
@@ -3237,12 +3247,12 @@ mrgPrm x y c  =   addToInst "prm-chg" x c
 
   The |addToInst| function inserts the |(x, c)| entry in |inst| if |x|
 is not yet a member. It raises a conflict with the supplied label
-if |x| is already in |inst| with a value that is different than |c|.
-\digress{I believe that we could develop a better algorithm if instead
+if |x| is already in |inst| with a value that is different from |c|.
+\footnote{It might be the case that we could develop a better algorithm if instead
 of forbidding values different than |c| we check to see whether the
-two different values can also be merged. I ran into many difficulties
-tracking how subtrees were moved and opted for the easy and pragmatic
-option of not doing anything difficult here.}
+two different values can also be merged. This did incur many difficulties
+tracking how subtrees were moved which made us opt for the easy and pragmatic
+approach of not doing anything difficult here.}
 
   The call to |addToInst| in |mrgPrm| never raises a
 |"prm-chg"| conflict. This is because |metavar x| and |metavar y| are
@@ -3255,7 +3265,7 @@ dataset, as expected.}
 
   With permutations and copies out of the way, we start looking at the
 more intricate branches of the merge function. Insertions are still fairly
-simple and must preserved as long as they do not attempt to
+simple and must be preserved as long as they do not attempt to
 insert different information in the same location -- we would not
 be able to decide which insertion come first in this situation.
 
@@ -3270,16 +3280,16 @@ be able to decide which insertion come first in this situation.
 \end{myhs}
 
   Deletions must be preserved and \emph{executed}. That is, if one patch
-deletes a constructor but the other modifies the fields the
+deletes a constructor but the other modifies the fields of the
 constructor, we must first ensure that none of the deleted fields
 have been modified but the deletion should be preserved in the merge.
 The |tryDel| function attempts to execute the deletion of a zipper
 over an alignment, and, if successful, returns the pair of
 alignments we should continue to merge. It essentially overlaps
-the deletion zipper with |a| and observe whether |a| performs no
+the deletion zipper with |a| and observes whether |a| performs no
 modifications anywhere except on the focus of the zipper.
 When its not possible to execute the deletion
-we can continue. \Cref{fig:pepatches:trydel-examples} illustrate some
+we can continue. \Cref{fig:pepatches:trydel-examples} illustrates some
 example calls to |tryDel|, whose complete generic definition is shown
 in \Cref{fig:pepatches:trydel}.
 
@@ -3290,7 +3300,7 @@ in \Cref{fig:pepatches:trydel}.
 \end{code} %
 \end{myhs}
 
-  Note that since |merge| is symmetric, we an freely swap the order
+  Note that since |merge| is symmetric, we can freely swap the order
 of arguments. \digress{Let me rephrase that. The |merge| \emph{should}
 be symmetric, and \texttt{QuickCheck} tests were positive of this, but
 I have not come to the point of proving this yet.}
@@ -3375,7 +3385,7 @@ change.
 
   The |mrgChgSpn| function, below, matches the deletion context of the
 |Chg| against the spine and and returns a |P2Instantiate| instruction.
-The instantiation function |instM|, exemplified in
+The instantiation function |instM|, illustrated in
 \Cref{fig:pepatches:instm-examples} and defined in
 \Cref{fig:pepatches:instm}, receives a deletion context and an
 alignment and attempts to assign the variables in the deletion context
@@ -3491,8 +3501,8 @@ here are operating over pairs of lists.}
 \end{code}
 \end{myhs}
 
-  The |Just| in the return value above indicate we must check that we
-will not introduce extra duplications.  In
+  The |Just| in the return value above indicates that we must check that we
+will not introduce extra duplications.
 \Cref{fig:pepatches:merge-03} illustrates a case where failing to
 perform this check would result in an erroneous duplication of the
 value |2|. Matching the deletion context of |chg = Chg (metavar c)
@@ -3547,7 +3557,7 @@ is recurse on the paired fields of the spines, point-wise:
 
   Lastly, when the alignments in question are arbitrary modifications,
 we must try our best to reconcile these. We handle duplications differently
-than arbitrary modifications, they are easier to handle.
+from arbitrary modifications, which are easier to handle.
 
 \begin{myhs}
 \begin{code}
@@ -3591,7 +3601,7 @@ mrgChgChg p' q'  | isDup p'   = mrgChgDup p' q'
 
 %   \Cref{fig:pepatches:mergePhaseOne} collects all the cases discussed
 % above and illustrates the full definition of |mergePhase1|.
-Once the first pass is done and we have collected information
+Once the first pass is done, we have collected information
 about how each subtree has been changed and potential subtree
 equivalences we might have discovered. The next step is to synthesize
 this information into two maps: a deletion map that informs us
@@ -3663,7 +3673,7 @@ components of each of its points. Next, we partition the equivalences into rigid
 equivalences, of the form |(metavar v , t)| where |t| has no holes, and
 non-rigid equivalences. The rigid equivalences are added to both
 deletion and insertion maps, but the non-rigid ones, |(metavar v ,
-t)|, are are only added when there is no information about the
+t)|, are only added when there is no information about the
 |metavar v| in the map and, if |t == metavar u|, we also check
 that there is no information about |metavar u| in the map.
 Lastly, after these have been added to the map, we call |minimize|
@@ -3778,7 +3788,7 @@ edit-scripts enables us to define a computationally efficient
 differencing algorithm and how the notion of \emph{change} coupled
 with a simple notion of composition gives a sensible algebraic
 structure.  The patch datatype in \texttt{hdiff} is more expressive
-than edit-script based approaches, it enables us to write
+than edit-script based approaches, as it enables us to write
 transformations involving arbitrary permutations and duplications. As
 a consequence, we have a more involved merge algorithm. For one, we
 cannot easily generalize our three-way merge to $n$-way merge. More
@@ -3798,7 +3808,7 @@ a production tool.
 
 \subsubsection*{Refining Matching and Sharing Control}
   The matching engine underlying \texttt{hdiff} uses hashes
-indiscriminately, all information under a subtree is used to compute
+indiscriminately, all information under a subtree being used to compute
 its hash, which can be undesirable. Imagine a parser that annotates
 its resulting AST with source-location tokens. This means that we
 would not be able to recognize permutations of statements, for
@@ -3810,7 +3820,7 @@ be shared and up until which point. For example, we probably never
 want to share local statements outside their scope.  Recall we avoided
 this issue by restricting whether a subtree could be shared
 or not based on its height. This was a pragmatic design choice
-that enabled us to make progress but it is a work-around at its best.
+that enabled us to make progress but it is a work-around at best.
 
   Salting the hash function of |preprocess| is not an option for
 working around the issue of sharing control.
@@ -3857,9 +3867,10 @@ hashes.
   This problem is twofold, however. Besides identifying the
 algorithmic means to ensure \texttt{hdiff} could be scope-aware and
 respect said scopes, we must also engineer an interface to enable the
-user to easily define said scopes. I envisioned a design with a custom
-version of the \genericssimpl{} library, with an added alias for the
-identity functor that could receive special treatment, for example:
+user to easily define said scopes. We could think of design that
+made use of a custom version of the \genericssimpl{} library, 
+with an added alias for the identity functor that could receive 
+special treatment, for example:
 
 \begin{myhs}
 \begin{code}
@@ -3876,11 +3887,11 @@ throughout our algorithms, we could treat \emph{scoped} types differently.
 
   We reiterate that if there is a solution to this problem, it certainly
 will not use a modification of the matching mechanism: if we use
-scope names, renamings will case problems; if we use the order which
+scope names, renamings will cause problems; if we use the order in which
 scopes have been seen (De Bruijn-like), permutations will cause problems.
 Controlling on the height of the trees and minimizing this issue was
 the best option to move forward in an early stage. Unfortunately,
-I did not have time to explore how scope graphs~\cite{Neron2015} could
+there was no time to explore how scope graphs~\cite{Neron2015} could
 help us here, but it is certainly a good place to start looking.
 It might be possible to use scope graphs to write a more intricate
 |close| function, that will properly break sharing where necessary,
@@ -3892,9 +3903,9 @@ We have presented three extraction methods, which we called
 |NoNested|, |ProperShare| and |Patience|.  Computing the diff between
 two trees using different extraction methods can produce different
 patches. Certainly there can be more extraction methods. One such
-example that I never had the time to implement was a refinement of
+example that would be interesting to implement is a refinement of
 |ProperShare|, aimed at breaking the sharing introduced by it. The
-idea was to list the the metavariables that appear in the deletion and
+idea was to list the metavariables that appear in the deletion and
 insertion context and compute the LCS between these lists. The
 location of copies enable us to break sharing and introduce new
 metavariables.  For example, take the change below.
@@ -3937,14 +3948,14 @@ enlarge the domain of our patches.
 
   Forgetting about sharing is just one example of a different context
 extraction mechanism and, without a formal notion about when a patch
-is \emph{better} than another, its impossible to make a decision about
+is \emph{better} than another, it is impossible to make a decision about
 which context extraction should be used. Our experimental results
 suggest that |Patience| yields patches that merge successfully more
 often, but this is far from providing a metric on patches, like the
 usual notion of cost does for edit-scripts.
 
 \paragraph{Relation to Edit-Scripts.} Another interesting aspect that
-I would have liked to look at is the relation between our |Patch| datatype
+could have been looked at is the relation between our |Patch| datatype
 and traditional edit-scripts. The idea of breaking sharing above can be used
 to translate our patches to an edit-script. Some early experiments did show
 that we could use this method to compute approximations of the least-cost
@@ -3954,9 +3965,9 @@ how good an approximation we might be able to compute in linear time.
 
 \subsubsection*{Formalizations and Generalizations}
 Formalizing and proving properties about our |diff| and |merge| functions
-was also one of my priorities. As it turns out, the extensional nature
+was also a priority. As it turns out, the extensional nature
 of |Patch| makes for a difficult Agda formalization, which is the reason
-this was left as further work.
+this was left as future work.
 
   The value of a formalization goes beyond enabling us to prove
 important properties. It also provides a laboratory for generalizing
