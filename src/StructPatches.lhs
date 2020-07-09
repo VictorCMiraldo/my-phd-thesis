@@ -779,7 +779,7 @@ merge (Spn s1)     (Ins c2 s2)  = Ins c2         <$$> (mergeAlmuCtx (Spn s1) s2)
 merge (Del c1 s1)  (Ins c2 s2)  = Ins c2         <$$> (mergeAlmuCtx (Del c1 s1) s2)
 \end{code}
 \end{myhs}
-\caption{Definition of |merge|}
+\caption{Definition of |merge|.}
 \label{fig:stdiff:mergest}
 \end{figure}
 
@@ -805,7 +805,7 @@ mergeSpine ix iy (SChg cx cy al) (SCns cz zs)  = do  Refl <- testEquality ix iy
                                                      SCns cy <$$> mergeAlAt al zs
 \end{code} %$
 \end{myhs}
-\caption{Definition of |mergeSpine|}
+\caption{Definition of |mergeSpine|.}
 \label{fig:stdiff:mergespine}
 \end{figure}
 

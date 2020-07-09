@@ -769,7 +769,7 @@ o & 1 & 4,5 & 2 & 3,4,5 & 6 \\
 b & 1 & 4,5 & 2 & 4,5,3 & 6 \\
 \end{tabular}
 \label{fig:background:example-diff3:propagate}}%
-\caption{A simple \texttt{diff3} run}
+\caption{A simple \texttt{diff3} run.}
 \label{fig:background:example-diff3}
 \end{figure}
 
@@ -1029,7 +1029,7 @@ $\begin{array}{l}
   \;  = |gsize (L1 (K1 1)) + gsize (L1 (K1 2))|\\
   \;  = |size (1 :: Int) + size (2 :: Int)|
 \end{array}$}
-\caption{Reduction of |size (Bin (Leaf 1) (Leaf 2))|}
+\caption{Reduction of |size (Bin (Leaf 1) (Leaf 2))|.}
 \label{fig:background:sizederiv}
 \end{figure}
 
@@ -1253,7 +1253,7 @@ used to represent generic values.
   Mutual Recursion      &  \texttt{multirec}     &   \\
 \bottomrule
 \end{tabular}
-\caption{Spectrum of static generic programming libraries}
+\caption{Spectrum of static generic programming libraries.}
 \label{fig:background:gplibraries}
 \end{figure}
 

@@ -315,7 +315,7 @@ crush k cat = crushFix . deepFrom
          go (NA_K i) = k i
 \end{code}
 \end{myhs}
-\caption{Generic |crush| combinator}
+\caption{Generic |crush| combinator.}
 \label{fig:gp:crush}
 \end{figure}
 
@@ -727,7 +727,7 @@ class Family (kappa :: kon -> Star) (fam :: [Star]) (codes :: [[[Atom kon]]]) wh
   toMRec    :: SNat ix  -> RepMRec kappa (El fam) (Lkup codes ix) -> El fam ix
 \end{code}
 \end{myhs}
-\caption{|Family| typeclass with support for different opaque types}
+\caption{|Family| typeclass with support for different opaque types.}
 \label{fig:gp:int}
 \end{figure}
 
@@ -828,7 +828,7 @@ geq eqK x y = go (deepFrom x) (deepFrom y)
       =  maybe False (elimRep (uncurry eqK) (uncurry go) and) $  zipRep x y
 \end{code} %$
 \end{myhs}
-\caption{Generic equality}
+\caption{Generic equality.}
 \label{fig:gp:genericeq}
 \end{figure}
 
@@ -1146,7 +1146,7 @@ class HasDatatypeInfo a where
   datatypeInfo :: proxy a -> DatatypeInfo (Code a)
 \end{code}
 \end{myhs}
-\caption{Definitions related to metadata from \texttt{generics-sop}}
+\caption{Definitions related to metadata from \texttt{generics-sop}.}
 \label{fig:gp:sopmeta}
 \end{figure}
 
@@ -1689,7 +1689,7 @@ class GDeep kappa fam f where
   gdto    :: SRep (SFix kappa fam) f -> f x
 \end{code}
 \end{myhs}
-\caption{Declaration of |Deep| and |GDeep| typeclasses}
+\caption{Declaration of |Deep| and |GDeep| typeclasses.}
 \label{fig:gp:gdeep}
 \end{figure}
 
@@ -1769,7 +1769,7 @@ dtoRose :: SFix PrimsRose FamRose (Rose Int) -> Rose Int
 dtoRose = dto
 \end{code}
 \end{myhs}
-\caption{Usage example for \genericssimpl{}}
+\caption{Usage example for \genericssimpl{}.}
 \label{fig:gp:simplistic:example}
 \end{figure}
 
@@ -2147,7 +2147,7 @@ algorithms.
   Mutual Recursion      &   &   \\
 \bottomrule
 \end{tabular}
-\caption{Updated spectrum of generic programming libraries}
+\caption{Updated spectrum of generic programming libraries.}
 \label{fig:gp:gplibraries}
 \end{figure}
 

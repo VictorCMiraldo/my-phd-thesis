@@ -28,9 +28,9 @@ It is also available in Zenodo for download.
 \begin{center}
 \footnotesize
 \begin{longtable}{lllll}
-\caption{Repositories used for data collection} \label{tbl:repos} \\ \toprule
+\caption{Repositories used for data collection.} \label{tbl:repos} \\ \toprule
 Language & Repository & Conflicts & Commits & Forks \\ \midrule \endfirsthead
-\caption{Repositories used for data collection (continued)} \label{tbl:repos} \\ \toprule
+\caption{Repositories used for data collection (continued).} \label{tbl:repos} \\ \toprule
 Language & Repository & Conflicts & Commits & Forks \\ \midrule \endhead
 Clojure & metabase/metabase & 411 & 18697 & 25 \\
 Clojure & onyx-platform/onyx & 189 & 6828 & 209 \\

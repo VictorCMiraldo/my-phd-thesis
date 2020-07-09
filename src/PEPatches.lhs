@@ -395,7 +395,7 @@ context.}
 \end{myforest}
 \label{fig:pepatches:extract-sol-01:proper}}%
 \caption{Two potential solutions to the problem of nested common
-subtrees, illustrated in \Cref{fig:pepatches:extract-problem}}
+subtrees, illustrated in \Cref{fig:pepatches:extract-problem}.}
 \label{fig:pepatches:extract-sol-01}
 \end{figure}
 
@@ -1112,7 +1112,7 @@ the change shown in \Cref{fig:pepatches:inv-not-id}.
 \begin{myforest}
 [,change [|Bin| [|Leaf| [|42|]] [x,metavar]] [|Bin| [|Leaf| [|42|]] [x,metavar]]]
 \end{myforest}}
-\caption{Example of a change, its inverse and their composition}
+\caption{Example of a change, its inverse and their composition.}
 \label{fig:pepatches:inv-not-id}
 \end{figure}
 
@@ -3306,7 +3306,7 @@ be symmetric, and \texttt{QuickCheck} tests were positive of this, but
 I have not come to the point of proving this yet.}
 
 \begin{figure}
-\subfloat[Call to |tryDel| succeeds; The |Bin| at the root can be deleted
+\subfloat[Call to |tryDel| succeeds. The |Bin| at the root can be deleted
 as it only overlaps with copies. |tryDel| returns the focus of the deletion
 and the part of the alignment |a| that overlaps with it.]{
 \begin{myforest}
@@ -3326,7 +3326,7 @@ and the part of the alignment |a| that overlaps with it.]{
 \draw[->,black!30!white] (NA.east)   to[out=10,in=90] (DEST);
 \end{myforest}}
 
-\subfloat[Call to |tryDel| fails; Although the |Bin| at the root could
+\subfloat[Call to |tryDel| fails. Although the |Bin| at the root could
 be deleted, the alignment |a| is changing the |42| present in the
 leaf. This is a conflict.]{
 \begin{myforest}
@@ -3415,7 +3415,7 @@ according to the alignment.]{%
 \draw[->,black!30!white] (NAL.east) to[out=10,in=90] (DEST);
 \end{myforest}}
 
-\subfloat[Call to |instM| returns a conflict; The deletion context, |d|,
+\subfloat[Call to |instM| returns a conflict. The deletion context, |d|,
 wants to match against the value |42| but the alignment modifies it.]{%
 \begin{myforest}
 [,phantom,s sep=10mm, l=0mm,for children={no edge}

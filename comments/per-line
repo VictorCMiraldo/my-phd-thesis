@@ -9,7 +9,7 @@ D Fig.2.5.(D) s/f/d/ and s/g/e/, no?
 
 No
 
-**> Figure 2.3 - caption does not end with full stop, unlike Figure 2.5
+D Figure 2.3 - caption does not end with full stop, unlike Figure 2.5
   and many others. Check all captions in this respect.
 
 D Figure 2.4 - I think the first clause should be "apply [] ts = ts";
@@ -24,13 +24,13 @@ D Figure 2.7 - is "diff O B" what is shown in (E)? "sum := 0"
   (resp. "sum := sum + i") is added, not "prod := 1" (resp. "prod :=
   prod * i"). Main text to be checked too (page 17).
 
-> Figure 5.28 - "fails; Although" -> "fails. Although"
+D Figure 5.28 - "fails; Although" -> "fails. Although"
 
-> Figure 5.28 - "succeeds, The" -> "succeeds. The"
+D Figure 5.28 - "succeeds, The" -> "succeeds. The"
 
-> Figure 5.30 - "conflict," -> "conflict."
+D Figure 5.30 - "conflict," -> "conflict."
 
-> Figure 6.3(F) - "; The" -> ". The"
+D Figure 6.3(F) - "; The" -> ". The"
 
 **> Section 2.1.3: it seems to me that all these problems already
   existed on text-based diffs. It seems that the message is that
@@ -75,7 +75,7 @@ the other doesn't (because of the GHC bug), I guess.
   doing this, first person singular should be avoided because it is
   not standard in scientific writing.
 
-> Table 6.3 - "patches, globally" -> "patches. Globally"
+D Table 6.3 - "patches, globally" -> "patches. Globally"
 
 D 100: "at least 26% of the conflicts [..] could have been
   automatically merge".  Taking into account the weight you had to

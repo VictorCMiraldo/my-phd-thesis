@@ -337,7 +337,7 @@ Language & Mode & Height & \emph{success} & (ratio) & \emph{mdif} & (ratio) & \e
 \caption{Best results for each extraction mode. The \emph{height} column
 indicates the minimum height a subtree must have to qualify for sharing,
 configured with the \texttt{--min-height} option. All of the above results
-were obtained with \emph{locally-scoped} patches, \emph{globally-scoped}
+were obtained with \emph{locally-scoped} patches. \emph{Globally-scoped}
 success rates were consistently lower than their \emph{locally-scoped} counterpart.}
 \label{tbl:eval:merge-hdiff}
 \end{table}
@@ -438,7 +438,7 @@ class Class {
 \end{minipage}\qquad}
 
 \subfloat[Simplified illustration of patch computed with
-\texttt{hdiff -d nonest \{O,A\}.java}; The sharing of |metavar p|
+\texttt{hdiff -d nonest \{O,A\}.java}. The sharing of |metavar p|
 reflects the sharing of the list of method modifiers.]%
 {%
 \begin{myforest}
