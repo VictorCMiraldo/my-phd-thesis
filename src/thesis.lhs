@@ -151,9 +151,9 @@
 \bibliographystyle{acm}
 \bibliography{references}
 
-\chapter{Sammenvatting}
-\lhsinclude{Sammenvatting.lhs}
-%include src/Sammenvatting.lhs
+\chapter{Samenvatting}
+\lhsinclude{Samenvatting.lhs}
+%include src/Samenvatting.lhs
 
 
 \chapter{Curriculum Vitae}
