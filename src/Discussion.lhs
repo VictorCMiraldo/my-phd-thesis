@@ -1,5 +1,5 @@
   Even though the main topic of this thesis is \emph{structural
-differencing}, a significant part of the contribution lies in field of
+differencing}, a significant part of the contribution lies in the field of
 generic programming.  The two libraries we wrote make it possible to
 use powerful generic programming techniques over larger classes of
 datatypes than what was previously available.  In particular, defining
@@ -10,7 +10,7 @@ algorithms.
 
   On \emph{structural differencing}, we have explored two preliminary
 approaches. A first method, \texttt{stdiff}, was presented in
-\Cref{chap:structural-patches} and revealed itself to be unpractical
+\Cref{chap:structural-patches} and revealed itself to be inpractical
 due to poor performance. The second method, \texttt{hdiff},
 introduced in \Cref{chap:pattern-expression-patches}, has shown
 much greater potential. Empirical results were discussed in \Cref{chap:experiments}.
@@ -46,7 +46,7 @@ other interesting applications that could benefit from structural
 differencing techniques.  In particular, we can probably use
 structural differencing to aid any task where a human does not
 directly edit the files being analyzed or when the result of the
-analysis does require no further interaction.  For example, it should
+analysis require no further interaction.  For example, it should
 be possible to deploy \texttt{hdiff} to provide a human readable
 summary of a patch, something that looks at the working directory,
 computes the structural diffs between the various files, just like
@@ -77,7 +77,7 @@ file for example.  It is automatically generated and independent of
 the formatting of document inside the file and it has no scoping or
 sharing inside, hence, it would be simpler to deploy a structural
 merging tool over \texttt{.odf} files.  Some care must be taken with
-the unordered trees, even though I conjecture \texttt{hdiff} would
+the unordered trees, even though our conjecture is that \texttt{hdiff} would
 behave mostly alright.
 
 \section{Concluding Remarks}

@@ -1050,25 +1050,27 @@ D 3485: GRAMMAR: "about our algorithms." [two changes]
 
 D 3485: text missing here? "about out algorithms" (...)?
 
-> 3490: "in field" -> "in the field"
+D 3490: "in field" -> "in the field"
 
-> 3497: GRAMMAR: "impractical"
+D 3497: GRAMMAR: "impractical"
 
-> 3507: Maybe the change of formatting *was* the edit!
+D 3507: Maybe the change of formatting *was* the edit!
 
-> 3518: "makes me question the" -> "makes one question about the"
+D 3518: "makes me question the" -> "makes one question about the"
   (first person singular should be avoided in scientific writing)
 
-> 3523: GRAMMAR: "analysis requires no further"
+D 3523: GRAMMAR: "analysis requires no further"
 
-> 3545: "I conjecture" -> "our conjecture is that" (same reason)
+D 3545: "I conjecture" -> "our conjecture is that" (same reason)
 
-> 3592: "encoded through using" s/through//
+D 3592: "encoded through using" s/through//
 
-> 10000: References: capitalization
+**> 10000: References: capitalization
   [7,8,10,19,22,31,36,37,53,57,62,69,73,77,83,92,95]. Pages X-Y or
   Volume Z of what? [22,37,60,75,98]. SPJ is "Peyton Jones, Simon"
   [43,49,95]. More data needed [59]. Duplicate "in" [78]. [102] was in
   ICFP. Bram Cohen [17] has been filed under his first name, not
   surname like everyone else.
 
+I fixed the capitalization of {H}askell and {XML} and fixed the
+other problems; some of the aforementioned cases I found no problems.
