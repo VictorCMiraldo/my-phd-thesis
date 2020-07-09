@@ -51,11 +51,11 @@ expression. Essentially, we write |c| as |Chg (Bin (Leaf 10) y) (Bin
 \subfloat[Haskell function |c|]{%
 \begin{myhsFig}[0.4\textwidth]
 \begin{code}
-p :: Tree -> Maybe Tree
-p (Bin (Leaf x) y)
+c :: Tree -> Maybe Tree
+c (Bin (Leaf x) y)
   | x == 10    = Just (Bin (Leaf 42) y)
   | otherwise  = Nothing
-p _            = Nothing
+c _            = Nothing
 \end{code}
 \end{myhsFig}\label{fig:pepatches:example-01:A}}\qquad\qquad
 \subfloat[|c| represented as a \emph{change}]{%

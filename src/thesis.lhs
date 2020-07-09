@@ -57,15 +57,27 @@
 
 %% Set up the front matter of our book
 \frontmatter
-\tableofcontents
 
-% \chapter{Declaration}
-% Thanks to family, supervisor, friends and hops!
+%% Dedication to my family
+\newpage
+\thispagestyle{empty}
+\vspace*{\fill}
+\begingroup
+\centering
+\begin{flushright}
+\itshape To my Mother, Father and Brother
+\end{flushright}
+\endgroup
+\vspace*{\fill}
+\newpage
+\thispagestyle{empty}
+
+
+\tableofcontents
 
 \chapter{Abstract}
 \lhsinclude{Abstract.lhs}
 %include src/Abstract.lhs
-
 
 %% Starts the mainmatter
 \mainmatter
@@ -139,17 +151,20 @@
 \bibliographystyle{acm}
 \bibliography{references}
 
-%\chapter{Curriculum Vitae}
-%
-%\chapter{Sammenvatting}
-%Sommige goed samenvatting in het Nederlands.
-%Sommige goed samenvatting in het Nederlands.
-%Sommige goed samenvatting in het Nederlands.
-%Sommige goed samenvatting in het Nederlands.
-%Sommige goed samenvatting in het Nederlands.
-%Sommige goed samenvatting in het Nederlands.
-%Sommige goed samenvatting in het Nederlands.
-%Sommige goed samenvatting in het Nederlands.
+\chapter{Sammenvatting}
+\lhsinclude{Sammenvatting.lhs}
+%include src/Sammenvatting.lhs
+
+
+\chapter{Curriculum Vitae}
+\lhsinclude{CV.lhs}
+%include src/CV.lhs
+
+\chapter{Acknowledgements}
+\lhsinclude{Acknowledgements.lhs}
+%include src/Acknowledgements.lhs
+
+
 
 \end{document}
 

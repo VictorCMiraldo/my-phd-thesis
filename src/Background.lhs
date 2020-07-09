@@ -1201,13 +1201,13 @@ written with the \texttt{generics-sop} library and no sugar
 is shown in \Cref{fig:background:generics-sop:gsize}.
 
 \begin{figure}
-\begin{myhsFig}
+\begin{myhs}
 \begin{code}
 gsize :: (GenericSOP a , All2 Size (CodeSOP a)) => a -> Int
 gsize  =  sum  .  hcollapse
        .  hcmap (Proxy :: Proxy Size) (mapIK size) .  fromSOP
 \end{code}
-\end{myhsFig}
+\end{myhs}
 \caption{Definition of |gsize| in the \texttt{generics-sop} style.}
 \label{fig:background:generics-sop:gsize}
 \end{figure}
