@@ -967,84 +967,88 @@ D 3257: "one of my priorities " -> "a priority"
 
 D 3259: "further work" -> "future work" (cf above)
 
-> 3272: "hdiff," -> "hdiff, in
+D 3272: "hdiff," -> "hdiff, in
 
-> 3284: "data" -> "such data"
+D 3284: "data" -> "such data"
 
-> 3287: GRAMMAR: "could only evaluate"
+D 3287: GRAMMAR: "could only evaluate"
+D 3287: "only evaluated" -> "only evaluate"
 
-> 3287: "only evaluated" -> "only evaluate"
+D 3293: "then attempting" -> "and attempting"
 
-> 3293: "then attempting" -> "and attempting"
+D 3294: "written by a master student [33]" -> "available from [33]"
 
-> 3294: "written by a master student [33]" -> "available from [33]"
+D 3320: "illustrated" -> "illustrates"
 
-> 3320: "illustrated" -> "illustrates"
+D 3324: GRAMMAR: "spatial"
 
-> 3324: GRAMMAR: "spatial"
+D 3331: "Let fa and fb be" -> "For fa and fb"
 
-> 3331: "Let fa and fb be" -> "For fa and fb"
-
-> 3338: "929 used more than 8GB of memory". How is that even possible?
+**> 3338: "929 used more than 8GB of memory". How is that even possible?
   This should be discussed.
 
-> 3338: "have been plotted" -> "are plotted"
+I don't understand the surprise. But sure, will discuss.
 
-> 3354: "in the right complexity class". It is a bit bizarre to talk
+D 3338: "have been plotted" -> "are plotted"
+
+D 3354: "in the right complexity class". It is a bit bizarre to talk
   about 'complexity class' as if it were an experimental thing.
 
-> 3362: GRAMMAR: "produced a different result"
+D 3362: GRAMMAR: "produced a different result"
 
-> 3362: "was successful but produced a different than the manual" ->
+D 3362: "was successful but produced a different than the manual" ->
   "was successful but different from manual"
 
-> 3369-3378: about the ambiguity between "same merge" and "human made
+**> 3369-3378: about the ambiguity between "same merge" and "human made
   changes during merge". An alternative would have been to run the
   unit tests to check if things were right on your side.
 
-> 3381: "method, the" -> "method. The"
+Which tests? The repository tests? This would involve building it
+at every commit, which might not be possible and would take
+considerably longer.
 
-> 3381: "the most" -> "more"
+D 3381: "method, the" -> "method. The"
 
-> 3387: GRAMMAR: "witnessed that in"
+D 3381: "the most" -> "more"
 
-> 3390: "illustrate in" -> "illustrated in"
+D 3387: GRAMMAR: "witnessed that in"
 
-> 3395: "and the majority of the time, it matches" -> "and most often
+D 3390: "illustrate in" -> "illustrated in"
+
+D 3395: "and the majority of the time, it matches" -> "and most often
   matches"
 
-> 3398: "complimentary" -> "complementary"
+D 3398: "complimentary" -> "complementary"
 
-> 3408: "since these" -> "as these" (thus avoiding "since ... since
+D 3408: "since these" -> "as these" (thus avoiding "since ... since
   ...")
 
-> 3416: GRAMMAR: "both n and o" are what?
+D 3416: GRAMMAR: "both n and o" are what?
 
-> 3424: GRAMMAR: "order of declarations matters"
+D 3424: GRAMMAR: "order of declarations matters"
 
-> 3441: GRAMMAR: "were completely ignored"
+D 3441: GRAMMAR: "were completely ignored"
 
-> 3446: GRAMMAR: "prevent ... from being detected"
+D 3446: GRAMMAR: "prevent ... from being detected"
 
-> 3449: GRAMMAR: "Our decision to ignore"
+D 3449: GRAMMAR: "Our decision to ignore"
 
-> 3455: "showcases two such cases, hence" -> "shows two such
+D 3455: "showcases two such cases, hence" -> "shows two such
   cases. Hence"
 
-> 3458: "of if unusable in practice"
+D 3458: "of if unusable in practice"
 
-> 3462: "GitHub" -> "the GitHub"
+D 3462: "GitHub" -> "the GitHub"
 
-> 3467: GRAMMAR: "Our suspicion of it as unusable"
+D 3467: GRAMMAR: "Our suspicion of it as unusable"
+D 3467: "it unusable" -> "it being unusable"
 
-> 3467: "it unusable" -> "it being unusable"
-
-> 3476: "proper calculation of the probability". I don't think we can
+D 3476: "proper calculation of the probability". I don't think we can
   formally talk about a 'probability' here.
 
-> 3485: GRAMMAR: "about our algorithms." [two changes]
+D 3485: GRAMMAR: "about our algorithms." [two changes]
 
-> 3485: text missing here? "about out algorithms" (...)?
+D 3485: text missing here? "about out algorithms" (...)?
 
 > 3490: "in field" -> "in the field"
 

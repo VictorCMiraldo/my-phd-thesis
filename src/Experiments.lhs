@@ -2,7 +2,7 @@
 structural differencing. In \Cref{chap:structural-patches} we saw
 \texttt{stdiff}, which although unpractical, provided us with important
 insights into the representation of patches. These
-insights and experience led us to develop \texttt{hdiff},
+insights and experience led us to develop \texttt{hdiff}, in
 \Cref{chap:pattern-expression-patches}, which improved upon the
 previous approach with a more efficient |diff| function at
 the expense of the simplicity of the merge algorithm: the
@@ -22,7 +22,7 @@ obtained from large public repositories storing code written in Java,
 JavaScript, Python, Lua and Clojure. The choice of programming languages
 was motivated by the availability of parsers, with the exception
 of Clojure, where we borrowed a parser from a MSc
-thesis~\cite{Garuffi2018}. More detailed information about data
+thesis~\cite{Garuffi2018}. More detailed information about the data
 collection is given in \Cref{sec:eval:collection}.
 
    The evaluation of \texttt{stdiff} has fewer
@@ -30,7 +30,7 @@ datapoints than \texttt{hdiff} for the sole reason that \texttt{stdiff}
 requires the \texttt{generics-mrsop} library, which triggers a memory
 leak in GHC\footnote{\url{https://gitlab.haskell.org/ghc/ghc/issues/17223} and
 \url{https://gitlab.haskell.org/ghc/ghc/issues/14987}} when used with
-larger abstract syntax trees. Consequently, we could only evaluated
+larger abstract syntax trees. Consequently, we could only evaluate
 \texttt{stdiff} over the Clojure and Lua subset of our dataset.
 
 \section{Data Collection}
@@ -40,11 +40,11 @@ larger abstract syntax trees. Consequently, we could only evaluated
 be done with the help of some bash scripting. The overall idea is to
 extract the merge conflicts from a given repository by listing all
 commits $c$ with more than two parents, recreating the repository at
-the state immediately previous to $c$ then attempting to call
+the state immediately previous to $c$ and attempting to call
 \texttt{git merge} at that state.
 
   Our script improves upon the script written
-by a master student~\cite{Garuffi2018} by making sure to collect
+by Garuffi~\cite{Garuffi2018} by making sure to collect
 the file that a human committed as the resolution of the conflict,
 denoted \texttt{M.lang}. To collect conflicts from a repository, then,
 all we have to do is run the following commands at its root.
@@ -132,7 +132,7 @@ approaches we computed four patches per datapoint, namely:
 
   Whilst computing patches we limited the memory
 usage to 8GB and runtime to 30s. If a call to |diff| used more than
-the available temporal and spacial resources it was automatically
+the available temporal and spatial resources it was automatically
 killed. We ran both \texttt{stdiff} and \texttt{hdiff} on the same
 machine, yet, we stress that the absolute values are of little
 interest.  The real take away from this experiment is the empirical
@@ -140,9 +140,9 @@ validation of the complexity class of each algorithm. The results
 are shown in \Cref{fig:eval:perf} and plot the measured runtime against
 the sum of the number of constructors in the source and destination trees.
 
-  \Cref{fig:eval:perf:stdiff} illustrated the measured performance of
+  \Cref{fig:eval:perf:stdiff} illustrates the measured performance of
 the differencing algorithm in \texttt{stdiff}, our first structural
-differencing tool, discussed in \Cref{sec:stdiff:oraclesenum}.  Let
+differencing tool, discussed in \Cref{sec:stdiff:oraclesenum}.  For
 |fa| and |fb| be the files being differenced, we have only timed the call to
 |diff fa fb| -- which excludes parsing. Note that most of the time,
 \texttt{stdiff} exhibits a runtime proportional to the square of the
@@ -151,8 +151,11 @@ to annotate the trees and then translate the annotated trees into
 |PatchST| over a single pass.  Out of the 8428 datapoints where we
 attempted to time \texttt{stdiff} in order to produce
 \Cref{fig:eval:perf:stdiff}, 913 took longer than thirty seconds and
-929 used more than 8GB of memory. The rest have been plotted in
-\Cref{fig:eval:perf:stdiff}.
+929 used more than 8GB of memory. The rest are plotted in
+\Cref{fig:eval:perf:stdiff}. The high memory usage for particularly
+large examples is unsurprising. Computing a \texttt{stdiff} patch 
+requires us to maintain and manipulate a number of singleton types 
+and constraints.
 
   \Cref{fig:eval:perf:hdiff} illustrates the measured performance of
 the differencing algorithm underlying \texttt{hdiff}, discussed in
@@ -185,7 +188,7 @@ time act = do  t1 <- getCPUTime
 \label{sec:eval:merging}
 
   While the performance measurements provide some empirical evidence
-that \texttt{hdiff} is in the right complexity class, the
+that \texttt{hdiff} is indeed linear, the
 synchronization experiment, discussed in this section, aims at
 establishing a lower bound on the number of conflicts that could be
 solved in practice.
@@ -200,7 +203,7 @@ a more substantial problem. The three outcomes we expect to see are:
 \emph{success}, which indicates the merge was
 successful and was equal to that produced by a human;
 \emph{mdif} which indicates that the merge was
-successful but produced a different than the manual merge;
+successful but different from the manual merge;
 and finally \emph{conf} which means that the merge was
 unsuccessful. The other possible outcome comes from
 producing a patch that \emph{cannot} be applied to \texttt{O},
@@ -345,7 +348,7 @@ have run the experiment with each combination of extraction method
 (|Patience, NoNested, ProperShare|), local or global metavariable
 scoping and minimum sharing height of $1, 3$ and $9$.
 \Cref{tbl:eval:merge-hdiff} shows the combination of parameters that
-yielded the most successes per extraction method, the column for
+yielded more successes per extraction method. The column for
 scoping is omitted because local scope outperformed global scoping in
 all instances. \Cref{tbl:eval:merge-hdiff-aggr} shows only the highest
 success rate per language.
@@ -355,12 +358,12 @@ are to be expected.  Different parameters used with \texttt{hdiff}
 yield different patches, which might be easier or harder to merge. Out
 of the datapoints that resulted in \emph{mdif} we have manually
 analyzed \qManualMDiffAnal{} randomly selected cases. We witnessed
-that \qManualMDiffOk{} of those \texttt{hdiff} behaved as we expect,
+that in \qManualMDiffOk{} of those \texttt{hdiff} behaved as we expect,
 and the \emph{mdif} result was attributed to the human performing more
 operations than a structural merge would have performed, as
 exemplified in \Cref{fig:eval:mdif-suc-01}, which was distilled from
 the manually analyzed cases. We will shortly discuss two cases,
-illustrate in \Cref{fig:eval:nn-pt-01,fig:eval:nn-pt-02}, where
+illustrated in \Cref{fig:eval:nn-pt-01,fig:eval:nn-pt-02}, where
 \texttt{hdiff} behaved unexpectedly.
 
   It is worth noting that even though 100\% success
@@ -368,12 +371,12 @@ rate is unachievable -- some conflicts really come from a subtree being
 modified in two distinct ways and inevitably require human
 intervention -- the results we have seen are very encouraging.
 In \Cref{tbl:eval:merge-hdiff-aggr} we see that \texttt{hdiff} produces
-a merge in at least 39\% of datapoints and the majority of the time,
-it matches the handmade merge.
+a merge in at least 39\% of datapoints and most often
+matches the handmade merge.
 
   The cases where \emph{the same} datapoint yields a true success and
 a \emph{mdif}, depending on which extraction method was used, are
-interesting. Let us look at two complimentary examples
+interesting. Let us look at two complementary examples
 (\Cref{fig:eval:nn-pt-01,fig:eval:nn-pt-02}) that were distilled from
 these contradicting cases.
 
@@ -500,7 +503,7 @@ by appending \texttt{static}, the merge algorithm replicates this
 change to the list of modifiers of \texttt{f}, since the patch
 wrongly believes both lists represent \emph{the same list}.
 Merging with |Patience| does not witness the problem since it will
-not share \texttt{x} not the modifier list, since these occur
+not share \texttt{x} not the modifier list, as these occur
 more than once in the deletion and insertion context of both
 \texttt{hdiff O A} and \texttt{hdiff O B}.
 
@@ -588,7 +591,7 @@ clear.  When differencing \texttt{A} and \texttt{O} under |Patience|
 context extraction, the empty bodies (which are represented in the
 Java AST by |MethodBody Nothing|) of the declarations of \texttt{n}
 and \texttt{o} are not shared. Hence, the alignment mechanism
-wrongly identifies that \emph{both} \texttt{n} and \texttt{o}.
+wrongly identifies that \emph{both} \texttt{n} and \texttt{o} were deleted.
 Moreover, because \texttt{C.g()} is uniquely shared between
 the definition of \texttt{m} and \texttt{S}, the patch identifies that
 \texttt{void m...} became \texttt{String S...}. Finally, the merge
@@ -599,10 +602,10 @@ insertion of \texttt{X}, resulting in the non-intuitive placement
 of \texttt{X} in the merge produced with |Patience|.
 When using |NoNested|, however, the empty bodies get all shared through
 the code and prevent the detection of a deletion by the alignment
-algorithm. It is worth noting that just because Java does not order
-its declarations, this is not acceptable behavior since
+algorithm. It is worth noting that just because Java does not care
+about the order of declarations, this is not acceptable behavior since
 it could produce invalid source files in a language like Agda, where
-the order of declarations matter, for example.
+the order of declarations matters, for example.
 
   The examples in \Cref{fig:eval:nn-pt-01,fig:eval:nn-pt-02} illustrate
 an inherent difficulty of using naive structured differencing over
@@ -648,18 +651,18 @@ and setting and preemptively understand which factors
 could also be influencing the numbers.
 
   We are differencing and comparing objects \emph{after} parsing.
-This means that comments and formatting data was completely ignored. In fact,
+This means that comments and formatting data were completely ignored. In fact,
 preliminary evaluations showed that a vastly inferior success rate
 results from incorporating and considering source-location tokens in
 the abstract syntax tree. This is expected since the insertion of a
 single empty line, for example, will change the hashes that identify
 all subsequent elements of the abstract syntax and stop them from
-being shared. The source-location tokens essentially make the
-transformations that happen further down the file to be undetected
-using \texttt{hdiff}. Although \texttt{stdiff} would not suffer from
+being shared. The source-location tokens essentially prevent the
+transformations that happen further down the file to be detected
+by \texttt{hdiff}. Although \texttt{stdiff} would not suffer from
 this problem, it is already impractical by itself.
 
-  Our decision of disconsidering formatting, comments and
+  Our decision to ignore formatting, comments and
 source-location tokens is twofold. First, the majority of the
 available parsers does not include said information. Secondly, if we
 had considered all that information in our merging process, the final
@@ -668,7 +671,7 @@ numbers would not inform us about how many code transformations are
 
   Another case worth noting is that although we have not found many cases
 where \texttt{hdiff} performed a wrong merge, \Cref{fig:eval:nn-pt-01,fig:eval:nn-pt-02}
-showcases two such cases, hence, it is important to take the aggregate success
+shows two such cases, hence, it is important to take the aggregate success
 rate with a grain of salt. There exists a probability that some of the
 \emph{mdif} cases are false positives, that is, \texttt{hdiff} produced a merge
 but it performed the wrong operation.
@@ -677,14 +680,14 @@ but it performed the wrong operation.
 arise from rebasing, as these are not observed in the git history.
 This does not necessarily make a threat to validity, but indeed would have
 given us more data. That being said, we would only be able to recreate rebases
-done through \texttt{GitHub} web interface. The rebases done on the command line are
+done through the \texttt{GitHub} web interface. The rebases done on the command line are
 impossible to recreate.
 
 \section{Discussion}
 
   This chapter provided an empirical evaluation of our methods and
 techniques. We observed how \texttt{stdiff} is at least one order of
-magnitude slower than \texttt{hdiff}, confirming our suspicion of it
+magnitude slower than \texttt{hdiff}, confirming our suspicion of it being
 unusable in practice.  Preliminary synchronization experiments done with
 \texttt{stdiff} over the same data revealed a comparatively small success
 rate. Around 15\% of the conflicts could be solved, out of which 60\%
@@ -695,13 +698,10 @@ impressive results. Even with all the overhead introduced by generic
 programming and an unoptimized algorithm, we can still compute patches
 almost instantaneously. Moreover, it confirms our intuition that the
 differencing algorithm underlying \texttt{hdiff} is in fact linear.
-
-  The synchronization results for \texttt{hdiff} are
-encouraging.  A proper calculation of the probability that a conflict
-encountered in \texttt{GitHub} could be solved automatically is
-involved and out of the scope of this thesis.  Nevertheless, we have
-observed that 39\% of the conflicts in our dataset could be solved by
-\texttt{hdiff} and 66\% of these solutions did match what a human performed.
+Moreover, the synchronization results for \texttt{hdiff} are
+encouraging. We have observed that 39\% of the conflicts in our
+dataset could be solved by \texttt{hdiff} and 66\% of these solutions
+did match what a human performed.
 
   An interesting observation that comes from the
 synchronization experiment, \Cref{tbl:eval:merge-hdiff}, is that the
@@ -712,7 +712,7 @@ contractions on the representation level and work on a merging
 algorithm that enjoys the precondition that each metavariable occurs
 only twice. This simplification could enable us to write a simpler
 merging algorithm and an Agda model, which can then be used to prove
-important properties about out algorithms
+important properties about our algorithms.
 
 %%% Local Variables:
 %%% mode: latex
