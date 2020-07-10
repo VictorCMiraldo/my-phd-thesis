@@ -1,4 +1,4 @@
-\documentclass[noseaweed,draft,10pt,b5paper,cmyk]{uustthesis}
+\documentclass[noseaweed,10pt,b5paper,cmyk]{uustthesis}
 %% Remove the 'noseaweed' option to draw the fractal
 %% at the section headings. This slows compilation down, though.
 
@@ -114,27 +114,27 @@
 \chapter{Generic Programming with Mutually Recursive Types}
 \label{chap:generic-programming}
 \lhsinclude{GenericProgramming.lhs}
-%include src/GenericProgramming.lhs
+% include src/GenericProgramming.lhs
 
 \chapter{Structural Patches}
 \label{chap:structural-patches}
 \lhsinclude{StructPatches.lhs}
-%include src/StructPatches.lhs
+% include src/StructPatches.lhs
 
 \chapter{Pattern-Expression Patches}
 \label{chap:pattern-expression-patches}
 \lhsinclude{PEPatches.lhs}
-%include src/PEPatches.lhs
+% include src/PEPatches.lhs
 
 \chapter{Experiments}
 \label{chap:experiments}
 \lhsinclude{Experiments.lhs}
-%include src/Experiments.lhs
+% include src/Experiments.lhs
 
 \chapter{Discussion}
 \label{chap:discussion}
 \lhsinclude{Discussion.lhs}
-%include src/Discussion.lhs
+% include src/Discussion.lhs
 
 \appendix
 \chapter{Source-Code and Dataset}

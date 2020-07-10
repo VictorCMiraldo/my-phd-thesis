@@ -44,13 +44,13 @@ and finally copy the last line. The output we would see from
 and insertions prefixed with a plus sign. Copies have no prefix.
 In our case, it would look something like:%
 \begin{alltt}\footnotesize
--    res := 0;
-+    print("summing up");
-+    sum := 0;
-     for (i in is) \{
--      res += i;
-+      sum += i;
-     \}
+  -    res := 0;
+  +    print("summing up");
+  +    sum := 0;
+       for (i in is) \{
+  -      res += i;
+  +      sum += i;
+       \}
 \end{alltt}
 
   The edit-scripts produced by the \unixdiff{} contain information
@@ -289,9 +289,6 @@ the Levenshtein distance. For example, there are only two edit-scripts
 with minimum cost on |lcs ["a", "b"] ["b" , "a"]|. This, in fact,
 is a general problem with any \emph{edit-script} based approach.
 
-  We can implementing the |lcs| function efficiently using
-dynamic programming techniques
-
   The original \unixdiff{} implementation was based on Hirschberg's
 dynamic algorithm~\cite{Hirschberg1975}, which uses a memoized |lcs|
 to avoid recomputing sub-problems and has a quadratic runtime. The
@@ -385,11 +382,12 @@ data Tree = Node Label [Tree]
 arity :: Label -> Int
 
 apply :: [EOp] -> [Tree] -> Maybe [Tree]
-apply []                           []   = Just []
-apply (Cpy l  : ops)                ts   = apply (Ins l : Del l : ops) ts
-apply (Del l  : ops) (Node l'  xs:  ts)  = guard (l == l') >> apply ops (xs ++ ts)
-apply (Ins l  : ops) ts
-  = (\(args , rs) -> Node l args : rs) . takeDrop (arity l) <$$> apply ops ts
+apply []              []                  = Just []
+apply (Cpy l  : ops)  ts                  = apply (Ins l : Del l : ops) ts
+apply (Del l  : ops)  (Node l'  xs:  ts)  = guard (l == l') >> apply ops (xs ++ ts)
+apply (Ins l  : ops)  ts                  = (\(args , rs) -> Node l args : rs) . takeDrop (arity l) 
+                                          <$$> apply ops ts
+apply _               _                   = Nothing
 \end{code}
 \end{myhs}
 \caption{Definition of |apply| for tree edit operations.}

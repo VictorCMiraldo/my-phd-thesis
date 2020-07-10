@@ -1,5 +1,5 @@
 
-  Version Control is essential for any kind of distributed
+  Version Control is essential for most distributed
 collaborative work. It enables contributors to operate independently
 and later combine their work. For that, though, it must
 address the situation where two developers changed a piece of
@@ -32,10 +32,11 @@ such as Git, Mercurial and Darcs.
 
   The limited grammar of changes used by the \unixdiff{} works
 particularly well for programming languages that organize a program
-into lines of code. For example, consider the following modification
-that extends an existing \texttt{for}-loop to not only compute the sum
-of the elements of an array, but also compute their product:
-%
+into lines of code. For example, consider the modification in
+\Cref{fig:introduction:first}, where the insertions do not interfere
+with the rest of the program.
+
+\begin{figure}
 \begin{alltt}\small
     sum := 0;
  +  prod := 1;
@@ -44,6 +45,11 @@ of the elements of an array, but also compute their product:
  +    prod *= i;
     \}
 \end{alltt}
+\caption{Modification that extends an existing \texttt{for}-loop to
+not only compute the sum of the elements of an array, but also compute
+their product.}
+\label{fig:introduction:first}
+\end{figure}
 
 However, the bias towards \emph{lines} of code may lead to
 (unnecessary) conflicts when considering other programming
@@ -121,8 +127,7 @@ public void test(obj) \{
 \end{alltt}
 \end{minipage}
 
-
-  It is straightforward to see that the desired \emph{synchronized} version
+ It is arguable that the desired \emph{synchronized} version
 can incorporate both changes, calling { \small \verb!assert(obj).hasSize(6)!}.
 Combining these changes would be impossible without access to information
 about the old and new state of \emph{individual abstract-syntax elements}.
@@ -179,11 +184,11 @@ non-uniqueness of the best solution and slow algorithms. We will
 discuss them in more detail in
 \Cref{sec:background:string-edit-distance}.
 
-  Once we have the |diff| and |apply| functions handy, we
+  Once we have the |diff| and |apply| functions at hand, we
 move on to the |merge| function, which is responsible for
 synchronizing two different changes into a single
-one, when they are compatible. Naturally not all patches can be merged,
-in fact, we can only merge those patches that alter \emph{disjoint} parts of the AST.
+one, when they are compatible. Naturally, 
+we can only merge patches that alter \emph{disjoint} parts of the AST.
 Hence, the merge function must be partial, returning a conflict whenever
 patches change the same part of the tree in different ways.
 
