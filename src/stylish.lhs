@@ -98,7 +98,9 @@
 %format ==         = "\mathrel{\HSSym{\equiv}} "
 %format /=         = "\mathrel{\HSSym{\not\equiv}} "
 %format <=         = "\mathrel{\HSSym{\leq}} "
+%format <          = "\mathrel{\HSSym{<}} "
 %format >=         = "\mathrel{\HSSym{\geq}} "
+%format >          = "\mathrel{\HSSym{>}} "
 
 %format :          = "\mathbin{\HSCon{:}}"
 %format +          = "\mathbin{\HSSym{+}}"

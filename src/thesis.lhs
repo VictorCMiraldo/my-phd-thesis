@@ -119,12 +119,12 @@
 \chapter{Structural Patches}
 \label{chap:structural-patches}
 \lhsinclude{StructPatches.lhs}
-% include src/StructPatches.lhs
+%include src/StructPatches.lhs
 
 \chapter{Pattern-Expression Patches}
 \label{chap:pattern-expression-patches}
 \lhsinclude{PEPatches.lhs}
-% include src/PEPatches.lhs
+%include src/PEPatches.lhs
 
 \chapter{Experiments}
 \label{chap:experiments}

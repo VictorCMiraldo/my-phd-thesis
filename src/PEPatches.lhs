@@ -923,7 +923,7 @@ Assuming |app (after p q) x == Just y|, we want to prove there exists
 be the result of |unify (chgDel p) (chgIns q)|, witnessing |after p q|;
 let |gamma| be the result of |unify (sigma (chgDel q)) x|, witnessing the
 application.
-
+%
 Take |z = (gamma . sigma) (ctxIns q)|, and let us prove |gamma . sigma|
 unifies |ctxDel p| and |z|.
 \begin{squiggol}[tight]
@@ -936,8 +936,8 @@ unifies |ctxDel p| and |z|.
 |sigma (ctxDel p) == sigma (ctxIns q)|
 \end{squiggol}
 %
-Hence, |p| can be applied to |z|, and the result is |(gamma . sigma) (ctxIns p)|,
-which by hypothesis, is equal to |y|.
+Hence, |p| can be applied to |z|, resulting in |(gamma . sigma) (ctxIns p)|,
+which is equal to |y| (hyp).
 %
 \item[only if.]
 Assuming there exists |z| such that |app q x == Just z| and
@@ -949,17 +949,18 @@ Let |beta| be such that |beta (ctxDel p) == z|, hence |y == beta (ctxIns p)|.
 there exists |sigma'| that unifies |ctxIns q| and |ctxDel p|.
 Recall |alpha| and |beta| have disjoint variables
 because we assume |p| and |q| have a
-disjoint set of names. Let |sigma' = alpha `union` beta|,
+disjoint set of names. Let |sigma' = alpha union beta|,
 which corresponds to |alpha . beta| or
-|beta . alpha| because of they have disjoint set of names.
+|beta . alpha| because they have disjoint sets of names.
 %
-\begin{squiggol}[tight]
-|sigma'  (ctxIns q)  ==  sigma'  (ctxDel p)|
-\reasonRel{\iff}{\text{disjoint supports}}
-|alpha (ctxIns q) == beta (ctxDel p)|
-\reasonRel{\iff}{\text{definition of } |z|}
-|z == beta (ctxDel p)|
-\end{squiggol}
+\[
+|sigma' (ctxIns q) == alpha (ctxIns q) == z == beta (ctxDel p) == sigma' (ctxDel p)| 
+\]
+% \begin{squiggol}[tight]
+% |sigma'  (ctxIns q)  ==  sigma'  (ctxDel p)|
+% \reasonRel{\iff}{\text{disjoint supports}}
+% |alpha (ctxIns q) == beta (ctxDel p)| & & \enspace \quad \{\text{definition of } |z| \} 
+% \end{squiggol}
 %
 Since |sigma'| unifies |ctxIns q| and |ctxDel p|, let
 |sigma| be their \emph{most general unifier}.
@@ -986,9 +987,9 @@ Proving it coincides with |y| is a straightforward calculation:
 |gamma (sigma (ctxIns p)) == alpha (ctxIns p)|
 \reasonRel{\iff}{\text{Disj. supports};\text{Def. }|sigma'|}
 |gamma (sigma (ctxIns p)) == gamma (sigma (ctxIns p))|
-\end{squiggol}
-\end{enumerate}
-\end{description}
+\end{squiggol}%
+\end{enumerate}%
+\end{description}%
 \end{proof}
 
   Once we have established that composition is correct with respect to
@@ -998,7 +999,7 @@ consider an extensional equality over changes. Two changes are said to
 be equivalent if and only if they are indistinguishable through their
 application semantics.
 
-%format ~~ = "\HT{\approx}"
+%format ~~ = "\mathrel{\HT{\approx}}"
 \begin{definition}[Change Equivalent]
 Two changes |p| and |q| are said to be equivalent, denoted |p ~~ q|,
 if and only if |forall x dot (app p x) == (app q x)|
@@ -1067,13 +1068,8 @@ Trivial; |cpy| unifies with all possible terms.
 
   \Cref{lemma:pepatches:comp-assoc,lemma:pepatches:comp-id} establish
 a partial monoid structure for |Chg| and |after| under extensional
-change equality, |~~|. As we shall see next, however, it is not
-trivial to squeeze more structure out of this change representation.
-\digress{I would have enjoyed to be able to spend more time studying
-the metatheory. Obviously, it is not because the options discussed
-next failed that there exists no option to extend the metatheory
-whatsoever. It is still worth discussing the difficulties I encountered
-while trying to use standard techniques, below.}
+change equality, |~~|. It is not trivial to squeeze more structure 
+out of this change representation, as we shall discuss next.
 
 %format (inv p) = p "^{\HVNI{-1}}"
 \paragraph{Loose Ends.}
@@ -1137,8 +1133,8 @@ In other words, |p <= q| when |q| coincides with |p| when restricted to |p|'s
 domain.
 \end{definition}
 
-%format ~  = "\HS{\sim}"
-%format /~ = "\HS{\nsim}"
+%format ~  = "\mathrel{\HS{\sim}}"
+%format /~ = "\mathrel{\HS{\nsim}}"
 
   This gives us a preorder on changes and it is the case that
 |after p (inv p) <= cpy| and |after (inv p) p <= cpy|. Attempting
@@ -1150,8 +1146,8 @@ denoted |p ~ q|, by whether |p| and |q| are comparable under
 transitive, as illustrated in \Cref{fig:pepatches:approx-not-equiv}).
 Moreover, the extension order cannot be used to define the \emph{best}
 change between two elements |x| and |y|. Take |x| to be |Bin (Bin a b)
-a| and |y| to be |Bin (Bin b a) a|, for which two uncomparable
-candidate changes are shown in \Cref{fig:pepatches:ext-ord-not-cost}.
+a| and |y| to be |Bin (Bin b a) a|, two uncomparable
+changes are shown in \Cref{fig:pepatches:ext-ord-not-cost}.
 
 
 \begin{figure}
@@ -1186,8 +1182,8 @@ candidate changes are shown in \Cref{fig:pepatches:ext-ord-not-cost}.
   This short discussion does not mean that there is \emph{no} suitable
 way to compare the changes in \Cref{fig:pepatches:ext-ord-not-cost} or
 to define |~| in such a way that the changes in
-\Cref{fig:pepatches:approx-not-equiv} can be considered equivalent. It
-does mean, however, that simply comparing the domain of changes is a
+\Cref{fig:pepatches:approx-not-equiv} be considered equivalent. It
+does mean, however, that comparing the domain of changes is a
 weak definition and a robust definition will probably be significantly
 more involved.
 
@@ -1254,13 +1250,7 @@ Nevertheless, we can impose different restrictions that make it
 simple and effective such measure is not sharing subtrees with height
 strictly less than one (or a configurable parameter). This keeps
 constants and most variable declarations from being shared,
-effectively avoiding the issue.  \digress{I would like to reiterate
-the \emph{avoiding-the-issue} aspect of this decision. I did attempt
-to overcome this with a few methods which will be discussed later
-(\Cref{sec:pepatches:discussion}). None of my attempts at solving the
-issue were successful, hence, the best option really became avoiding
-the issue by making sure that we can easily exclude certain trees from
-being shared.}
+effectively avoiding the issue. 
 
 \subsubsection{Which Common Subtree, Generically}
 
@@ -1335,10 +1325,6 @@ integers count how many times we have seen a tree, indicating the
 arity of a subtree. Shared subtrees occur with arity of at least two:
 once in the deletion context and once in the insertion context.  The
 underlying datastructure is a |Int64|-indexed trie~\cite{Brass2008}.
-\digress{I would like to also implement this
-algorithm with a big-endian Patricia Tree~\cite{Okasaki1998} and
-compare the results. I think the difference would be small, but worth
-considering when working on a production implementation}.
 
 \begin{myhs}
 \begin{code}
@@ -1395,19 +1381,20 @@ are the number of constructors in |s| and |d|. A call to |f x| for
 some |x|, however, is answered in $\mathcal{O}(1)$ due to the
 bounded depth of the trie.
 
-  We chose to use a cryptographic hash function~\cite{Menezes1997}
-and ignore the remote possibility of hash collisions.
-Although it would not be hard to detect these collisions whilst
-computing the arity map, doing so would incur a performance
-penalty. Checking for collisions would require us to store the
-path to the tree together with its associated hash instead of only storing the hash.
-Then, on every insertion we could check
-that the inserted tree matches with the tree already in the map.
-\digress{If I had used a non-cryptographic hash, which are much faster to
-compute than cryptographic hash functions, I would have had to
-employ the collision detection mechanism above. This would
-cost a significant amount of time. I believe it is worth paying the
-price for a more expensive hash function.}
+  We chose to use a cryptographic hash function~\cite{Menezes1997} and
+ignore the remote possibility of hash collisions.  Although it would
+not be hard to detect these collisions whilst computing the arity map,
+doing so would incur a performance penalty. Checking for collisions
+would require us to store the path to the tree together with its
+associated hash instead of only storing the hash.  Then, on every
+insertion we could check that the inserted tree matches with the tree
+already in the map. Had we opted for a non-cryptographic hash, which 
+are much faster to compute than cryptographic hash functions, 
+we would have had to employ the collision detection mechanism above. 
+It is plausible that this would cost more time than computing the
+cryptorgaphic hash at once. We did not test this, however.
+
+\
 
 \subsubsection{Context Extraction}
 \label{sec:pepatches:extract}
@@ -1797,12 +1784,6 @@ performance reasons, consequently, we must manually ensure that all
 scopes contain disjoint sets of names and therefore can be
 safely distributed whenever applicable. This is a usual difficulty
 when handling objects with binders, in general.
-\digress{I wonder how an
-implementation using De Bruijn indexes would look like. I'm not
-immediately sure it would be easier to enforce correct indices. Through
-the bowels of the code we ensure two changes have disjoint sets of
-names by adding the successor of the maximum variable of one over the
-other.}
 
 \begin{myhs}
 \begin{code}
@@ -2060,6 +2041,7 @@ If it is not possible to close the current spine, we
 return a |InL dots| equivalent to pushing all the
 constructors of the spine down the deletion and insertion contexts.
 
+\
 
 \subsection{The |diff| Function}
 
@@ -2347,9 +2329,7 @@ the alignment, and continue to align its fields pairwise.
 
   The |Spn| inside an alignment does not need to preserve metavariable scoping.
 Consequently, it can be pushed closer to the leaves uncovering as many
-copies as possible.
-
-  When no |Ins|, |Del| or |Spn| can be used,
+copies as possible. When no |Ins|, |Del| or |Spn| can be used,
 we must resort to recording a unclassified modification,
 of type |f at|. Most of the times |f| will be simply |Chg kappa fam|,
 but we will be needing to add some extra information in the leaves
@@ -2390,12 +2370,12 @@ deleted (resp. inserted). A deletion (resp. insertion) of an occurrence
 of a constructor |X| can be performed when all fields of |X| at
 this occurrence are \emph{rigid} trees with the exception of a single
 recursive field -- recall \emph{rigid} trees contains no
-metavariables. If we can delete the root, we flag it as a deletion and
+metavariables. If we can delete the root, we flag it as such and
 continue through the recursive \emph{non-rigid} field. If we cannot
 perform a deletion at the root of |chgDel c| nor an insertion at the
 root of |chgIns c| but they are constructed with the same constructor,
 we identify the constructor as being part of the alignments' spine.
-If |chgDel c| and |chgIns c| do not even
+If |chgDel c| and |chgIns c| do not
 have the same constructor at the root, nor are copies or permutations,
 we finally fallback and flag an unclassified modification.
 

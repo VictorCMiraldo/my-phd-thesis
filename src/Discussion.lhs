@@ -102,6 +102,33 @@ From simplistic discussion on unification's existential on maps
 would be worth the trouble. |Data.Map| has excellent performance and has been
 thoroughly tested.} 
 
+From deciding what can and cannot be shared
+ \digress{I would like to reiterate
+the \emph{avoiding-the-issue} aspect of this decision. I did attempt
+to overcome this with a few methods which will be discussed later
+(\Cref{sec:pepatches:discussion}). None of my attempts at solving the
+issue were successful, hence, the best option really became avoiding
+the issue by making sure that we can easily exclude certain trees from
+being shared.}
+
+From the internals of my implementation
+\digress{I would like to also implement this
+algorithm with a big-endian Patricia Tree~\cite{Okasaki1998} and
+compare the results. I think the difference would be small, but worth
+considering when working on a production implementation}.
+
+From wondering about handling names in |Chg|
+\digress{I wonder how an
+implementation using De Bruijn indexes would look like. I'm not
+immediately sure it would be easier to enforce correct indices. Through
+the bowels of the code we ensure two changes have disjoint sets of
+names by adding the successor of the maximum variable of one over the
+other.}
+
+
+
+
+
 \section{Concluding Remarks}
 
   This dissertation explored a novel approach to structural
