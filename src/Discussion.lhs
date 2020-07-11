@@ -80,6 +80,28 @@ merging tool over \texttt{.odf} files.  Some care must be taken with
 the unordered trees, even though our conjecture is that \texttt{hdiff} would
 behave mostly alright.
 
+\section{Digressions}
+
+
+From the intro to simplistics:
+  \digress{After realizing that the differencing algorithms presented in
+\Cref{chap:pattern-expression-patches} did not explicitly require
+sums of products to work, I was able to implement a workaround
+using \texttt{GHC.Generics} to encode mutually recursive families. The
+main idea is to take the dual approach from
+\texttt{generics-mrsop}: instead of defining which types belong in the
+family, we define which types \emph{do not} belong to the family.
+Corresponding with A. Serrano we discussed how this approach could
+be seen as an extension of his \genericssimpl{}
+library, which lead me to write the layer that handles deep representations with
+support for mutual recursion on top a the preliminary version of this library,
+giving rise to the \genericssimpl{} library in its current form.}
+
+From simplistic discussion on unification's existential on maps
+\digress{we could write a custom heterogeneous key-value store, but I'm doubtful this
+would be worth the trouble. |Data.Map| has excellent performance and has been
+thoroughly tested.} 
+
 \section{Concluding Remarks}
 
   This dissertation explored a novel approach to structural

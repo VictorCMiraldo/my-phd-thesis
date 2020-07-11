@@ -5,6 +5,16 @@ recursive families of datatypes. Consider Haskell itself, a |do| block construct
 an expression, even though the |do| block itself is
 composed by a list of statements which may include expressions.
 
+% \begin{myhs}[.4\textwidth]
+% \begin{code}
+% data Expr  = ... | Do [Stmt] | ...
+% \end{code}
+% \end{myhs}%
+% \begin{myhs}[.5\textwidth]
+% \begin{code}
+% data Stmt  = Assign Var Expr | Let Var Expr
+% \end{code}
+% \end{myhs}
 \begin{myhs}
 \begin{code}
 data Expr  = ... | Do [Stmt] | ...
@@ -12,11 +22,23 @@ data Stmt  = Assign Var Expr | Let Var Expr
 \end{code}
 \end{myhs}
 
+
+
   Another example is found in \texttt{HTML} and \texttt{XML} documents.
 These are easily described by a Rose tree, which albeit
 being a nested type \cite{Bird1998}, is naturally encoded
 in the mutually recursive family of datatypes below.
 
+% \begin{myhs}[.4\textwidth]
+% \begin{code}
+% data Rose  a  =  Fork a [Rose a]
+% \end{code}
+% \end{myhs}
+% \begin{myhs}[.5\textwidth]
+% \begin{code}
+% data []    a  =  [] | a : [a]
+% \end{code}
+% \end{myhs}
 \begin{myhs}
 \begin{code}
 data Rose  a  =  Fork a [Rose a]
@@ -24,15 +46,15 @@ data []    a  =  [] | a : [a]
 \end{code}
 \end{myhs}
 
-  The mutual recursion becomes apparent once one instantiates |a| to some
-ground type, for instance:
-
-\begin{myhs}
-\begin{code}
-data RoseI  =  Fork Int ListI
-data ListI  =  Nil | RoseI : ListI
-\end{code}
-\end{myhs}
+%   The mutual recursion becomes apparent once one instantiates |a| to some
+% ground type, for instance:
+% 
+% \begin{myhs}
+% \begin{code}
+% data RoseI  =  Fork Int ListI
+% data ListI  =  Nil | RoseI : ListI
+% \end{code}
+% \end{myhs}
 
   Working with generic mutually recursive families in Haskell, however, is a
 non-trivial task.  The best solution at the time of writing is the
@@ -95,7 +117,8 @@ works on the pattern functor spectrum of generic programming.
   The \texttt{generics-mrsop} library is an intersection of the
 \texttt{multirec} and \texttt{generics-sop} libraries. It uses
 explicit codes in the sums of products style to guide the
-representation of datatypes. This enables a simple explicit fixpoint
+representation of datatypes. 
+This enables a simple explicit fixpoint
 construction and a variety of recursion schemes, which makes the
 development of generic programs fairly straightforward.
 
@@ -241,39 +264,44 @@ sop  :: RepFix  sop  x  -> View    sop   x
 \end{code}
 \end{myhs}
 
-  Having the core of the \emph{sums-of-products} universe defined,
-we can turn our attention to writing the combinators that the programmer
-will use. These will naturally be defined by induction on the |CodeFix| instead of
-having to rely on instances, like in \Cref{sec:background:patternfunctors}.
-For instance, let us look at |compos|, which applies a function |f| everywhere
-on the recursive structure.
+   Having the core of the \emph{sums-of-products} universe defined,
+we turn our attention to the representation of recursion through
+the |Fix| datatype. This enables us to convert values to their
+\emph{deep} representation.
 
-\begin{myhs}
-\begin{code}
-compos :: (GenericFix a) => (a -> a) -> a -> a
-compos f = toFix . fmap f . fromFix
-\end{code}
-\end{myhs}
-
-  Although more interesting in the mutually recursive setting,
-\Cref{sec:gp:family}, we can illustrate its use for traversing a
-tree and adding one to its leaves. This example is a bit convoluted,
-since one could get the same result by simply writing
-|fmap (+1) :: Bin Int -> Bin Int|, but shows the intended usage
-of the |compos| combinator just defined.
-
-\begin{myhs}
-\begin{code}
-example :: Bin Int -> Bin Int
-example (Leaf n)  = Leaf (n + 1)
-example x         = compos example x
-\end{code}
-\end{myhs}
-
-  It is worth noting the \emph{catch-all} case, allowing one to
-focus only on the interesting patterns and using a default implementation
-everywhere else, which is convenient when the datatypes in question
-are large and might change often.
+%   Having the core of the \emph{sums-of-products} universe defined,
+% we can turn our attention to writing the combinators that the programmer
+% will use. These will naturally be defined by induction on the |CodeFix| instead of
+% having to rely on instances, like in \Cref{sec:background:patternfunctors}.
+% For instance, let us look at |compos|, which applies a function |f| everywhere
+% on the recursive structure.
+% 
+% \begin{myhs}
+% \begin{code}
+% compos :: (GenericFix a) => (a -> a) -> a -> a
+% compos f = toFix . fmap f . fromFix
+% \end{code}
+% \end{myhs}
+% 
+%   Although more interesting in the mutually recursive setting,
+% \Cref{sec:gp:family}, we can illustrate its use for traversing a
+% tree and adding one to its leaves. This example is a bit convoluted,
+% since one could get the same result by simply writing
+% |fmap (+1) :: Bin Int -> Bin Int|, but shows the intended usage
+% of the |compos| combinator just defined.
+% 
+% \begin{myhs}
+% \begin{code}
+% example :: Bin Int -> Bin Int
+% example (Leaf n)  = Leaf (n + 1)
+% example x         = compos example x
+% \end{code}
+% \end{myhs}
+% 
+%   It is worth noting the \emph{catch-all} case, allowing one to
+% focus only on the interesting patterns and using a default implementation
+% everywhere else, which is convenient when the datatypes in question
+% are large and might change often.
 
 \paragraph{Converting to a deep representation.}  The |fromFix|
 function still returns a shallow representation. But by constructing the
@@ -348,9 +376,9 @@ encoding for free. This essentially frees us from the burden of
 maintaining constraints. Compare the |gsize| above with its
 \texttt{generics-sop} variation, in
 \Cref{fig:background:generics-sop:gsize}.  The information about the
-recursive position allows us to write neat combinators like |crush|
-and |compos| together with a convenient |View| type for easy generic
-pattern matching. The only thing keeping us from handling real life
+recursive position allows us to write concise combinators, such as |crush|,
+and a convenient |View| type for easy generic
+pattern matching. The only thing keeping us from handling larger
 applications is the limited form of recursion.
 
 \subsection{Mutual Recursion}
@@ -495,13 +523,13 @@ class Family (fam :: [Star]) (codes :: [[[Atom]]]) where
 
   One of the differences between other approaches and ours is that we do
 not use an associated type to define the |codes| for the family
-|fam|. One of the reasons to choose this path is that it alleviates
+|fam|. This path is that it alleviates
 the burden of writing the longer |CodeMRec fam| every time we want to
 refer to |codes|. Furthermore, there are types like lists which appear
 in many different families, and in that case it makes sense to speak
 about a relation instead of a function.
 
-Since now |fromMRec| and |toMRec| operate on families, we have to
+Since |fromMRec| and |toMRec| operate on families, we have to
 specify how to translate \emph{each} of the members of the family
 \emph{to} and \emph{from} their generic representation.
 This translation needs to know
@@ -518,8 +546,10 @@ data SNat (n :: Nat) where
 \end{code}
 \end{myhs}
 
-  This, in turn, enables us to write the definition of |fromMRec| for
-the family of rose trees.
+\
+
+  The |SNat| datatype, in turn, enables us to write the 
+definition of |fromMRec| for the mutually recursive family of rose trees.
 
 \begin{myhs}
 \begin{code}
@@ -663,20 +693,15 @@ representations and pattern matches which should never be reached.
 \end{enumerate}
 
 Our solution is to \emph{parameterize} |Atom|,
-giving users the choice of opaque types:
-
-\begin{myhs}
-\begin{code}
-data Atom kon = I Nat | K kon
-\end{code}
-\end{myhs}
-
+giving users the choice of opaque types.
 For example, if we only want to deal with numeric opaque types, we can write:
 
 \begin{myhs}
 \begin{code}
-data NumericK = KInt | KInteger | KFloat
-type NumericAtom = Atom NumericK
+data Atom kon     = I Nat | K kon
+
+data NumericK     = KInt | KInteger | KFloat
+type NumericAtom  = Atom NumericK
 \end{code}
 \end{myhs}
 
@@ -1371,20 +1396,12 @@ in the GHC bug tracker\footnote{
 \url{https://gitlab.haskell.org/ghc/ghc/issues/14987}}
 but have not been resolved at the time of writing.
 This means that if we wish to collect large scale real data
-for our experiments, we must develop an alternative approach.
-
-  \digress{After realizing that the differencing algorithms presented in
-\Cref{chap:pattern-expression-patches} did not explicitly require
-sums of products to work, I was able to implement a workaround
-using \texttt{GHC.Generics} to encode mutually recursive families. The
-main idea is to take the dual approach from
-\texttt{generics-mrsop}: instead of defining which types belong in the
-family, we define which types \emph{do not} belong to the family.
-Corresponding with A. Serrano we discussed how this approach could
-be seen as an extension of his \genericssimpl{}
-library, which lead me to write the layer that handles deep representations with
-support for mutual recursion on top a the preliminary version of this library,
-giving rise to the \genericssimpl{} library in its current form.}
+for our experiments, we must develop an alternative approach. 
+The \genericssimpl{} approach trades the sums-of-products 
+structure of \texttt{generics-mrsop} for a simpler representation.
+Consequently, some generic functions will be more verbose
+than in \texttt{generics-mrsop}, but we can handle larger families 
+without running into the aforementioned bugs.
 
 \subsection{The Simplistic View}
 
@@ -1467,25 +1484,26 @@ repLeaves  :: SRep phi f -> [Exists phi]
 \end{code}
 \end{myhs}
 
+\
 
 \subsection{Mutual Recursion}
 \label{sec:gp:simplistic-deep}
 
   The |SRep phi f| datatype enables us to write generic functions
-without resorting to typeclasses and also provides a simple
+without resorting to typeclasses and provides a simple
 way to interact with potentially recursive subtrees through the
-|phi| functor. To write a deep representation,
-all we have to do is define a mutually recursive family to be
+|phi| functor. Writing a deep representation
+involves defining a mutually recursive family as
 any type that is \emph{not} a primitive type, where
-the choice of primitive type shall be parameterized through
+the choice of primitive type is parameterized through
 the usual |kappa| parameter. The pseudo-code below illustrates
 this idea.
 
 \begin{myhs}
 \begin{code}
 data SFix kappa :: Star -> Star where
-  Prim  :: (x `elem` kappa)                  => x -> SFix kappa fam x
-  SFix  :: (not (x`elem` kappa), Generic x)  => SRep (SFix prim) (Rep x)  -> SFix kappa fam x
+  Prim  ::       (x `elem` kappa)              => x -> SFix kappa fam x
+  SFix  :: (not  (x `elem` kappa), Generic x)  => SRep (SFix prim) (Rep x)  -> SFix kappa fam x
 \end{code}
 \end{myhs}
 
@@ -1519,9 +1537,8 @@ representation, as defined below.
 \begin{myhs}
 \begin{code}
 data SFix kappa fam :: Star -> Star where
-  Prim  :: (PrimCnstr kappa fam x) => x -> SFix kappa fam x
-
-  SFix  :: (CompoundCnstr kappa fam x) => SRep (SFix prim) (Rep x) -> SFix kappa fam x
+  Prim  :: (PrimCnstr kappa fam x)      => x -> SFix kappa fam x
+  SFix  :: (CompoundCnstr kappa fam x)  => SRep (SFix prim) (Rep x) -> SFix kappa fam x
 \end{code}
 \end{myhs}
 
@@ -1594,9 +1611,11 @@ type family All c xs :: Constraint where
 we must extract the |Eq y| instance from |All Eq prim|, for some |y|
 such that |IsElem y prim ~ P True|. This is where |ElemPrf|  becomes
 essential. By pattern matching on |ElemPrf|  we are able to extract the
-necessary instance, as shown by the |witness| function below. Naturally,
+necessary instance through the |witness| function. Naturally,
 once we find the instance we are looking for, we record it in a datatype
-for easier access.
+for easier access. This is similar to the |Dict| datatype from 
+\texttt{generics-sop}, but since we are working with a deep representation,
+we only use |witness| for accessing functionality over the primitive types.
 
 \begin{myhs}
 \begin{code}
@@ -1663,14 +1682,17 @@ sameType _ _ _ = sameIdx (hasElem :: ElemPrf x fam) (hasElem :: ElemPrf y fam)
 
 
 \paragraph{Converting to a deep representation.}
-  With representational issues out of the way, we shall need to
-translate between a value and its deep \texttt{GHC.Generics}-based
-representation. This can be done with the generic functions |dfrom| and |dto|,
+Next we look at how to convert values from their shallow
+\texttt{GHC.Generics} representation into \genericssimpl{}.
+As usual, we use the |dfrom| and |dto| functions,
 which follow the textbook recipe of defining generic functionality
 with \texttt{GHC.Generics}: use a typeclass and its generic
 variant and use \emph{default signatures}
 to bridge the gap between them. In our case, this is done with
 the |Deep| and |GDeep| typeclasses, declared in \Cref{fig:gp:gdeep}.
+This technique of deriving a generic representation from
+some simpler generic representation is often refered to as 
+\emph{Generic Generic Programming}~\cite{Magalhaes2014}.
 
 \begin{figure}
 \begin{myhs}
@@ -1694,9 +1716,9 @@ class GDeep kappa fam f where
 \end{figure}
 
   Defining the |GDeep| instances is straightforward with the exception
-of the |(K1 R a)| case, where we must decide whether or not |a|
-is a primitive type. Ideally we would like to write something
-in the lines of:
+of the |(K1 R a)| case, where we must perform different actions
+depending on whether or not |a| is a primitive type. Ideally we 
+would like to write something in the lines of:
 
 \begin{myhs}
 \begin{code}
@@ -1707,9 +1729,9 @@ instance (IsElem a kappa ~ P False)  => GDeep kappa fam (K1 R a) dots
 
   But \texttt{GHC} cannot distinguish between these two instances
 when resolving them. Not even \texttt{-XOverlappingInstances}
-can help us here. The only way out is to abstract the call to |IsElem|
-to an auxiliary typeclass, which ``pattern matches'' on the
-result of this type-level computation.
+can help us here. The solution, then, is to abstract the call to |IsElem|
+to an auxiliary typeclass, which performs a type-level pattern-match
+on the result of |IsElem a kappa|, which we call |isPrim|, below.
 
 \begin{myhs}
 \begin{code}
@@ -1829,11 +1851,11 @@ pattern PrimAnn ann x = Prim' ann x
 \end{code}
 \end{myhs}
 
-  Annotated fixpoints, in fact, are very important for us.
-Many of the algorithms in \Cref{chap:pattern-expression-patches}
-proceed by first annotating a tree with some auxiliary information and then
-computing a result over said tree. This ensures we never recompute
-auxiliary information and keeps our algorithms linear.
+%   Annotated fixpoints are very important for us.
+% Many of the algorithms in \Cref{chap:pattern-expression-patches}
+% proceed by first annotating a tree with some auxiliary information and then
+% computing a result over said tree. This ensures we never recompute
+% auxiliary information and keeps our algorithms linear.
 
 \subsubsection{Annotated Fixpoints}
 \label{sec:gp:annfix}
@@ -1994,18 +2016,17 @@ type Subst kappa fam phi = Map (Exists phi) (Exists (Holes kappa fam phi))
 \end{code}
 \end{myhs}
 
-  We need the existentials here in order to use the builtin, homogeneous, |Data.Map|.
-\digress{we could write a custom heterogeneous key-value store, but I'm doubtful this
-would be worth the trouble. |Data.Map| has excellent performance and has been
-thoroughly tested.} Naturally,
-when looking for the value associated with a key within the substitution
-we will run into a type error as soon as we unwrap the |Exists|. There are
-a number of solutions to this. For one, we could use the |sameTy| function
-and ensure they are of the same type. Pragmatically though, as long as
-we ensure we only insert keys |phi at| associated with values |Holes kappa fam phi at|,
-the type indexes will never differ and we can safely call |unsafeCoerce| to
-mitigate any performance overhead. We chose to use |unsafeCoerce| but stress
-that it can be easily avoided with a call to |sameTy|.
+  We need the existentials here in order to use the builtin,
+homogeneous, |Data.Map|.  Naturally, when looking for the value
+associated with a key within the substitution we will run into a type
+error as soon as we unwrap the |Exists|. There are a number of
+solutions to this. For one, we could use the |sameTy| function and
+ensure they are of the same type. Pragmatically though, as long as we
+ensure we only insert keys |phi at| associated with values |Holes
+kappa fam phi at|, the type indexes will never differ and we can
+safely call |unsafeCoerce| to mitigate any performance overhead. We
+chose to use |unsafeCoerce| but stress that it can be easily avoided
+with a call to |sameTy|.
 
 \begin{myhs}
 \begin{code}

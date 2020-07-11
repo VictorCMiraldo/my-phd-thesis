@@ -114,7 +114,7 @@
 \chapter{Generic Programming with Mutually Recursive Types}
 \label{chap:generic-programming}
 \lhsinclude{GenericProgramming.lhs}
-% include src/GenericProgramming.lhs
+%include src/GenericProgramming.lhs
 
 \chapter{Structural Patches}
 \label{chap:structural-patches}
