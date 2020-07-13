@@ -70,12 +70,14 @@
 \newpage
 \thispagestyle{empty}
 
-
-\tableofcontents
-
 \chapter{Abstract}
 \lhsinclude{Abstract.lhs}
 %include src/Abstract.lhs
+\newpage
+\thispagestyle{empty}
+
+\tableofcontents
+\thispagestyle{empty}
 
 %% Starts the mainmatter
 \mainmatter

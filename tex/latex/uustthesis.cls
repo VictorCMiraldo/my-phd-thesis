@@ -195,7 +195,6 @@ I'll pass it to 'book' just in case.}
 %% Adds the uppercase title of the current chapter to
 %% the top of the page, centered. Numbers go alternating
 %% left to right or centered, depending on oneside or twoside options.
-\pagestyle{fancy}
 \fancypagestyle{UUCSstyle}{
   \renewcommand{\chaptermark}[1]{\markboth{\MakeUppercase{##1}}{}}
   \renewcommand{\sectionmark}[1]{\markright{\MakeUppercase{##1}}{}}
