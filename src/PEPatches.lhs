@@ -3918,7 +3918,7 @@ suggest that |Patience| yields patches that merge successfully more
 often, but this is far from providing a metric on patches, like the
 usual notion of cost does for edit-scripts.
 
-\paragraph{Relation to Edit-Scripts.} Another interesting aspect that
+Another interesting aspect that
 could have been looked at is the relation between our |Patch| datatype
 and traditional edit-scripts. The idea of breaking sharing above can be used
 to translate our patches to an edit-script. Some early experiments did show

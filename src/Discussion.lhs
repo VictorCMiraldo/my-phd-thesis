@@ -80,74 +80,58 @@ merging tool over \texttt{.odf} files.  Some care must be taken with
 the unordered trees, even though our conjecture is that \texttt{hdiff} would
 behave mostly alright.
 
-\section{Digressions}
+\section{Future Work}
 
+  Although the long term future of structural differencing specifically
+for source-code versioning is uncertain, there are numerous fronts to continue
+working on the work developed and discussed in this dissertation,
+in particular, \texttt{hdiff} (\Cref{chap:pattern-expression-patches}).
+We refer the interested reader to \Cref{sec:pepatches:discussion} for
+a more detailed discussion on these topics, but proceed with
+a summary of interesting directions for future work.
+  
+  One clear option for further work is the improvement of the merge
+algorithm, presented in \Cref{sec:pepatches:merging}.  A good way to
+start could be restricting \texttt{hdiff} to produce only linear
+patches (context extraction with |Patience| option) and use these
+guarantees to study and develop a merge algorithm in a more
+disciplined fashion. It is possible that the extra guarantees that are
+provided by linear patches (metavariables are used only once) would
+simplify the algorithm to the point where we can start thinking about
+proving properties about it. We would hope that some simplifications
+would remove the need for some of the ad-hoc checks that are currently
+present in the merge algorithm -- take the example from
+\Cref{fig:pepatches:merge-03}, which feels overly complicated and with
+no real good justification besides having found these situation in
+practice. Finally, our experiments have shown us that the |Patience|
+extraction method gives superior success rates anyway.
 
-From the intro to simplistics:
-  \digress{After realizing that the differencing algorithms presented in
-\Cref{chap:pattern-expression-patches} did not explicitly require
-sums of products to work, I was able to implement a workaround
-using \texttt{GHC.Generics} to encode mutually recursive families. The
-main idea is to take the dual approach from
-\texttt{generics-mrsop}: instead of defining which types belong in the
-family, we define which types \emph{do not} belong to the family.
-Corresponding with A. Serrano we discussed how this approach could
-be seen as an extension of his \genericssimpl{}
-library, which lead me to write the layer that handles deep representations with
-support for mutual recursion on top a the preliminary version of this library,
-giving rise to the \genericssimpl{} library in its current form.}
+  Another interesting front would be to define the type of |Chg|
+in a well-scoped manner, essentially using De Bruijn indicies. 
+This would pottentially complicate some of the simpler parts of
+\texttt{hdiff} but could provide important insight into how to
+handle variables when merging in a very disciplined way.
+Different representations for |Chg| could also shed some light
+on how to better control which subtrees can be shared or not.
 
-From simplistic discussion on unification's existential on maps
-\digress{we could write a custom heterogeneous key-value store, but I'm doubtful this
-would be worth the trouble. |Data.Map| has excellent performance and has been
-thoroughly tested.} 
+  The actual implementation of \texttt{hdiff} could also benefit
+from further work. We could work on optimizing the generic programming 
+libraries for performance, rewriting parts of the code to use
+standard implementations well-known data structures instead,
+or even better visualization of patches using pretty printers.
 
-From deciding what can and cannot be shared
- \digress{I would like to reiterate
-the \emph{avoiding-the-issue} aspect of this decision. I did attempt
-to overcome this with a few methods which will be discussed later
-(\Cref{sec:pepatches:discussion}). None of my attempts at solving the
-issue were successful, hence, the best option really became avoiding
-the issue by making sure that we can easily exclude certain trees from
-being shared.}
-
-From the internals of my implementation
-\digress{I would like to also implement this
-algorithm with a big-endian Patricia Tree~\cite{Okasaki1998} and
-compare the results. I think the difference would be small, but worth
-considering when working on a production implementation}.
-
-From wondering about handling names in |Chg|
-\digress{I wonder how an
-implementation using De Bruijn indexes would look like. I'm not
-immediately sure it would be easier to enforce correct indices. Through
-the bowels of the code we ensure two changes have disjoint sets of
-names by adding the successor of the maximum variable of one over the
-other.}
-
-From hdiff's merge
-\digress{Unfortunately, I never had time to come back and refine the
-merging algorithm from its prototype phase into a more polished
-version. The merging algorithm was the last aspect of the project I worked on.}
-
-Checking that the set of subtrees that appear in a chg is disjoint from
-the set of subtrees moved by spn in a |Spn-Chg|
-\digress{I
-dislike this aspect of this synchronization algorithm quite a lot, it
-feels unnecessarily complex and with no really good justification
-besides the example in \Cref{fig:pepatches:merge-03}, which was
-distilled from real conflicts. I believe that further work would
-uncover a more disciplined way of disallowing duplications to be
-introduced.}
-
-Onto the order of equivalenecs in |splitDelInsMap|
-\digress{This is yet
-another aspect I am unsatisfied with and would like to see a more
-disciplined approach. Will have to be future work, nevertheless.}
-
-
-
-
+  Finally, the metatheory surrounding |Chg| and |Patch| should be
+worked on.  In \Cref{sec:pepatches:meta-theory} we have seen how |Chg|
+forms a partial monoid with a simple composition operation, but we
+also seen how the trivial inverse operaton does not give us a partial
+group. It could give us an inverse semigroup, for it has a weaker
+notion of \emph{inverse}. In fact, Darcs patch theory have been
+formalised with inverse semigrougs~\cite{Jacobson2009}. 
+Additionally, using the canonical extension order (i.e.,
+comparing domains of application functions) is not a great option for
+defining \emph{the best} patch. It would be interesting to see
+whether a categorical approach, similar to Mimram's work \cite{Mimram2013}, 
+could provide more educated insights in that direction.
 
 \section{Concluding Remarks}
 
