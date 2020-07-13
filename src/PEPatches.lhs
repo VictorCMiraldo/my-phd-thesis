@@ -2228,7 +2228,7 @@ In \Cref{fig:pepatches:alignment-01:A}, for example, the second |(:)|
 in the deletion context represents the same information as the
 root |(:)| in the insertion context.
 
-  We can recognize the deletion of |(: 42)| in
+  We can recognize the deletion of |(42 :)| in
 \Cref{fig:pepatches:alignment-01:B} structurally.  All of its fields,
 except one recursive field, contains no metavariables. The
 one subtree which \emph{does contain} metavariables is denoted the
@@ -2243,8 +2243,8 @@ consider this constructor to be part of the \emph{deletion}
 (resp. \emph{insertion}).
 
   Since our patches are locally scoped, computing an aligned patch is
-simply done by mapping over the spine and aligning the individual
-changes.  Aligning changes, in turn, is done by identifying whether
+done by mapping over the spine and aligning the individual
+changes.  Aligning changes, in turn, consists in identifying whether
 the constructor at the head of the deletion (resp. insertion) context
 can be deleted (resp. inserted) then recursing on the focus of the
 deletion (resp. insertion). When the root of the deletion context and
@@ -2275,10 +2275,10 @@ alignChg  :: Chg kappa fam at -> Al kappa fam (Chg kappa fam) at
 \end{code}
 \end{myhs}
 
-  This alignment notion, encoded in the |Al| datatype, is similar to its
+  Alignments encoded in the |Al| datatype are similar to its
 predecessor |Almu| from \texttt{stdiff}
-(\Cref{sec:stdiff:diff:fixpoint}), as it records insertions, deletions
-and spines over a fixpoint. Insertions and deletions will be
+(\Cref{sec:stdiff:diff:fixpoint}). They record insertions, deletions
+and spines over a fixpoint. Insertions and deletions are
 represented with |Zipper|s~\cite{Huet1997}. A zipper over a datatype
 |t| is the type of \emph{one-hole-contexts} over |t|, where the hole
 indicates a focused position. We will use the zippers provided
@@ -2342,7 +2342,7 @@ turns |Al| into a functor which enables us to map over it easily.
 \end{code}
 \end{myhs}
 
-  Imagine an alignment |a = Mod (Chg (metavar x) (metavar x))|. Does |a|
+  Take an alignment |a = Mod (Chg (metavar x) (metavar x))|. Does |a|
 represent a copy or is |x| contracted or duplicated? Because metavariables
 are scoped globally within an alignment, we can only distinguish between
 copies and duplications by traversing the entire alignment and recording
@@ -2350,8 +2350,7 @@ the arity of |x|. Yet, it is an important distinction to make. A copy
 synchronizes with anything whereas a contraction needs to satisfy
 additional constraints. Therefore, we will identify copies and permutations
 directly in the alignment to aid the merge function, later.
-
-  Let |c = Chg (metavar x) (metavar y)| where both |x| and |y| occur twice
+Let |c = Chg (metavar x) (metavar y)| where both |x| and |y| occur twice
 in their global scope: once in the deletion context and once in the
 insertion context. We say |c| is a copy when |x == y| and a permutation
 when |x /= y|. These are the last two constructors of |Al|.
@@ -2420,9 +2419,9 @@ annotRigidity :: Holes kappa fam h x -> HolesAnn  kappa fam IsRigid  h x
 
   After annotating the trees with rigidity information, we
 extract the zippers that witness potential insertions
-or deletions. This is done by the |hasRigidZipper| function, which is
-implemented by extracting \emph{all} possible zippers from the root
-and checking whether there is one such that all of its fields are
+or deletions. This is done by the |hasRigidZipper| function, which
+first extracts \emph{all} possible zippers from the root
+then checks whether one of them have all of its fields marked
 rigid except for the focus of the zipper. If we find such a zipper, we
 return it wrapped in a |Just|. When a rigid zipper exists it is
 unique by definition, hence there is no choice involved in detecting
@@ -2466,7 +2465,7 @@ in the source code (\Cref{chap:where-is-the-code}).
   [|Tri| [|Leaf| [|42|]] [|Leaf| [|21|]] [SQ]]
   [|Bin| [k,metavar] [l,metavar]]]
 \end{myforest}\label{fig:pepatches:hasrigidzipper:C}}
-\caption{Example calls to |hasRigidZipper| and their respective return values
+\caption{Examples to |hasRigidZipper| and their return values
 where applicable.}
 \label{fig:pepatches:hasrigidzipper}
 \end{figure}
@@ -2563,31 +2562,26 @@ al vars d i = alD (alS vars (al vars)) d i
   Forgetting the information computed by |alignChg| is trivial, as
 shown in the |disalign| function sketched below. It converts a |Al|
 back into a |Chg| in the expected way: it plugs deletion and insertion
-zippers, casting a zipper over |SFix| into a zipper over |Holes| where
-necessary, and distributes the constructors in the spine into both
+zippers and distributes the constructors in the spine into both
 deletion and insertion contexts and translates |Cpy| and |Prm| as
 expected.
 
 \begin{myhs}
 \begin{code}
 disalign :: Al kappa fam (Chg kappa fam) at -> Chg kappa fam at
-disalign (Del (Zipper del rest)) =
-  let Chg d i = disalign rest
-   in Chg (Roll (plug (cast del) d) i)
+disalign (Del (Zipper del rest)) = 
+  let Chg d i = disalign rest in Chg (Roll (plug (cast del) d) i)
 disalign dots
 \end{code}
 \end{myhs}
 
   Distributing an outer spine through an alignment is trivial.
-All we must do is place all the constructors of the outer spine
-as |Spn|:
+All we must do is place all the constructors of the outer 
+as constructors belonging to the alignment's spine, |Spn|.
 
 \begin{myhs}
 \begin{code}
 alDistr :: PatchAl kappa fam at -> Al kappa fam (Chg kappa fam) at
-alDistr (Hole al)  = al
-alDistr (Prim k)   = Spn (Prim k)
-alDistr (Roll r)   = Spn (Roll (repMap alDistr r))
 \end{code}
 \end{myhs}
 
@@ -2616,8 +2610,8 @@ changes are \emph{not} isomorphic.
 \begin{code}
 align' :: Patch kappa fam at -> (PatchAl kappa fam at , Int)
 align' p = flip runState maxv $$ holesMapM (alRefineM cpyPrims . alignChg vars) p
- where  vars = patchVars p
-        maxv = maybe 0 id (lookupMax vars)
+ where  vars  = patchVars p
+        maxv  = maybe 0 id (lookupMax vars)
 \end{code}
 \end{myhs}
 
@@ -2870,9 +2864,6 @@ type PatchC kappa fam at    = Holes kappa fam (Sum (Conflict kappa fam) (Chg kap
   Merging has a large design space. In what follows we will discuss
 our initial exploration and prototype algorithm, which was driven by
 practical experiments (\Cref{chap:experiments}).
-\digress{Unfortunately, I never had time to come back and refine the
-merging algorithm from its prototype phase into a more polished
-version. The merging algorithm was the last aspect of the project I worked on.}
 
   The |mergeAl| function is responsible for synchronizing alignments and
 is where most of the work happens. In broad strokes, it is similar to
@@ -3125,9 +3116,11 @@ The first pass is computed by the |mergePhase1| function, which will
 populate the state with instantiations and equivalences and place
 values of type |Phase2| in-place in the alignment. These values instruct
 the second phase on how to proceed on that particular location.
-Before proceeding, though, we must process the information
-we gathered into a deletion and an insertion map, with
-|splitDelInsMap| function. First we look into how the first pass
+In between these phases of the merge algorithm we must 
+process the information we gathered into a deletion and an insertion map, 
+which enables us to understand how subtrees were modified. 
+This is done by the |splitDelInsMap| function and will be discussed
+in more detail later. First, we look into how the first pass
 instantiates metavariables and registers equivalences.
 
   The |mergePhase1| function receives two alignments and
@@ -3152,7 +3145,8 @@ discussed one by one, next.
 
 \begin{myhs}
 \begin{code}
-mergePhase1  :: Al kappa fam x -> Al kappa fam x -> MergeM kappa fam (Al' kappa fam (Phase2 kappa fam) x)
+mergePhase1  :: Al kappa fam x -> Al kappa fam x 
+             -> MergeM kappa fam (Al' kappa fam (Phase2 kappa fam) x)
 mergePhase1 p q = case (p , q) of
    (Cpy _ , _)  -> return (Mod (P2Instantiate (disalign q)))
    (_ , Cpy _)  -> return (Mod (P2Instantiate (disalign p)))
@@ -3178,19 +3172,21 @@ the other changes its contents.
 \begin{myhs}
 \begin{code}
    (Prm x y, Prm w z)  -> Mod <$$> mrgPrmPrm x y w z
+
    (Prm x y, _)        -> Mod <$$> mrgPrm x y (disalign q)
    (_, Prm x y)        -> Mod <$$> mrgPrm x y (disalign p)
 \end{code} %$
 \end{myhs}
 
-  If we are to merge two permutations, |Prm (metavar x) (metavar y)|
+  When merging two permutations, |Prm (metavar x) (metavar y)|
 against |Prm (metavar w) (metavar z)|, for example, we know that
 |metavar x| and |metavar w| must refer to the same subtree, hence we
 register their equivalence. But since the two changes permuted the
 same tree, we can only synchronize them if they were permuted to the
-\emph{same place}, in other words, if both permutations turn out to be
-equal at the end of the synchronization process. Consequently,
-we issue a |P2TestEq|.
+\emph{same place}. We can only assert that if we also get an
+equivalence between |metavar y| and |metavar z|. Consequently,
+we issue a |P2TestEq| and estabilish whether the two
+permutations can be merged or not at the end of process.
 
 \begin{myhs}
 \begin{code}
@@ -3226,28 +3222,25 @@ mrgPrm x y c  =   addToInst "prm-chg" x c
 \end{myhs}
 
   The |addToInst| function inserts the |(x, c)| entry in |inst| if |x|
-is not yet a member. It raises a conflict with the supplied label
-if |x| is already in |inst| with a value that is different from |c|.
-\footnote{It might be the case that we could develop a better algorithm if instead
-of forbidding values different than |c| we check to see whether the
-two different values can also be merged. This did incur many difficulties
-tracking how subtrees were moved which made us opt for the easy and pragmatic
-approach of not doing anything difficult here.}
-
-  The call to |addToInst| in |mrgPrm| never raises a
+is not yet a member. It raises a conflict, in general, 
+if |x| is already in |inst| with a value that is different from |c|
+\footnote{Instead of forbidding values different than |c|,
+we could think to check whether the two different values can be merged. 
+This would incur other difficulties and is left as future work.}.
+In the call to |addToInst| in |mrgPrm|, above, it never raises a
 |"prm-chg"| conflict. This is because |metavar x| and |metavar y| are
 classified as a permutation -- each variable occurs exactly once
 in the deletion and once in the insertion contexts.  Therefore, it is
-impossible that |x| was already a member of |inst|.  \digress{In
-fact, throughout our experiments, in \Cref{chap:experiments}, we
-observed that |"prm-chg"| never showed up as a conflict in our whole
-dataset, as expected.}
+impossible that |x| was already a member of |inst|. 
+% \footnote{In
+% Fact, throughout our experiments, in \Cref{chap:experiments}, we
+% Observed that |"prm-chg"| never showed up as a conflict in our whole
+% Dataset, as expected.}.
 
-  With permutations and copies out of the way, we start looking at the
-more intricate branches of the merge function. Insertions are still fairly
-simple and must be preserved as long as they do not attempt to
-insert different information in the same location -- we would not
-be able to decide which insertion come first in this situation.
+  Next, we look at insertions. Interstinos must be preserved as long
+as they do not attempt to insert different information in the same
+location, otherwise we would not be able to decide which insertion 
+should happen first.
 
 \begin{myhs}
 \begin{code}
@@ -3280,10 +3273,10 @@ in \Cref{fig:pepatches:trydel}.
 \end{code} %
 \end{myhs}
 
-  Note that since |merge| is symmetric, we can freely swap the order
-of arguments. \digress{Let me rephrase that. The |merge| \emph{should}
-be symmetric, and \texttt{QuickCheck} tests were positive of this, but
-I have not come to the point of proving this yet.}
+  Note that since |merge| is supposed to be symmetric, we can 
+freely swap the order of arguments. Although we
+never got to proving this formally, our \texttt{QuickCheck} tests 
+were encouraging that this is the case.
 
 \begin{figure}
 \subfloat[Call to |tryDel| succeeds. The |Bin| at the root can be deleted
@@ -3513,14 +3506,7 @@ merging the left hand side of |(,)|, in
 clear that |metavar a| was erroneously duplicated. Our implementation
 will reject this by checking that the set of
 subtrees that appear in the result of instantiating |chg| is disjoint
-from the set of subtrees moved by |spn|. \digress{I
-dislike this aspect of this synchronization algorithm quite a lot, it
-feels unnecessarily complex and with no really good justification
-besides the example in \Cref{fig:pepatches:merge-03}, which was
-distilled from real conflicts. I believe that further work would
-uncover a more disciplined way of disallowing duplications to be
-introduced.}
-
+from the set of subtrees moved by |spn|. 
 
   Merging two spines is simple. We know they must
 reference the same constructor since the arguments
@@ -3634,17 +3620,15 @@ and |P2TestEq| instructions.
 The second phase starts with splitting |inst| and |eqvs|, which
 requires some attention. For example,
 imagine there exists an entry in |inst| that assigns |metavar x|
-to |Chg (Hole (metavar y)) (: 42 (Hole (metavar y)))|, this tells us that
+to |Chg (Hole (metavar y)) (42 : (Hole (metavar y)))|, this tells us that
 the tree identified by |metavar x| is the same as the tree identified
-by |metavar y|, and it became |(: 42 (metavar y))|. Now suppose that
+by |metavar y|, and it became |42 : (metavar y)|. Now suppose that
 |metavar x| was duplicated somewhere else, and we come across
 an equivalence that says |metavar y == metavar x|. We cannot simply insert
 this equivalence into |inst| because the merge algorithm made the decision to
 remove all occurrences of |metavar x|, not of |metavar y|, even
 though they identify the same subtree. This is important to ensure
-we produce patches that can be applied. \digress{This is yet
-another aspect I am unsatisfied with and would like to see a more
-disciplined approach. Will have to be future work, nevertheless.}
+we produce patches that can be applied.   
 
   The |splitDelInsMaps| function is responsible for synthesizing the
 information gathered in the first pass of the synchronization

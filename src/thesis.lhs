@@ -50,8 +50,6 @@
 \newcommand{\qManualMDiffOk}{13}
 
 
-%% \linenumbers
-
 \begin{document}
 \maketitle
 
@@ -129,12 +127,12 @@
 \chapter{Experiments}
 \label{chap:experiments}
 \lhsinclude{Experiments.lhs}
-% include src/Experiments.lhs
+%include src/Experiments.lhs
 
 \chapter{Discussion}
 \label{chap:discussion}
 \lhsinclude{Discussion.lhs}
-% include src/Discussion.lhs
+%include src/Discussion.lhs
 
 \appendix
 \chapter{Source-Code and Dataset}

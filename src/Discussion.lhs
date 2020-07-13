@@ -125,6 +125,26 @@ the bowels of the code we ensure two changes have disjoint sets of
 names by adding the successor of the maximum variable of one over the
 other.}
 
+From hdiff's merge
+\digress{Unfortunately, I never had time to come back and refine the
+merging algorithm from its prototype phase into a more polished
+version. The merging algorithm was the last aspect of the project I worked on.}
+
+Checking that the set of subtrees that appear in a chg is disjoint from
+the set of subtrees moved by spn in a |Spn-Chg|
+\digress{I
+dislike this aspect of this synchronization algorithm quite a lot, it
+feels unnecessarily complex and with no really good justification
+besides the example in \Cref{fig:pepatches:merge-03}, which was
+distilled from real conflicts. I believe that further work would
+uncover a more disciplined way of disallowing duplications to be
+introduced.}
+
+Onto the order of equivalenecs in |splitDelInsMap|
+\digress{This is yet
+another aspect I am unsatisfied with and would like to see a more
+disciplined approach. Will have to be future work, nevertheless.}
+
 
 
 
