@@ -1,17 +1,21 @@
-  The \unixdiff{} tool -- which computes the differences between two
-files in terms of a set of copied lines -- is widely used in
-software version control. The fixed \emph{lines-of-code} granularity,
-however, is sometimes too coarse and obscures simple changes, \ie{}, renaming
-a single parameter triggers the whole line to be seen as \emph{changed}. This may
-lead to unnecessary conflicts when unrelated changes occur on the same line.
-Consequently, it is difficult to merge such changes automatically.
+De \unixdiff{} tool -- die het verschil tussen twee bestanden berekent
+in termen van de verzameling regels die gekopieerd worden -- wordt
+veel gebruikt bij het versiebeheer van software. De vaste
+granulariteit, \emph{regels code}, is helaas soms te grof en verhult
+eenvoudige wijzigingen. Bijvoorbeeld, door het hernoemen van een
+parameter van een functie kunnen vele verschillende regels
+veranderen. Dit kan leiden tot onnodige conflicten wanneer
+ongerelateerde wijzigingen toevallig op dezelfde regel code
+plaatsvinden. Het is daarom lastig om zulke wijzigingen automatisch te
+combineren (todo merge?).
 
-  Tradidional methods for computing differences 
+Traditionele methodes om verschillen te bepalen tussen een bronbestand en doelbestand
 \cite{Bille2005,Bergroth2000,Paassen2018,McIlroy1976,Myers1986,Hirschberg1975}
-mostly rely on the computation of an \emph{edit-script} that transforms
-the source into the destination. An edit-script consists in
-a list of edit-operations, which in turn, usually consist in insertions, deletions
-and copies. Take the two files below as an example:
+maken gebruik van een \emph{edit-script}, die de veranderingen
+documenteren om het bronbestand in het doelbestand te transformeren. Zulke
+edit-scripts bestaan uit een reeks edit-operaties, zoals het invoegen,
+verwijderen of kopie\"eren van een regel. Beschouw bijvoorbeeld de
+volgende twee bestanden:
 
 {
 \footnotesize
@@ -34,23 +38,23 @@ and copies. Take the two files below as an example:
 \end{minipage}
 }
 
-  Lines 2 and 4 in the source file, on the left, match
-lines 3 and 5 in the destination. These are identified
-as copies. The rest of the lines, with no matches,
-are marked as deletions or insertions. In this example,
-lines 1 and 3 in the source are deleted and lines
-1,2 and 4 in the destination are inserted.
+Regels 2 en 4 in het bronbestand links komen overeen met regels 3 en 5
+in het doelbestand rechts. Deze worden dan ook geidentificeerd als
+kopie\"en. De overige regels worden verwijderd of ingevoegd. In dit
+voorbeeld worden regels 1 en 3 uit het bronbestand verwijderd; regels
+1,2 en 4 worden in het doelbestand ingevoegd.
 
-  This information about which lines have been \emph{copied},
-\emph{deleted} or \emph{inserted} is then packaged into
-an \emph{edit-script}: a list of operations that transforms
-the source file into the destination file. For the example above,
-the edit-script would read something like: delete the first line;
-insert two new lines; copy a line; delete a line; insert a line
-and finally copy the last line. The output we would see from
-\unixdiff{} would show deletions prefixed with a minus sign
-and insertions prefixed with a plus sign. Copies have no prefix.
-In our case, it would look something like:%
+Deze informatie over welke afzonderlijke regels zijn gekopieerd,
+verwijderd of ingevoegd wordt dan samengebrakcht in een edit script:
+een lijst operaties die een bronbestand transformeert in een
+doelbestand. In het voorbeeld hierboven, zou het edit-script bestaan
+uit een serie edit-operaties als: verwijder een regel; voeg twee
+nieuwe regels in; kopieer een regel; verwijder een regel; enz. De
+uitvoer van \unixdiff{} bestaat uit zo'n lijst
+operaties. Verwijderingen worden aangeduid door een regel te beginnen
+met een minteken; invoegingen worden aangeduid met een plusteken. In
+ons voorbeeld zou het resultaan van \unixdiff{} bestaan uit de
+volgende regels:
 \begin{alltt}\footnotesize
 -    res := 0;
 +    print("summing up");
@@ -61,48 +65,56 @@ In our case, it would look something like:%
      \}
 \end{alltt}
 
-  Although there exists many generalizations of \emph{edit-scripts} to work over trees
+Er bestaan veel generalisaties van edit-scripts die niet werken met
+regels code, maar bomen
 \cite{Zhang1989,Demaine2007,Dulucq2003,Pawlik2012,Augsten2008,Augsten2010},
-these approaches suffer from significant drawbacks. For one, edit-scripts
-do not have the expressivity to encode arbitrary permutations, duplications
-or contractions (inverse of a duplication). Secondly, there is a big performance
-cost to be paid for computing edit-scripts for trees.
-Finally, most of the previous work on the topic considers only \emph{untyped} trees.
-That is, the transformations are not guaranteed to respect some \emph{schema}.
-It is possible to design edit-scripts in a typed fashion \cite{Lempsink2009} but
-this does not solve the issues we just mentioned.
+maar veel van dit werk heeft significante nadelen. Om te beginnen,
+edit-scripts zijn niet in staat om willekeuringe permutaties,
+duplicaties, of contracties (de inverse van duplicaties) uit te
+drukken. Ten tweede, hebben de meeste van deze algoritmen een
+significant slechtere \emph{performance} dan \unixdiff. Tot slot,
+houdt het meeste van dit werk zich bezig met \emph{ongetypeerde}
+bomen, dat wil zeggen, dat ze geen garanties geven over of de
+resulterende edit-scripts een zekere structuur, ook wel bekend als een
+\emph{schema}, behoudt. Het is mogelijk om getypeerde edit-scripts te
+ontwerpen, \cite{Lempsink2009}, maar dit pakt nog niet alle
+bovengenoemde nadelen aan.
 
-  In this thesis we discuss two novel approaches to structural
-differencing that aim at detaching from edit-script. 
-The first approach defines a type-indexed representation of
-patches and provides a clear merging algorithm, but it is
-computationally expensive to produce patches with this approach.
-The second approach addresses the efficiency problem by choosing an
-extensional representation for patches. This enables us to represent
-transformations involving insertions, deletions, duplication,
-contractions and permutations which are computable in linear time.
+In dit proefschrift bespreken we twee nieuwe manieren om het verschil
+te bepalen tussen `gestructureerde data', zoals bomen, die zich niet langer
+beperken tot alleen edit-scripts. De eerste aanpak definieert een
+type-ge\"{\i}ndexeerde representatie van wijzigingen en geeft een helder
+algoritme om twee verschillende wijzigingen samen te voegen, maar is
+helaas computationeel te duur om bruikbaar te zijn. De tweede aanpak
+is een stuk effici\"enter door het kiezen van een meer extensionele
+representatie van wijzigingen. Hierdoor kunnen we allerlei
+transformaties uitdrukken die gebruik maken van invoegingen,
+verwijderingen, duplicaties, contracties en permutaties, en deze in
+lineaire tijd berekenen.
 
-  Suppose we want to describe a change that modifies the left element
-of a binary tree. If we had the full Haskell programming language
-available as the patch language, we could write something similar to
-function |c|, in \Cref{fig:sammenvatting:example-01:A}. Observing the
-function |c| we see it has a clear domain -- a set of |Tree|s that
-when applied to |c| yields a |Just| -- which is specified by the
-pattern and guards. Then, for each tree in the domain we compute a
-corresponding tree in the codomain.  The new tree is obtained from the
-old tree by replacing the |10| by |42| in-place.  Closely inspecting
-this definition, we can interpret the matching of the
-pattern as a \emph{deletion} phase and the construction of the
-resulting tree as a \emph{insertion} phase.  The \texttt{hdiff}
-approach represents the change in |c| exactly as that: a pattern and a
-expression. Essentially, we write |c| as |Chg (Bin (Leaf 10) y) (Bin
-(Leaf 42) y)| -- represented graphically as in
+Stel, we moeten een wijziging beschrijven in de linkerdeelboom van een
+binaire boom. Als we een hele programmeertaal zoals Haskell tot onze
+beschikking zouden hebben, zouden we iets kunnen schrijven als de
+functie |c| in \Cref{fig:sammenvatting:example-01:A}. Merk hierbij
+op dat deze functie een duidelijk domein heeft -- de verzameling bomen
+die, wanneer |c| erop toegepast wordt een |Just| constructor
+opleveren. Dit domein wordt bepaald door de patronen en ``guards'' die
+de functie |c| gebruikt. Zo bepalen we voor elke boom in dit domein,
+een bijbehorend resultaat in het codomein. Deze nieuwe boom kunnen we
+bepalen door in de oude boom de waarde 10 te vervangen door 42. Bij
+nadere inspectie, zien we dat we het pattern-matchen op de invoerboom
+kunnen opvatten als het (mogelijk) \emph{verwijderen} van bepaalde
+deelbomen; de constructie van de resultaatboom kunnen we beschouwen
+als het \emph{invoegen} van nieuwe deelbomen. Het \texttt{hdiff}
+algoritme dat wij in dit proefschrift ontwikkelen representeert een
+wijziging |c| dan ook als een patroon en een expressie. Zo kunnen we
+de wijziging van |c| beschrijven als |Chg (Bin (Leaf 10) y) (Bin
+(Leaf 42) y)| -- zoals we illustreren in 
 \Cref{fig:sammenvatting:example-01:B}.
-
 
 \begin{figure}
 \centering
-\subfloat[Haskell function |c|]{%
+\subfloat[Haskell functie |c|]{%
 \begin{myhsFig}[0.4\textwidth]
 \begin{code}
 c :: Tree -> Maybe Tree
@@ -112,7 +124,7 @@ c (Bin (Leaf x) y)
 c _            = Nothing
 \end{code}
 \end{myhsFig}\label{fig:sammenvatting:example-01:A}}\qquad\qquad
-\subfloat[|c| represented as a \emph{change}]{%
+\subfloat[|c| gerepresenteerd als een \emph{wijziging}]{%
 \begin{myforest}
 [,change
 [|Bin|
@@ -123,26 +135,31 @@ c _            = Nothing
   [y,metavar]]
 ]
 \end{myforest}\label{fig:sammenvatting:example-01:B}}
-\caption{Haskell function and its graphical representation as a change.
-The change here modifies the left child of a binary node. Notation |metavar y| is used to indicate |y| is
-a metavariable.}
+\caption{Een Haskell functie en de bijbehorende grafische
+  representatie als wijziging.  Deze wijziging past de linkerdeelboom
+  van een binaire knoop aan. De notatie |metavar y| wordt gebruikt om
+  aan te geven dat |y| een metavariabele is.}
 \label{fig:sammenvatting:example-01}
 \end{figure}
 
-  With the added expressivity, however, comes added
-complexity. Consequently, the merging algorithm is more intricate and
-the patches can be harder to reason about.
+Doordat onze wijzigingen een rijkere expressiviteit genieten, wordt
+het samenvoegen van zulke wijzigingen complexer. Als gevolg hiervan
+wordt het algoritme om twee wijzigingen te verenigen ingewikkelder en
+kan het soms lastiger worden om over de wijzigingen te redeneren.
 
-  Both of our approaches can be instantiated to mutually recursive
-datatypes and, consequently, can be used to compare
-elements of most programming languages.  Writing the software that
-does so, however, comes with additional challenges.  To address this we
-have developed two new libraries for generic programming in Haskell.
+Deze twee verschillende algoritmes om het verschil tussen
+gestructureerde data te berekenen kunnen worden toegepast op
+wederzijds recursieve datatypes, met als gevolg dat ze gebruikt kunnen
+worden om computerprogramma's te vergelijken. Om dit te implementeren
+was niet eenvoudig, en we hebben in de context van
+dit proefschrift dan ook verschillende nieuwe bibliotheken voor
+generiek programmeren in Haskell ontwikkeld.
 
-  Finally, we empirically evaluate our algorithms by a number of
-experiments over real conflicts gathered from \texttt{GitHub}. Our
-evaluation reveals that at least \qSolvedPerc{} of the conflicts
-that developers face on a day-to-day basis could have been
-automatically merged. This suggests there is a benefit in using
-structural differencing tools as the basis for software version
-control.
+Tot slot, hebben we een empirische evaluatie van onze algoritmes
+uitgevoerd aan de hand van conflicten die we hebben verzameld van
+\texttt{GitHub}. Uit deze evaluatie blijkt dat ten minste
+\qSolvedPerc{} van de conflicten die softwareontwikkelaars dagelijks
+tegenkomen, voorkomen hadden kunnen worden met de technologie die in
+dit proefschrift ontwikkeld wordt. Dit doet vermoeden dat er nog veel
+winst te behalen is in het gebruik van betere algoritmes als basis
+voor het versiebeheer van software.

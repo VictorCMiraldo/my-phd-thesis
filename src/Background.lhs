@@ -1022,7 +1022,7 @@ $\begin{array}{l}
   \;  = |gsize (fromGen (Bin (Leaf 1) (Leaf 2)))| \\
   \;  = |gsize (R1 (K1 (Leaf 1) :*: K1 (Leaf 2)))| \\
   \;  = |gsize (K1 (Leaf 1)) + gsize (K1 (Leaf 2))| \\
-  \;  \overset{\dagger}{=} |size (Leaf 1) + size (Leaf 2)| \\
+  \;  = |size (Leaf 1) + size (Leaf 2)| \\
   \;  = |gsize (fromGen (Leaf 1)) + gsize (fromGen (Leaf 2))|\\
   \;  = |gsize (L1 (K1 1)) + gsize (L1 (K1 2))|\\
   \;  = |size (1 :: Int) + size (2 :: Int)|
@@ -1045,8 +1045,10 @@ we just need an instance for |Size Int| to compute the final
 result. Literals of type |Int| illustrate what we often call \emph{opaque
 types}: those types that constitute the base of the universe
 and are \emph{opaque} to the representation language.
-
-\
+This approach to generic programming was also used as the basis for 
+bringing generic programming to Clean~\cite{Alimarine2005}, where
+it was later improved to support dynamic types 
+and compile-time optimizations, for example.
 
 \subsection{Explicit Sums of Products}
 \label{sec:background:explicitsop}
