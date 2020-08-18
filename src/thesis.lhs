@@ -1,4 +1,4 @@
-\documentclass[noseaweed,10pt,b5paper,cmyk]{uustthesis}
+\documentclass[10pt,b5paper,cmyk]{uustthesis}
 %% Remove the 'noseaweed' option to draw the fractal
 %% at the section headings. This slows compilation down, though.
 
