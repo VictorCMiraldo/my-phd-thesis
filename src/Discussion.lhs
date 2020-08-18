@@ -13,7 +13,8 @@ approaches. A first method, \texttt{stdiff}, was presented in
 \Cref{chap:structural-patches} and revealed itself to be inpractical
 due to poor performance. The second method, \texttt{hdiff},
 introduced in \Cref{chap:pattern-expression-patches}, has shown
-much greater potential. Empirical results were discussed in \Cref{chap:experiments}.
+much greater potential. Empirical results were discussed in 
+\Cref{chap:experiments}.
 
 \section{The Future of Structural Differencing}
 
@@ -84,7 +85,7 @@ behave mostly alright.
 
   Although the long term future of structural differencing specifically
 for source-code versioning is uncertain, there are numerous fronts to continue
-working on the work developed and discussed in this dissertation,
+working on many of the aspects developed and discussed in this dissertation,
 in particular, \texttt{hdiff} (\Cref{chap:pattern-expression-patches}).
 We refer the interested reader to \Cref{sec:pepatches:discussion} for
 a more detailed discussion on these topics, but proceed with
@@ -99,7 +100,7 @@ disciplined fashion. It is possible that the extra guarantees that are
 provided by linear patches (metavariables are used only once) would
 simplify the algorithm to the point where we can start thinking about
 proving properties about it. We would hope that some simplifications
-would remove the need for some of the ad-hoc checks that are currently
+would remove the need for some of the more ad-hoc checks that are currently
 present in the merge algorithm -- take the example from
 \Cref{fig:pepatches:merge-03}, which feels overly complicated and with
 no real good justification besides having found these situation in
@@ -120,8 +121,8 @@ libraries for performance, rewriting parts of the code to use
 standard implementations well-known data structures instead,
 or even better visualization of patches using pretty printers.
 
-  Finally, the metatheory surrounding |Chg| and |Patch| should be
-worked on.  In \Cref{sec:pepatches:meta-theory} we have seen how |Chg|
+  Finally, the metatheory surrounding \texttt{hdiff}'s |Chg| and |Patch| 
+should be worked on.  In \Cref{sec:pepatches:meta-theory} we have seen how |Chg|
 forms a partial monoid with a simple composition operation, but we
 also seen how the trivial inverse operaton does not give us a partial
 group. It could give us an inverse semigroup, for it has a weaker
@@ -131,7 +132,7 @@ Additionally, using the canonical extension order (i.e.,
 comparing domains of application functions) is not a great option for
 defining \emph{the best} patch. It would be interesting to see
 whether a categorical approach, similar to Mimram's work \cite{Mimram2013}, 
-could provide more educated insights in that direction.
+could provide more educated insights in that direction. 
 
 \section{Concluding Remarks}
 

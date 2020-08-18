@@ -7,7 +7,7 @@ parameter van een functie kunnen vele verschillende regels
 veranderen. Dit kan leiden tot onnodige conflicten wanneer
 ongerelateerde wijzigingen toevallig op dezelfde regel code
 plaatsvinden. Het is daarom lastig om zulke wijzigingen automatisch te
-combineren (todo merge?).
+combineren.
 
 Traditionele methodes om verschillen te bepalen tussen een bronbestand en doelbestand
 \cite{Bille2005,Bergroth2000,Paassen2018,McIlroy1976,Myers1986,Hirschberg1975}
@@ -39,13 +39,13 @@ volgende twee bestanden:
 }
 
 Regels 2 en 4 in het bronbestand links komen overeen met regels 3 en 5
-in het doelbestand rechts. Deze worden dan ook geidentificeerd als
+in het doelbestand rechts. Deze worden dan ook ge\"{i}dentificeerd als
 kopie\"en. De overige regels worden verwijderd of ingevoegd. In dit
 voorbeeld worden regels 1 en 3 uit het bronbestand verwijderd; regels
 1,2 en 4 worden in het doelbestand ingevoegd.
 
 Deze informatie over welke afzonderlijke regels zijn gekopieerd,
-verwijderd of ingevoegd wordt dan samengebrakcht in een edit script:
+verwijderd of ingevoegd wordt dan samengebracht in een edit script:
 een lijst operaties die een bronbestand transformeert in een
 doelbestand. In het voorbeeld hierboven, zou het edit-script bestaan
 uit een serie edit-operaties als: verwijder een regel; voeg twee
@@ -53,7 +53,7 @@ nieuwe regels in; kopieer een regel; verwijder een regel; enz. De
 uitvoer van \unixdiff{} bestaat uit zo'n lijst
 operaties. Verwijderingen worden aangeduid door een regel te beginnen
 met een minteken; invoegingen worden aangeduid met een plusteken. In
-ons voorbeeld zou het resultaan van \unixdiff{} bestaan uit de
+ons voorbeeld zou het resultaat van \unixdiff{} bestaan uit de
 volgende regels:
 \begin{alltt}\footnotesize
 -    res := 0;
@@ -69,7 +69,7 @@ Er bestaan veel generalisaties van edit-scripts die niet werken met
 regels code, maar bomen
 \cite{Zhang1989,Demaine2007,Dulucq2003,Pawlik2012,Augsten2008,Augsten2010},
 maar veel van dit werk heeft significante nadelen. Om te beginnen,
-edit-scripts zijn niet in staat om willekeuringe permutaties,
+edit-scripts zijn niet in staat om willekeurige permutaties,
 duplicaties, of contracties (de inverse van duplicaties) uit te
 drukken. Ten tweede, hebben de meeste van deze algoritmen een
 significant slechtere \emph{performance} dan \unixdiff. Tot slot,

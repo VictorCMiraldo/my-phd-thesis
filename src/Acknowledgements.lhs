@@ -30,10 +30,12 @@ of the tunnel during the later years of my PhD. I can't wait to
 spend the years after my PhD with you by my side.
 
   Next I want to thank Lisa for being instrumental to my happiness while
-in Utrecht, and, consequently, to this thesis. Thank you for your
+in Utrecht, and consequently, to this thesis. Thank you for your
 support, companionship, for always being there for one last beer and
-sharing so many great experiences, which I'm confident we'll continue to
-have. I'd propose Vietnam for a strong next candidate! 
+for organizing so many great activities with me. I cherish all of
+our shared experiences very much and looking forward to the
+ones that are yet to come. If I may, let me propose Vietnammese distillaries 
+for a strong next candidate! 
 
   Truth be told, I have been blessed with amazing friends here in Utrecht.
 They have all contributed to the completion of this thesis by being gorgeous

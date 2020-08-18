@@ -807,16 +807,17 @@ changes.
 
   With some basic knowledge of differencing and edit-distances under
 our belt, we briefly look over some of the relevant literature on the
-topic of tree differencing. Zhang and Sasha~\cite{Zhang1989} were perhaps 
-the first to
-provide a number of algorithms which were later improved on by Klein
-et al.~\cite{Klein1998} and Dulucq et al.~\cite{Dulucq2003}. Finally,
+topic of tree differencing. Tai~\cite{Tai1979} was the first to
+consider edit distance between two trees, followed Zhang and
+Sasha~\cite{Zhang1989}. More refined algorithms for computing the
+distance between two trees have been presented by Klein et
+al.~\cite{Klein1998} and Dulucq et al.~\cite{Dulucq2003}. Finally,
 Demaine et al.~\cite{Demaine2007} presents an algorithm of cubic
 complexity and proves this is the best possible worst case. Zhang and
 Sasha's algorithm is still preferred in many pratical scenarios,
 though. The more recent \emph{RTED}~\cite{Pawlik2012} algorithm
-maintains the cubic worst case complexity and compares or outruns any
-of the other algorithms, rendering it the standard choice for
+maintains the cubic worst case complexity and is comparable or faster
+than the other algorithms, rendering it the standard choice for
 computing tree edit distance based on the classic edit operations.  In
 the case of unordered trees the best we can rely on are approximations
 \cite{Augsten2008,Augsten2010} since the problem is
@@ -834,7 +835,7 @@ number, the \emph{distance} between objects, quantifying how similar
 they are.
 
   From the perspective of \emph{tree differencing}, on the other hand,
-we actually care about the edit operations and might want to perform
+we focus mainly on the edit operations and might want to perform
 computations such as composition and merging of
 differences. Naturally, however, the choice of edit operations heavily
 influences the complexity of the |diff| algorithm. Allowing a
