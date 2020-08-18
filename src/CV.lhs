@@ -1,7 +1,10 @@
+
+\vfill
+
 {\large Victor Cacciari Miraldo} \\
 Born 16 October 1991 in S\~{a}o Paulo, Brazil.
 
-\
+\vfill
 
 \noindent\begin{minipage}[t]{.2\textwidth}
 \subsubsection*{Education}
@@ -18,10 +21,10 @@ Master in Computer Science
 \vspace{.5em}
 
 \noindent\emph{2015 - 2020, Utrecht Universiteit, the Netherlands}\\
-PhD candidate in Computer Science
+PhD in Computer Science
 \end{minipage}
 
-\
+\vfill
 
 \noindent\begin{minipage}[t]{.2\textwidth}
 \subsubsection*{Research}
