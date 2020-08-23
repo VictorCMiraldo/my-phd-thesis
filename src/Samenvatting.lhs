@@ -77,7 +77,7 @@ houdt het meeste van dit werk zich bezig met \emph{ongetypeerde}
 bomen, dat wil zeggen, dat ze geen garanties geven over of de
 resulterende edit-scripts een zekere structuur, ook wel bekend als een
 \emph{schema}, behoudt. Het is mogelijk om getypeerde edit-scripts te
-ontwerpen, \cite{Lempsink2009}, maar dit pakt nog niet alle
+ontwerpen~\cite{Lempsink2009}, maar dit pakt nog niet alle
 bovengenoemde nadelen aan.
 
 In dit proefschrift bespreken we twee nieuwe manieren om het verschil
