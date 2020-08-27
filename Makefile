@@ -76,7 +76,7 @@ remock: $(BUILD_DEPENDS) tex/latex/uustthesis.cls images
 
 cover: cover/cover.svg default
 	$(MAKE) -C cover/
-	pdftk cover/frontcover.pdf dist/thesis.pdf cat output dist/with-cover.pdf
+	pdftk cover/frontcover.pdf dist/thesis.pdf cover/backcover.pdf cat output dist/with-cover.pdf
 
 get-titlepage: default
 	pdfjam -o dist/titlepage.pdf dist/thesis.pdf 1,2
