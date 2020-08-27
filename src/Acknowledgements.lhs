@@ -2,8 +2,8 @@
 Oliveira, Rinus Plasmeijer, Sven-Bodo Scholz, Johan Jeuring; I would
 like for thank them for their time and for providing careful
 feedback. I will be defending this thesis against the aforementioned
-reading committee, Arno Siebes, Hajo Reijers and Hans Bodlaender.  I
-would henceforth like to thank all of them for agreeing to be part of
+reading committee, Arno Siebes, Hayo Reijers and Hans Bodlaender.  I
+would henceforth like to thank all of them for being part of
 my thesis committee.
 
   Although this dissertation and the research therein was done by
@@ -32,7 +32,7 @@ at \textsc{BBG-5.70} and he was always interested in what I was doing and did pr
 invaluable scientific advice with the addition of amazing band suggestions every 
 now and then, thank you! I would also like to extend my gratitude
 to the entirety of the group and staff that routinely attended our Monday meetings
--- Johan, Wishnu, Jeroen, Raja, Nico, Sergey, Anna-Lenna, Vedran, Trevor, Matthijs, 
+-- Johan, Wishnu, Jeroen, Raja, Nico, Sergey, Anna-Lena, Vedran, Trevor, Matthijs, 
 Ivo, Iris, Isaac, Samira and Saba -- for always being 
 helpful, eager to discuss and listening to countless talk rehearsals on Mondays.
 Finally, I want to thank Arian and Martijn who were also frequent visitor at
