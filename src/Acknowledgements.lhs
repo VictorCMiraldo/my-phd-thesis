@@ -1,13 +1,15 @@
-  This thesis have been reviewed by a committee consisting of five people. 
-I would like to thank Jeremy Gibbons, Jos\'{e} Nuno Oliveira, Rinus Plasmeijer,
-Sven-Bodo Scholz, Johan Jeuring for their time and careful feedback. I will
-be defending this thesis against the aforementioned reading committee, Hajo Reijers 
-and Hans Bodlaender. I would henceforth like to thank all of them for being there
-(physically or not).
+  This thesis have been reviewed by Jeremy Gibbons, Jos\'{e} Nuno
+Oliveira, Rinus Plasmeijer, Sven-Bodo Scholz, Johan Jeuring; I would
+like for thank them for their time and for providing careful
+feedback. I will be defending this thesis against the aforementioned
+reading committee, Arno Siebes, Hajo Reijers and Hans Bodlaender.  I
+would henceforth like to thank all of them for agreeing to be part of
+my thesis committee.
 
-  Although this dissertation and the research therein was done by myself, this would
-never have been possible without the professional and personal support I have
-received from my supervisors, colleagues, friends and family.
+  Although this dissertation and the research therein was done by
+myself, this would never have been possible without the professional
+and personal support I have received from my supervisors, colleagues,
+friends and family.
 
   First and foremost, I want to extend my gratitude to my supervisor,
 Wouter Swierstra, who was of central importance to this manuscript
@@ -35,7 +37,9 @@ Ivo, Iris, Isaac, Samira and Saba -- for always being
 helpful, eager to discuss and listening to countless talk rehearsals on Mondays.
 Finally, I want to thank Arian and Martijn who were also frequent visitor at
 \textsc{BBG-5.70} and always brought interesting topics to discuss
-and amazing Linux tricks.
+and amazing Linux tricks. Finally, I would like to thank Lisa and Vedran
+for being my paranymphs and helping to organize the different aspects
+associated with the defense of this manuscript.
 
   Subsequently, I would also like to thank my girlfriend, Nadine, for
 all her love, support and encouragement. Thank you for being there to
@@ -47,14 +51,13 @@ spend the years after my PhD with you by my side.
 in Utrecht, and consequently, to this thesis. Thank you for your
 support, companionship, for always being there for one last beer and
 for organizing so many great activities with me. I cherish all of
-our shared experiences very much and looking forward to the
+our shared experiences very much and I am looking forward to the
 ones that are yet to come. If I may, let me propose Vietnamese distilleries 
 for a strong next candidate! 
 
-  I have been blessed with amazing friends here in Utrecht and
-they have all contributed to the completion of this thesis by being amazing
-people who I thoroughly enjoy the company of. Thank you Vedran and Elena
-for so many kayaking and pandemic afternoons; Thank you Antonello for
+  I have been blessed with great friends here in Utrecht and
+they have all contributed to the completion of this thesis by being there.
+Thank you Vedran and Elena for so many kayaking and pandemic afternoons; Thank you Antonello for
 the yearly Eurovision gatherings and great cheeses; Thank you Kristhell and Ivan for
 the yearly Sinterklass; Thank you Marina for believing in my cooking career; 
 Thank you Lisa for the brewery visits; Thank you Jo\~{a}o for introducing
@@ -62,15 +65,17 @@ me to the ING; Thank you Joel, Seraina, Ivica, Laura, Jurica and all the people
 that have brought nothing but happiness, contributing greatly to my social 
 well-being during my PhD.
 
-  I only met most of these amazing people because I went to Jan Primus,
-one given evening, for the Social Wednesday ING event. Little did I expect
-I would be coming back every Wednesday, meet almost all my friends there
-and make it our second home. Fast forward a few years and I had the privilege 
-of being part of the organization of the ING alongside Lisa, Jo\~{a}o and
-the rest of the board. Lisa, Jo\~{a}o and I then started hosting
-the Social Wednesdays and many other events ourselves.
+  I only met most of these amazing people because I went to Jan Primus
+one given evening, for the Social Wednesday event. Little did I expect
+I would be coming back pretty much every subsequent Wednesday and meet virtually all 
+my friends there. Jan Primus certainly was our second home for a little while. 
+Fast forward a few years and I had the privilege 
+of being part of the activity committee of the ING alongside Lisa and Jo\~{a}o.
+Lisa, Jo\~{a}o and I then started hosting the Social Wednesdays and many other events ourselves.
 This would not have been possible if Laura and Justus were not behind the bar,
 welcoming us and making Jan Primus our second home in Utrecht, thank you.
+I would also like to thank the board of the International Neighbor Group for 
+giving me this opportunity.
 
   Last but not least, I want to thank my family in this last paragraph, 
 were I'll switch to Portuguese. Obrigado M\~{a}e, Pai e Irm\~{a}o
