@@ -192,29 +192,27 @@ I'll pass it to 'book' just in case.}
 \fi
 % \@ifundefined{\PHD@latestcommit}{\def\PHD@latestcommit{000000}}{}
 
+% Commands like chapter/section/etc call \thispagestyle{plain}, effectively
+% not using whatever page style is selected; we redefine plain to
+% our likings, then.
+\fancypagestyle{plain}{%
+  \fancyhf{} % clear all header and footer fields
+  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\footrulewidth}{0pt}
+}
+
 %% Adds the uppercase title of the current chapter to
 %% the top of the page, centered. Numbers go alternating
 %% left to right or centered, depending on oneside or twoside options.
-\fancypagestyle{UUCSstyle}{
-  \renewcommand{\chaptermark}[1]{\markboth{\MakeUppercase{##1}}{}}
-  \renewcommand{\sectionmark}[1]{\markright{\MakeUppercase{##1}}{}}
-  \fancyhead{}
-  \fancyfoot{}
-  \renewcommand{\headrulewidth}{0pt}
-  \fancyhead[RO, LE]{\thepage}
-\ifPHD@isdraft
-  \fancyhead[LO, RE]{\texttt{\PHD@latestcommit}}
-\fi
-  \fancyhead[CO]{\leftmark}
-  \fancyhead[CE]{\rightmark}
-}
-
-\pagestyle{UUCSstyle}
-
-\fancypagestyle{plain}{
-  \fancyhead{}
-  \renewcommand{\headrulewidth}{0pt}
-}
+\pagestyle{fancy}
+\renewcommand{\chaptermark}[1]{\markboth{\MakeUppercase{#1}}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\ \MakeUppercase{#1}}{}}
+\renewcommand{\headrulewidth}{0pt}
+\fancyhead{}
+\fancyfoot{}
+\fancyhead[RO, LE]{\thepage}
+\fancyhead[CO]{\leftmark}
+\fancyhead[CE]{\rightmark}
 
 %%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%

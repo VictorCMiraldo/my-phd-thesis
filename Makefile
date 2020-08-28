@@ -74,7 +74,7 @@ remock: $(BUILD_DEPENDS) tex/latex/uustthesis.cls images
 	export TEXMFHOME=".:$(TEXMFHOME)" && \
 	$(LATEX) dist/mock-chapter.tex
 
-cover: cover/cover.svg default
+cover: cover/cover.svg dist/thesis.pdf
 	$(MAKE) -C cover/
 	pdftk cover/frontcover.pdf dist/thesis.pdf cover/backcover.pdf cat output dist/with-cover.pdf
 

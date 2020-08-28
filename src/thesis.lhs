@@ -77,7 +77,6 @@
 \thispagestyle{empty}
 
 \tableofcontents
-\thispagestyle{empty}
 
 %% Starts the mainmatter
 \mainmatter
@@ -163,8 +162,6 @@
 \chapter{Acknowledgements}
 \lhsinclude{Acknowledgements.lhs}
 %include src/Acknowledgements.lhs
-
-
 
 \end{document}
 
