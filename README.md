@@ -37,10 +37,14 @@ automatically merged. This suggests there is a benefit in using
 structural differencing tools as the basis for software version
 control.
 
+## Obtaining the PDF
+
+You can find a pre-compiled pdf of my thesis, as of commit 498e76,
+in the [UU digital library](https://dspace.library.uu.nl/handle/1874/399612).
+
 ## Compiling the PDF
 
-There should be a `pdf` file already pre-compiled in the root of this repo;
-if you want to compile one yourself, you might need to increase the memory 
+If you want to compile one yourself, you might need to increase the memory 
 limits of your latex distribution. To do that 
 find your relevant config file; mine was in `/usr/share/texmf/web2c/texmf.cnf`
 then go to where it says something like: `maim_memory = ...` and increase those
